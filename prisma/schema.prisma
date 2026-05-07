@@ -1,0 +1,131 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    ADMIN
+    ADMINISTRATIVO
+    ALMOXARIFADO
+}
+
+enum EmployeeStatus {
+    ATIVO
+    INATIVO
+    DESLIGADO
+    RESCINDIDO
+    APOSENTADO
+    FÉRIAS
+    LICENÇA_MATERNIDADE
+    LICENÇA_MED
+}
+
+model company {
+    id String @id @default(cuid())
+    name String
+    cnpj String @unique
+    isActive Boolean @default(true)
+
+    employee Employee[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model User {
+    id String @id @default(cuid())
+    name String
+    email String @unique
+    passwordHash String
+    role UserRole
+    isActive Boolean @default(true)
+    lastLogin DateTime     
+}
+
+model Role {
+    id String @id @default(uuid())
+    name String @unique
+    description String
+
+    employees Employee[]
+    roleEpis RoleEpi[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Employee {
+id              String         @‌id @default(uuid())
+name            String
+cpf             String         @‌unique
+status          EmployeeStatus @‌default(ATIVO)
+admissionDate   DateTime
+resignationDate DateTime?
+
+roleId          String
+role            Role           @‌relation(fields: [roleId], references: [id])
+
+companyId       String
+company         Company        @‌relation(fields: [companyId], references: [id])
+
+epiDeliveries   EpiDelivery[]
+
+deletedAt       DateTime?
+
+createdAt       DateTime       @‌default(now())
+updatedAt       DateTime       @‌updatedAt
+}
+
+model Epi {
+id               String        @‌id @default(uuid())
+name             String
+caNumber         String        @‌unique
+caExpirationDate DateTime      
+
+isActive         Boolean       @‌default(true)
+
+roleEpis         RoleEpi[]
+deliveries       EpiDelivery[]
+
+createdAt        DateTime      @‌default(now())
+updatedAt        DateTime      @‌updatedAt
+}
+
+model RoleEpi {
+id              String   @‌id @default(uuid())
+
+roleId          String
+role            Role     @‌relation(fields: [roleId], references: [id])
+
+epiId           String
+epi             Epi      @‌relation(fields: [epiId], references: [id])
+
+periodicityDays Int
+
+@@unique([roleId, epiId]) 
+}
+
+model EpiDelivery {
+id            String   @‌id @default(uuid())
+
+employeeId    String
+employee      Employee @‌relation(fields: [employeeId], references: [id])
+
+epiId         String
+epi           Epi      @‌relation(fields: [epiId], references: [id])
+
+deliveredById String
+deliveredBy   User     @relation(fields: [deliveredById], references: [id])
+
+deliveryDate  DateTime @‌default(now())
+
+nextDueDate   DateTime?
+
+termSigned    Boolean  @default(false)
+
+createdAt     DateTime @default(now())
+}
