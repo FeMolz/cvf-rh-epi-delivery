@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -24,10 +23,10 @@ enum EmployeeStatus {
     LICENÇA_MED
 }
 
-model company {
-    id String @id @default(cuid())
-    name String
-    cnpj String @unique
+model Company {
+    id       String  @id @default(cuid())
+    name     String
+    cnpj     String  @unique
     isActive Boolean @default(true)
 
     employee Employee[]
@@ -37,95 +36,96 @@ model company {
 }
 
 model User {
-    id String @id @default(cuid())
-    name String
-    email String @unique
-    passwordHash String
-    role UserRole
-    isActive Boolean @default(true)
-    lastLogin DateTime     
+    id            String        @id @default(cuid())
+    name          String
+    email         String        @unique
+    passwordHash  String
+    role          UserRole
+    isActive      Boolean       @default(true)
+    lastLogin     DateTime
+    epiDeliveries EpiDelivery[]
 }
 
 model Role {
-    id String @id @default(uuid())
-    name String @unique
+    id          String @id @default(uuid())
+    name        String @unique
     description String
 
     employees Employee[]
-    roleEpis RoleEpi[]
+    roleEpis  RoleEpi[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
 
 model Employee {
-id              String         @‌id @default(uuid())
-name            String
-cpf             String         @‌unique
-status          EmployeeStatus @‌default(ATIVO)
-admissionDate   DateTime
-resignationDate DateTime?
+    id              String         @id @default(uuid())
+    name            String
+    cpf             String         @unique
+    status          EmployeeStatus @default(ATIVO)
+    admissionDate   DateTime
+    resignationDate DateTime?
 
-roleId          String
-role            Role           @‌relation(fields: [roleId], references: [id])
+    roleId String
+    role   Role   @relation(fields: [roleId], references: [id])
 
-companyId       String
-company         Company        @‌relation(fields: [companyId], references: [id])
+    companyId String
+    company   Company @relation(fields: [companyId], references: [id])
 
-epiDeliveries   EpiDelivery[]
+    epiDeliveries EpiDelivery[]
 
-deletedAt       DateTime?
+    deletedAt DateTime?
 
-createdAt       DateTime       @‌default(now())
-updatedAt       DateTime       @‌updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Epi {
-id               String        @‌id @default(uuid())
-name             String
-caNumber         String        @‌unique
-caExpirationDate DateTime      
+    id               String   @id @default(uuid())
+    name             String
+    caNumber         String   @unique
+    caExpirationDate DateTime
 
-isActive         Boolean       @‌default(true)
+    isActive Boolean @default(true)
 
-roleEpis         RoleEpi[]
-deliveries       EpiDelivery[]
+    roleEpis   RoleEpi[]
+    deliveries EpiDelivery[]
 
-createdAt        DateTime      @‌default(now())
-updatedAt        DateTime      @‌updatedAt
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model RoleEpi {
-id              String   @‌id @default(uuid())
+    id String @id @default(uuid())
 
-roleId          String
-role            Role     @‌relation(fields: [roleId], references: [id])
+    roleId String
+    role   Role   @relation(fields: [roleId], references: [id])
 
-epiId           String
-epi             Epi      @‌relation(fields: [epiId], references: [id])
+    epiId String
+    epi   Epi    @relation(fields: [epiId], references: [id])
 
-periodicityDays Int
+    periodicityDays Int
 
-@@unique([roleId, epiId]) 
+    @@unique([roleId, epiId])
 }
 
 model EpiDelivery {
-id            String   @‌id @default(uuid())
+    id String @id @default(uuid())
 
-employeeId    String
-employee      Employee @‌relation(fields: [employeeId], references: [id])
+    employeeId String
+    employee   Employee @relation(fields: [employeeId], references: [id])
 
-epiId         String
-epi           Epi      @‌relation(fields: [epiId], references: [id])
+    epiId String
+    epi   Epi    @relation(fields: [epiId], references: [id])
 
-deliveredById String
-deliveredBy   User     @relation(fields: [deliveredById], references: [id])
+    deliveredById String
+    deliveredBy   User   @relation(fields: [deliveredById], references: [id])
 
-deliveryDate  DateTime @‌default(now())
+    deliveryDate DateTime @default(now())
 
-nextDueDate   DateTime?
+    nextDueDate DateTime?
 
-termSigned    Boolean  @default(false)
+    termSigned Boolean @default(false)
 
-createdAt     DateTime @default(now())
+    createdAt DateTime @default(now())
 }
