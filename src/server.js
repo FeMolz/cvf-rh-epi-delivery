@@ -1,5 +1,6 @@
 import app from './app.js';
-import { PORT, DB_HOST, NODE_ENV } from './config/env.js';
+import env from './config/env.js';
+const { PORT, DB_HOST, NODE_ENV } = env;
 
 
 app.listen(PORT, () => {
