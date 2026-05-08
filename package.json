@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@prisma/client": "^7.8.0",
@@ -17,7 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "jest": "^30.3.0",
+    "jest": "^30.4.1",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.7"
   },

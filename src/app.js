@@ -9,6 +9,7 @@ app.use(express.json());
 // Importar rotas modulares
 // ------------------------------------------------------------------------------------------------------------------------------------
 // import authRoutes from './modules/users/routes/authRoutes.js';
+import roleRoutes from './modules/roles/routes/role.routes.js';
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Usar rotas modulares
@@ -31,5 +32,7 @@ app.use((err, req, res, next) => {
     message: err.message || "Ocorreu um erro interno no servidor",
   });
 });
+
+app.use("/api/v1/roles", roleRoutes);
 
 export default app;
