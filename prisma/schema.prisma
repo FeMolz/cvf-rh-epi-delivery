@@ -10,6 +10,7 @@ enum UserRole {
     ADMIN
     ADMINISTRATIVO
     ALMOXARIFADO
+    COLABORADOR
 }
 
 enum EmployeeStatus {

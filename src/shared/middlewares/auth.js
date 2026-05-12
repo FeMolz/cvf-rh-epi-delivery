@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
+import env from '../../config/env.js';
 
 export const isAuthenticated = (req, res, next) => {
     const tokenHeader = req.headers.authorization;
@@ -21,7 +21,7 @@ export const isAuthenticated = (req, res, next) => {
     }
 
     try {
-        const decodedToken = jwt.verify(token, JWT_SECRET);
+        const decodedToken = jwt.verify(token, env.JWT_SECRET || process.env.JWT_SECRET);
         req.user = decodedToken;
         next();
 

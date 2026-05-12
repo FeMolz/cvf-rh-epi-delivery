@@ -10,6 +10,7 @@ As regras de negócios, estrutura de pastas, endpoints disponíveis, permissões
 
 Antes de alterar algo em um módulo, é altamente recomendado a leitura da documentação correspondente:
 
+- 📄 **[Módulo de Usuários (Users)](./docs/USERS.md)** - Regras de cadastro, login, arquitetura e geração de Tokens JWT.
 - 📄 **[Módulo de Cargos (Roles)](./docs/ROLES.md)** - Explica como o padrão Repository/Service funciona para o gerenciamento das "roles".
 
 ---
@@ -82,6 +83,19 @@ A aplicação possui suporte nativo para ESModules no Jest (`--experimental-vm-m
 ```bash
 npm test
 ```
+
+### Criando uma Conta de Administrador Inicial (Seed)
+Caso você esteja subindo o sistema do zero e precise de um usuário com privilégios de **ADMIN** para começar a cadastrar outras coisas, criamos um seed para facilitar o processo.
+
+Execute o comando abaixo na raiz do projeto:
+```bash
+node prisma/seeders/admin.js
+```
+Esse comando irá criar um usuário no banco com as seguintes credenciais padrão:
+- **E-mail:** `admin@rhsystem.com`
+- **Senha:** `admin`
+
+Você poderá utilizar esses dados na rota `POST /api/v1/users/login` para receber seu Token JWT.
 
 ### Gerando Token Local para Teste no Postman/Insomnia
 Enquanto estiver programando, você pode precisar acessar as rotas bloqueadas (como `/api/v1/roles`) sem ter que criar toda a árvore de usuário. 
