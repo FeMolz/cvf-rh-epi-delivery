@@ -84,6 +84,7 @@ Abaixo a lista de rotas, onde as exceções como login e registro primário são
 | `GET`    | `/api/v1/users`           | `ADMIN`                       | Lista todos os usuários cadastrados.              |
 | `PUT`    | `/api/v1/users/:id`       | `ADMIN`, `ADMINISTRATIVO`     | Atualiza dados de um usuário pelo ID.             |
 | `DELETE` | `/api/v1/users/:id`       | `ADMIN`                       | Deleta a conta de um usuário (apenas admins).     |
+| `GET`    | `/api/v1/users/findByEmail/:email` | `ADMIN` | Busca usuário pelo email. |
 | `DELETE` | `/api/v1/users/me`        | Estar logado (Token Válido)   | Exclui a própria conta do usuário requisitante.   |
 | `PUT`    | `/api/v1/users/password/:id`| Estar logado                | Altera a senha.                                   |
 
