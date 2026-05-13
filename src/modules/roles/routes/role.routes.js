@@ -13,7 +13,7 @@ roleRoutes.get("/:id", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), 
 
 roleRoutes.put("/:id", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), roleController.update);
 
-roleRoutes.delete("/:id", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), roleController.delete);
+roleRoutes.delete("/:id", isAuthenticated, authorize(["ADMIN"]), roleController.delete);
 
 
 export default roleRoutes;
