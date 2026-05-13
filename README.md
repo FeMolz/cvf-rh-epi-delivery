@@ -13,6 +13,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Usuários (Users)](./docs/USERS.md)** - Regras de cadastro, login, arquitetura e geração de Tokens JWT.
 - 📄 **[Módulo de Cargos (Roles)](./docs/ROLES.md)** - Explica como o padrão Repository/Service funciona para o gerenciamento das "roles".
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
+- 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - Detalha a arquitetura estática Read-Only das 4 empresas do banco.
 
 ---
 
