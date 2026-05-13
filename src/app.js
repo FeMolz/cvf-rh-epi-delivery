@@ -11,6 +11,7 @@ app.use(express.json());
 // import authRoutes from './modules/users/routes/authRoutes.js';
 import roleRoutes from './modules/roles/routes/role.routes.js';
 import userRoutes from './modules/users/routes/user.routes.js';
+import employeeRoutes from './modules/employees/routes/employee.routes.js';
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Usar rotas modulares
@@ -36,5 +37,6 @@ app.use((err, req, res, next) => {
 
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/employees", employeeRoutes);
 
 export default app;

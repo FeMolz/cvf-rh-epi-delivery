@@ -4,8 +4,8 @@ import employeeRepository from '../repositories/EmployeeRepository.js';
 class EmployeeController {
     async create(req, res) {
         try {
-            const { name, cpf, status, admissionDate, resignationDate, companyId } = req.body;
-            const employee = await createEmployeeService.execute({ name, cpf, status, admissionDate, resignationDate, companyId });
+            const { name, cpf, status, admissionDate, resignationDate, companyId, roleId } = req.body;
+            const employee = await createEmployeeService.execute({ name, cpf, status, admissionDate, resignationDate, companyId, roleId });
 
             return res.status(201).json(employee);
 

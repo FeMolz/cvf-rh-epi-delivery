@@ -1,10 +1,10 @@
 import employeeRepository from '../repositories/EmployeeRepository.js';
 
 class CreateEmployeeService {
-    async execute({ name, cpf, status, admissionDate, resignationDate, companyId }) {
+    async execute({ name, cpf, status, admissionDate, resignationDate, companyId, roleId }) {
 
-        if (!name || !cpf || !companyId) {
-            throw new Error('Campos obrigatórios ausentes: name, cpf, companyId');
+        if (!name || !cpf || !companyId || !roleId) {
+            throw new Error('Campos obrigatórios ausentes: name, cpf, companyId, roleId');
         }
 
         const matches = await employeeRepository.findAll();
@@ -15,9 +15,10 @@ class CreateEmployeeService {
             name,
             cpf,
             status: status || 'ATIVO',
-            admissionDate,
-            resignationDate,
-            companyId
+            admissionDate: admissionDate ? new Date(admissionDate) : new Date(),
+            resignationDate: resignationDate ? new Date(resignationDate) : null,
+            companyId,
+            roleId
         });
         return employee;
     }
