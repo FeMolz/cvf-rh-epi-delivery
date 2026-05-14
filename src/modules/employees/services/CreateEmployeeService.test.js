@@ -18,7 +18,7 @@ describe('CreateEmployeeService', () => {
   });
 
   it('should create employee when data is valid', async () => {
-    const reqData = { name: 'John', cpf: '12345678900', companyId: 1 };
+    const reqData = { name: 'John', cpf: '12345678900', companyId: 1, roleId: 2 };
     const mockCreated = { id: 1, ...reqData, status: 'ATIVO' };
     employeeRepositoryMock.create.mockResolvedValue(mockCreated);
     employeeRepositoryMock.findAll.mockResolvedValue([]);
@@ -35,7 +35,7 @@ describe('CreateEmployeeService', () => {
     const existing = [{ id: 2, cpf: '12345678900' }];
     employeeRepositoryMock.findAll.mockResolvedValue(existing);
     await expect(
-      createEmployeeService.execute({ name: 'Jane', cpf: '12345678900', companyId: 1 })
+      createEmployeeService.execute({ name: 'Jane', cpf: '12345678900', companyId: 1, roleId: 2 })
     ).rejects.toThrow('CPF já cadastrado no sistema');
   });
 });
