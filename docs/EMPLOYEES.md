@@ -124,3 +124,49 @@ Seguindo o padrão do restante da aplicação para ESModules, os testes da camad
 - **`EmployeeRepository.test.js`**: Os métodos expostos pelo banco de dados (o Prisma Client instanciado no `config/database.js`) foram integralmente mockados e testam o comportamento exato dos retornos, bem como checam o repasse de propriedades complexas de filtragem (`select`).
 - **`CreateEmployeeService.test.js`**: Confirma que as regras de negócio foram devidamente aplicadas - especialmente o arremesso de erro sobre CPFs já persistidos.
 - **`EmployeeController.test.js`**: Comprova o tratamento correto de solicitações, respostas e códigos HTTP correspondentes (ex: `201` para sucesso na criação, `404` para buscas por ID inexistente, e `400` para solicitações que não cumprem as requisições primárias de dados).
+
+---
+
+## 7. Exemplos de Uso (Postman / Insomnia)
+
+> ⚠️ **Importante:** Estas rotas exigem um token JWT válido com perfil `ADMIN` ou `ADMINISTRATIVO`. Insira na aba Authorization > Bearer Token.
+
+### Cadastrar Novo Funcionário
+- **Método:** `POST`
+- **URL:** `http://localhost:3000/api/v1/employees`
+- **Body (JSON):**
+```json
+{
+  "name": "Maria Oliveira",
+  "cpf": "111.222.333-44",
+  "admissionDate": "2026-05-10T00:00:00Z",
+  "roleId": "id-do-cargo",
+  "companyId": "id-da-empresa"
+}
+```
+
+### Listar Todos os Funcionários
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/employees`
+- **Body:** *(Nenhum)*
+
+### Buscar um Funcionário Específico
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/employees/id-do-funcionario`
+- **Body:** *(Nenhum)*
+
+### Atualizar Funcionário
+- **Método:** `PUT`
+- **URL:** `http://localhost:3000/api/v1/employees/id-do-funcionario`
+- **Body (JSON):**
+```json
+{
+  "name": "Maria Silva Oliveira",
+  "status": "FERIAS"
+}
+```
+
+### Desligar Funcionário (Soft Delete)
+- **Método:** `DELETE`
+- **URL:** `http://localhost:3000/api/v1/employees/id-do-funcionario`
+- **Body:** *(Nenhum)*

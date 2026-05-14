@@ -107,3 +107,64 @@ Seguindo o padrão do restante da aplicação, os testes utilizam ESModules atra
 - **`UserRepository.test.js`**: Os métodos do Prisma (`prisma.user.create`, `findUnique`, etc.) são inteiramente mockados para validação da passagem de objetos.
 - **`CreateUserService.test.js` e `UserController.test.js`**: Focam em conferir as respostas de bloqueio, erro `400` em falta de campos, bem como a validação da exceção na geração do perfil tipo `ADMIN`.
 - **`user.routes.test.js`**: Utiliza `supertest` para varrer os caminhos abertos da API e certificar-se da comunicação perfeita entre a porta da API e os retornos simulados pelo controller mockado.
+
+---
+
+## 7. Exemplos de Uso (Postman / Insomnia)
+
+> ⚠️ **Importante:** Com exceção das rotas públicas (Cadastro comum e Login), as demais exigem a passagem do Token JWT gerado no login, via **Authorization > Bearer Token**.
+
+### Cadastro Comum (Público)
+- **Método:** `POST`
+- **URL:** `http://localhost:3000/api/v1/users`
+- **Body (JSON):**
+```json
+{
+  "name": "José Colaborador",
+  "email": "jose@empresa.com",
+  "password": "senha123",
+  "role": "COLABORADOR"
+}
+```
+
+### Login (Público)
+- **Método:** `POST`
+- **URL:** `http://localhost:3000/api/v1/users/login`
+- **Body (JSON):**
+```json
+{
+  "email": "jose@empresa.com",
+  "password": "senha123"
+}
+```
+
+### Listar Usuários (Requer ADMIN)
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/users`
+- **Body:** *(Nenhum)*
+
+### Atualizar Usuário
+- **Método:** `PUT`
+- **URL:** `http://localhost:3000/api/v1/users/id-do-usuario`
+- **Body (JSON):**
+```json
+{
+  "name": "José Silva",
+  "isActive": false
+}
+```
+
+### Alterar Senha (Requer Token Próprio ou ADMIN)
+- **Método:** `PUT`
+- **URL:** `http://localhost:3000/api/v1/users/password/id-do-usuario`
+- **Body (JSON):**
+```json
+{
+  "newPassword": "nova_senha_segura"
+}
+```
+
+### Excluir a Própria Conta
+- **Método:** `DELETE`
+- **URL:** `http://localhost:3000/api/v1/users/me`
+- **Body:** *(Nenhum)*

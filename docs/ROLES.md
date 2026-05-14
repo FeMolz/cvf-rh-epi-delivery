@@ -88,3 +88,46 @@ Como o código do projeto foi modernizado para utilizar importações ES6+ nativ
 - **Nos testes do Repository**: A instância do Prisma Client (`database.js`) é mockada, garantindo que as chamadas a funções do Prisma (ex: `prisma.role.create`) não falhem ou gerem logs de conexão com a infraestrutura no ambiente de testes.
 - **Nos testes da Service**: O `RoleRepository` é mockado. Em vez de salvar no banco, validamos apenas as regras de negócio em si (ex: assegurar o acionamento de um erro quando a role já existe).
 - **Nos testes do Controller**: A `CreateRoleService` (ou as demais services) é mockada. Focamos apenas na garantia de que as requisições estão sendo formadas de forma correta e que os **Status Codes HTTP** adequados (como o código `201`) são devolvidos pela API.
+
+---
+
+## 7. Exemplos de Uso (Postman / Insomnia)
+
+> ⚠️ **Importante:** Estas rotas exigem um token JWT válido com perfil `ADMIN` (ou `ADMINISTRATIVO` para leitura e criação). Insira na aba Authorization > Bearer Token.
+
+### Criar Cargo
+- **Método:** `POST`
+- **URL:** `http://localhost:3000/api/v1/roles`
+- **Body (JSON):**
+```json
+{
+  "name": "Técnico de Segurança",
+  "description": "Responsável por inspecionar a segurança do trabalho."
+}
+```
+
+### Listar Cargos
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/roles`
+- **Body:** *(Nenhum)*
+
+### Buscar Cargo por ID
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/roles/id-do-cargo`
+- **Body:** *(Nenhum)*
+
+### Atualizar Cargo
+- **Método:** `PUT`
+- **URL:** `http://localhost:3000/api/v1/roles/id-do-cargo`
+- **Body (JSON):**
+```json
+{
+  "name": "Engenheiro de Segurança",
+  "description": "Gerencia e implementa normas de segurança no trabalho."
+}
+```
+
+### Deletar Cargo
+- **Método:** `DELETE`
+- **URL:** `http://localhost:3000/api/v1/roles/id-do-cargo`
+- **Body:** *(Nenhum)*

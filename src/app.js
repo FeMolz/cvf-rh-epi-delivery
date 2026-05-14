@@ -13,6 +13,8 @@ import roleRoutes from './modules/roles/routes/role.routes.js';
 import userRoutes from './modules/users/routes/user.routes.js';
 import employeeRoutes from './modules/employees/routes/employee.routes.js';
 import companyRoutes from './modules/companies/routes/company.routes.js';
+import epiRoutes from './modules/epis/routes/epi.routes.js';
+import epiToRoleRoutes from './modules/chaining/epiToRole/routes/epiToRole.routes.js';
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Usar rotas modulares
@@ -40,5 +42,7 @@ app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/companies", companyRoutes);
+app.use("/api/v1/epis", epiRoutes);
+app.use("/api/v1/roles-epis", epiToRoleRoutes);
 
 export default app;

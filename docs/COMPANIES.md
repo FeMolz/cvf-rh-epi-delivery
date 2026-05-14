@@ -81,3 +81,14 @@ Este módulo disponibiliza apenas 1 rota pública para os usuários autenticados
 Seguindo o padrão de ESModules com injeção de dependência via `jest.unstable_mockModule`:
 - **`CompanyController.test.js`**: Valida se o retorno mapeia perfeitamente um `prisma.company.findMany` e atesta as respostas em status 200 (sucesso) e status 500 (falha de banco).
 - **`company.routes.test.js`**: Testa se o Supertest consegue atingir a porta do controller e se o middleware `isAuthenticated` bloqueia acessos indesejados à lista.
+
+---
+
+## 7. Exemplos de Uso (Postman / Insomnia)
+
+> ⚠️ **Importante:** A rota abaixo exige um token JWT válido de qualquer usuário logado. Para pegar um token rápido de desenvolvimento, use o script `node prisma/seeders/generate-dev-token.js`.
+
+### Listar Empresas
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/companies`
+- **Body:** *(Nenhum)*
