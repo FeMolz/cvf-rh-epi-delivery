@@ -1,83 +1,178 @@
-# Documentação do Módulo de EPIs
+# Documentação do Módulo de EPIs (Epis, Provider e Chaining)
 
-O módulo de EPIs foi arquitetado para ser uma solução escalável, separando a lógica de integração externa, regras de negócios e a ligação (chaining) entre Cargos e EPIs.
+## 1. Visão Geral
 
-## Estrutura de Pastas
+Este conjunto de documentação cobre:
 
-A arquitetura foi dividida da seguinte forma:
-- `src/shared/providers/EpiProvider`: Responsável por se comunicar com APIs externas.
-- `src/modules/epis`: Responsável pelo controle e regras de negócio relacionadas unicamente aos EPIs.
-- `src/modules/chaining/epiToRole`: Responsável pelas regras de negócio da relação de *Muitos-para-Muitos* entre Cargos e EPIs.
+- **Integração externa** com a API **baseCAEPI** (`EpiProvider`), isolada em `src/shared/providers/EpiProvider/`.
+- **Módulo `epis`** (`src/modules/epis/`): consulta por CA, cache local em PostgreSQL, listagem do cache e alteração de periodicidade do vínculo Cargo–EPI.
+- **Módulo de encadeamento `epiToRole`** (`src/modules/chaining/epiToRole/`): vínculo muitos-para-muitos entre `Role` e `Epi` via tabela `RoleEpi`.
 
----
-
-## 1. Provider: `EpiProvider`
-
-Criado sob o princípio da inversão de dependência (ou isolamento), a classe `EpiProvider` (`src/shared/providers/EpiProvider/EpiProvider.js`) lida estritamente com a integração com a API `baseCAEPI` via HTTP. 
-
-- O Provider consulta um CA pelo endpoint e mapeia o JSON de retorno.
-- **Configuração de URL**: Utiliza a variável de ambiente `CAEPI_API_URL` (com fallback para `http://localhost:8080`). O caminho de busca consumido é `/CA/:caNumber`.
+**Dependências principais:** Express, Prisma (PostgreSQL), JWT/RBAC nas rotas, variável de ambiente `CAEPI_API_URL` (opcional; padrão `http://localhost:8080`).
 
 ---
 
-## 2. Módulo Principal (`src/modules/epis`)
+## 2. Modelo de Dados
 
-Responsável por listar os EPIs do banco de dados e aplicar regras específicas de um equipamento.
+Trecho relevante do `prisma/schema.prisma`:
 
-### Serviços Principais
-- **`FetchEpiFromApiService`**: Verifica se o CA já está cadastrado localmente no PostgreSQL. Caso não esteja, ele orquestra uma chamada ao `EpiProvider` e, se o EPI for válido, ele o armazena na nossa base local, retornando o objeto salvo.
-- **`ChangeEpiPeriodicityService`**: Embora trate de uma coluna na tabela intermediária (`RoleEpi.periodicityDays`), a alteração de periodicidade de vida útil de um EPI foi alocada no módulo EPI para manter a coesão semântica. 
+```prisma
+model Epi {
+    id               String   @id @default(uuid())
+    name             String
+    caNumber         String   @unique
+    caExpirationDate DateTime
 
-### Endpoints (Base: `/api/v1/epis`)
+    isActive Boolean @default(true)
 
-| Método | Rota | Descrição | Permissões |
-|--------|------|-----------|------------|
-| `GET` | `/:caNumber` | Busca informações de um EPI específico (no banco local ou na API). | ADMIN, ADMINISTRATIVO, ALMOXARIFADO |
-| `GET` | `/` | Lista todos os EPIs já cacheados/cadastrados no banco local. | ADMIN, ADMINISTRATIVO, ALMOXARIFADO |
-| `PUT` | `/periodicity` | Altera a periodicidade (em dias) de um EPI vinculado a um Cargo. | ADMIN, ADMINISTRATIVO |
+    roleEpis   RoleEpi[]
+    deliveries EpiDelivery[]
 
----
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
 
-## 3. Módulo de Vínculos (`src/modules/chaining/epiToRole`)
+model RoleEpi {
+    id String @id @default(uuid())
 
-Este módulo gerencia a matriz de obrigatoriedade de EPIs para os Cargos, lidando com a tabela intermediária e explícita do Prisma `RoleEpi`.
+    roleId String
+    role   Role   @relation(fields: [roleId], references: [id])
 
-### Serviços Principais
-- **`LinkEpiToRoleService`**: Orquestra a criação do vínculo. Ele recebe o ID do Cargo e o `caNumber`. Caso o EPI não exista na nossa base, ele engatilha o `FetchEpiFromApiService` do módulo de epis. Depois verifica se o vínculo já não existe, antes de criá-lo.
-- **`UnlinkEpiFromRoleService`**: Rompe o vínculo de um EPI para um determinado Cargo. (Importante: Não deleta o EPI da base de dados, apenas exclui o registro de `RoleEpi`).
+    epiId String
+    epi   Epi    @relation(fields: [epiId], references: [id])
 
-### Endpoints (Base: `/api/v1/roles-epis`)
+    periodicityDays Int
 
-| Método | Rota | Descrição | Permissões |
-|--------|------|-----------|------------|
-| `POST` | `/` | Liga um EPI a um Cargo. Recebe `roleId`, `caNumber` e `periodicityDays`. | ADMIN, ADMINISTRATIVO |
-| `DELETE` | `/:roleId/:epiId` | Desliga um EPI de um Cargo. | ADMIN, ADMINISTRATIVO |
-| `GET` | `/:roleId` | Lista todos os EPIs vinculados a um Cargo específico. | ADMIN, ADMINISTRATIVO, ALMOXARIFADO |
+    @@unique([roleId, epiId])
+}
+```
 
----
-
-## 4. Testes e Cobertura (Jest)
-
-Para cada arquivo contendo lógica e roteamento, há um arquivo `*.test.js` emulando fluxos e testando respostas:
-
-- **EpiProvider.test.js**: Faz o Mock do `global.fetch` testando retornos (404 e 500) e retornos de sucesso transformando strings de data corretamente.
-- **Service Tests**: Utilizam mock da instância Prisma para simular cenários de negócio como *“EPI já vinculado”*, *“Cargo Inexistente”* ou *“Periodicidade <= 0”*.
-- **Route / Controller Tests**: Utilizam o `supertest` aliados aos mocks via `jest.unstable_mockModule` do padrão de módulos ES6, atestando o comportamento ideal das respostas HTTP.
-
-> **Dica para rodar os testes:**  
-> Como o projeto usa ES Modules e Jest, execute usando `$env:NODE_OPTIONS="--experimental-vm-modules"; npx jest` (ou via `npm test` caso configurado corretamente).
+O campo `Epi.isActive` reflete se o CA está aceito para uso no sistema (cadastro com validade ativa). EPIs com CA sem validade ativa **não** são retornados ao cliente nas buscas por CA e **não** são persistidos ao buscar pela primeira vez na API.
 
 ---
 
-## 5. Exemplos de Uso (Postman / Insomnia)
+## 3. Estrutura de Diretórios
 
-> ⚠️ **Importante:** Todas essas rotas são protegidas! Não se esqueça de rodar o comando `node prisma/seeders/generate-dev-token.js` no terminal, copiar o token gerado e colocar no Postman na aba **Authorization > Bearer Token**.
+```text
+src/shared/providers/EpiProvider/
+├── EpiProvider.js
+└── EpiProvider.test.js
 
-### Vincular EPI a um Cargo (Faz o Fetch na API se não existir)
-Pega um EPI na API externa ou no cache e vincula ao Cargo.
-- **Método:** `POST`
+src/modules/epis/
+├── controllers/
+│   ├── EpiController.js
+│   └── EpiController.test.js
+├── repositories/
+│   ├── EpiRepository.js
+│   └── EpiRepository.test.js
+├── routes/
+│   ├── epi.routes.js
+│   └── epi.routes.test.js
+└── services/
+    ├── ChangeEpiPeriodicityService.js
+    ├── ChangeEpiPeriodicityService.test.js
+    ├── FetchEpiFromApiService.js
+    ├── FetchEpiFromApiService.test.js
+    ├── ListCachedEpisService.js
+    └── ListCachedEpisService.test.js
+
+src/modules/chaining/epiToRole/
+├── controllers/
+├── routes/
+└── services/
+    ├── LinkEpiToRoleService.js
+    ├── LinkEpiToRoleService.test.js
+    └── ...
+```
+
+> **Regra arquitetural:** apenas arquivos em `repositories/` do módulo `epis` invocam o Prisma para `Epi` e `RoleEpi` nesses fluxos. Controllers permanecem finos (delegam a serviços).
+
+---
+
+## 4. Regras de Negócio e Arquitetura
+
+### `EpiProvider`
+
+- Consulta `GET {CAEPI_API_URL}/CA/:caNumber`.
+- Converte `DataValidade` (formato usual `DD/MM/YYYY`) para `Date`.
+- Calcula **`hasValidCaRegistration`** (e alinha **`isActive`**) com base no payload:
+  - `Validade` ou `StatusValidade` interpretados como booleano (inclui variantes em string, por exemplo `FALSO`, `false`, `0`, `NÃO`).
+  - `Situacao` textual: considera inválido se indicar **vencido**, **cancelado**, **cassado**, **suspenso** ou **inválido** (comparação insensível a acentos).
+- Retorno inclui `rawData` com o JSON bruto da API para evoluções futuras.
+
+### `EpiRepository`
+
+- `findByCaNumber`, `createEpi`, `findAllEpis`.
+- `findRoleEpiByCompositeKey` e `updateRoleEpiPeriodicity` para o fluxo de periodicidade do vínculo.
+
+### `FetchEpiFromApiService`
+
+1. Busca EPI local por `caNumber`.
+2. Se existir e `isActive === false`, lança erro: o sistema **não devolve** esse EPI (CA sem validade ativa no cache).
+3. Se não existir, chama o provider. Se a API não retornar dados, erro de “não encontrado na base pública”.
+4. Se `hasValidCaRegistration === false`, lança erro e **não** grava no PostgreSQL.
+5. Caso válido, persiste via repositório e retorna o registro criado.
+
+### `ListCachedEpisService`
+
+- Lista todos os EPIs do cache (`EpiRepository.findAllEpis`), usado pelo endpoint `GET /api/v1/epis`.
+
+### `ChangeEpiPeriodicityService`
+
+- Valida parâmetros e periodicidade &gt; 0; localiza `RoleEpi`; atualiza `periodicityDays` via repositório.
+
+### `LinkEpiToRoleService` (chaining)
+
+- Utiliza `FetchEpiFromApiService.execute(caNumber)`; portanto **herda** as mesmas regras de validade do CA (vínculo não é criado para CA inválido ou inativo no cache).
+
+---
+
+## 5. Endpoints / Rotas Disponíveis
+
+### Base `/api/v1/epis`
+
+| Método | Endpoint | Permissões | Descrição |
+|--------|----------|------------|-----------|
+| `GET` | `/:caNumber` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Retorna o EPI pelo CA (cache ou API). Resposta **404** se o CA não existir na API, se a validade cadastral estiver inativa ou se o cache local estiver com `isActive` falso. |
+| `GET` | `/` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Lista EPIs em cache local. |
+| `PUT` | `/periodicity` | ADMIN, ADMINISTRATIVO | Altera `periodicityDays` do vínculo `RoleEpi`. |
+
+### Base `/api/v1/roles-epis` (chaining)
+
+| Método | Endpoint | Permissões | Descrição |
+|--------|----------|------------|-----------|
+| `POST` | `/` | ADMIN, ADMINISTRATIVO | Vincula EPI ao cargo (`roleId`, `caNumber`, `periodicityDays`). Falha se o CA for inválido/inativo pelas regras do `FetchEpiFromApiService`. |
+| `DELETE` | `/:roleId/:epiId` | ADMIN, ADMINISTRATIVO | Remove o vínculo (não apaga `Epi`). |
+| `GET` | `/:roleId` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Lista EPIs vinculados ao cargo. |
+
+---
+
+## 6. Testes Automatizados (Jest)
+
+- **`EpiProvider.test.js`**: mock de `fetch`; 404; erro HTTP não tratado como 404; mapeamento de sucesso; cenários com `Validade: false`, `StatusValidade: false` e `Situacao` cancelada.
+- **`EpiRepository.test.js`**: Prisma mockado; `findByCaNumber` (normalização para string), `createEpi`, `findAllEpis`, vínculo `RoleEpi` e atualização de periodicidade.
+- **`FetchEpiFromApiService.test.js`**: mocks de `EpiRepository` e `EpiProvider`; cache hit ativo; cache com `isActive` false; API nula; API com `hasValidCaRegistration` false (sem `create`); fluxo completo de criação.
+- **`ListCachedEpisService.test.js`**: delegação ao repositório.
+- **`ChangeEpiPeriodicityService.test.js`**: mocks do repositório; validações e atualização.
+- **`EpiController.test.js`** / **`epi.routes.test.js`**: controller e rotas com dependências mockadas.
+
+Execução sugerida (PowerShell):
+
+```powershell
+$env:NODE_OPTIONS="--experimental-vm-modules"; npx jest src/modules/epis src/shared/providers/EpiProvider
+```
+
+---
+
+## 7. Exemplos de Uso (Postman / Insomnia)
+
+> **Importante:** rotas protegidas. Gere token com `node prisma/seeders/generate-dev-token.js` e use **Bearer Token**.
+
+### Vincular EPI a um Cargo
+
+- **Método:** `POST`  
 - **URL:** `http://localhost:3000/api/v1/roles-epis`
-- **Body (JSON):**
+
 ```json
 {
   "roleId": "id-do-cargo",
@@ -86,15 +181,16 @@ Pega um EPI na API externa ou no cache e vincula ao Cargo.
 }
 ```
 
-### Listar os EPIs vinculados a um Cargo
-- **Método:** `GET`
-- **URL:** `http://localhost:3000/api/v1/roles-epis/id-do-cargo`
-- **Body:** *(Nenhum)*
+### Listar EPIs vinculados a um Cargo
 
-### Alterar a Periodicidade do Vínculo
-- **Método:** `PUT`
+- **Método:** `GET`  
+- **URL:** `http://localhost:3000/api/v1/roles-epis/id-do-cargo`
+
+### Alterar periodicidade do vínculo
+
+- **Método:** `PUT`  
 - **URL:** `http://localhost:3000/api/v1/epis/periodicity`
-- **Body (JSON):**
+
 ```json
 {
   "roleId": "id-do-cargo",
@@ -103,17 +199,19 @@ Pega um EPI na API externa ou no cache e vincula ao Cargo.
 }
 ```
 
-### Buscar informações de um EPI pelo CA
-- **Método:** `GET`
+### Buscar EPI pelo CA
+
+- **Método:** `GET`  
 - **URL:** `http://localhost:3000/api/v1/epis/11070`
-- **Body:** *(Nenhum)*
 
-### Ver o Cache de EPIs Locais
-- **Método:** `GET`
+Em caso de CA sem validade ativa (API ou cache), a API responde **404** com `{ "error": "..." }` descrevendo o motivo.
+
+### Listar cache local de EPIs
+
+- **Método:** `GET`  
 - **URL:** `http://localhost:3000/api/v1/epis`
-- **Body:** *(Nenhum)*
 
-### Desvincular um EPI do Cargo
-- **Método:** `DELETE`
+### Desvincular EPI do cargo
+
+- **Método:** `DELETE`  
 - **URL:** `http://localhost:3000/api/v1/roles-epis/id-do-cargo/id-do-epi`
-- **Body:** *(Nenhum)*

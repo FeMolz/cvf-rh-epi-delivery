@@ -59,7 +59,64 @@ describe('EpiProvider', () => {
             name: 'Capacete de Segurança',
             expirationDate: new Date('2025-12-25T00:00:00Z'),
             isActive: true,
+            hasValidCaRegistration: true,
             rawData: expect.any(Object)
         });
+    });
+
+    it('should mark CA as invalid when Validade is false', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    RegistroCA: '11070',
+                    NomeEquipamento: 'Capacete de Segurança',
+                    DataValidade: '25/12/2025',
+                    Situacao: 'VÁLIDO',
+                    Validade: false
+                })
+            })
+        );
+
+        const result = await epiProvider.getEpiByCa('11070');
+        expect(result.hasValidCaRegistration).toBe(false);
+        expect(result.isActive).toBe(false);
+    });
+
+    it('should mark CA as invalid when StatusValidade is false', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    RegistroCA: '11070',
+                    NomeEquipamento: 'Capacete de Segurança',
+                    DataValidade: '25/12/2025',
+                    Situacao: 'VÁLIDO',
+                    StatusValidade: false
+                })
+            })
+        );
+
+        const result = await epiProvider.getEpiByCa('11070');
+        expect(result.hasValidCaRegistration).toBe(false);
+        expect(result.isActive).toBe(false);
+    });
+
+    it('should mark CA as invalid when Situacao indicates cancellation', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    RegistroCA: '11070',
+                    NomeEquipamento: 'Capacete de Segurança',
+                    DataValidade: '25/12/2025',
+                    Situacao: 'CANCELADO'
+                })
+            })
+        );
+
+        const result = await epiProvider.getEpiByCa('11070');
+        expect(result.hasValidCaRegistration).toBe(false);
+        expect(result.isActive).toBe(false);
     });
 });

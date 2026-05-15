@@ -1,14 +1,12 @@
 import { jest } from '@jest/globals';
 
-const prismaMock = {
-    roleEpi: {
-        findUnique: jest.fn(),
-        update: jest.fn()
-    }
+const epiRepositoryMock = {
+    findRoleEpiByCompositeKey: jest.fn(),
+    updateRoleEpiPeriodicity: jest.fn()
 };
 
-jest.unstable_mockModule('../../../config/database.js', () => ({
-    default: prismaMock
+jest.unstable_mockModule('../repositories/EpiRepository.js', () => ({
+    default: epiRepositoryMock
 }));
 
 const changeEpiPeriodicityService = (await import('./ChangeEpiPeriodicityService.js')).default;
@@ -27,17 +25,17 @@ describe('ChangeEpiPeriodicityService', () => {
     });
 
     it('should throw error if link not found', async () => {
-        prismaMock.roleEpi.findUnique.mockResolvedValue(null);
+        epiRepositoryMock.findRoleEpiByCompositeKey.mockResolvedValue(null);
         await expect(changeEpiPeriodicityService.execute({ roleId: '1', epiId: '2', newPeriodicityDays: 30 })).rejects.toThrow('Vínculo entre este Cargo e EPI não encontrado.');
     });
 
     it('should update and return the link if valid', async () => {
         const mockLink = { roleId: '1', epiId: '2', periodicityDays: 30 };
-        prismaMock.roleEpi.findUnique.mockResolvedValue(mockLink);
-        prismaMock.roleEpi.update.mockResolvedValue({ ...mockLink, periodicityDays: 60 });
+        epiRepositoryMock.findRoleEpiByCompositeKey.mockResolvedValue(mockLink);
+        epiRepositoryMock.updateRoleEpiPeriodicity.mockResolvedValue({ ...mockLink, periodicityDays: 60 });
 
         const result = await changeEpiPeriodicityService.execute({ roleId: '1', epiId: '2', newPeriodicityDays: 60 });
         expect(result.periodicityDays).toBe(60);
-        expect(prismaMock.roleEpi.update).toHaveBeenCalled();
+        expect(epiRepositoryMock.updateRoleEpiPeriodicity).toHaveBeenCalledWith('1', '2', 60);
     });
 });

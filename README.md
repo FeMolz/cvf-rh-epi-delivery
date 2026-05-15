@@ -14,7 +14,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Cargos (Roles)](./docs/ROLES.md)** - Explica como o padrão Repository/Service funciona para o gerenciamento das "roles".
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
 - 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - Detalha a arquitetura estática Read-Only das 4 empresas do banco.
-- 📄 **[Módulo de EPIs (Epis & Chaining)](./docs/EPI.md)** - Detalha a integração externa com a API baseCAEPI e o vínculo (Muitos-para-Muitos) de EPIs com Cargos.
+- 📄 **[Módulo de EPIs (Epis & Chaining)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), camada `repositories` no módulo `epis`, validade do CA (`Validade`, `StatusValidade`, `Situacao`) e vínculo Cargo–EPI.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
 ---
 

@@ -1,35 +1,38 @@
-import prisma from '../../../config/database.js';
+import epiRepository from '../repositories/EpiRepository.js';
 import epiProvider from '../../../shared/providers/EpiProvider/EpiProvider.js';
+
+const MENSAGEM_CA_SEM_VALIDADE = 'Este CA não possui validade ativa. Não é permitido utilizar este EPI.';
+const MENSAGEM_CA_NAO_ENCONTRADO = 'EPI com este CA não encontrado na base pública.';
+const MENSAGEM_CA_INVALIDO_CADASTRO_OFICIAL
+    = 'Este CA não possui validade ativa no cadastro oficial. Não é permitido utilizar este EPI.';
 
 class FetchEpiFromApiService {
     async execute(caNumber) {
-        // 1. Verifica se já existe na base local
-        let epi = await prisma.epi.findUnique({
-            where: { caNumber: String(caNumber) }
-        });
+        const epi = await epiRepository.findByCaNumber(caNumber);
 
         if (epi) {
+            if (!epi.isActive) {
+                throw new Error(MENSAGEM_CA_SEM_VALIDADE);
+            }
             return epi;
         }
 
-        // 2. Busca na API externa através do Provider
         const epiData = await epiProvider.getEpiByCa(caNumber);
-        
+
         if (!epiData) {
-            throw new Error('EPI com este CA não encontrado na base pública.');
+            throw new Error(MENSAGEM_CA_NAO_ENCONTRADO);
         }
 
-        // 3. Salva no banco de dados local
-        epi = await prisma.epi.create({
-            data: {
-                caNumber: epiData.caNumber,
-                name: epiData.name,
-                caExpirationDate: epiData.expirationDate,
-                isActive: epiData.isActive
-            }
-        });
+        if (!epiData.hasValidCaRegistration) {
+            throw new Error(MENSAGEM_CA_INVALIDO_CADASTRO_OFICIAL);
+        }
 
-        return epi;
+        return epiRepository.createEpi({
+            caNumber: epiData.caNumber,
+            name: epiData.name,
+            caExpirationDate: epiData.expirationDate,
+            isActive: epiData.isActive
+        });
     }
 }
 

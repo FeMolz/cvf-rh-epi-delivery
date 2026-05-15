@@ -1,4 +1,4 @@
-import prisma from '../../../config/database.js';
+import epiRepository from '../repositories/EpiRepository.js';
 
 class ChangeEpiPeriodicityService {
     async execute({ roleId, epiId, newPeriodicityDays }) {
@@ -10,32 +10,13 @@ class ChangeEpiPeriodicityService {
             throw new Error('A periodicidade deve ser maior que zero.');
         }
 
-        const roleEpi = await prisma.roleEpi.findUnique({
-            where: {
-                roleId_epiId: {
-                    roleId,
-                    epiId
-                }
-            }
-        });
+        const roleEpi = await epiRepository.findRoleEpiByCompositeKey(roleId, epiId);
 
         if (!roleEpi) {
             throw new Error('Vínculo entre este Cargo e EPI não encontrado.');
         }
 
-        const updatedRoleEpi = await prisma.roleEpi.update({
-            where: {
-                roleId_epiId: {
-                    roleId,
-                    epiId
-                }
-            },
-            data: {
-                periodicityDays: newPeriodicityDays
-            }
-        });
-
-        return updatedRoleEpi;
+        return epiRepository.updateRoleEpiPeriodicity(roleId, epiId, newPeriodicityDays);
     }
 }
 
