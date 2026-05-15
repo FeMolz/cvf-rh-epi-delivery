@@ -350,3 +350,6 @@ buck-out/
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react,reactnative
 /src/generated/prisma
+
+# PDFs gerados (relatórios de entrega de EPI)
+storage/epi-delivery-reports/*.pdf

@@ -32,6 +32,28 @@ class EpiDeliveryRepository {
             select: { id: true, roleId: true }
         });
     }
+
+    async findDeliveriesByEmployeeIdAndDeliveryDateRange(employeeId, dataInicio, dataFim) {
+        return prisma.epiDelivery.findMany({
+            where: {
+                employeeId,
+                deliveryDate: {
+                    gte: dataInicio,
+                    lte: dataFim
+                }
+            },
+            include: {
+                epi: {
+                    select: {
+                        id: true,
+                        name: true,
+                        caNumber: true
+                    }
+                }
+            },
+            orderBy: { deliveryDate: 'asc' }
+        });
+    }
 }
 
 export default new EpiDeliveryRepository();

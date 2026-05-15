@@ -16,6 +16,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - Detalha a arquitetura estática Read-Only das 4 empresas do banco.
 - 📄 **[Módulo de EPIs (Epis & Chaining)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), camada `repositories` no módulo `epis`, validade do CA (`Validade`, `StatusValidade`, `Situacao`) e vínculo Cargo–EPI.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
+- 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento em disco, pendências de assinatura e atualização de flags operacionais.
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
@@ -55,6 +56,9 @@ DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/NOME_DO_BANCO?sc
 # Chave de criptografia utilizada pelo JWT para login
 JWT_SECRET="adicione_uma_chave_secreta_robusta_aqui"
 JWT_EXPIRES_IN="7d"
+
+# URL base da API baseCAEPI (consulta GET /CA/:numero). Obrigatório para testes locais manuais e seed de EPIs quando o CA ainda não está no PostgreSQL — suba a API com Docker e alinhe host/porta (ver docs/EPI.md).
+# CAEPI_API_URL="http://localhost:8080"
 ```
 
 ### 5. Configuração do Prisma (Banco de Dados)
@@ -90,7 +94,7 @@ npm test
 ### Criando uma Conta de Administrador Inicial (Seed)
 Caso você esteja subindo o sistema do zero e precise de um usuário com privilégios de **ADMIN** para começar a cadastrar outras coisas, criamos um seed para facilitar o processo.
 
-Execute o comando abaixo na raiz do projeto:
+Execute o comando abaixo na raiz do projeto (ou use `npm run seed:admin`, que sempre usa a raiz do pacote):
 ```bash
 node prisma/seeders/admin.js
 ```
@@ -100,11 +104,22 @@ Esse comando irá criar um usuário no banco com as seguintes credenciais padrã
 
 Você poderá utilizar esses dados na rota `POST /api/v1/users/login` para receber seu Token JWT.
 
+### Outros seeders (mesmo carregamento de `.env` da raiz)
+
+| Comando npm | Equivalente |
+|-------------|----------------|
+| `npm run seed:companies` | `node prisma/seeders/seed_companies.js` |
+| `npm run seed:test-data` | `node prisma/seeders/seed_test_data.js` |
+| `npm run seed:epis` | `node prisma/seeders/seed_epis.js` |
+| `npm run seed:dev-token` | `node prisma/seeders/generate-dev-token.js` |
+
+Todos os arquivos em `prisma/seeders/` importam `carregarAmbienteRaiz.js` primeiro, para que `DATABASE_URL` e `JWT_SECRET` venham do `.env` na raiz do repositório mesmo se o `cwd` do terminal não for a pasta do projeto.
+
 ### Gerando Token Local para Teste no Postman/Insomnia
 Enquanto estiver programando, você pode precisar acessar as rotas bloqueadas (como `/api/v1/roles`) sem ter que criar toda a árvore de usuário. 
 
 Existe um script pronto que lê o seu `.env` e devolve um token assinado para a Role "ADMIN". Basta executar:
 ```bash
-node prisma/seeders/generate-dev-token.js
+npm run seed:dev-token
 ```
 Após rodar, copie a string retornada e insira na aba **Bearer Token** da sua ferramenta de testes de API favorita.

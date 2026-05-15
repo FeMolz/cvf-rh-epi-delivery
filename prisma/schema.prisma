@@ -47,6 +47,8 @@ model User {
 
     epiDeliveries EpiDelivery[]
 
+    epiDeliveryReportsGenerated EpiDeliveryReport[] @relation("EpiDeliveryReportGenerator")
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -79,10 +81,37 @@ model Employee {
 
     epiDeliveries EpiDelivery[]
 
+    epiDeliveryReports EpiDeliveryReport[]
+
     deletedAt DateTime?
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
+
+model EpiDeliveryReport {
+    id String @id @default(uuid())
+
+    employeeId String
+    employee   Employee @relation(fields: [employeeId], references: [id])
+
+    periodStartDate DateTime
+    periodEndDate   DateTime
+
+    pdfConteudo Bytes
+
+    foiImpresso    Boolean @default(false)
+    foiEncaminhado Boolean @default(false)
+    foiAssinado    Boolean @default(false)
+
+    generatedByUserId String?
+    generatedBy       User?   @relation("EpiDeliveryReportGenerator", fields: [generatedByUserId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([employeeId])
+    @@index([foiAssinado])
 }
 
 model Epi {

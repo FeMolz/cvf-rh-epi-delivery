@@ -1,8 +1,18 @@
-import prisma from '../../src/config/database.js';
+import './carregarAmbienteRaiz.js';
+import { UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+
+import prisma from '../../src/config/database.js';
 
 async function main() {
     console.log('Iniciando seed de administrador...');
+
+    if (!process.env.DATABASE_URL) {
+        console.error(
+            'DATABASE_URL nao encontrada. Crie um arquivo .env na raiz do repositorio (ao lado de package.json) com a string de conexao do PostgreSQL.'
+        );
+        process.exit(1);
+    }
 
     const adminEmail = 'admin@rhsystem.com';
     const adminPassword = 'admin';
@@ -22,12 +32,12 @@ async function main() {
     const passwordHash = await bcrypt.hash(adminPassword, 10);
 
     // Cria o usuário administrador
-    const admin = await prisma.user.create({
+    await prisma.user.create({
         data: {
             name: adminName,
             email: adminEmail,
             passwordHash: passwordHash,
-            role: 'ADMIN',
+            role: UserRole.ADMIN,
             isActive: true
         }
     });

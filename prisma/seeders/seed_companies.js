@@ -1,3 +1,5 @@
+import './carregarAmbienteRaiz.js';
+
 import prisma from '../../src/config/database.js';
 
 const companiesData = [

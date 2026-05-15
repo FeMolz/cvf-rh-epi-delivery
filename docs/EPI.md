@@ -10,6 +10,17 @@ Este conjunto de documentação cobre:
 
 **Dependências principais:** Express, Prisma (PostgreSQL), JWT/RBAC nas rotas, variável de ambiente `CAEPI_API_URL` (opcional; padrão `http://localhost:8080`).
 
+### Desenvolvimento e testes locais (API baseCAEPI no Docker)
+
+Para **testes locais manuais** da API RH (Postman, Insomnia, front apontando para `localhost`) e para o seeder **`npm run seed:epis`**, qualquer fluxo que consulte um CA **ainda não existente no cache PostgreSQL** chama o `EpiProvider`, que faz `GET {CAEPI_API_URL}/CA/:caNumber`. Sem esse serviço acessível, a consulta falha (falha de conexão ou resposta inválida).
+
+**Recomendação:** subir a **API baseCAEPI** via **Docker**, usando a imagem e a porta indicadas na documentação da imagem que você adotar (por exemplo imagens comunitárias `joaoaugustomv/api_base_ca_epi` publicadas no Docker Hub). Depois:
+
+1. Ajuste `CAEPI_API_URL` no `.env` na raiz do repositório para a **URL base** onde a API responde (sem barra no final), de modo que `GET /CA/11070` funcione — por exemplo `http://localhost:8080` se o container publicar a API nessa porta, ou outra porta se o mapeamento for diferente.
+2. Opcional: `CAEPI_API_TIMEOUT_MS` (milissegundos) para o tempo máximo de espera pela API CAEPI.
+
+**Testes automatizados (Jest)** dos arquivos `EpiProvider.test.js`, `FetchEpiFromApiService.test.js`, etc.: utilizam **mocks** de `fetch` e de repositórios; **não** exigem Docker nem a API baseCAEPI em execução.
+
 ---
 
 ## 2. Modelo de Dados
@@ -155,6 +166,8 @@ src/modules/chaining/epiToRole/
 - **`ListCachedEpisService.test.js`**: delegação ao repositório.
 - **`ChangeEpiPeriodicityService.test.js`**: mocks do repositório; validações e atualização.
 - **`EpiController.test.js`** / **`epi.routes.test.js`**: controller e rotas com dependências mockadas.
+
+Os testes acima **não** sobem a API baseCAEPI; para validação ponta a ponta com rede real, use ambiente com Docker conforme a seção **Desenvolvimento e testes locais** no início deste documento.
 
 Execução sugerida (PowerShell):
 

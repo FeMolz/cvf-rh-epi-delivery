@@ -55,4 +55,32 @@ describe('EpiDeliveryRepository', () => {
         expect(result).toEqual({ id: 'emp1' });
         expect(prismaMock.employee.findUnique).toHaveBeenCalled();
     });
+
+    it('findDeliveriesByEmployeeIdAndDeliveryDateRange should filter by deliveryDate', async () => {
+        prismaMock.epiDelivery.findMany.mockResolvedValue([{ id: 'd1' }]);
+        const limiteInicial = new Date('2026-02-01T00:00:00.000Z');
+        const limiteFinal = new Date('2026-02-15T23:59:59.999Z');
+        const resultado = await epiDeliveryRepository.findDeliveriesByEmployeeIdAndDeliveryDateRange(
+            'emp1',
+            limiteInicial,
+            limiteFinal
+        );
+        expect(resultado).toEqual([{ id: 'd1' }]);
+        expect(prismaMock.epiDelivery.findMany).toHaveBeenCalledWith({
+            where: {
+                employeeId: 'emp1',
+                deliveryDate: { gte: limiteInicial, lte: limiteFinal }
+            },
+            include: {
+                epi: {
+                    select: {
+                        id: true,
+                        name: true,
+                        caNumber: true
+                    }
+                }
+            },
+            orderBy: { deliveryDate: 'asc' }
+        });
+    });
 });
