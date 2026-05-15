@@ -60,6 +60,7 @@ model Role {
 
     employees Employee[]
     roleEpis  RoleEpi[]
+    roleQuesitos RoleQuesito[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -69,6 +70,7 @@ model Employee {
     id              String         @id @default(uuid())
     name            String
     cpf             String         @unique
+    birthDate       DateTime
     status          EmployeeStatus @default(ATIVO)
     admissionDate   DateTime
     resignationDate DateTime?
@@ -141,6 +143,35 @@ model RoleEpi {
     periodicityDays Int
 
     @@unique([roleId, epiId])
+}
+
+model Quesito {
+    id        String @id @default(uuid())
+    nome      String @unique
+    descricao String
+    bloco     String
+
+    roleQuesitos RoleQuesito[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([bloco])
+}
+
+model RoleQuesito {
+    id String @id @default(uuid())
+
+    roleId String
+    role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+    quesitoId String
+    quesito   Quesito @relation(fields: [quesitoId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([roleId, quesitoId])
 }
 
 model EpiDelivery {

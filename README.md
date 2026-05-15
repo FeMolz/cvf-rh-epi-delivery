@@ -17,6 +17,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de EPIs (Epis & Chaining)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), camada `repositories` no módulo `epis`, validade do CA (`Validade`, `StatusValidade`, `Situacao`) e vínculo Cargo–EPI.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
 - 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento em disco, pendências de assinatura e atualização de flags operacionais.
+- 📄 **[Módulo de Quesitos e vínculo Cargo–Quesito](./docs/QUESITOS.md)** - Cadastro de quesitos (nome único, descrição, bloco), filtros de listagem e encadeamento opcional com cargos (`/api/v1/roles-quesitos`).
 ---
 
 ## 🚀 Como executar este projeto em outra máquina

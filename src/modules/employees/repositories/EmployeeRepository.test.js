@@ -24,7 +24,14 @@ describe('EmployeeRepository', () => {
   });
 
   it('should create an employee and return selected fields', async () => {
-    const data = { name: 'John', cpf: '123', status: 'ATIVO', admissionDate: new Date(), companyId: 1 };
+    const data = {
+      name: 'John',
+      cpf: '123',
+      birthDate: new Date('1990-01-01'),
+      status: 'ATIVO',
+      admissionDate: new Date(),
+      companyId: 1
+    };
     const mockResult = { id: 1, ...data };
     prismaMock.employee.create.mockResolvedValue(mockResult);
     const result = await repo.create(data);

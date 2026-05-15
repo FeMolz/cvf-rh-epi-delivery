@@ -17,6 +17,8 @@ import epiRoutes from './modules/epis/routes/epi.routes.js';
 import epiToRoleRoutes from './modules/chaining/epiToRole/routes/epiToRole.routes.js';
 import epiDeliveryRoutes from './modules/epiDeliveries/routes/epiDelivery.routes.js';
 import epiDeliveryReportRoutes from './modules/epiDeliveryReports/routes/epiDeliveryReport.routes.js';
+import quesitoRoutes from './modules/quesitos/routes/quesito.routes.js';
+import quesitoToRoleRoutes from './modules/chaining/quesitoToRole/routes/quesitoToRole.routes.js';
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Usar rotas modulares
@@ -48,5 +50,7 @@ app.use("/api/v1/epis", epiRoutes);
 app.use("/api/v1/roles-epis", epiToRoleRoutes);
 app.use("/api/v1/epi-deliveries", epiDeliveryRoutes);
 app.use("/api/v1/epi-delivery-reports", epiDeliveryReportRoutes);
+app.use("/api/v1/quesitos", quesitoRoutes);
+app.use("/api/v1/roles-quesitos", quesitoToRoleRoutes);
 
 export default app;
