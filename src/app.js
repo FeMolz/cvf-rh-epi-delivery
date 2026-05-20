@@ -13,6 +13,7 @@ import roleRoutes from './modules/roles/routes/role.routes.js';
 import userRoutes from './modules/users/routes/user.routes.js';
 import employeeRoutes from './modules/employees/routes/employee.routes.js';
 import companyRoutes from './modules/companies/routes/company.routes.js';
+import setorRoutes from './modules/setores/routes/setor.routes.js';
 import epiRoutes from './modules/epis/routes/epi.routes.js';
 import epiToRoleRoutes from './modules/chaining/epiToRole/routes/epiToRole.routes.js';
 import epiDeliveryRoutes from './modules/epiDeliveries/routes/epiDelivery.routes.js';
@@ -33,24 +34,26 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-
-  res.status(err.statusCode || 500).json({
-    status: "error",
-    message: err.message || "Ocorreu um erro interno no servidor",
-  });
-});
-
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/companies", companyRoutes);
+app.use("/api/v1/setores", setorRoutes);
 app.use("/api/v1/epis", epiRoutes);
 app.use("/api/v1/roles-epis", epiToRoleRoutes);
 app.use("/api/v1/epi-deliveries", epiDeliveryRoutes);
 app.use("/api/v1/epi-delivery-reports", epiDeliveryReportRoutes);
 app.use("/api/v1/quesitos", quesitoRoutes);
 app.use("/api/v1/roles-quesitos", quesitoToRoleRoutes);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  const statusCode = err.statusCode || 500;
+
+  res.status(statusCode).json({
+    error: err.message || 'Ocorreu um erro interno no servidor'
+  });
+});
 
 export default app;

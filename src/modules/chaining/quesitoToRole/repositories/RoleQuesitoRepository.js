@@ -60,6 +60,40 @@ class RoleQuesitoRepository {
             orderBy: { createdAt: 'asc' }
         });
     }
+
+    /**
+     * @param {string} identificadorCargo
+     * @param {string[]} identificadoresQuesito
+     */
+    async createManyLinks(identificadorCargo, identificadoresQuesito) {
+        const resultado = await prisma.roleQuesito.createMany({
+            data: identificadoresQuesito.map(identificadorQuesito => ({
+                roleId: identificadorCargo,
+                quesitoId: identificadorQuesito
+            })),
+            skipDuplicates: true
+        });
+
+        return resultado.count;
+    }
+
+    /**
+     * @param {string} identificadorCargo
+     * @param {string[]} identificadoresQuesito
+     */
+    async findManyByRoleIdAndQuesitoIds(identificadorCargo, identificadoresQuesito) {
+        return prisma.roleQuesito.findMany({
+            where: {
+                roleId: identificadorCargo,
+                quesitoId: { in: identificadoresQuesito }
+            },
+            include: {
+                quesito: true,
+                role: true
+            },
+            orderBy: { createdAt: 'asc' }
+        });
+    }
 }
 
 export default new RoleQuesitoRepository();

@@ -1,34 +1,26 @@
-import prisma from '../../../../config/database.js';
+import roleEpiRepository from '../repositories/RoleEpiRepository.js';
+import { criarErroHttp } from '../../../../shared/errors/criarErroHttp.js';
+import {
+    MENSAGEM_CAMPOS_DESVINCULO_EPI_OBRIGATORIOS,
+    MENSAGEM_DESVINCULO_EPI_SUCESSO,
+    MENSAGEM_VINCULO_EPI_CARGO_NAO_ENCONTRADO
+} from '../constants/epiCargoConstantes.js';
 
 class UnlinkEpiFromRoleService {
     async execute({ roleId, epiId }) {
         if (!roleId || !epiId) {
-            throw new Error('roleId e epiId são obrigatórios.');
+            throw criarErroHttp(MENSAGEM_CAMPOS_DESVINCULO_EPI_OBRIGATORIOS);
         }
 
-        const existingLink = await prisma.roleEpi.findUnique({
-            where: {
-                roleId_epiId: {
-                    roleId,
-                    epiId
-                }
-            }
-        });
+        const vinculoExistente = await roleEpiRepository.findByRoleAndEpi(roleId, epiId);
 
-        if (!existingLink) {
-            throw new Error('Vínculo entre este Cargo e EPI não encontrado.');
+        if (!vinculoExistente) {
+            throw criarErroHttp(MENSAGEM_VINCULO_EPI_CARGO_NAO_ENCONTRADO, 404);
         }
 
-        await prisma.roleEpi.delete({
-            where: {
-                roleId_epiId: {
-                    roleId,
-                    epiId
-                }
-            }
-        });
+        await roleEpiRepository.deleteByRoleAndEpi(roleId, epiId);
 
-        return { message: 'Vínculo removido com sucesso.' };
+        return { message: MENSAGEM_DESVINCULO_EPI_SUCESSO };
     }
 }
 

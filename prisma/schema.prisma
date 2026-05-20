@@ -24,6 +24,37 @@ enum EmployeeStatus {
     LICENCA_MED
 }
 
+enum EstadoCivil {
+    SOLTEIRO
+    CASADO
+    DIVORCIADO
+    SEPARADO
+    VIUVO
+    UNIAO_ESTAVEL
+}
+
+enum RacaCor {
+    BRANCA
+    PRETA
+    PARDA
+    AMARELA
+    INDIGENA
+    NAO_DECLARADO
+}
+
+enum GrauInstrucao {
+    ANALFABETO
+    FUNDAMENTAL_INCOMPLETO
+    FUNDAMENTAL_COMPLETO
+    MEDIO_INCOMPLETO
+    MEDIO_COMPLETO
+    SUPERIOR_INCOMPLETO
+    SUPERIOR_COMPLETO
+    POS_GRADUACAO
+    MESTRADO
+    DOUTORADO
+}
+
 model Company {
     id       String  @id @default(uuid())
     name     String
@@ -31,6 +62,17 @@ model Company {
     isActive Boolean @default(true)
 
     employee Employee[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Setor {
+    id       String  @id @default(uuid())
+    nome     String  @unique
+    isActive Boolean @default(true)
+
+    employees Employee[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -70,16 +112,42 @@ model Employee {
     id              String         @id @default(uuid())
     name            String
     cpf             String         @unique
+    email           String         @unique
+    telefone        String
     birthDate       DateTime
     status          EmployeeStatus @default(ATIVO)
     admissionDate   DateTime
     resignationDate DateTime?
+
+    nacionalidade       String?
+    estadoCivil         EstadoCivil?
+    racaCor             RacaCor?
+    filiacao            String?
+    grauInstrucao       GrauInstrucao?
+    numeroCtps          String?
+    serieCtps           String?
+    numeroDependentes   Int?
+    pis                 String?
+    chavePix            String?
+    cep                 String?
+    logradouro          String?
+    numeroEndereco      String?
+    complemento         String?
+    bairro              String?
+    cidade              String?
+    estado              String?
+    valeTransporte      Boolean        @default(false)
+    valeAlimentacao     Boolean        @default(false)
+    planoSaude          Boolean        @default(false)
 
     roleId String
     role   Role   @relation(fields: [roleId], references: [id])
 
     companyId String
     company   Company @relation(fields: [companyId], references: [id])
+
+    setorId String
+    setor   Setor  @relation(fields: [setorId], references: [id])
 
     epiDeliveries EpiDelivery[]
 

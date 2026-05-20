@@ -9,49 +9,57 @@ O módulo de Funcionários (`Employees`) é responsável pelo gerenciamento cent
 O modelo `Employee` está definido no arquivo `prisma/schema.prisma` da seguinte forma:
 
 ```prisma
-enum EmployeeStatus {
-    ATIVO
-    INATIVO
-    DESLIGADO
-    RESCINDIDO
-    APOSENTADO
-    FERIAS
-    LICENCA_MATERNIDADE
-    LICENCA_MED
-}
+enum EmployeeStatus { ... }
+enum EstadoCivil { SOLTEIRO, CASADO, DIVORCIADO, SEPARADO, VIUVO, UNIAO_ESTAVEL }
+enum RacaCor { BRANCA, PRETA, PARDA, AMARELA, INDIGENA, NAO_DECLARADO }
+enum GrauInstrucao { ANALFABETO, FUNDAMENTAL_INCOMPLETO, ... }
 
 model Employee {
     id              String         @id @default(uuid())
     name            String
     cpf             String         @unique
+    email           String         @unique
+    telefone        String
     birthDate       DateTime
     status          EmployeeStatus @default(ATIVO)
     admissionDate   DateTime
     resignationDate DateTime?
 
-    roleId String
-    role   Role   @relation(fields: [roleId], references: [id])
+    nacionalidade       String?
+    estadoCivil         EstadoCivil?
+    racaCor             RacaCor?
+    filiacao            String?
+    grauInstrucao       GrauInstrucao?
+    numeroCtps          String?
+    serieCtps           String?
+    numeroDependentes   Int?
+    pis                 String?
+    chavePix            String?
+    cep                 String?
+    logradouro          String?
+    numeroEndereco      String?
+    complemento         String?
+    bairro              String?
+    cidade              String?
+    estado              String?
+    valeTransporte      Boolean @default(false)
+    valeAlimentacao     Boolean @default(false)
+    planoSaude          Boolean @default(false)
 
-    companyId String
-    company   Company @relation(fields: [companyId], references: [id])
-
-    epiDeliveries EpiDelivery[]
-
-    deletedAt DateTime?
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    roleId / companyId / relations ...
 }
 ```
-- **id**: Identificador único do funcionário (UUID).
-- **name**: Nome completo do funcionário.
-- **cpf**: CPF único utilizado como documento de identificação principal no sistema.
-- **birthDate**: Data de nascimento (obrigatória no cadastro e persistida no banco).
-- **status**: Situação atual do funcionário na empresa, baseada no enum `EmployeeStatus` (ex: ATIVO, FERIAS, DESLIGADO).
-- **admissionDate**: Data de contratação/admissão do funcionário.
-- **resignationDate**: Data de saída/demissão (opcional).
-- **roleId**: Referência cruzada obrigatória para a tabela de Cargos (`Role`).
-- **companyId**: Referência cruzada obrigatória para a tabela da Empresa (`Company`) onde ele foi alocado.
+
+### Campos obrigatórios no cadastro
+- **name**, **cpf**, **email**, **telefone**, **birthDate**, **roleId**, **companyId**, **setorId**
+
+### Campos opcionais
+- **Dados pessoais:** nacionalidade, estadoCivil, racaCor, filiacao, grauInstrucao, numeroCtps, serieCtps, numeroDependentes, pis, chavePix
+- **Endereço:** cep, logradouro, numeroEndereco, complemento, bairro, cidade, estado
+- **Benefícios (boolean):** valeTransporte, valeAlimentacao, planoSaude
+
+### Demais campos
+- **status**, **admissionDate**, **resignationDate**, vínculos com cargo e empresa
 
 ## 3. Estrutura de Diretórios
 O módulo segue a mesma arquitetura em camadas utilizada no restante do sistema:
@@ -79,8 +87,10 @@ O sistema utiliza a arquitetura **Repository / Service / Controller**, mantendo 
 ### Serviços Principais
 - **`CreateEmployeeService.js`**:
   - Responsável por validar os dados antes da criação do registro. 
-  - **Campos Obrigatórios:** Exige `name`, `cpf`, `companyId`, `roleId` e **`birthDate`** (data de nascimento válida). Rejeita datas inválidas ou em branco.
-  - **Bloqueio de Duplicidade (CPF):** Varre a base de dados utilizando o repositório para assegurar que não haja um funcionário já registrado com o mesmo CPF. Lança um erro (HTTP 400 no controller) se o CPF for duplicado.
+  - **Campos Obrigatórios:** Exige `name`, `cpf`, `email`, `telefone`, `companyId`, `roleId`, `setorId` e **`birthDate`** (data de nascimento válida).
+  - **Validações de formato:** `cpf` no padrão `xxx.xxx.xxx-xx` (11 dígitos com dígitos verificadores válidos), `email` válido (normalizado em minúsculas), `telefone` no padrão `(xx) xxxxx-xxxx` (celular) ou `(xx) xxxx-xxxx` (fixo).
+  - **Bloqueio de Duplicidade:** Impede CPF ou e-mail já cadastrados (HTTP 400).
+  - **Campos opcionais:** Demais dados pessoais, endereço e benefícios são aceitos quando enviados no body.
   - Define o valor padrão para o `status` como `ATIVO` na ausência de informação na request.
 
 ### Repositório
@@ -103,6 +113,28 @@ Para executar qualquer requisição, é necessário apresentar um JWT válido (`
 | `GET`    | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Retorna os dados de um funcionário específico.    |
 | `PUT`    | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Atualiza dados de um funcionário pelo ID.         |
 | `DELETE` | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Realiza o Soft Delete do funcionário (mantém histórico).     |
+| `GET`    | `/api/v1/employees/export/lista` | `ADMIN`, `ADMINISTRATIVO` | Exporta planilha XLSX com lista resumida de funcionários. |
+| `GET`    | `/api/v1/employees/:id/export` | `ADMIN`, `ADMINISTRATIVO` | Exporta planilha XLSX com ficha completa de um funcionário. |
+
+### Exportação em planilha (XLSX)
+
+**Lista resumida** — `GET /api/v1/employees/export/lista?filtro=ativos`
+
+Query `filtro` (opcional, padrão `ativos`):
+
+| Valor | Funcionários incluídos |
+|-------|-------------------------|
+| `ativos` | `ATIVO`, `FERIAS`, `LICENCA_MATERNIDADE`, `LICENCA_MED` |
+| `inativos` | `INATIVO`, `DESLIGADO`, `RESCINDIDO`, `APOSENTADO` |
+| `todos` | Todos não excluídos (soft delete) |
+
+Colunas da planilha: **Nome**, **Cargo**, **Setor**, **Status**, **Data de demissão** (preenchida somente quando o status é inativo).
+
+Resposta: arquivo `.xlsx` com `Content-Disposition: attachment`.
+
+**Ficha completa** — `GET /api/v1/employees/:id/export`
+
+Planilha em formato campo/valor com todos os dados do funcionário (pessoais, endereço, benefícios, cargo, empresa e setor).
 
 ### Exemplo de Retorno (POST e GET por ID)
 ```json
@@ -110,7 +142,12 @@ Para executar qualquer requisição, é necessário apresentar um JWT válido (`
   "id": "abc1234-abcd...",
   "name": "João da Silva",
   "cpf": "123.456.789-00",
+  "email": "joao.silva@empresa.com",
+  "telefone": "11999998888",
   "birthDate": "1992-03-20T00:00:00.000Z",
+  "nacionalidade": "Brasileira",
+  "estadoCivil": "CASADO",
+  "valeTransporte": true,
   "status": "ATIVO",
   "admissionDate": "2026-05-13T00:00:00.000Z",
   "resignationDate": null,
@@ -141,11 +178,21 @@ Seguindo o padrão do restante da aplicação para ESModules, os testes da camad
 ```json
 {
   "name": "Maria Oliveira",
-  "cpf": "111.222.333-44",
+  "cpf": "529.982.247-25",
+  "email": "maria.oliveira@empresa.com",
+  "telefone": "(11) 98888-7777",
   "birthDate": "1995-08-12",
   "admissionDate": "2026-05-10T00:00:00Z",
   "roleId": "id-do-cargo",
-  "companyId": "id-da-empresa"
+  "companyId": "id-da-empresa",
+  "setorId": "30303030-3030-3030-3030-303030303030",
+  "cep": "01310-100",
+  "logradouro": "Avenida Paulista",
+  "numeroEndereco": "1000",
+  "cidade": "São Paulo",
+  "estado": "SP",
+  "valeAlimentacao": true,
+  "planoSaude": true
 }
 ```
 

@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { MENSAGEM_QUESITO_NAO_ENCONTRADO } from '../constants/quesitoConstantes.js';
 
 const quesitoRepositoryMock = {
     findByNome: jest.fn(),
@@ -37,7 +38,7 @@ describe('ListQuesitosService', () => {
         quesitoRepositoryMock.findByNome.mockResolvedValue(null);
 
         await expect(listQuesitosService.execute({ nomeFiltro: 'inexistente' })).rejects.toThrow(
-            'Quesito nao encontrado.'
+            MENSAGEM_QUESITO_NAO_ENCONTRADO
         );
     });
 

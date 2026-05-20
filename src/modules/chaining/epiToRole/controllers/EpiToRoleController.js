@@ -1,44 +1,39 @@
 import linkEpiToRoleService from '../services/LinkEpiToRoleService.js';
+import listEpisByRoleService from '../services/ListEpisByRoleService.js';
 import unlinkEpiFromRoleService from '../services/UnlinkEpiFromRoleService.js';
-import prisma from '../../../../config/database.js';
 
 class EpiToRoleController {
-    async link(req, res) {
+    async link(request, response, next) {
         try {
-            // caNumber comes from body because it's a new link
-            const { roleId, caNumber, periodicityDays } = req.body;
-            
-            const result = await linkEpiToRoleService.execute({ roleId, caNumber, periodicityDays });
-            return res.status(201).json(result);
-        } catch (error) {
-            return res.status(400).json({ error: error.message });
-        }
-    }
-
-    async unlink(req, res) {
-        try {
-            const { roleId, epiId } = req.params;
-            
-            const result = await unlinkEpiFromRoleService.execute({ roleId, epiId });
-            return res.status(200).json(result);
-        } catch (error) {
-            return res.status(400).json({ error: error.message });
-        }
-    }
-
-    async listByRole(req, res) {
-        try {
-            const { roleId } = req.params;
-            
-            const roleEpis = await prisma.roleEpi.findMany({
-                where: { roleId },
-                include: {
-                    epi: true
-                }
+            const { roleId, caNumber, periodicityDays } = request.body;
+            const resultado = await linkEpiToRoleService.execute({
+                roleId,
+                caNumber,
+                periodicityDays
             });
-            return res.status(200).json(roleEpis);
-        } catch (error) {
-            return res.status(500).json({ error: 'Erro ao buscar EPIs vinculados a este cargo.' });
+            return response.status(201).json(resultado);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async unlink(request, response, next) {
+        try {
+            const { roleId, epiId } = request.params;
+            const resultado = await unlinkEpiFromRoleService.execute({ roleId, epiId });
+            return response.status(200).json(resultado);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async listByRole(request, response, next) {
+        try {
+            const { roleId } = request.params;
+            const roleEpis = await listEpisByRoleService.execute(roleId);
+            return response.status(200).json(roleEpis);
+        } catch (erro) {
+            return next(erro);
         }
     }
 }

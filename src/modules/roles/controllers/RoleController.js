@@ -1,75 +1,57 @@
-import createRoleService from "../services/CreateRoleService.js";
-import roleRepository from "../repositories/RoleRepository.js";
+import createRoleService from '../services/CreateRoleService.js';
+import deleteRoleService from '../services/DeleteRoleService.js';
+import findRoleByIdService from '../services/FindRoleByIdService.js';
+import listRolesService from '../services/ListRolesService.js';
+import updateRoleService from '../services/UpdateRoleService.js';
 
 class RoleController {
-    async create(req, res, next) {
+    async create(request, response, next) {
         try {
-            const { name, description } = req.body;
-
-            const role = await createRoleService.execute({
-                name,
-                description
-            });
-
-            return res.status(201).json(role);
-        } catch (error) {
-            next(error)
-        }
-    }
-    async findAll(req, res, next) {
-        try {
-            const roles = await roleRepository.findAll();
-            return res.status(200).json(roles);
-        } catch (error) {
-            next(error);
+            const { name, description } = request.body;
+            const cargo = await createRoleService.execute({ name, description });
+            return response.status(201).json(cargo);
+        } catch (erro) {
+            return next(erro);
         }
     }
 
-    async findById(req, res, next) {
+    async findAll(request, response, next) {
         try {
-            const { id } = req.params;
-            const role = await roleRepository.findById(id);
-            
-            if (!role) {
-                return res.status(404).json({ error: 'Cargo não encontrado' });
-            }
-            
-            return res.status(200).json(role);
-        } catch (error) {
-            next(error);
+            const cargos = await listRolesService.execute();
+            return response.status(200).json(cargos);
+        } catch (erro) {
+            return next(erro);
         }
     }
 
-    async update(req, res, next) {
+    async findById(request, response, next) {
         try {
-            const { id } = req.params;
-            const { name, description } = req.body;
-            
-            const roleExists = await roleRepository.exists(id);
-            if (!roleExists) {
-                return res.status(404).json({ error: 'Cargo não encontrado' });
-            }
-            
-            const role = await roleRepository.update(id, name, description);
-            return res.status(200).json(role);
-        } catch (error) {
-            next(error);
+            const { id } = request.params;
+            const cargo = await findRoleByIdService.execute(id);
+            return response.status(200).json(cargo);
+        } catch (erro) {
+            return next(erro);
         }
     }
 
-    async delete(req, res, next) {
+    async update(request, response, next) {
         try {
-            const { id } = req.params;
-            
-            const roleExists = await roleRepository.exists(id);
-            if (!roleExists) {
-                return res.status(404).json({ error: 'Cargo não encontrado' });
-            }
-            
-            await roleRepository.delete(id);
-            return res.status(204).send();
-        } catch (error) {
-            next(error);
+            const { id } = request.params;
+            const { name, description } = request.body;
+            const cargo = await updateRoleService.execute(id, { name, description });
+            return response.status(200).json(cargo);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async delete(request, response, next) {
+        try {
+            const { id } = request.params;
+            await deleteRoleService.execute(id);
+            return response.status(204).send();
+        } catch (erro) {
+            return next(erro);
         }
     }
 }

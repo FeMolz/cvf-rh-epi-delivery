@@ -1,41 +1,32 @@
 import prisma from '../../../config/database.js';
+import { CAMPOS_SELECAO_FUNCIONARIO } from '../constants/funcionarioConstantes.js';
+
+const SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS = {
+    name: true,
+    status: true,
+    resignationDate: true,
+    role: { select: { name: true } },
+    setor: { select: { nome: true } }
+};
+
+const SELECAO_EXPORTACAO_FICHA_FUNCIONARIO = {
+    ...CAMPOS_SELECAO_FUNCIONARIO,
+    deletedAt: true,
+    role: { select: { id: true, name: true } }
+};
 
 class EmployeeRepository {
     async create(data) {
         return prisma.employee.create({
             data,
-            select: {
-                id: true,
-                name: true,
-                cpf: true,
-                birthDate: true,
-                status: true,
-                admissionDate: true,
-                resignationDate: true,
-                companyId: true,
-                company: true,
-                createdAt: true,
-                updatedAt: true
-            }
+            select: CAMPOS_SELECAO_FUNCIONARIO
         });
     }
 
     async findAll() {
         return prisma.employee.findMany({
             where: { deletedAt: null },
-            select: {
-                id: true,
-                name: true,
-                cpf: true,
-                birthDate: true,
-                status: true,
-                admissionDate: true,
-                resignationDate: true,
-                companyId: true,
-                company: true,
-                createdAt: true,
-                updatedAt: true
-            }
+            select: CAMPOS_SELECAO_FUNCIONARIO
         });
     }
 
@@ -43,18 +34,8 @@ class EmployeeRepository {
         return prisma.employee.findUnique({
             where: { id },
             select: {
-                id: true,
-                name: true,
-                cpf: true,
-                birthDate: true,
-                status: true,
-                admissionDate: true,
-                resignationDate: true,
-                companyId: true,
-                company: true,
-                deletedAt: true,
-                createdAt: true,
-                updatedAt: true
+                ...CAMPOS_SELECAO_FUNCIONARIO,
+                deletedAt: true
             }
         });
     }
@@ -63,19 +44,28 @@ class EmployeeRepository {
         return prisma.employee.update({
             where: { id },
             data,
-            select: {
-                id: true,
-                name: true,
-                cpf: true,
-                birthDate: true,
-                status: true,
-                admissionDate: true,
-                resignationDate: true,
-                companyId: true,
-                company: true,
-                createdAt: true,
-                updatedAt: true
-            }
+            select: CAMPOS_SELECAO_FUNCIONARIO
+        });
+    }
+
+    /**
+     * @param {{ status?: { in: string[] } }} filtroStatus
+     */
+    async findManyParaExportacaoLista(filtroStatus) {
+        return prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                ...filtroStatus
+            },
+            select: SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS,
+            orderBy: [{ name: 'asc' }]
+        });
+    }
+
+    async findByIdParaExportacaoFicha(identificadorFuncionario) {
+        return prisma.employee.findUnique({
+            where: { id: identificadorFuncionario },
+            select: SELECAO_EXPORTACAO_FICHA_FUNCIONARIO
         });
     }
 
@@ -86,12 +76,11 @@ class EmployeeRepository {
             error.code = 'NOT_FOUND';
             throw error;
         }
-        // Aplica o Soft Delete: em vez de apagar do banco, preenche a data de exclusão
         return prisma.employee.update({
             where: { id },
-            data: { 
+            data: {
                 deletedAt: new Date(),
-                status: 'DESLIGADO' // Opcional: já muda o status do funcionário
+                status: 'DESLIGADO'
             }
         });
     }

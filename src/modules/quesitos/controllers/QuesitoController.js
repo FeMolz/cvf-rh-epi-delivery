@@ -1,11 +1,14 @@
 import createQuesitoService from '../services/CreateQuesitoService.js';
+import listAllQuesitosService from '../services/ListAllQuesitosService.js';
 import listQuesitosService from '../services/ListQuesitosService.js';
+import updateQuesitoService from '../services/UpdateQuesitoService.js';
 import {
+    MENSAGEM_BLOCO_QUESITO_OBRIGATORIO,
+    MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS,
+    MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA,
     MENSAGEM_FILTROS_NOME_E_BLOCO_EXCLUSIVOS,
     MENSAGEM_NOME_QUESITO_JA_CADASTRADO,
     MENSAGEM_NOME_QUESITO_OBRIGATORIO,
-    MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA,
-    MENSAGEM_BLOCO_QUESITO_OBRIGATORIO,
     MENSAGEM_QUESITO_NAO_ENCONTRADO
 } from '../constants/quesitoConstantes.js';
 
@@ -14,7 +17,8 @@ const CONJUNTO_MENSAGENS_RESPOSTA_400 = new Set([
     MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA,
     MENSAGEM_BLOCO_QUESITO_OBRIGATORIO,
     MENSAGEM_NOME_QUESITO_JA_CADASTRADO,
-    MENSAGEM_FILTROS_NOME_E_BLOCO_EXCLUSIVOS
+    MENSAGEM_FILTROS_NOME_E_BLOCO_EXCLUSIVOS,
+    MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS
 ]);
 
 class QuesitoController {
@@ -33,6 +37,33 @@ class QuesitoController {
         }
     }
 
+    async listAll(request, response, next) {
+        try {
+            const listaQuesitos = await listAllQuesitosService.execute();
+            return response.status(200).json(listaQuesitos);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async update(request, response, next) {
+        try {
+            const { id } = request.params;
+            const corpoRequisicao =
+                request.body !== null && typeof request.body === 'object' ? request.body : {};
+            const quesitoAtualizado = await updateQuesitoService.execute(id, corpoRequisicao);
+            return response.status(200).json(quesitoAtualizado);
+        } catch (erro) {
+            if (erro.message === MENSAGEM_QUESITO_NAO_ENCONTRADO) {
+                return response.status(404).json({ error: erro.message });
+            }
+            if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
+                return response.status(400).json({ error: erro.message });
+            }
+            return next(erro);
+        }
+    }
+
     async list(req, res, next) {
         try {
             const listaQuesitos = await listQuesitosService.execute({
@@ -43,11 +74,12 @@ class QuesitoController {
         } catch (erro) {
             if (erro.message === MENSAGEM_QUESITO_NAO_ENCONTRADO) {
                 return res.status(404).json({ error: erro.message });
-                
+
             }
             if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
                 return res.status(400).json({ error: erro.message });
             }
+            
             return next(erro);
         }
     }

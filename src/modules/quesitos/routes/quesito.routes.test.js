@@ -4,7 +4,9 @@ import express from 'express';
 
 const quesitoControllerMock = {
     create: jest.fn((req, res) => res.status(201).json({ id: 1 })),
-    list: jest.fn((req, res) => res.status(200).json([{ id: 1 }]))
+    listAll: jest.fn((req, res) => res.status(200).json([{ id: 1 }, { id: 2 }])),
+    list: jest.fn((req, res) => res.status(200).json([{ id: 1 }])),
+    update: jest.fn((req, res) => res.status(200).json({ id: req.params.id, nome: 'atualizado' }))
 };
 
 const authMiddlewareMock = {
@@ -51,9 +53,25 @@ describe('Quesito Routes', () => {
         expect(quesitoControllerMock.create).toHaveBeenCalled();
     });
 
+    it('GET /quesitos/todos deve chamar quesitoController.listAll', async () => {
+        const resposta = await request(app).get('/quesitos/todos');
+        expect(resposta.statusCode).toBe(200);
+        expect(quesitoControllerMock.listAll).toHaveBeenCalled();
+        expect(resposta.body).toHaveLength(2);
+    });
+
     it('GET /quesitos deve chamar quesitoController.list', async () => {
         const resposta = await request(app).get('/quesitos');
         expect(resposta.statusCode).toBe(200);
         expect(quesitoControllerMock.list).toHaveBeenCalled();
+    });
+
+    it('PUT /quesitos/:id deve chamar quesitoController.update', async () => {
+        const resposta = await request(app)
+            .put('/quesitos/uuid-1')
+            .send({ descricao: 'Nova descrição' });
+        expect(resposta.statusCode).toBe(200);
+        expect(quesitoControllerMock.update).toHaveBeenCalled();
+        expect(resposta.body.nome).toBe('atualizado');
     });
 });

@@ -1,4 +1,8 @@
 import { jest } from '@jest/globals';
+import {
+    MENSAGEM_NOME_QUESITO_OBRIGATORIO,
+    MENSAGEM_QUESITO_NAO_ENCONTRADO
+} from '../constants/quesitoConstantes.js';
 
 const createQuesitoServiceMock = {
     execute: jest.fn()
@@ -8,12 +12,28 @@ const listQuesitosServiceMock = {
     execute: jest.fn()
 };
 
+const listAllQuesitosServiceMock = {
+    execute: jest.fn()
+};
+
+const updateQuesitoServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/CreateQuesitoService.js', () => ({
     default: createQuesitoServiceMock
 }));
 
+jest.unstable_mockModule('../services/ListAllQuesitosService.js', () => ({
+    default: listAllQuesitosServiceMock
+}));
+
 jest.unstable_mockModule('../services/ListQuesitosService.js', () => ({
     default: listQuesitosServiceMock
+}));
+
+jest.unstable_mockModule('../services/UpdateQuesitoService.js', () => ({
+    default: updateQuesitoServiceMock
 }));
 
 const quesitoController = (await import('./QuesitoController.js')).default;
@@ -38,7 +58,9 @@ describe('QuesitoController', () => {
     });
 
     it('create deve retornar 400 para erro de validacao conhecido', async () => {
-        createQuesitoServiceMock.execute.mockRejectedValue(new Error('nome e obrigatorio.'));
+        createQuesitoServiceMock.execute.mockRejectedValue(
+            new Error(MENSAGEM_NOME_QUESITO_OBRIGATORIO)
+        );
         const mockReq = { body: {} };
         const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
         const mockNext = jest.fn();
@@ -60,6 +82,20 @@ describe('QuesitoController', () => {
         expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
     });
 
+    it('listAll deve retornar 200 com todos os quesitos', async () => {
+        const lista = [{ id: '1' }, { id: '2' }];
+        listAllQuesitosServiceMock.execute.mockResolvedValue(lista);
+        const mockReq = {};
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const mockNext = jest.fn();
+
+        await quesitoController.listAll(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith(lista);
+        expect(mockNext).not.toHaveBeenCalled();
+    });
+
     it('list deve retornar 200 com lista', async () => {
         const lista = [{ id: '1' }];
         listQuesitosServiceMock.execute.mockResolvedValue(lista);
@@ -73,8 +109,33 @@ describe('QuesitoController', () => {
         expect(mockRes.json).toHaveBeenCalledWith(lista);
     });
 
+    it('update deve retornar 200 quando servico atualiza com sucesso', async () => {
+        const atualizado = { id: '1', nome: 'n', descricao: 'd', bloco: 'b' };
+        updateQuesitoServiceMock.execute.mockResolvedValue(atualizado);
+        const mockReq = { params: { id: '1' }, body: { descricao: 'nova' } };
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const mockNext = jest.fn();
+
+        await quesitoController.update(mockReq, mockRes, mockNext);
+
+        expect(updateQuesitoServiceMock.execute).toHaveBeenCalledWith('1', { descricao: 'nova' });
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith(atualizado);
+    });
+
+    it('update deve retornar 404 quando quesito nao existe', async () => {
+        updateQuesitoServiceMock.execute.mockRejectedValue(new Error(MENSAGEM_QUESITO_NAO_ENCONTRADO));
+        const mockReq = { params: { id: '99' }, body: { nome: 'x' } };
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const mockNext = jest.fn();
+
+        await quesitoController.update(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
+
     it('list deve retornar 404 quando quesito por nome nao existe', async () => {
-        listQuesitosServiceMock.execute.mockRejectedValue(new Error('Quesito nao encontrado.'));
+        listQuesitosServiceMock.execute.mockRejectedValue(new Error(MENSAGEM_QUESITO_NAO_ENCONTRADO));
         const mockReq = { query: { nome: 'x' } };
         const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
         const mockNext = jest.fn();

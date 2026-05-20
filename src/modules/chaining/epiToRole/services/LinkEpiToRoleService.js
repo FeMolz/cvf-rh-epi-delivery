@@ -1,53 +1,38 @@
-import prisma from '../../../../config/database.js';
+import roleRepository from '../../../roles/repositories/RoleRepository.js';
 import fetchEpiFromApiService from '../../../epis/services/FetchEpiFromApiService.js';
+import roleEpiRepository from '../repositories/RoleEpiRepository.js';
+import { criarErroHttp } from '../../../../shared/errors/criarErroHttp.js';
+import {
+    MENSAGEM_CAMPOS_VINCULO_EPI_OBRIGATORIOS,
+    MENSAGEM_CARGO_NAO_ENCONTRADO,
+    MENSAGEM_VINCULO_EPI_CARGO_JA_EXISTE
+} from '../constants/epiCargoConstantes.js';
 
 class LinkEpiToRoleService {
     async execute({ roleId, caNumber, periodicityDays }) {
         if (!roleId || !caNumber || periodicityDays === undefined) {
-            throw new Error('roleId, caNumber e periodicityDays são obrigatórios.');
+            throw criarErroHttp(MENSAGEM_CAMPOS_VINCULO_EPI_OBRIGATORIOS);
         }
 
-        // 1. Verifica se o Cargo existe
-        const role = await prisma.role.findUnique({
-            where: { id: roleId }
-        });
+        const cargo = await roleRepository.findById(roleId);
 
-        if (!role) {
-            throw new Error('Cargo não encontrado.');
+        if (!cargo) {
+            throw criarErroHttp(MENSAGEM_CARGO_NAO_ENCONTRADO, 404);
         }
 
-        // 2. Busca o EPI localmente ou na API externa
-        // O serviço cuidará de salvar na base local caso ainda não exista
         const epi = await fetchEpiFromApiService.execute(caNumber);
 
-        // 3. Verifica se já existe o vínculo
-        const existingLink = await prisma.roleEpi.findUnique({
-            where: {
-                roleId_epiId: {
-                    roleId,
-                    epiId: epi.id
-                }
-            }
-        });
+        const vinculoExistente = await roleEpiRepository.findByRoleAndEpi(roleId, epi.id);
 
-        if (existingLink) {
-            throw new Error('Este EPI já está vinculado a este Cargo.');
+        if (vinculoExistente) {
+            throw criarErroHttp(MENSAGEM_VINCULO_EPI_CARGO_JA_EXISTE);
         }
 
-        // 4. Cria o vínculo
-        const roleEpi = await prisma.roleEpi.create({
-            data: {
-                roleId,
-                epiId: epi.id,
-                periodicityDays
-            },
-            include: {
-                epi: true,
-                role: true
-            }
+        return roleEpiRepository.create({
+            roleId,
+            epiId: epi.id,
+            periodicityDays
         });
-
-        return roleEpi;
     }
 }
 

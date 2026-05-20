@@ -4,7 +4,8 @@ const prismaMock = {
     quesito: {
         create: jest.fn(),
         findUnique: jest.fn(),
-        findMany: jest.fn()
+        findMany: jest.fn(),
+        update: jest.fn()
     }
 };
 
@@ -77,5 +78,19 @@ describe('QuesitoRepository', () => {
             where: { id: 'abc' }
         });
         expect(resultado).toEqual(quesito);
+    });
+
+    it('deve atualizar quesito', async () => {
+        const dados = { descricao: 'Nova descrição' };
+        const atualizado = { id: 'abc', nome: 'epi', descricao: 'Nova descrição', bloco: 'SST' };
+        prismaMock.quesito.update.mockResolvedValue(atualizado);
+
+        const resultado = await quesitoRepository.update('abc', dados);
+
+        expect(prismaMock.quesito.update).toHaveBeenCalledWith({
+            where: { id: 'abc' },
+            data: dados
+        });
+        expect(resultado).toEqual(atualizado);
     });
 });

@@ -1,4 +1,8 @@
 import { jest } from '@jest/globals';
+import {
+    MENSAGEM_ROLE_ID_QUESITO_ID_OBRIGATORIOS,
+    MENSAGEM_VINCULO_QUESITO_CARGO_NAO_EXISTE
+} from '../../../quesitos/constants/quesitoConstantes.js';
 
 const roleQuesitoRepositoryMock = {
     findByRoleIdAndQuesitoId: jest.fn(),
@@ -18,7 +22,7 @@ describe('UnlinkQuesitoFromRoleService', () => {
 
     it('deve rejeitar quando roleId ou quesitoId faltam', async () => {
         await expect(unlinkQuesitoFromRoleService.execute({ roleId: '1' })).rejects.toThrow(
-            'roleId e quesitoId sao obrigatorios.'
+            MENSAGEM_ROLE_ID_QUESITO_ID_OBRIGATORIOS
         );
     });
 
@@ -27,7 +31,7 @@ describe('UnlinkQuesitoFromRoleService', () => {
 
         await expect(
             unlinkQuesitoFromRoleService.execute({ roleId: '1', quesitoId: '2' })
-        ).rejects.toThrow('Vinculo entre cargo e quesito nao encontrado.');
+        ).rejects.toThrow(MENSAGEM_VINCULO_QUESITO_CARGO_NAO_EXISTE);
     });
 
     it('deve remover quando vinculo existe', async () => {

@@ -15,10 +15,24 @@ quesitoRoutes.post(
 );
 
 quesitoRoutes.get(
+    '/todos',
+    isAuthenticated,
+    authorize(['ADMIN', 'ADMINISTRATIVO']),
+    (req, res, next) => quesitoController.listAll(req, res, next)
+);
+
+quesitoRoutes.get(
     '/',
     isAuthenticated,
     authorize(['ADMIN', 'ADMINISTRATIVO']),
     (req, res, next) => quesitoController.list(req, res, next)
+);
+
+quesitoRoutes.put(
+    '/:id',
+    isAuthenticated,
+    authorize(['ADMIN', 'ADMINISTRATIVO']),
+    (req, res, next) => quesitoController.update(req, res, next)
 );
 
 export default quesitoRoutes;

@@ -43,6 +43,26 @@ class QuesitoRepository {
             where: { id: identificadorQuesito }
         });
     }
+
+    /**
+     * @param {string[]} identificadoresQuesito
+     */
+    async findManyByIds(identificadoresQuesito) {
+        return prisma.quesito.findMany({
+            where: { id: { in: identificadoresQuesito } }
+        });
+    }
+
+    /**
+     * @param {string} identificadorQuesito
+     * @param {{ nome?: string, descricao?: string, bloco?: string }} dadosQuesito
+     */
+    async update(identificadorQuesito, dadosQuesito) {
+        return prisma.quesito.update({
+            where: { id: identificadorQuesito },
+            data: dadosQuesito
+        });
+    }
 }
 
 export default new QuesitoRepository();

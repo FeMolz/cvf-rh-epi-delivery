@@ -1,24 +1,37 @@
 import employeeRepository from '../repositories/EmployeeRepository.js';
+import {
+    MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO,
+    MENSAGEM_CPF_DUPLICADO,
+    MENSAGEM_DATA_NASCIMENTO_INVALIDA,
+    MENSAGEM_EMAIL_DUPLICADO
+} from '../constants/funcionarioConstantes.js';
+import { montarDadosFuncionario } from '../utils/montarDadosFuncionario.js';
+import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
+import { validarEmail } from '../utils/validarEmail.js';
+import { validarTelefone } from '../utils/validarTelefone.js';
 
 class CreateEmployeeService {
     /**
-     * @param {{ name: string, cpf: string, birthDate: string|Date, status?: string, admissionDate?: string|Date, resignationDate?: string|Date, companyId: string, roleId: string }} entrada
+     * @param {Record<string, unknown>} entrada
      */
     async execute(entrada) {
-        const { name, cpf, status, admissionDate, resignationDate, companyId, roleId } = entrada;
-        const { birthDate } = entrada;
+        const { name, cpf, email, telefone, companyId, roleId, setorId, birthDate } = entrada;
 
-        if (!name || !cpf || !companyId || !roleId) {
-            throw new Error('Campos obrigatórios ausentes: name, cpf, companyId, roleId, birthDate');
+        if (!name || !cpf || !email || !telefone || !companyId || !roleId || !setorId) {
+            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
 
         if (birthDate === undefined || birthDate === null) {
-            throw new Error('Campos obrigatórios ausentes: name, cpf, companyId, roleId, birthDate');
+            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
 
         if (typeof birthDate === 'string' && birthDate.trim() === '') {
-            throw new Error('Campos obrigatórios ausentes: name, cpf, companyId, roleId, birthDate');
+            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
+
+        const cpfValidado = validarCpf(cpf);
+        const emailValidado = validarEmail(email);
+        const telefoneValidado = validarTelefone(telefone);
 
         const dataNascimento =
             birthDate instanceof Date
@@ -26,24 +39,32 @@ class CreateEmployeeService {
                 : new Date(typeof birthDate === 'string' ? birthDate.trim() : birthDate);
 
         if (Number.isNaN(dataNascimento.getTime())) {
-            throw new Error('Data de nascimento inválida.');
+            throw new Error(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
         }
 
-        const matches = await employeeRepository.findAll();
-        if (matches.some(emp => emp.cpf === cpf)) {
-            throw new Error('CPF já cadastrado no sistema');
+        const digitosCpfInformado = extrairDigitosCpf(cpfValidado);
+        const funcionarios = await employeeRepository.findAll();
+
+        if (
+            funcionarios.some(
+                funcionario => extrairDigitosCpf(funcionario.cpf) === digitosCpfInformado
+            )
+        ) {
+            throw new Error(MENSAGEM_CPF_DUPLICADO);
         }
-        const employee = await employeeRepository.create({
-            name,
-            cpf,
-            birthDate: dataNascimento,
-            status: status || 'ATIVO',
-            admissionDate: admissionDate ? new Date(admissionDate) : new Date(),
-            resignationDate: resignationDate ? new Date(resignationDate) : null,
-            companyId,
-            roleId
+        if (funcionarios.some(funcionario => funcionario.email === emailValidado)) {
+            throw new Error(MENSAGEM_EMAIL_DUPLICADO);
+        }
+
+        const dadosFuncionario = montarDadosFuncionario({
+            ...entrada,
+            cpf: cpfValidado,
+            email: emailValidado,
+            telefone: telefoneValidado,
+            birthDate: dataNascimento
         });
-        return employee;
+
+        return employeeRepository.create(dadosFuncionario);
     }
 }
 

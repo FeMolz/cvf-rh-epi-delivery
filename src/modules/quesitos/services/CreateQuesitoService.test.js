@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import {
+    MENSAGEM_BLOCO_QUESITO_OBRIGATORIO,
+    MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA,
+    MENSAGEM_NOME_QUESITO_JA_CADASTRADO,
+    MENSAGEM_NOME_QUESITO_OBRIGATORIO
+} from '../constants/quesitoConstantes.js';
 
 const quesitoRepositoryMock = {
     findByNome: jest.fn(),
@@ -39,19 +45,19 @@ describe('CreateQuesitoService', () => {
     it('deve rejeitar nome vazio', async () => {
         await expect(
             createQuesitoService.execute({ nome: '', descricao: 'd', bloco: 'b' })
-        ).rejects.toThrow('nome e obrigatorio.');
+        ).rejects.toThrow(MENSAGEM_NOME_QUESITO_OBRIGATORIO);
     });
 
     it('deve rejeitar descricao vazia', async () => {
         await expect(
             createQuesitoService.execute({ nome: 'n', descricao: '   ', bloco: 'b' })
-        ).rejects.toThrow('descricao e obrigatoria.');
+        ).rejects.toThrow(MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA);
     });
 
     it('deve rejeitar bloco vazio', async () => {
         await expect(
             createQuesitoService.execute({ nome: 'n', descricao: 'd', bloco: '' })
-        ).rejects.toThrow('bloco e obrigatorio.');
+        ).rejects.toThrow(MENSAGEM_BLOCO_QUESITO_OBRIGATORIO);
     });
 
     it('deve rejeitar nome duplicado', async () => {
@@ -59,7 +65,7 @@ describe('CreateQuesitoService', () => {
 
         await expect(
             createQuesitoService.execute({ nome: 'dup', descricao: 'd', bloco: 'b' })
-        ).rejects.toThrow('Ja existe um quesito com este nome.');
+        ).rejects.toThrow(MENSAGEM_NOME_QUESITO_JA_CADASTRADO);
 
         expect(quesitoRepositoryMock.create).not.toHaveBeenCalled();
     });

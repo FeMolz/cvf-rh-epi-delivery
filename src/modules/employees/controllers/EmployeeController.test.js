@@ -1,105 +1,174 @@
 import { jest } from '@jest/globals';
 
-const employeeRepositoryMock = {
-    findAll: jest.fn(),
-    findById: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn()
-};
-
 const createEmployeeServiceMock = {
     execute: jest.fn()
 };
 
-jest.unstable_mockModule('../repositories/EmployeeRepository.js', () => ({
-    default: employeeRepositoryMock
-}));
+const updateEmployeeServiceMock = {
+    execute: jest.fn()
+};
+
+const listEmployeesServiceMock = {
+    execute: jest.fn()
+};
+
+const findEmployeeByIdServiceMock = {
+    execute: jest.fn()
+};
+
+const deleteEmployeeServiceMock = {
+    execute: jest.fn()
+};
 
 jest.unstable_mockModule('../services/CreateEmployeeService.js', () => ({
     default: createEmployeeServiceMock
 }));
 
+jest.unstable_mockModule('../services/UpdateEmployeeService.js', () => ({
+    default: updateEmployeeServiceMock
+}));
+
+jest.unstable_mockModule('../services/ListEmployeesService.js', () => ({
+    default: listEmployeesServiceMock
+}));
+
+jest.unstable_mockModule('../services/FindEmployeeByIdService.js', () => ({
+    default: findEmployeeByIdServiceMock
+}));
+
+jest.unstable_mockModule('../services/DeleteEmployeeService.js', () => ({
+    default: deleteEmployeeServiceMock
+}));
+
 const employeeController = (await import('./EmployeeController.js')).default;
 
 describe('EmployeeController', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
 
-  it('should create employee and return 201', async () => {
-    const req = { body: { name: 'John', cpf: '123', companyId: 1 } };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    const mockEmployee = { id: 1, name: 'John', cpf: '123' };
-    createEmployeeServiceMock.execute.mockResolvedValue(mockEmployee);
-    await employeeController.create(req, res);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockEmployee);
-  });
+    it('deve criar funcionário e retornar 201', async () => {
+        const request = {
+            body: {
+                name: 'John',
+                cpf: '123',
+                email: 'john@empresa.com',
+                telefone: '11988887777',
+                companyId: 1
+            }
+        };
+        const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const funcionarioMock = { id: 1, name: 'John', cpf: '123' };
 
-  it('should handle create error with 400', async () => {
-    const req = { body: {} };
-    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    const error = new Error('Campos obrigatórios ausentes');
-    createEmployeeServiceMock.execute.mockRejectedValue(error);
-    await employeeController.create(req, res);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: error.message });
-  });
+        createEmployeeServiceMock.execute.mockResolvedValue(funcionarioMock);
+        await employeeController.create(request, response, next);
 
-  it('should return all employees', async () => {
-    const req = {};
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    const list = [{ id: 1, name: 'John' }];
-    employeeRepositoryMock.findAll.mockResolvedValue(list);
-    await employeeController.findAll(req, res);
-    expect(res.json).toHaveBeenCalledWith(list);
-  });
+        expect(response.status).toHaveBeenCalledWith(201);
+        expect(response.json).toHaveBeenCalledWith(funcionarioMock);
+        expect(next).not.toHaveBeenCalled();
+    });
 
-  it('should return employee by id', async () => {
-    const req = { params: { id: 1 } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    const emp = { id: 1, name: 'John' };
-    employeeRepositoryMock.findById.mockResolvedValue(emp);
-    await employeeController.findById(req, res);
-    expect(res.json).toHaveBeenCalledWith(emp);
-  });
+    it('deve encaminhar erro de validação na criação', async () => {
+        const request = { body: {} };
+        const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('Campos obrigatórios ausentes');
 
-  it('should return 404 when employee not found', async () => {
-    const req = { params: { id: 99 } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    employeeRepositoryMock.findById.mockResolvedValue(null);
-    await employeeController.findById(req, res);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Funcionário não encontrado' });
-  });
+        createEmployeeServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.create(request, response, next);
 
-  it('should update employee', async () => {
-    const req = { params: { id: 1 }, body: { name: 'Jane' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    const updated = { id: 1, name: 'Jane' };
-    employeeRepositoryMock.update.mockResolvedValue(updated);
-    await employeeController.update(req, res);
-    expect(res.json).toHaveBeenCalledWith(updated);
-  });
+        expect(next).toHaveBeenCalledWith(
+            expect.objectContaining({ message: erro.message, statusCode: 400 })
+        );
+    });
 
-  it('should delete employee', async () => {
-    const req = { params: { id: 1 } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    const deleted = { id: 1 };
-    employeeRepositoryMock.delete.mockResolvedValue(deleted);
-    await employeeController.delete(req, res);
-    expect(res.json).toHaveBeenCalledWith(deleted);
-  });
+    it('deve retornar todos os funcionários', async () => {
+        const request = {};
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const lista = [{ id: 1, name: 'John' }];
 
-  it('should return 404 on delete when not found', async () => {
-    const req = { params: { id: 99 } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-    const err = new Error('Not found');
-    err.code = 'NOT_FOUND';
-    employeeRepositoryMock.delete.mockRejectedValue(err);
-    await employeeController.delete(req, res);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Funcionário não encontrado' });
-  });
+        listEmployeesServiceMock.execute.mockResolvedValue(lista);
+        await employeeController.findAll(request, response, next);
+
+        expect(response.json).toHaveBeenCalledWith(lista);
+    });
+
+    it('deve retornar funcionário por id', async () => {
+        const request = { params: { id: 1 } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const funcionario = { id: 1, name: 'John' };
+
+        findEmployeeByIdServiceMock.execute.mockResolvedValue(funcionario);
+        await employeeController.findById(request, response, next);
+
+        expect(response.json).toHaveBeenCalledWith(funcionario);
+    });
+
+    it('deve encaminhar erro 404 quando funcionário não existe', async () => {
+        const request = { params: { id: 99 } };
+        const response = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+        const next = jest.fn();
+        const erro = new Error('Funcionário não encontrado');
+        erro.statusCode = 404;
+
+        findEmployeeByIdServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.findById(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve atualizar funcionário', async () => {
+        const request = { params: { id: 1 }, body: { name: 'Jane' } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const atualizado = { id: 1, name: 'Jane' };
+
+        updateEmployeeServiceMock.execute.mockResolvedValue(atualizado);
+        await employeeController.update(request, response, next);
+
+        expect(updateEmployeeServiceMock.execute).toHaveBeenCalledWith(1, { name: 'Jane' });
+        expect(response.json).toHaveBeenCalledWith(atualizado);
+    });
+
+    it('deve encaminhar erro de validação na atualização', async () => {
+        const request = { params: { id: 1 }, body: { cpf: 'invalido' } };
+        const response = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+        const next = jest.fn();
+        const erro = new Error('CPF inválido. Os dígitos verificadores não conferem.');
+
+        updateEmployeeServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.update(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(
+            expect.objectContaining({ message: erro.message, statusCode: 400 })
+        );
+    });
+
+    it('deve excluir funcionário', async () => {
+        const request = { params: { id: 1 } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const excluido = { id: 1 };
+
+        deleteEmployeeServiceMock.execute.mockResolvedValue(excluido);
+        await employeeController.delete(request, response, next);
+
+        expect(response.json).toHaveBeenCalledWith(excluido);
+    });
+
+    it('deve encaminhar erro 404 na exclusão quando não encontrado', async () => {
+        const request = { params: { id: 99 } };
+        const response = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+        const next = jest.fn();
+        const erro = new Error('Funcionário não encontrado');
+        erro.statusCode = 404;
+
+        deleteEmployeeServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.delete(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
 });
-

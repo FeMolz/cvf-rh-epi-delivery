@@ -5,6 +5,8 @@ import express from 'express';
 const employeeControllerMock = {
     create: jest.fn((req, res) => res.status(201).json({ id: '1' })),
     findAll: jest.fn((req, res) => res.status(200).json([{ id: '1' }])),
+    exportarLista: jest.fn((req, res) => res.status(200).send(Buffer.from('xlsx'))),
+    exportarFuncionarioCompleto: jest.fn((req, res) => res.status(200).send(Buffer.from('xlsx'))),
     findById: jest.fn((req, res) => res.status(200).json({ id: '1' })),
     update: jest.fn((req, res) => res.status(200).json({ id: '1' })),
     delete: jest.fn((req, res) => res.status(200).json({ id: '1' }))
@@ -59,6 +61,20 @@ describe('Employee Routes', () => {
         
         expect(res.statusCode).toBe(200);
         expect(employeeControllerMock.findAll).toHaveBeenCalled();
+    });
+
+    it('GET /employees/export/lista deve chamar exportarLista', async () => {
+        const res = await request(app).get('/employees/export/lista?filtro=ativos');
+
+        expect(res.statusCode).toBe(200);
+        expect(employeeControllerMock.exportarLista).toHaveBeenCalled();
+    });
+
+    it('GET /employees/:id/export deve chamar exportarFuncionarioCompleto', async () => {
+        const res = await request(app).get('/employees/1/export');
+
+        expect(res.statusCode).toBe(200);
+        expect(employeeControllerMock.exportarFuncionarioCompleto).toHaveBeenCalled();
     });
 
     it('GET /employees/:id deve chamar employeeController.findById', async () => {

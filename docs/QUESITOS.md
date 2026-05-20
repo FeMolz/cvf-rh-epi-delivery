@@ -63,8 +63,12 @@ src/modules/quesitos/
 └── services/
     ├── CreateQuesitoService.js
     ├── CreateQuesitoService.test.js
+    ├── ListAllQuesitosService.js
+    ├── ListAllQuesitosService.test.js
     ├── ListQuesitosService.js
-    └── ListQuesitosService.test.js
+    ├── ListQuesitosService.test.js
+    ├── UpdateQuesitoService.js
+    └── UpdateQuesitoService.test.js
 
 src/modules/chaining/quesitoToRole/
 ├── controllers/
@@ -91,10 +95,12 @@ src/modules/chaining/quesitoToRole/
 |------------------|------------------|
 | **QuesitoRepository** | Único acesso Prisma à entidade `Quesito` (criar, buscar por `nome`, por `id`, listar por `bloco`, listar ordenado). |
 | **CreateQuesitoService** | Valida `nome`, `descricao` e `bloco` (trim); impede duplicidade de `nome`. |
+| **UpdateQuesitoService** | Atualização parcial por `id`; valida campos informados; impede `nome` duplicado em outro quesito. |
+| **ListAllQuesitosService** | Retorna todos os quesitos ordenados por `bloco` e `nome` (rota `/todos`). |
 | **ListQuesitosService** | Filtros mutuamente exclusivos: `nome` (retorna um registro ou erro 404 tratado no controller) ou `bloco` (lista); sem query retorna todos ordenados por `bloco` e `nome`. |
 | **QuesitoController** | Encaminha `req` para serviços e mapeia mensagens conhecidas para HTTP 400/404; demais erros vão ao handler global. |
 | **RoleQuesitoRepository** | Persistência de `RoleQuesito` (busca composta, criar, excluir, listar por `roleId` com `quesito`). |
-| **LinkQuesitoToRoleService** | Garante existência de cargo e quesito; impede vínculo duplicado; cria registro em `RoleQuesito`. |
+| **LinkQuesitoToRoleService** | Vincula um ou vários quesitos ao cargo (`quesitoId` ou `quesitoIds`); valida existência; em lote ignora duplicatas já existentes e retorna quantidades. |
 | **UnlinkQuesitoFromRoleService** | Remove vínculo se existir; caso contrário erro de negócio. |
 | **ListQuesitosVinculadosAoCargoService** | Lista vínculos de um cargo com dados do quesito (delegação ao repositório). |
 | **QuesitoToRoleController** | POST/DELETE com resposta 400 em falhas de validação de negócio; GET repassa erros inesperados ao `next`. |
@@ -108,13 +114,15 @@ Base da API: prefixo `/api/v1`.
 | Método | Endpoint | Permissões | Descrição |
 |--------|----------|--------------|-----------|
 | `POST` | `/api/v1/quesitos` | `ADMIN`, `ADMINISTRATIVO` | Cria quesito (`nome`, `descricao`, `bloco`). |
-| `GET` | `/api/v1/quesitos` | `ADMIN`, `ADMINISTRATIVO` | Lista todos, ou `?bloco=` (mesmo bloco), ou `?nome=` (nome único; um item). Não usar `nome` e `bloco` juntos. |
+| `PUT` | `/api/v1/quesitos/:id` | `ADMIN`, `ADMINISTRATIVO` | Atualiza quesito (parcial: `nome`, `descricao` e/ou `bloco`). |
+| `GET` | `/api/v1/quesitos/todos` | `ADMIN`, `ADMINISTRATIVO` | Lista **todos** os quesitos (ordenados por bloco e nome). |
+| `GET` | `/api/v1/quesitos` | `ADMIN`, `ADMINISTRATIVO` | Sem query: lista todos. Com `?bloco=` ou `?nome=` aplica filtros (não usar `nome` e `bloco` juntos). |
 
 ### Chaining Cargo–Quesito (`/api/v1/roles-quesitos`)
 
 | Método | Endpoint | Permissões | Descrição |
 |--------|----------|--------------|-----------|
-| `POST` | `/api/v1/roles-quesitos` | `ADMIN`, `ADMINISTRATIVO` | Corpo: `{ "roleId", "quesitoId" }` — cria vínculo. |
+| `POST` | `/api/v1/roles-quesitos` | `ADMIN`, `ADMINISTRATIVO` | Corpo: `{ "roleId", "quesitoId" }` (um) ou `{ "roleId", "quesitoIds": [] }` (vários). |
 | `DELETE` | `/api/v1/roles-quesitos/:roleId/:quesitoId` | `ADMIN`, `ADMINISTRATIVO` | Remove vínculo. |
 | `GET` | `/api/v1/roles-quesitos/:roleId` | `ADMIN`, `ADMINISTRATIVO` | Lista vínculos do cargo com dados do quesito. |
 
@@ -150,6 +158,27 @@ POST /api/v1/quesitos
 }
 ```
 
+**Atualizar quesito**
+
+```http
+PUT /api/v1/quesitos/<uuid-do-quesito>
+```
+
+```json
+{
+  "descricao": "Texto atualizado da pergunta",
+  "bloco": "SST"
+}
+```
+
+Informe ao menos um campo (`nome`, `descricao` ou `bloco`). Campos omitidos permanecem inalterados.
+
+**Listar todos os quesitos**
+
+```http
+GET /api/v1/quesitos/todos
+```
+
 **Listar por bloco**
 
 ```http
@@ -162,7 +191,7 @@ GET /api/v1/quesitos?bloco=SST
 GET /api/v1/quesitos?nome=uso_epi_obrigatorio
 ```
 
-**Vincular quesito a cargo**
+**Vincular um quesito a cargo**
 
 ```http
 POST /api/v1/roles-quesitos
@@ -174,6 +203,32 @@ POST /api/v1/roles-quesitos
   "quesitoId": "<uuid-do-quesito>"
 }
 ```
+
+**Vincular vários quesitos ao mesmo cargo**
+
+```json
+{
+  "roleId": "<uuid-do-cargo>",
+  "quesitoIds": [
+    "<uuid-quesito-1>",
+    "<uuid-quesito-2>",
+    "<uuid-quesito-3>"
+  ]
+}
+```
+
+Resposta em lote (201):
+
+```json
+{
+  "roleId": "<uuid-do-cargo>",
+  "vinculos": [ ... ],
+  "quantidadeCriada": 2,
+  "quantidadeJaExistente": 1
+}
+```
+
+Quesitos já vinculados são ignorados (não geram erro); `quantidadeJaExistente` indica quantos já estavam no cargo.
 
 **Listar quesitos vinculados ao cargo**
 

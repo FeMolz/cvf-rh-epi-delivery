@@ -1,40 +1,46 @@
 import {
     MENSAGEM_CARGO_NAO_ENCONTRADO_QUESITO,
-    MENSAGEM_QUESITO_NAO_ENCONTRADO,
-    MENSAGEM_ROLE_ID_QUESITO_ID_OBRIGATORIOS,
+    MENSAGEM_QUESITOS_NAO_ENCONTRADOS,
     MENSAGEM_VINCULO_QUESITO_CARGO_JA_EXISTE
 } from '../../../quesitos/constants/quesitoConstantes.js';
 import quesitoRepository from '../../../quesitos/repositories/QuesitoRepository.js';
 import roleRepository from '../../../roles/repositories/RoleRepository.js';
 import roleQuesitoRepository from '../repositories/RoleQuesitoRepository.js';
+import { normalizarEntradaVinculoQuesitoCargo } from '../utils/normalizarEntradaVinculoQuesitoCargo.js';
 
 class LinkQuesitoToRoleService {
     /**
-     * @param {{ roleId: string, quesitoId: string }} entrada
+     * @param {Record<string, unknown>} entrada
      */
     async execute(entrada) {
-        const { roleId, quesitoId } = entrada;
-
-        if (!roleId || !quesitoId) {
-            throw new Error(MENSAGEM_ROLE_ID_QUESITO_ID_OBRIGATORIOS);
-        }
+        const { roleId, quesitoIds, envioUnico } = normalizarEntradaVinculoQuesitoCargo(entrada);
 
         const cargo = await roleRepository.findById(roleId);
         if (!cargo) {
             throw new Error(MENSAGEM_CARGO_NAO_ENCONTRADO_QUESITO);
         }
 
-        const quesito = await quesitoRepository.findById(quesitoId);
-        if (!quesito) {
-            throw new Error(MENSAGEM_QUESITO_NAO_ENCONTRADO);
+        const quesitosLocalizados = await quesitoRepository.findManyByIds(quesitoIds);
+        if (quesitosLocalizados.length !== quesitoIds.length) {
+            throw new Error(MENSAGEM_QUESITOS_NAO_ENCONTRADOS);
         }
 
-        const vinculoExistente = await roleQuesitoRepository.findByRoleIdAndQuesitoId(roleId, quesitoId);
-        if (vinculoExistente) {
-            throw new Error(MENSAGEM_VINCULO_QUESITO_CARGO_JA_EXISTE);
+        const quantidadeCriada = await roleQuesitoRepository.createManyLinks(roleId, quesitoIds);
+        const vinculos = await roleQuesitoRepository.findManyByRoleIdAndQuesitoIds(roleId, quesitoIds);
+
+        if (envioUnico) {
+            if (quantidadeCriada === 0) {
+                throw new Error(MENSAGEM_VINCULO_QUESITO_CARGO_JA_EXISTE);
+            }
+            return vinculos[0];
         }
 
-        return roleQuesitoRepository.createLink(roleId, quesitoId);
+        return {
+            roleId,
+            vinculos,
+            quantidadeCriada,
+            quantidadeJaExistente: quesitoIds.length - quantidadeCriada
+        };
     }
 }
 
