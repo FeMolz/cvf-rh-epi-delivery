@@ -1,0 +1,118 @@
+import express from 'express';
+
+import anuncioVagaController from '../controllers/AnuncioVagaController.js';
+import candidaturaController from '../controllers/CandidaturaController.js';
+import cadastroContratacaoController from '../controllers/CadastroContratacaoController.js';
+import { middlewareUploadCurriculo } from '../middlewares/uploadCurriculoMiddleware.js';
+import { ROLES_GESTAO_RECRUTAMENTO } from '../constants/recrutamentoConstantes.js';
+import { isAuthenticated } from '../../../shared/middlewares/auth.js';
+import { authorize } from '../../../shared/middlewares/rbac.js';
+
+const { Router } = express;
+const recruitmentRoutes = Router();
+
+recruitmentRoutes.get('/publico/vagas/:id', (requisicao, resposta, proximo) =>
+    anuncioVagaController.getPublico(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/publico/vagas/:id/candidaturas',
+    middlewareUploadCurriculo,
+    (requisicao, resposta, proximo) => candidaturaController.createPublica(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get('/publico/cadastro-contratacao/:token', (requisicao, resposta, proximo) =>
+    cadastroContratacaoController.getPublico(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post('/publico/cadastro-contratacao/:token', (requisicao, resposta, proximo) =>
+    cadastroContratacaoController.submeterPublico(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/vagas',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => anuncioVagaController.create(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/vagas',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => anuncioVagaController.list(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/vagas/:id',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => anuncioVagaController.getById(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.put(
+    '/vagas/:id',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => anuncioVagaController.update(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.patch(
+    '/vagas/:id/status',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => anuncioVagaController.updateStatus(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/vagas/:id/candidaturas',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.listByAnuncio(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/candidaturas/:id',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.getById(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/candidaturas/:id/curriculo',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.downloadCurriculo(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/candidaturas/:id/convite-cadastro',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) =>
+        cadastroContratacaoController.gerarConvite(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/cadastros-contratacao',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => cadastroContratacaoController.list(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/cadastros-contratacao/:id',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => cadastroContratacaoController.getById(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.patch(
+    '/cadastros-contratacao/:id/status',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) =>
+        cadastroContratacaoController.atualizarStatus(requisicao, resposta, proximo)
+);
+
+export default recruitmentRoutes;

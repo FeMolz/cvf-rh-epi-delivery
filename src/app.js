@@ -20,6 +20,7 @@ import epiDeliveryRoutes from './modules/epiDeliveries/routes/epiDelivery.routes
 import epiDeliveryReportRoutes from './modules/epiDeliveryReports/routes/epiDeliveryReport.routes.js';
 import quesitoRoutes from './modules/quesitos/routes/quesito.routes.js';
 import quesitoToRoleRoutes from './modules/chaining/quesitoToRole/routes/quesitoToRole.routes.js';
+import recruitmentRoutes from './modules/recruitment/routes/recruitment.routes.js';
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Usar rotas modulares
@@ -45,6 +46,7 @@ app.use("/api/v1/epi-deliveries", epiDeliveryRoutes);
 app.use("/api/v1/epi-delivery-reports", epiDeliveryReportRoutes);
 app.use("/api/v1/quesitos", quesitoRoutes);
 app.use("/api/v1/roles-quesitos", quesitoToRoleRoutes);
+app.use("/api/v1/recruitment", recruitmentRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

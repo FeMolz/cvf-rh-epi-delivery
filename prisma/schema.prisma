@@ -55,13 +55,37 @@ enum GrauInstrucao {
     DOUTORADO
 }
 
+enum StatusAnuncioVaga {
+    ATIVA
+    INATIVA
+    ENCERRADA
+}
+
+enum TipoContratacaoVaga {
+    CLT
+    PJ
+    ESTAGIO
+    TEMPORARIO
+    APRENDIZ
+    OUTRO
+}
+
+enum StatusCadastroContratacao {
+    AGUARDANDO_PREENCHIMENTO
+    AGUARDANDO_ANALISE_RH
+    CONTRATADO
+    DESCONTINUADO
+}
+
 model Company {
     id       String  @id @default(uuid())
     name     String
     cnpj     String  @unique
     isActive Boolean @default(true)
 
-    employee Employee[]
+    employee     Employee[]
+    anunciosVaga AnuncioVaga[]
+    cadastrosContratacao CadastroContratacao[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -73,6 +97,8 @@ model Setor {
     isActive Boolean @default(true)
 
     employees Employee[]
+    anunciosVaga           AnuncioVaga[]
+    cadastrosContratacao CadastroContratacao[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -91,6 +117,10 @@ model User {
 
     epiDeliveryReportsGenerated EpiDeliveryReport[] @relation("EpiDeliveryReportGenerator")
 
+    anunciosVagaCriados AnuncioVaga[] @relation("AnuncioVagaCriador")
+
+    cadastrosContratacaoAnalisados CadastroContratacao[] @relation("CadastroContratacaoAnalisador")
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -103,6 +133,8 @@ model Role {
     employees Employee[]
     roleEpis  RoleEpi[]
     roleQuesitos RoleQuesito[]
+    anunciosVaga           AnuncioVaga[]
+    cadastrosContratacao CadastroContratacao[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -152,6 +184,8 @@ model Employee {
     epiDeliveries EpiDelivery[]
 
     epiDeliveryReports EpiDeliveryReport[]
+
+    cadastroContratacaoOrigem CadastroContratacao?
 
     deletedAt DateTime?
 
@@ -261,4 +295,137 @@ model EpiDelivery {
     termSigned Boolean @default(false)
 
     createdAt DateTime @default(now())
+}
+
+model AnuncioVaga {
+    id String @id @default(uuid())
+
+    tituloVaga String
+
+    apresentacaoEmpresa String
+    sobreVaga           String
+    responsabilidades   String
+    requisitos          String
+    beneficios          String
+
+    localTrabalho     String
+    tipoContratacao   TipoContratacaoVaga
+    jornadaTrabalho   String
+    faixaSalarial     String?
+
+    roleId String
+    role   Role   @relation(fields: [roleId], references: [id])
+
+    companyId String
+    company   Company @relation(fields: [companyId], references: [id])
+
+    setorId String
+    setor   Setor  @relation(fields: [setorId], references: [id])
+
+    status StatusAnuncioVaga @default(INATIVA)
+
+    criadoPorUserId String
+    criadoPor       User   @relation("AnuncioVagaCriador", fields: [criadoPorUserId], references: [id])
+
+    candidaturas Candidatura[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([status])
+    @@index([createdAt])
+}
+
+model Candidatura {
+    id String @id @default(uuid())
+
+    anuncioVagaId String
+    anuncioVaga   AnuncioVaga @relation(fields: [anuncioVagaId], references: [id])
+
+    nomeCompleto String
+    email        String
+    telefone     String
+    cpf          String?
+    cidade       String
+    estado       String
+    linkedinUrl  String?
+
+    pretensaoSalarial      String?
+    disponibilidadeInicio  String?
+    mensagemCandidato      String?
+
+    curriculoConteudo     Bytes
+    curriculoNomeArquivo  String
+    curriculoTipoMime     String
+    curriculoTamanhoBytes Int
+
+    cadastroContratacao CadastroContratacao?
+
+    createdAt DateTime @default(now())
+
+    @@index([anuncioVagaId])
+    @@index([createdAt])
+    @@index([email])
+}
+
+model CadastroContratacao {
+    id String @id @default(uuid())
+
+    candidaturaId String @unique
+    candidatura   Candidatura @relation(fields: [candidaturaId], references: [id])
+
+    tokenAcesso String @unique
+
+    roleId String
+    role   Role @relation(fields: [roleId], references: [id])
+
+    companyId String
+    company   Company @relation(fields: [companyId], references: [id])
+
+    setorId String
+    setor   Setor @relation(fields: [setorId], references: [id])
+
+    status StatusCadastroContratacao @default(AGUARDANDO_PREENCHIMENTO)
+
+    name        String?
+    cpf         String?
+    email       String?
+    telefone    String?
+    birthDate   DateTime?
+    admissionDate DateTime?
+
+    nacionalidade     String?
+    estadoCivil       EstadoCivil?
+    racaCor           RacaCor?
+    filiacao          String?
+    grauInstrucao     GrauInstrucao?
+    numeroCtps        String?
+    serieCtps         String?
+    numeroDependentes Int?
+    pis               String?
+    chavePix          String?
+    cep               String?
+    logradouro        String?
+    numeroEndereco    String?
+    complemento       String?
+    bairro            String?
+    cidade            String?
+    estado            String?
+    valeTransporte    Boolean?
+    valeAlimentacao     Boolean?
+    planoSaude          Boolean?
+
+    employeeId String? @unique
+    employee   Employee? @relation(fields: [employeeId], references: [id])
+
+    analisadoPorUserId String?
+    analisadoPor       User? @relation("CadastroContratacaoAnalisador", fields: [analisadoPorUserId], references: [id])
+    analisadoEm        DateTime?
+    enviadoEm          DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([status])
+    @@index([tokenAcesso])
 }
