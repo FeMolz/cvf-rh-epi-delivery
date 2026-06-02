@@ -36,16 +36,27 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1/roles", roleRoutes);
+
 app.use("/api/v1/users", userRoutes);
+
 app.use("/api/v1/employees", employeeRoutes);
+
 app.use("/api/v1/companies", companyRoutes);
+
 app.use("/api/v1/setores", setorRoutes);
+
 app.use("/api/v1/epis", epiRoutes);
+
 app.use("/api/v1/roles-epis", epiToRoleRoutes);
+
 app.use("/api/v1/epi-deliveries", epiDeliveryRoutes);
+
 app.use("/api/v1/epi-delivery-reports", epiDeliveryReportRoutes);
+
 app.use("/api/v1/quesitos", quesitoRoutes);
+
 app.use("/api/v1/roles-quesitos", quesitoToRoleRoutes);
+
 app.use("/api/v1/recruitment", recruitmentRoutes);
 
 app.use((err, req, res, next) => {
