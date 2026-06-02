@@ -3,7 +3,7 @@
 Este documento descreve a arquitetura, as regras de negócio e os endpoints do módulo de **Entregas de EPIs** (`EpiDeliveries`), responsável por registrar e controlar os equipamentos de proteção individual fornecidos aos funcionários.
 
 ## 1. Visão Geral
-O módulo de Entregas de EPIs é projetado para gerenciar a entrega em lote de equipamentos para os funcionários. Ele calcula automaticamente a data da próxima troca (`nextDueDate`) com base nas regras estipuladas no cargo do funcionário (tabela `RoleEpi`), gerando um histórico rastreável essencial para a segurança no trabalho e emissão de relatórios.
+O módulo de Entregas de EPIs é projetado para gerenciar a entrega em lote de equipamentos para os funcionários. Ele calcula automaticamente a data da próxima troca (`nextDueDate`) com base nas regras estipuladas no cargo do funcionário (tabela `RoleEpi`; ver **[CHAINING.md](./CHAINING.md)**), gerando um histórico rastreável essencial para a segurança no trabalho e emissão de relatórios.
 
 ## 2. Modelo de Dados
 O modelo de dados baseia-se na tabela `EpiDelivery` presente em `schema.prisma`:

@@ -15,7 +15,8 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
 - 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - Detalha a arquitetura estática Read-Only das 4 empresas do banco.
 - 📄 **[Módulo de Setores (Setores)](./docs/SETORES.md)** - Listagem read-only de setores para vínculo com funcionários.
-- 📄 **[Módulo de EPIs (Epis & Chaining)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), camada `repositories` no módulo `epis`, validade do CA (`Validade`, `StatusValidade`, `Situacao`) e vínculo Cargo–EPI.
+- 📄 **[Módulo de EPIs (Epis)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), cache local por CA, validade cadastral (`Validade`, `StatusValidade`, `Situacao`) e consulta/listagem.
+- 📄 **[Chaining (Cargo–EPI)](./docs/CHAINING.md)** - Vincular, listar e desvincular EPIs por cargo (`RoleEpi`), periodicidade de troca e rotas `/api/v1/roles-epis`.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
 - 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento em disco, pendências de assinatura e atualização de flags operacionais.
 - 📄 **[Módulo de Quesitos e vínculo Cargo–Quesito](./docs/QUESITOS.md)** - Cadastro de quesitos (nome único, descrição, bloco), filtros de listagem e encadeamento opcional com cargos (`/api/v1/roles-quesitos`).
