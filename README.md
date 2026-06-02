@@ -21,6 +21,8 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento em disco, pendências de assinatura e atualização de flags operacionais.
 - 📄 **[Módulo de Quesitos e vínculo Cargo–Quesito](./docs/QUESITOS.md)** - Cadastro de quesitos (nome único, descrição, bloco), filtros de listagem e encadeamento opcional com cargos (`/api/v1/roles-quesitos`).
 - 📄 **[Módulo de Recrutamento (Recruitment)](./docs/RECRUTAMENTO.md)** - Anúncios de vaga com modelo padrão, inscrição pública com currículo e gestão de candidaturas com filtro por data.
+- 📄 **[Módulo de Ponto (Secullum)](./docs/PONTO.md)** - Resumo diário de batidas: quem bateu ponto, batidas registradas e quem não bateu (integração Ponto Web).
+- 📄 **[Configuração de Ponto em produção](./CONFIG_PONTO.md)** - Variáveis `SECULLUM_*`, checklist de go-live e validação pós-deploy.
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
@@ -63,6 +65,11 @@ JWT_EXPIRES_IN="7d"
 
 # URL base da API baseCAEPI (consulta GET /CA/:numero). Obrigatório para testes locais manuais e seed de EPIs quando o CA ainda não está no PostgreSQL — suba a API com Docker e alinhe host/porta (ver docs/EPI.md).
 # CAEPI_API_URL="http://localhost:8080"
+
+# Secullum Ponto Web — obrigatório para GET /api/v1/ponto/resumo (ver docs/PONTO.md)
+# SECULLUM_USUARIO="email@conta-secullum.com"
+# SECULLUM_SENHA="sua_senha"
+# SECULLUM_BANCO_ID="id_do_banco"
 ```
 
 ### 5. Configuração do Prisma (Banco de Dados)
