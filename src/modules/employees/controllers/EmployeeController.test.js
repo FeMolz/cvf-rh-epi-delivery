@@ -83,6 +83,21 @@ describe('EmployeeController', () => {
         );
     });
 
+    it('deve normalizar erro na criação quando handler é passado desvinculado ao Express', async () => {
+        const request = { body: {} };
+        const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('Campos obrigatórios ausentes');
+        const handlerDesvinculado = employeeController.create;
+
+        createEmployeeServiceMock.execute.mockRejectedValue(erro);
+        await handlerDesvinculado(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(
+            expect.objectContaining({ message: erro.message, statusCode: 400 })
+        );
+    });
+
     it('deve retornar todos os funcionários', async () => {
         const request = {};
         const response = { json: jest.fn() };

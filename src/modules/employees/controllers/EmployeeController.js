@@ -12,6 +12,16 @@ import {
 } from '../constants/funcionarioExportacaoConstantes.js';
 
 class EmployeeController {
+    constructor() {
+        this.create = this.create.bind(this);
+        this.exportarLista = this.exportarLista.bind(this);
+        this.exportarFuncionarioCompleto = this.exportarFuncionarioCompleto.bind(this);
+        this.findAll = this.findAll.bind(this);
+        this.findById = this.findById.bind(this);
+        this.update = this.update.bind(this);
+        this.delete = this.delete.bind(this);
+    }
+
     async create(request, response, next) {
         try {
             const funcionario = await createEmployeeService.execute(request.body);
