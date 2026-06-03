@@ -1,3 +1,5 @@
+import { validarNumeroCaEpi } from '../../utils/validarNumeroCaEpi.js';
+
 /**
  * @param {unknown} valorBruto
  * @returns {boolean|null} verdadeiro/falso quando interpretável; null quando ausente ou não mapeado
@@ -68,9 +70,10 @@ class EpiProvider {
      */
     async getEpiByCa(caNumber) {
         const baseUrl = process.env.CAEPI_API_URL || 'http://localhost:8080';
+        const numeroCaValidado = validarNumeroCaEpi(caNumber);
 
         try {
-            const response = await fetch(`${baseUrl}/CA/${caNumber}`);
+            const response = await fetch(`${baseUrl}/CA/${numeroCaValidado}`);
 
             if (!response.ok) {
                 if (response.status === 404) {

@@ -1,5 +1,6 @@
 import epiRepository from '../repositories/EpiRepository.js';
 import epiProvider from '../../../shared/providers/EpiProvider/EpiProvider.js';
+import { validarNumeroCaEpi } from '../../../shared/utils/validarNumeroCaEpi.js';
 
 const MENSAGEM_CA_SEM_VALIDADE = 'Este CA não possui validade ativa. Não é permitido utilizar este EPI.';
 const MENSAGEM_CA_NAO_ENCONTRADO = 'EPI com este CA não encontrado na base pública.';
@@ -8,7 +9,8 @@ const MENSAGEM_CA_INVALIDO_CADASTRO_OFICIAL
 
 class FetchEpiFromApiService {
     async execute(caNumber) {
-        const epi = await epiRepository.findByCaNumber(caNumber);
+        const numeroCaValidado = validarNumeroCaEpi(caNumber);
+        const epi = await epiRepository.findByCaNumber(numeroCaValidado);
 
         if (epi) {
             if (!epi.isActive) {
@@ -17,7 +19,7 @@ class FetchEpiFromApiService {
             return epi;
         }
 
-        const epiData = await epiProvider.getEpiByCa(caNumber);
+        const epiData = await epiProvider.getEpiByCa(numeroCaValidado);
 
         if (!epiData) {
             throw new Error(MENSAGEM_CA_NAO_ENCONTRADO);

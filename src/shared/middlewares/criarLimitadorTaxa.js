@@ -50,3 +50,9 @@ export const limitadorTaxaRotasPublicas = criarLimitadorTaxa({
     limiteRequisicoes: Number(process.env.RATE_LIMIT_PUBLICO_MAX) || 60,
     mensagem: 'Muitas requisições neste endpoint público. Tente novamente mais tarde.'
 });
+
+export const limitadorTaxaGlobal = criarLimitadorTaxa({
+    janelaMs: 15 * 60 * 1000,
+    limiteRequisicoes: Number(process.env.RATE_LIMIT_GLOBAL_MAX) || 300,
+    mensagem: 'Muitas requisições. Tente novamente mais tarde.'
+});

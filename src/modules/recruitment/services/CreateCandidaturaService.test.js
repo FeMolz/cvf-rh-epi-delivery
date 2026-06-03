@@ -21,7 +21,7 @@ jest.unstable_mockModule('../repositories/CandidaturaRepository.js', () => ({
 const createCandidaturaService = (await import('./CreateCandidaturaService.js')).default;
 
 const arquivoPdfMock = {
-    buffer: Buffer.from('pdf'),
+    buffer: Buffer.from('%PDF-1.4 conteudo-teste'),
     mimetype: 'application/pdf',
     originalname: 'curriculo.pdf',
     size: 100

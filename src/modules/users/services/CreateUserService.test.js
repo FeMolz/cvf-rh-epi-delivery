@@ -29,7 +29,7 @@ describe('CreateUserService', () => {
             createUserService.execute({
                 name: 'Admin',
                 email: 'admin@teste.com',
-                password: '123',
+                password: 'senha123',
                 role: 'ADMIN'
             })
         ).rejects.toMatchObject({
@@ -50,7 +50,7 @@ describe('CreateUserService', () => {
         const resultado = await createUserService.execute({
             name: 'Admin',
             email: 'admin@teste.com',
-            password: '123',
+            password: 'senha123',
             role: 'ADMIN',
             papelSolicitante: 'ADMIN'
         });
@@ -63,8 +63,19 @@ describe('CreateUserService', () => {
         userRepositoryMock.findByEmail.mockResolvedValue({ id: '1', email: 'teste@teste.com' });
 
         await expect(
-            createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' })
+            createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: 'senha123' })
         ).rejects.toThrow('Este e-mail já está cadastrado no sistema.');
+    });
+
+    it('deve rejeitar senha fraca', async () => {
+        userRepositoryMock.findByEmail.mockResolvedValue(null);
+
+        await expect(
+            createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' })
+        ).rejects.toMatchObject({
+            message: 'A senha deve ter no mínimo 8 caracteres, incluindo letras e números.',
+            statusCode: 400
+        });
     });
 
     it('deve criar usuário com role padrão COLABORADOR', async () => {
@@ -72,7 +83,11 @@ describe('CreateUserService', () => {
         bcryptMock.hash.mockResolvedValue('hashed_password');
         userRepositoryMock.create.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
 
-        await createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' });
+        await createUserService.execute({
+            name: 'Teste',
+            email: 'teste@teste.com',
+            password: 'senha123'
+        });
 
         expect(userRepositoryMock.create).toHaveBeenCalledWith(
             expect.objectContaining({ role: 'COLABORADOR' })

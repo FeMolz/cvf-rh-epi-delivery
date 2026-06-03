@@ -5,6 +5,7 @@ import {
     STATUS_CADASTRO_CONTRATACAO
 } from '../constants/recrutamentoConstantes.js';
 import cadastroContratacaoRepository from '../repositories/CadastroContratacaoRepository.js';
+import { tokenCadastroContratacaoExpirado } from '../utils/tokenCadastroContratacaoExpirado.js';
 
 class GetCadastroContratacaoPublicoService {
     /**
@@ -19,6 +20,10 @@ class GetCadastroContratacaoPublicoService {
         const cadastro = await cadastroContratacaoRepository.findByToken(token);
         if (!cadastro) {
             throw new Error(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
+        }
+
+        if (tokenCadastroContratacaoExpirado(cadastro.createdAt)) {
+            throw new Error(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
         }
 
         if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO) {

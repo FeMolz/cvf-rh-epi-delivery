@@ -8,6 +8,10 @@ import {
 } from '../constants/recrutamentoConstantes.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
 import cadastroContratacaoRepository from '../repositories/CadastroContratacaoRepository.js';
+import {
+    registrarEventoAuditoria,
+    TIPOS_EVENTO_AUDITORIA
+} from '../../../shared/utils/registrarEventoAuditoria.js';
 
 class GerarConviteCadastroContratacaoService {
     /**
@@ -44,6 +48,11 @@ class GerarConviteCadastroContratacaoService {
             companyId: anuncio.companyId,
             setorId: anuncio.setorId,
             status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO
+        });
+
+        registrarEventoAuditoria(TIPOS_EVENTO_AUDITORIA.CONVITE_CADASTRO_GERADO, {
+            identificadorCandidatura,
+            identificadorCadastroContratacao: cadastroCriado.id
         });
 
         return {

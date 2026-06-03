@@ -66,6 +66,17 @@ describe('UpdateUserService', () => {
         });
     });
 
+    it('deve impedir ADMINISTRATIVO de editar usuário ADMIN', async () => {
+        userRepositoryMock.findById.mockResolvedValue({ id: '1', role: 'ADMIN' });
+
+        await expect(
+            updateUserService.execute('1', { name: 'Outro Nome' }, 'ADMINISTRATIVO')
+        ).rejects.toMatchObject({
+            message: 'Você não tem permissão para alterar este usuário.',
+            statusCode: 403
+        });
+    });
+
     it('deve permitir ADMIN promover usuário para ADMIN', async () => {
         userRepositoryMock.findById.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
         userRepositoryMock.update.mockResolvedValue({ id: '1', role: 'ADMIN' });

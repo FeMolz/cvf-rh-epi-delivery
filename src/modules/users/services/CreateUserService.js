@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import userRepository from '../repositories/UserRepository.js';
 import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
+import { validarPoliticaSenha } from '../../../shared/utils/validarSenha.js';
+import { MENSAGEM_SENHA_FRACA } from '../../../shared/constants/segurancaConstantes.js';
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import { formatarRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
 import {
@@ -31,6 +33,12 @@ class CreateUserService {
 
         if (emailExistente) {
             throw criarErroHttp(MENSAGEM_EMAIL_JA_CADASTRADO);
+        }
+
+        try {
+            validarPoliticaSenha(password);
+        } catch (erroValidacao) {
+            throw criarErroHttp(erroValidacao.message || MENSAGEM_SENHA_FRACA, 400);
         }
 
         const hashSenha = await bcrypt.hash(password, 10);

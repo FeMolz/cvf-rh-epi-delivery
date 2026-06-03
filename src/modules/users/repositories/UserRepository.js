@@ -40,6 +40,18 @@ class UserRepository {
         });
     }
 
+    async findSessaoPorId(identificadorUsuario) {
+        return prisma.user.findUnique({
+            where: { id: identificadorUsuario },
+            select: {
+                id: true,
+                email: true,
+                role: true,
+                isActive: true
+            }
+        });
+    }
+
     /**
      * @param {string} identificadorUsuario
      * @param {{ name?: string, email?: string, role?: string }} dadosAtualizacao

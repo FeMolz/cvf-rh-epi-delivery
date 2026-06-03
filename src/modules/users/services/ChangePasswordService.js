@@ -1,6 +1,12 @@
 import bcrypt from 'bcryptjs';
 import userRepository from '../repositories/UserRepository.js';
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
+import { validarPoliticaSenha } from '../../../shared/utils/validarSenha.js';
+import { MENSAGEM_SENHA_FRACA } from '../../../shared/constants/segurancaConstantes.js';
+import {
+    registrarEventoAuditoria,
+    TIPOS_EVENTO_AUDITORIA
+} from '../../../shared/utils/registrarEventoAuditoria.js';
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import {
     MENSAGEM_NOVA_SENHA_OBRIGATORIA,
@@ -43,8 +49,25 @@ class ChangePasswordService {
             throw criarErroNaoEncontrado(MENSAGEM_USUARIO_NAO_ENCONTRADO);
         }
 
+        try {
+            validarPoliticaSenha(novaSenha);
+        } catch (erroValidacao) {
+            throw criarErroHttp(erroValidacao.message || MENSAGEM_SENHA_FRACA, 400);
+        }
+
         const hashSenha = await bcrypt.hash(novaSenha, 10);
-        return userRepository.changePassword(identificadorUsuarioAlvo, hashSenha);
+        const usuarioAtualizado = await userRepository.changePassword(
+            identificadorUsuarioAlvo,
+            hashSenha
+        );
+
+        registrarEventoAuditoria(TIPOS_EVENTO_AUDITORIA.ALTERACAO_SENHA, {
+            identificadorUsuarioAlvo,
+            identificadorUsuarioAutenticado,
+            papelUsuarioAutenticado
+        });
+
+        return usuarioAtualizado;
     }
 }
 

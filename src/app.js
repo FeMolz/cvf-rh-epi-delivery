@@ -1,14 +1,21 @@
 import express from 'express';
 import prisma from './config/database.js';
+import env from './config/env.js';
 import { configurarCors } from './shared/middlewares/configurarCors.js';
 import { configurarHelmet } from './shared/middlewares/configurarHelmet.js';
 import { identificadorRequisicao } from './shared/middlewares/identificadorRequisicao.js';
+import { limitadorTaxaGlobal } from './shared/middlewares/criarLimitadorTaxa.js';
 
 const app = express();
+
+if (env.TRUST_PROXY_SALTOS > 0) {
+    app.set('trust proxy', env.TRUST_PROXY_SALTOS);
+}
 
 app.use(identificadorRequisicao());
 app.use(configurarHelmet());
 app.use(configurarCors());
+app.use(limitadorTaxaGlobal);
 app.use(express.json({ limit: '1mb' }));
 
 // ------------------------------------------------------------------------------------------------------------------------------------

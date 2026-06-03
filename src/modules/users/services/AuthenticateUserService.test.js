@@ -22,9 +22,14 @@ jest.unstable_mockModule('jsonwebtoken', () => ({
 
 jest.unstable_mockModule('../../../config/env.js', () => ({
     default: {
-        JWT_SECRET: 'segredo-teste',
+        JWT_SECRET: 'segredo-teste-local-16',
         JWT_EXPIRES_IN: '1d'
     }
+}));
+
+jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', () => ({
+    registrarEventoAuditoria: jest.fn(),
+    TIPOS_EVENTO_AUDITORIA: { LOGIN_SUCESSO: 'LOGIN_SUCESSO' }
 }));
 
 const bcrypt = (await import('bcryptjs')).default;
@@ -41,10 +46,10 @@ describe('AuthenticateUserService', () => {
 
         await expect(
             authenticateUserService.execute({ email: 'a@b.com', password: '123' })
-        ).rejects.toThrow('Email ou senha incorretos.');
+        ).rejects.toThrow('E-mail ou senha incorretos.');
     });
 
-    it('deve lançar erro quando usuário está inativo', async () => {
+    it('deve lançar a mesma mensagem quando usuário estiver inativo', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue({
             id: '1',
             email: 'a@b.com',
@@ -56,7 +61,7 @@ describe('AuthenticateUserService', () => {
 
         await expect(
             authenticateUserService.execute({ email: 'a@b.com', password: '123' })
-        ).rejects.toThrow('Usuário inativo. Entre em contato com o administrador do sistema.');
+        ).rejects.toThrow('E-mail ou senha incorretos.');
     });
 
     it('deve lançar erro quando senha não confere', async () => {
@@ -72,7 +77,7 @@ describe('AuthenticateUserService', () => {
 
         await expect(
             authenticateUserService.execute({ email: 'a@b.com', password: 'errada' })
-        ).rejects.toThrow('Email ou senha incorretos.');
+        ).rejects.toThrow('E-mail ou senha incorretos.');
     });
 
     it('deve retornar usuário e token quando credenciais são válidas', async () => {

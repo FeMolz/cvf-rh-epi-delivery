@@ -24,6 +24,7 @@ describe('GetCadastroContratacaoPublicoService', () => {
     it('deve retornar formulario publico com campos bloqueados', async () => {
         cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
             tokenAcesso: 'token-1',
+            createdAt: new Date(),
             status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
             role: { id: 'r1', name: 'Analista' },
             company: { id: 'c1', name: 'Empresa' },
@@ -53,8 +54,20 @@ describe('GetCadastroContratacaoPublicoService', () => {
         );
     });
 
+    it('deve rejeitar token expirado', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            createdAt: new Date('2020-01-01'),
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO
+        });
+
+        await expect(getCadastroContratacaoPublicoService.execute('token')).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+    });
+
     it('deve rejeitar quando status nao permite preenchimento', async () => {
         cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            createdAt: new Date(),
             status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH
         });
 

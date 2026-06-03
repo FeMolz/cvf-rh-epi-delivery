@@ -26,6 +26,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Cobertura de endpoints (testes vs Postman)](./docs/COBERTURA_ENDPOINTS.md)** - Mapa de rotas e como rodar `npm test` / `npm run test:routes`.
 - 📄 **[Checklist Postman (testes manuais)](./docs/POSTMAN_MANUAL.md)** - O que ainda validar na mão (PDF, Secullum, upload, JWT).
 - 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
+- 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
@@ -62,16 +63,27 @@ PORT=3000
 # String de conexão com o banco de dados PostgreSQL
 DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/NOME_DO_BANCO?schema=public"
 
-# Chave de criptografia utilizada pelo JWT para login
-JWT_SECRET="adicione_uma_chave_secreta_robusta_aqui"
+# JWT (obrigatório; mín. 16 caracteres em dev, 32 em produção)
+JWT_SECRET="adicione_uma_chave_secreta_robusta_aqui_com_16_chars"
 JWT_EXPIRES_IN="7d"
 
-# CORS: origens permitidas separadas por vírgula (produção). Omitir = liberado (desenvolvimento).
+# CORS: em produção liste origens explícitas (obrigatório). Em dev, omitir = liberado.
 # CORS_ORIGINS="https://app.empresa.com"
 
-# Rate limit (opcional): login e rotas públicas de recrutamento
+# Rate limit (opcional)
+# RATE_LIMIT_GLOBAL_MAX=300
 # RATE_LIMIT_LOGIN_MAX=20
 # RATE_LIMIT_PUBLICO_MAX=60
+
+# Link público de cadastro (recrutamento), expiração em dias
+# TOKEN_CADASTRO_VALIDADE_DIAS=7
+
+# Atrás de proxy reverso (ex.: nginx)
+# TRUST_PROXY_SALTOS=1
+
+# Seed do admin (recomendado)
+# ADMIN_SEED_EMAIL="admin@rhsystem.com"
+# ADMIN_SEED_PASSWORD="AlterarSenha123!"
 
 # URL base da API baseCAEPI (consulta GET /CA/:numero). Obrigatório para testes locais manuais e seed de EPIs quando o CA ainda não está no PostgreSQL — suba a API com Docker e alinhe host/porta (ver docs/EPI.md).
 # CAEPI_API_URL="http://localhost:8080"
@@ -126,11 +138,13 @@ Execute o comando abaixo na raiz do projeto (ou use `npm run seed:admin`, que se
 ```bash
 node prisma/seeders/admin.js
 ```
-Esse comando irá criar um usuário no banco com as seguintes credenciais padrão:
-- **E-mail:** `admin@rhsystem.com`
-- **Senha:** `admin`
+Defina `ADMIN_SEED_EMAIL` e `ADMIN_SEED_PASSWORD` no `.env` antes de rodar (veja [docs/SEGURANCA.md](./docs/SEGURANCA.md)). Em produção, `ADMIN_SEED_PASSWORD` é obrigatória. O script não exibe a senha no console.
 
-Você poderá utilizar esses dados na rota `POST /api/v1/users/login` para receber seu Token JWT.
+Credenciais padrão de desenvolvimento (se variáveis não forem definidas):
+- **E-mail:** `admin@rhsystem.com`
+- **Senha:** `AlterarSenha123!` (apenas ambiente não-produtivo)
+
+Utilize `POST /api/v1/users/login` para obter o token JWT.
 
 ### Outros seeders (mesmo carregamento de `.env` da raiz)
 
@@ -146,8 +160,10 @@ Todos os arquivos em `prisma/seeders/` importam `carregarAmbienteRaiz.js` primei
 ### Gerando Token Local para Teste no Postman/Insomnia
 Enquanto estiver programando, você pode precisar acessar as rotas bloqueadas (como `/api/v1/roles`) sem ter que criar toda a árvore de usuário. 
 
-Existe um script pronto que lê o seu `.env` e devolve um token assinado para a Role "ADMIN". Basta executar:
+Existe um script que lê o `.env` e devolve um token assinado para a role `ADMIN` (**somente desenvolvimento** — bloqueado em produção):
+
 ```bash
 npm run seed:dev-token
 ```
-Após rodar, copie a string retornada e insira na aba **Bearer Token** da sua ferramenta de testes de API favorita.
+
+Copie o `Bearer ...` retornado para a aba **Authorization** do Postman/Insomnia. Detalhes em [docs/SEGURANCA.md](./docs/SEGURANCA.md).

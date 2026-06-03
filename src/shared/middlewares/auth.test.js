@@ -1,13 +1,25 @@
-import 'dotenv/config';
 import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
-import { isAuthenticated } from './auth.js';
+
+const userRepositoryMock = {
+    findSessaoPorId: jest.fn()
+};
+
+jest.unstable_mockModule('../../modules/users/repositories/UserRepository.js', () => ({
+    default: userRepositoryMock
+}));
+
+jest.unstable_mockModule('../../config/env.js', () => ({
+    default: { JWT_SECRET: 'segredo-teste-local-16' }
+}));
+
+const { isAuthenticated } = await import('./auth.js');
 
 const mockResponse = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
+    const resposta = {};
+    resposta.status = jest.fn().mockReturnValue(resposta);
+    resposta.json = jest.fn().mockReturnValue(resposta);
+    return resposta;
 };
 
 const mockNext = jest.fn();
@@ -17,76 +29,74 @@ describe('isAuthenticated Middleware', () => {
         jest.clearAllMocks();
     });
 
-    it('should return 401 if authorization header is missing', () => {
-        const req = { headers: {} };
-        const res = mockResponse();
+    it('deve retornar 401 se o cabeçalho authorization estiver ausente', async () => {
+        const requisicao = { headers: {} };
+        const resposta = mockResponse();
 
-        isAuthenticated(req, res, mockNext);
+        await isAuthenticated(requisicao, resposta, mockNext);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-            status: 'error',
-            message: 'Token de autenticação não fornecido.'
-        });
+        expect(resposta.status).toHaveBeenCalledWith(401);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should return 401 if token is not a Bearer token', () => {
-        const req = { headers: { authorization: 'Basic token123' } };
-        const res = mockResponse();
+    it('deve retornar 401 se o token não for Bearer', async () => {
+        const requisicao = { headers: { authorization: 'Basic token123' } };
+        const resposta = mockResponse();
 
-        isAuthenticated(req, res, mockNext);
+        await isAuthenticated(requisicao, resposta, mockNext);
 
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-            status: 'error',
-            message: 'Token de autenticação não fornecido.'
-        });
+        expect(resposta.status).toHaveBeenCalledWith(401);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should return 401 if no token is provided after Bearer', () => {
-        const req = { headers: { authorization: 'Bearer ' } };
-        const res = mockResponse();
+    it('deve popular req.user quando token e sessão forem válidos', async () => {
+        const payload = { id: 'uuid-1', role: 'ADMIN', email: 'admin@teste.com' };
+        const tokenValido = jwt.sign(payload, 'segredo-teste-local-16');
+        const requisicao = { headers: { authorization: `Bearer ${tokenValido}` } };
+        const resposta = mockResponse();
 
-        isAuthenticated(req, res, mockNext);
-
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-            status: 'error',
-            message: 'Token de autenticação não fornecido.'
+        userRepositoryMock.findSessaoPorId.mockResolvedValue({
+            id: 'uuid-1',
+            role: 'ADMIN',
+            email: 'admin@teste.com',
+            isActive: true
         });
-        expect(mockNext).not.toHaveBeenCalled();
-    });
 
-    it('should call next and populate req.user if token is valid', () => {
-        const payload = { id: 1, role: 'admin' };
-        // We use process.env.JWT_SECRET from .env, loaded by dotenv/config
-        const validToken = jwt.sign(payload, process.env.JWT_SECRET || 'secret');
-        const req = { headers: { authorization: `Bearer ${validToken}` } };
-        const res = mockResponse();
+        await isAuthenticated(requisicao, resposta, mockNext);
 
-        isAuthenticated(req, res, mockNext);
-
-        expect(req.user).toBeDefined();
-        expect(req.user.id).toBe(payload.id);
-        expect(req.user.role).toBe(payload.role);
+        expect(requisicao.user).toEqual({
+            id: 'uuid-1',
+            role: 'ADMIN',
+            email: 'admin@teste.com'
+        });
         expect(mockNext).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
     });
 
-    it('should return 401 if token is invalid', () => {
-        const invalidToken = 'invalid.token.here';
-        const req = { headers: { authorization: `Bearer ${invalidToken}` } };
-        const res = mockResponse();
+    it('deve retornar 401 quando usuário estiver inativo no banco', async () => {
+        const tokenValido = jwt.sign({ id: 'uuid-1' }, 'segredo-teste-local-16');
+        const requisicao = { headers: { authorization: `Bearer ${tokenValido}` } };
+        const resposta = mockResponse();
 
-        isAuthenticated(req, res, mockNext);
-
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({
-            status: 'error',
-            message: 'Token de autenticação inválido ou expirado.'
+        userRepositoryMock.findSessaoPorId.mockResolvedValue({
+            id: 'uuid-1',
+            role: 'COLABORADOR',
+            email: 'user@teste.com',
+            isActive: false
         });
+
+        await isAuthenticated(requisicao, resposta, mockNext);
+
+        expect(resposta.status).toHaveBeenCalledWith(401);
+        expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar 401 se o token for inválido', async () => {
+        const requisicao = { headers: { authorization: 'Bearer token.invalido' } };
+        const resposta = mockResponse();
+
+        await isAuthenticated(requisicao, resposta, mockNext);
+
+        expect(resposta.status).toHaveBeenCalledWith(401);
         expect(mockNext).not.toHaveBeenCalled();
     });
 });

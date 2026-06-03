@@ -22,6 +22,7 @@ describe('SubmeterCadastroContratacaoService', () => {
     it('deve submeter cadastro para analise do RH', async () => {
         cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
             id: 'cad1',
+            createdAt: new Date(),
             status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
             roleId: 'r1',
             companyId: 'co1',

@@ -17,6 +17,11 @@ jest.unstable_mockModule('bcryptjs', () => ({
     default: bcryptMock
 }));
 
+jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', () => ({
+    registrarEventoAuditoria: jest.fn(),
+    TIPOS_EVENTO_AUDITORIA: { ALTERACAO_SENHA: 'ALTERACAO_SENHA' }
+}));
+
 const changePasswordService = (await import('./ChangePasswordService.js')).default;
 
 describe('ChangePasswordService', () => {
@@ -31,7 +36,7 @@ describe('ChangePasswordService', () => {
 
         await changePasswordService.execute({
             identificadorUsuarioAlvo: '1',
-            novaSenha: 'nova123',
+            novaSenha: 'nova1234',
             identificadorUsuarioAutenticado: '1',
             papelUsuarioAutenticado: 'COLABORADOR'
         });
@@ -43,7 +48,7 @@ describe('ChangePasswordService', () => {
         await expect(
             changePasswordService.execute({
                 identificadorUsuarioAlvo: '2',
-                novaSenha: 'nova123',
+                novaSenha: 'nova1234',
                 identificadorUsuarioAutenticado: '1',
                 papelUsuarioAutenticado: 'COLABORADOR'
             })
@@ -73,7 +78,7 @@ describe('ChangePasswordService', () => {
         await expect(
             changePasswordService.execute({
                 identificadorUsuarioAlvo: '99',
-                novaSenha: 'nova123',
+                novaSenha: 'nova1234',
                 identificadorUsuarioAutenticado: '1',
                 papelUsuarioAutenticado: 'ADMIN'
             })
@@ -89,7 +94,7 @@ describe('ChangePasswordService', () => {
 
         await changePasswordService.execute({
             identificadorUsuarioAlvo: '2',
-            novaSenha: 'nova123',
+            novaSenha: 'nova1234',
             identificadorUsuarioAutenticado: '1',
             papelUsuarioAutenticado: 'ADMIN'
         });

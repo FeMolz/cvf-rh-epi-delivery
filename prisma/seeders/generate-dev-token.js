@@ -2,28 +2,23 @@ import './carregarAmbienteRaiz.js';
 
 import jwt from 'jsonwebtoken';
 
-// Script utilitário para gerar um token de teste durante o desenvolvimento.
-// Como não temos a criação de usuários finalizada, esse script permite
-// contornar a autenticação de forma segura gerando um token válido com as Roles necessárias.
+import env from '../../src/config/env.js';
 
-const segredoJwt = process.env.JWT_SECRET;
-
-if (!segredoJwt) {
-    console.error(
-        'JWT_SECRET nao encontrada. Defina no arquivo .env na raiz do repositorio (ao lado de package.json).'
-    );
+if (env.NODE_ENV === 'production') {
+    console.error('Este script não pode ser executado em produção.');
     process.exit(1);
 }
 
 const token = jwt.sign(
     {
         id: 'dev-user-id',
-        role: 'ADMIN' // Altere para a Role que deseja testar
+        role: 'ADMIN',
+        email: 'dev@rhsystem.local'
     },
-    segredoJwt,
+    env.JWT_SECRET,
     { expiresIn: '7d' }
 );
 
-console.log('\n--- SEU TOKEN DE TESTE ---');
+console.log('\n--- SEU TOKEN DE TESTE (somente desenvolvimento) ---');
 console.log('Bearer ' + token);
-console.log('--------------------------\n');
+console.log('----------------------------------------------------\n');

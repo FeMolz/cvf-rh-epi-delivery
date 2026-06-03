@@ -9,6 +9,16 @@ jest.unstable_mockModule('./config/database.js', () => ({
     default: prismaMock
 }));
 
+jest.unstable_mockModule('./config/env.js', () => ({
+    default: {
+        NODE_ENV: 'test',
+        JWT_SECRET: 'segredo-teste-local-16',
+        TRUST_PROXY_SALTOS: 0,
+        TOKEN_CADASTRO_VALIDADE_DIAS: 7,
+        RATE_LIMIT_GLOBAL_MAX: 1000
+    }
+}));
+
 const aplicacao = (await import('./app.js')).default;
 
 describe('GET /health', () => {

@@ -2,6 +2,11 @@ import createCandidaturaService from '../services/CreateCandidaturaService.js';
 import downloadCurriculoCandidaturaService from '../services/DownloadCurriculoCandidaturaService.js';
 import getCandidaturaService from '../services/GetCandidaturaService.js';
 import listCandidaturasService from '../services/ListCandidaturasService.js';
+import { sanitizarNomeArquivoDownload } from '../utils/sanitizarNomeArquivoDownload.js';
+import {
+    registrarEventoAuditoria,
+    TIPOS_EVENTO_AUDITORIA
+} from '../../../shared/utils/registrarEventoAuditoria.js';
 import {
     MENSAGEM_ANUNCIO_NAO_ATIVO,
     MENSAGEM_ANUNCIO_NAO_ENCONTRADO,
@@ -97,8 +102,16 @@ class CandidaturaController {
         try {
             const { bufferCurriculo, nomeArquivo, tipoMime } =
                 await downloadCurriculoCandidaturaService.execute(requisicao.params.id);
+            const nomeArquivoSeguro = sanitizarNomeArquivoDownload(nomeArquivo);
+
+            registrarEventoAuditoria(TIPOS_EVENTO_AUDITORIA.DOWNLOAD_CURRICULO, {
+                identificadorCandidatura: requisicao.params.id,
+                identificadorUsuario: requisicao.user?.id,
+                papelUsuario: requisicao.user?.role
+            });
+
             resposta.setHeader('Content-Type', tipoMime);
-            resposta.attachment(nomeArquivo);
+            resposta.attachment(nomeArquivoSeguro);
             return resposta.send(bufferCurriculo);
         } catch (erro) {
             if (CONJUNTO_MENSAGENS_RESPOSTA_404.has(erro.message)) {

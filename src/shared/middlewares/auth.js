@@ -1,36 +1,60 @@
 import jwt from 'jsonwebtoken';
+
 import env from '../../config/env.js';
+import userRepository from '../../modules/users/repositories/UserRepository.js';
 
-export const isAuthenticated = (req, res, next) => {
-    const tokenHeader = req.headers.authorization;
+export const isAuthenticated = async (requisicao, resposta, proximo) => {
+    const cabecalhoAutorizacao = requisicao.headers.authorization;
 
-    if (!tokenHeader || !tokenHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
+    if (!cabecalhoAutorizacao || !cabecalhoAutorizacao.startsWith('Bearer ')) {
+        return resposta.status(401).json({
             status: 'error',
             message: 'Token de autenticação não fornecido.'
-        })
+        });
     }
 
-    const token = tokenHeader.split(' ')[1];
+    const token = cabecalhoAutorizacao.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({
+        return resposta.status(401).json({
             status: 'error',
             message: 'Token de autenticação não fornecido.'
-        })
+        });
     }
 
     try {
-        const decodedToken = jwt.verify(token, env.JWT_SECRET || process.env.JWT_SECRET);
-        req.user = decodedToken;
-        next();
+        const tokenDecodificado = jwt.verify(token, env.JWT_SECRET);
+        const identificadorUsuario = tokenDecodificado?.id;
 
-    } catch (error) {
-        return res.status(401).json({
+        if (!identificadorUsuario) {
+            return resposta.status(401).json({
+                status: 'error',
+                message: 'Token de autenticação inválido ou expirado.'
+            });
+        }
+
+        const usuarioSessao = await userRepository.findSessaoPorId(identificadorUsuario);
+
+        if (!usuarioSessao || !usuarioSessao.isActive) {
+            return resposta.status(401).json({
+                status: 'error',
+                message: 'Token de autenticação inválido ou expirado.'
+            });
+        }
+
+        requisicao.user = {
+            id: usuarioSessao.id,
+            role: usuarioSessao.role,
+            email: usuarioSessao.email
+        };
+
+        return proximo();
+    } catch {
+        return resposta.status(401).json({
             status: 'error',
             message: 'Token de autenticação inválido ou expirado.'
-        })
+        });
     }
-}
+};
 
 export default isAuthenticated;
