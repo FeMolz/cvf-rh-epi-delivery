@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 const diretorioAtualArquivo = path.dirname(fileURLToPath(import.meta.url));
 const diretorioRaizRepositorio = path.resolve(diretorioAtualArquivo, '../..');
 
-dotenv.config({ path: path.join(diretorioRaizRepositorio, '.env') });
+const nomeArquivoAmbiente = process.env.RH_ENV_ARQUIVO || '.env';
+
+dotenv.config({ path: path.join(diretorioRaizRepositorio, nomeArquivoAmbiente) });
 
 export const diretorioRaizProjeto = diretorioRaizRepositorio;

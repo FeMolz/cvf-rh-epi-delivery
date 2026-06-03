@@ -71,4 +71,36 @@ describe('User Routes', () => {
         expect(res.statusCode).toBe(200);
         expect(userControllerMock.findAll).toHaveBeenCalled();
     });
+
+    it('GET /users/:id deve chamar userController.findById', async () => {
+        const resposta = await request(app).get('/users/uuid-1');
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.findById).toHaveBeenCalled();
+    });
+
+    it('GET /users/findByEmail/:email deve chamar userController.findByEmail', async () => {
+        const resposta = await request(app).get('/users/findByEmail/admin@teste.com');
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.findByEmail).toHaveBeenCalled();
+    });
+
+    it('PUT /users/:id deve chamar userController.update', async () => {
+        const resposta = await request(app).put('/users/uuid-1').send({ name: 'Novo' });
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.update).toHaveBeenCalled();
+    });
+
+    it('DELETE /users/:id deve chamar userController.delete', async () => {
+        const resposta = await request(app).delete('/users/uuid-1');
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.delete).toHaveBeenCalled();
+    });
+
+    it('PUT /users/password/:id deve chamar userController.changePassword', async () => {
+        const resposta = await request(app)
+            .put('/users/password/uuid-1')
+            .send({ password: 'nova123' });
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.changePassword).toHaveBeenCalled();
+    });
 });

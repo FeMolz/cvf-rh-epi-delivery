@@ -1,0 +1,19 @@
+# Banco PostgreSQL isolado para testes manuais (Postman).
+# Suba com: docker compose -f docker-compose.test.yml up -d
+# Pare com: docker compose -f docker-compose.test.yml down -v
+
+services:
+  postgres-teste:
+    image: postgres:16-alpine
+    container_name: rh-system-postgres-teste
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rh_system_test
+    volumes:
+      - rh_system_pg_teste:/var/lib/postgresql/data
+
+volumes:
+  rh_system_pg_teste:

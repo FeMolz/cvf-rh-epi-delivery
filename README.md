@@ -23,6 +23,9 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Recrutamento (Recruitment)](./docs/RECRUTAMENTO.md)** - Anúncios de vaga com modelo padrão, inscrição pública com currículo e gestão de candidaturas com filtro por data.
 - 📄 **[Módulo de Ponto (Secullum)](./docs/PONTO.md)** - Resumo diário de batidas: quem bateu ponto, batidas registradas e quem não bateu (integração Ponto Web).
 - 📄 **[Configuração de Ponto em produção](./CONFIG_PONTO.md)** - Variáveis `SECULLUM_*`, checklist de go-live e validação pós-deploy.
+- 📄 **[Cobertura de endpoints (testes vs Postman)](./docs/COBERTURA_ENDPOINTS.md)** - Mapa de rotas e como rodar `npm test` / `npm run test:routes`.
+- 📄 **[Checklist Postman (testes manuais)](./docs/POSTMAN_MANUAL.md)** - O que ainda validar na mão (PDF, Secullum, upload, JWT).
+- 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
@@ -108,6 +111,13 @@ A aplicação possui suporte nativo para ESModules no Jest (`--experimental-vm-m
 ```bash
 npm test
 ```
+
+Para validar **todas as rotas HTTP** sem abrir o Postman (smoke de método, path e controller):
+```bash
+npm run test:routes
+```
+
+Consulte [docs/COBERTURA_ENDPOINTS.md](./docs/COBERTURA_ENDPOINTS.md) para a lista completa de endpoints cobertos.
 
 ### Criando uma Conta de Administrador Inicial (Seed)
 Caso você esteja subindo o sistema do zero e precise de um usuário com privilégios de **ADMIN** para começar a cadastrar outras coisas, criamos um seed para facilitar o processo.

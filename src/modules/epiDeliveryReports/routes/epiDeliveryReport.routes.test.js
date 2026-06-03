@@ -62,6 +62,22 @@ describe('EpiDeliveryReport Routes', () => {
         expect(controllerMock.listPending).toHaveBeenCalled();
     });
 
+    it('GET /epi-delivery-reports/employee/:employeeId/archive deve listar arquivo', async () => {
+        const resposta = await request(app).get('/epi-delivery-reports/employee/e1/archive');
+
+        expect(resposta.statusCode).toBe(200);
+        expect(controllerMock.listArchiveByEmployee).toHaveBeenCalled();
+    });
+
+    it('PATCH /epi-delivery-reports/:id/flags deve atualizar flags', async () => {
+        const resposta = await request(app)
+            .patch('/epi-delivery-reports/rel1/flags')
+            .send({ foiImpresso: true });
+
+        expect(resposta.statusCode).toBe(200);
+        expect(controllerMock.updateFlags).toHaveBeenCalled();
+    });
+
     it('GET /epi-delivery-reports/:id/pdf deve baixar pdf', async () => {
         const resposta = await request(app).get('/epi-delivery-reports/rel1/pdf');
 

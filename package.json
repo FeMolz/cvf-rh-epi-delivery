@@ -18,6 +18,11 @@
     "seed:epis": "node prisma/seeders/seed_epis.js",
     "seed:dev-token": "node prisma/seeders/generate-dev-token.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:routes": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns routes.test --testPathPatterns app.health.test",
+    "dev:test": "node prisma/scripts/executar-com-ambiente-teste.mjs node_modules/nodemon/bin/nodemon.js src/server.js",
+    "db:test:push": "node prisma/scripts/preparar-banco-teste.mjs --apenas-schema",
+    "db:test:seed": "node prisma/scripts/preparar-banco-teste.mjs",
+    "db:test:reset": "docker compose -f docker-compose.test.yml down -v && docker compose -f docker-compose.test.yml up -d && node prisma/scripts/preparar-banco-teste.mjs",
     "lint": "eslint src"
   },
   "dependencies": {
