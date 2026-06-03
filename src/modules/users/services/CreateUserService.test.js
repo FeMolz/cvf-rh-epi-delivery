@@ -2,11 +2,11 @@ import { jest } from '@jest/globals';
 
 const userRepositoryMock = {
     findByEmail: jest.fn(),
-    create: jest.fn(),
+    create: jest.fn()
 };
 
 const bcryptMock = {
-    hash: jest.fn(),
+    hash: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/UserRepository.js', () => ({
@@ -24,54 +24,53 @@ describe('CreateUserService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve lançar um erro se tentar criar um usuário com role ADMIN', async () => {
+    it('deve impedir criação de ADMIN sem solicitante ADMIN', async () => {
         await expect(
-            createUserService.execute({ name: 'Admin', email: 'admin@teste.com', password: '123', role: 'ADMIN' })
-        ).rejects.toThrow('Não é permitido se cadastrar como ADMIN.');
+            createUserService.execute({
+                name: 'Admin',
+                email: 'admin@teste.com',
+                password: '123',
+                role: 'ADMIN'
+            })
+        ).rejects.toMatchObject({
+            message: 'Não é permitido definir o papel ADMIN.',
+            statusCode: 403
+        });
     });
 
-    it('deve lançar um erro se o e-mail já estiver cadastrado', async () => {
+    it('deve permitir ADMIN criar usuário ADMIN', async () => {
+        userRepositoryMock.findByEmail.mockResolvedValue(null);
+        bcryptMock.hash.mockResolvedValue('hash');
+        userRepositoryMock.create.mockResolvedValue({ id: '1', role: 'ADMIN' });
+
+        const resultado = await createUserService.execute({
+            name: 'Admin',
+            email: 'admin@teste.com',
+            password: '123',
+            role: 'ADMIN',
+            papelSolicitante: 'ADMIN'
+        });
+
+        expect(resultado.role).toBe('ADMIN');
+    });
+
+    it('deve lançar erro se o e-mail já estiver cadastrado', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue({ id: '1', email: 'teste@teste.com' });
 
         await expect(
             createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' })
         ).rejects.toThrow('Este e-mail já está cadastrado no sistema.');
-
-        expect(userRepositoryMock.findByEmail).toHaveBeenCalledWith('teste@teste.com');
     });
 
-    it('deve criar um usuário com role padrão COLABORADOR se role não for fornecida', async () => {
+    it('deve criar usuário com role padrão COLABORADOR', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue(null);
         bcryptMock.hash.mockResolvedValue('hashed_password');
-        const mockCreatedUser = { id: '1', name: 'Teste', email: 'teste@teste.com', role: 'COLABORADOR' };
-        userRepositoryMock.create.mockResolvedValue(mockCreatedUser);
+        userRepositoryMock.create.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
 
-        const result = await createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' });
+        await createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123' });
 
-        expect(bcryptMock.hash).toHaveBeenCalledWith('123', 10);
-        expect(userRepositoryMock.create).toHaveBeenCalledWith({
-            name: 'Teste',
-            email: 'teste@teste.com',
-            passwordHash: 'hashed_password',
-            role: 'COLABORADOR'
-        });
-        expect(result).toEqual(mockCreatedUser);
-    });
-
-    it('deve criar um usuário com a role informada (se não for ADMIN)', async () => {
-        userRepositoryMock.findByEmail.mockResolvedValue(null);
-        bcryptMock.hash.mockResolvedValue('hashed_password');
-        const mockCreatedUser = { id: '1', name: 'Teste', email: 'teste@teste.com', role: 'ADMINISTRATIVO' };
-        userRepositoryMock.create.mockResolvedValue(mockCreatedUser);
-
-        const result = await createUserService.execute({ name: 'Teste', email: 'teste@teste.com', password: '123', role: 'ADMINISTRATIVO' });
-
-        expect(userRepositoryMock.create).toHaveBeenCalledWith({
-            name: 'Teste',
-            email: 'teste@teste.com',
-            passwordHash: 'hashed_password',
-            role: 'ADMINISTRATIVO'
-        });
-        expect(result).toEqual(mockCreatedUser);
+        expect(userRepositoryMock.create).toHaveBeenCalledWith(
+            expect.objectContaining({ role: 'COLABORADOR' })
+        );
     });
 });

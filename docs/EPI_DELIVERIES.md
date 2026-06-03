@@ -70,7 +70,7 @@ Prefixo Base: `/api/v1/epi-deliveries`
 | Método | Endpoint | Permissões Exigidas | Descrição |
 |---|---|---|---|
 | `POST` | `/` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Registra a entrega de um ou mais EPIs para um funcionário. |
-| `GET` | `/employee/:employeeId` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Retorna o histórico de todas as entregas realizadas para um funcionário. |
+| `GET` | `/employee/:employeeId` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Retorna o histórico de **entregas registradas** (`EpiDelivery`) para o funcionário. Retorna `404` se o funcionário não existir ou estiver excluído. Array vazio = nenhuma entrega foi feita via `POST /` (não lista EPIs vinculados ao cargo; use `GET /api/v1/roles-epis/:roleId`). |
 
 ## 6. Testes Automatizados (Jest)
 Todas as camadas deste módulo foram unitariamente testadas seguindo a norma de mock de módulos do ES6 (`jest.unstable_mockModule`):

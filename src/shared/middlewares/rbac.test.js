@@ -70,4 +70,14 @@ describe('authorize Middleware', () => {
         });
         expect(mockNext).not.toHaveBeenCalled();
     });
+
+    it('deve aceitar papéis informados como argumentos separados', () => {
+        const req = { user: { role: 'ADMINISTRATIVO' } };
+        const res = mockResponse();
+        const middleware = authorize('ADMIN', 'ADMINISTRATIVO', 'ALMOXARIFADO');
+
+        middleware(req, res, mockNext);
+
+        expect(mockNext).toHaveBeenCalled();
+    });
 });

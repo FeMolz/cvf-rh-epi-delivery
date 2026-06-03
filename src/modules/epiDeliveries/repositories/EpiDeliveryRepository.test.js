@@ -8,9 +8,6 @@ const prismaMock = {
     roleEpi: {
         findMany: jest.fn()
     },
-    employee: {
-        findUnique: jest.fn()
-    }
 };
 
 jest.unstable_mockModule('../../../config/database.js', () => ({
@@ -46,14 +43,6 @@ describe('EpiDeliveryRepository', () => {
         
         expect(result).toEqual([{ id: 1 }]);
         expect(prismaMock.roleEpi.findMany).toHaveBeenCalled();
-    });
-
-    it('findEmployeeById should call prisma.findUnique', async () => {
-        prismaMock.employee.findUnique.mockResolvedValue({ id: 'emp1' });
-        const result = await epiDeliveryRepository.findEmployeeById('emp1');
-        
-        expect(result).toEqual({ id: 'emp1' });
-        expect(prismaMock.employee.findUnique).toHaveBeenCalled();
     });
 
     it('findDeliveriesByEmployeeIdAndDeliveryDateRange should filter by deliveryDate', async () => {

@@ -6,8 +6,9 @@ const env = {
     DB_HOST: process.env.DB_HOST,
     NODE_ENV: process.env.NODE_ENV || 'development',
     JWT_SECRET: process.env.JWT_SECRET,
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN
-}
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+    CORS_ORIGINS: process.env.CORS_ORIGINS
+};
 
 if (!env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined in environment variables');

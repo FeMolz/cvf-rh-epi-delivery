@@ -5,7 +5,8 @@ const SELECAO_FUNCIONARIO_RELATORIO = {
     name: true,
     cpf: true,
     role: { select: { name: true } },
-    company: { select: { name: true } }
+    company: { select: { name: true } },
+    setor: { select: { nome: true } }
 };
 
 const SELECAO_USUARIO_GERADOR = {
@@ -32,16 +33,25 @@ class EpiDeliveryReportRepository {
      * @param {string} identificadorFuncionario
      */
     async findEmployeeContextForReport(identificadorFuncionario) {
-        return prisma.employee.findFirst({
-            where: { id: identificadorFuncionario, deletedAt: null },
+        const funcionario = await prisma.employee.findUnique({
+            where: { id: identificadorFuncionario },
             select: {
                 id: true,
                 name: true,
                 cpf: true,
+                deletedAt: true,
                 role: { select: { name: true } },
-                company: { select: { name: true } }
+                company: { select: { name: true } },
+                setor: { select: { nome: true } }
             }
         });
+
+        if (!funcionario || funcionario.deletedAt) {
+            return null;
+        }
+
+        const { deletedAt: _excluidoEm, ...contextoRelatorio } = funcionario;
+        return contextoRelatorio;
     }
 
     /**

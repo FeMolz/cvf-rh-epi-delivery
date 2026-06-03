@@ -16,7 +16,8 @@ function sanitizarNomeFuncionarioParaArquivo(nomeBruto) {
     }
     const texto = nomeBruto
         .trim()
-        .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '')
+        .replace(/[<>:"/\\|?*]/g, '')
+        .replace(/\p{Cc}/gu, '')
         .replace(/\.+$/g, '')
         .replace(/\s+/g, '_')
         .replace(/_+/g, '_')

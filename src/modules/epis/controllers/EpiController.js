@@ -1,34 +1,46 @@
 import fetchEpiFromApiService from '../services/FetchEpiFromApiService.js';
 import changeEpiPeriodicityService from '../services/ChangeEpiPeriodicityService.js';
 import listCachedEpisService from '../services/ListCachedEpisService.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 
 class EpiController {
-    async findByCa(req, res) {
+    constructor() {
+        this.findByCa = this.findByCa.bind(this);
+        this.changePeriodicity = this.changePeriodicity.bind(this);
+        this.findAllLocal = this.findAllLocal.bind(this);
+    }
+
+    async findByCa(requisicao, resposta, proximo) {
         try {
-            const { caNumber } = req.params;
+            const { caNumber } = requisicao.params;
             const epi = await fetchEpiFromApiService.execute(caNumber);
-            return res.status(200).json(epi);
-        } catch (error) {
-            return res.status(404).json({ error: error.message });
+            return resposta.status(200).json(epi);
+        } catch (erro) {
+            const erroHttp = criarErroHttp(erro.message, 404);
+            return proximo(erroHttp);
         }
     }
 
-    async changePeriodicity(req, res) {
+    async changePeriodicity(requisicao, resposta, proximo) {
         try {
-            const { roleId, epiId, newPeriodicityDays } = req.body;
-            const result = await changeEpiPeriodicityService.execute({ roleId, epiId, newPeriodicityDays });
-            return res.status(200).json(result);
-        } catch (error) {
-            return res.status(400).json({ error: error.message });
+            const { roleId, epiId, newPeriodicityDays } = requisicao.body;
+            const resultado = await changeEpiPeriodicityService.execute({
+                roleId,
+                epiId,
+                newPeriodicityDays
+            });
+            return resposta.status(200).json(resultado);
+        } catch (erro) {
+            return proximo(criarErroHttp(erro.message));
         }
     }
 
-    async findAllLocal(req, res) {
+    async findAllLocal(_requisicao, resposta, proximo) {
         try {
             const epis = await listCachedEpisService.execute();
-            return res.status(200).json(epis);
-        } catch (error) {
-            return res.status(500).json({ error: 'Erro ao buscar EPIs.' });
+            return resposta.status(200).json(epis);
+        } catch (erro) {
+            return proximo(criarErroHttp('Erro ao buscar EPIs.', 500));
         }
     }
 }

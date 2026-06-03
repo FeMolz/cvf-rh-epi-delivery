@@ -1,14 +1,22 @@
-export const authorize = (allowedRoles = []) => {
-    return (req, res, next) => {
-        const { role } = req.user;
+/**
+ * @param {string[] | string} papeisPermitidosEntrada
+ * @returns {import('express').RequestHandler}
+ */
+export const authorize = (...papeisPermitidosEntrada) => {
+    const listaPapeis = Array.isArray(papeisPermitidosEntrada[0])
+        ? papeisPermitidosEntrada[0]
+        : papeisPermitidosEntrada;
 
-        if (!allowedRoles.includes(role)) {
-            return res.status(403).json({
+    return (requisicao, resposta, proximo) => {
+        const papelUsuario = requisicao.user?.role;
+
+        if (!listaPapeis.includes(papelUsuario)) {
+            return resposta.status(403).json({
                 status: 'error',
-                message: 'Você não tem permissão para acessar esse recurso.',
+                message: 'Você não tem permissão para acessar esse recurso.'
             });
         }
 
-        next();
+        return proximo();
     };
 };

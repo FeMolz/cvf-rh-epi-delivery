@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 
 const prismaMock = {
     employee: {
-        findFirst: jest.fn()
+        findUnique: jest.fn()
     },
     epiDeliveryReport: {
         create: jest.fn(),
@@ -23,11 +23,37 @@ describe('EpiDeliveryReportRepository', () => {
         jest.clearAllMocks();
     });
 
-    it('findEmployeeContextForReport deve consultar funcionario ativo', async () => {
-        prismaMock.employee.findFirst.mockResolvedValue({ id: 'e1', name: 'Joao' });
+    it('findEmployeeContextForReport deve retornar contexto sem deletedAt', async () => {
+        prismaMock.employee.findUnique.mockResolvedValue({
+            id: 'e1',
+            name: 'Joao',
+            deletedAt: null,
+            cpf: '1',
+            role: { name: 'Cargo' },
+            company: { name: 'Empresa' },
+            setor: { nome: 'Setor' }
+        });
         const resultado = await epiDeliveryReportRepository.findEmployeeContextForReport('e1');
-        expect(resultado).toEqual({ id: 'e1', name: 'Joao' });
-        expect(prismaMock.employee.findFirst).toHaveBeenCalled();
+        expect(resultado).toEqual({
+            id: 'e1',
+            name: 'Joao',
+            cpf: '1',
+            role: { name: 'Cargo' },
+            company: { name: 'Empresa' },
+            setor: { nome: 'Setor' }
+        });
+        expect(prismaMock.employee.findUnique).toHaveBeenCalledWith(
+            expect.objectContaining({ where: { id: 'e1' } })
+        );
+    });
+
+    it('findEmployeeContextForReport deve retornar null para funcionario excluido', async () => {
+        prismaMock.employee.findUnique.mockResolvedValue({
+            id: 'e1',
+            deletedAt: new Date()
+        });
+        const resultado = await epiDeliveryReportRepository.findEmployeeContextForReport('e1');
+        expect(resultado).toBeNull();
     });
 
     it('createReport deve persistir relatorio', async () => {

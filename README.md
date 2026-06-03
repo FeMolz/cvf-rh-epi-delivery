@@ -63,6 +63,13 @@ DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/NOME_DO_BANCO?sc
 JWT_SECRET="adicione_uma_chave_secreta_robusta_aqui"
 JWT_EXPIRES_IN="7d"
 
+# CORS: origens permitidas separadas por vírgula (produção). Omitir = liberado (desenvolvimento).
+# CORS_ORIGINS="https://app.empresa.com"
+
+# Rate limit (opcional): login e rotas públicas de recrutamento
+# RATE_LIMIT_LOGIN_MAX=20
+# RATE_LIMIT_PUBLICO_MAX=60
+
 # URL base da API baseCAEPI (consulta GET /CA/:numero). Obrigatório para testes locais manuais e seed de EPIs quando o CA ainda não está no PostgreSQL — suba a API com Docker e alinhe host/porta (ver docs/EPI.md).
 # CAEPI_API_URL="http://localhost:8080"
 

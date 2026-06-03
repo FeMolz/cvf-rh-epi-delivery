@@ -1,31 +1,45 @@
-import userRepository from "../repositories/UserRepository.js";
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
+import userRepository from '../repositories/UserRepository.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
+import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
+import {
+    MENSAGEM_EMAIL_JA_CADASTRADO,
+    MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN,
+    PAPEL_PADRAO_NOVO_USUARIO
+} from '../constants/usuarioConstantes.js';
 
 class CreateUserService {
-    async execute({ name, email, password, role }) {
+    /**
+     * @param {{
+     *   name: string,
+     *   email: string,
+     *   password: string,
+     *   role?: string,
+     *   papelSolicitante?: string
+     * }} entrada
+     */
+    async execute(entrada) {
+        const { name, email, password, role, papelSolicitante } = entrada;
+        const papelInformado = role || PAPEL_PADRAO_NOVO_USUARIO;
 
-        if (role === 'ADMIN') {
-            throw new Error("Não é permitido se cadastrar como ADMIN.");
+        if (papelInformado === PAPEL_ADMIN && papelSolicitante !== PAPEL_ADMIN) {
+            throw criarErroHttp(MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN, 403);
         }
 
-        const finalRole = role ? role : 'COLABORADOR';
+        const emailExistente = await userRepository.findByEmail(email);
 
-        const emailExists = await userRepository.findByEmail(email);
-
-        if (emailExists) {
-            throw new Error("Este e-mail já está cadastrado no sistema.");
+        if (emailExistente) {
+            throw criarErroHttp(MENSAGEM_EMAIL_JA_CADASTRADO);
         }
 
-        const passwordHash = await bcrypt.hash(password, 10);
+        const hashSenha = await bcrypt.hash(password, 10);
 
-        const user = await userRepository.create({
+        return userRepository.create({
             name,
             email,
-            passwordHash,
-            role: finalRole
+            passwordHash: hashSenha,
+            role: papelInformado
         });
-
-        return user;
     }
 }
 

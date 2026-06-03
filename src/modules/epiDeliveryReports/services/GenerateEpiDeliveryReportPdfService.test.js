@@ -42,7 +42,8 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
             name: 'Joao',
             cpf: '123',
             role: { name: 'Cargo X' },
-            company: { name: 'Empresa Y' }
+            company: { name: 'Empresa Y' },
+            setor: { nome: 'Setor Z' }
         });
         epiDeliveryRepositoryMock.findDeliveriesByEmployeeIdAndDeliveryDateRange.mockResolvedValue([
             {
@@ -63,6 +64,7 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         expect(pdfProviderMock.gerarBufferPdf).toHaveBeenCalledWith(
             expect.objectContaining({
                 nomeFuncionario: 'Joao',
+                nomeSetor: 'Setor Z',
                 entregasTabela: [
                     expect.objectContaining({
                         nomeEquipamento: 'Capacete',
@@ -99,7 +101,8 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
             name: 'Joao',
             cpf: '123',
             role: { name: 'Cargo X' },
-            company: { name: 'Empresa Y' }
+            company: { name: 'Empresa Y' },
+            setor: { nome: 'Setor Z' }
         });
         epiDeliveryRepositoryMock.findDeliveriesByEmployeeIdAndDeliveryDateRange.mockResolvedValue([]);
         epiDeliveryReportRepositoryMock.createReport.mockRejectedValue(new Error('falha banco'));

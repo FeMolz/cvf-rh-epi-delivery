@@ -1,9 +1,12 @@
 import { jest } from '@jest/globals';
 
 const epiDeliveryRepositoryMock = {
-    findEmployeeById: jest.fn(),
     findRoleEpisByRoleId: jest.fn(),
     createBatch: jest.fn()
+};
+
+const employeeRepositoryMock = {
+    findById: jest.fn()
 };
 
 const fetchEpiFromApiServiceMock = {
@@ -12,6 +15,10 @@ const fetchEpiFromApiServiceMock = {
 
 jest.unstable_mockModule('../repositories/EpiDeliveryRepository.js', () => ({
     default: epiDeliveryRepositoryMock
+}));
+
+jest.unstable_mockModule('../../employees/repositories/EmployeeRepository.js', () => ({
+    default: employeeRepositoryMock
 }));
 
 jest.unstable_mockModule('../../epis/services/FetchEpiFromApiService.js', () => ({
@@ -34,12 +41,12 @@ describe('CreateEpiDeliveryService', () => {
     });
 
     it('should throw error if employee does not exist', async () => {
-        epiDeliveryRepositoryMock.findEmployeeById.mockResolvedValue(null);
+        employeeRepositoryMock.findById.mockResolvedValue(null);
         await expect(createEpiDeliveryService.execute({ employeeId: '1', caNumbers: ['11070'], deliveredById: '2' })).rejects.toThrow('Funcionário não encontrado.');
     });
 
     it('should process multiple deliveries with correct periodicity', async () => {
-        epiDeliveryRepositoryMock.findEmployeeById.mockResolvedValue({ id: '1', roleId: 'role1' });
+        employeeRepositoryMock.findById.mockResolvedValue({ id: '1', roleId: 'role1', deletedAt: null });
         epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([{ epiId: 'epi1', periodicityDays: 30 }]);
         
         fetchEpiFromApiServiceMock.execute.mockResolvedValueOnce({ id: 'epi1' }); // Found in role
@@ -58,5 +65,16 @@ describe('CreateEpiDeliveryService', () => {
         expect(createBatchArgs[0].nextDueDate).not.toBeNull();
         // O segundo não tem porque não tem vinculo no cargo
         expect(createBatchArgs[1].nextDueDate).toBeNull();
+    });
+
+    it('deve falhar quando createMany não persistir todas as entregas', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({ id: '1', roleId: 'role1', deletedAt: null });
+        epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([]);
+        fetchEpiFromApiServiceMock.execute.mockResolvedValue({ id: 'epi1' });
+        epiDeliveryRepositoryMock.createBatch.mockResolvedValue({ count: 0 });
+
+        await expect(
+            createEpiDeliveryService.execute({ employeeId: '1', caNumbers: ['11070'], deliveredById: '2' })
+        ).rejects.toThrow('Falha ao registrar uma ou mais entregas no banco de dados.');
     });
 });

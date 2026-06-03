@@ -26,13 +26,6 @@ class EpiDeliveryRepository {
         });
     }
 
-    async findEmployeeById(employeeId) {
-        return prisma.employee.findUnique({
-            where: { id: employeeId },
-            select: { id: true, roleId: true }
-        });
-    }
-
     async findDeliveriesByEmployeeIdAndDeliveryDateRange(employeeId, dataInicio, dataFim) {
         return prisma.epiDelivery.findMany({
             where: {

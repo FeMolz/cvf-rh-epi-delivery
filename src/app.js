@@ -1,14 +1,19 @@
-import express from "express";
-import cors from "cors";
+import express from 'express';
+import prisma from './config/database.js';
+import { configurarCors } from './shared/middlewares/configurarCors.js';
+import { configurarHelmet } from './shared/middlewares/configurarHelmet.js';
+import { identificadorRequisicao } from './shared/middlewares/identificadorRequisicao.js';
+
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(identificadorRequisicao());
+app.use(configurarHelmet());
+app.use(configurarCors());
+app.use(express.json({ limit: '1mb' }));
 
 // ------------------------------------------------------------------------------------------------------------------------------------
 // Importar rotas modulares
 // ------------------------------------------------------------------------------------------------------------------------------------
-// import authRoutes from './modules/users/routes/authRoutes.js';
 import roleRoutes from './modules/roles/routes/role.routes.js';
 import userRoutes from './modules/users/routes/user.routes.js';
 import employeeRoutes from './modules/employees/routes/employee.routes.js';
@@ -23,53 +28,52 @@ import quesitoToRoleRoutes from './modules/chaining/quesitoToRole/routes/quesito
 import recruitmentRoutes from './modules/recruitment/routes/recruitment.routes.js';
 import pontoRoutes from './modules/ponto/routes/ponto.routes.js';
 
-// ------------------------------------------------------------------------------------------------------------------------------------
-// Usar rotas modulares
-// ------------------------------------------------------------------------------------------------------------------------------------
-// app.use('/api/auth', authRoutes);
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "Sistema de RH e SST rodando perfeitamente",
-  });
+app.get('/health', async (_requisicao, resposta) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        return resposta.status(200).json({
+            status: 'OK',
+            database: 'OK',
+            message: 'Sistema de RH e SST operacional'
+        });
+    } catch {
+        return resposta.status(503).json({
+            status: 'DEGRADED',
+            database: 'UNAVAILABLE',
+            message: 'API no ar, mas banco de dados indisponível'
+        });
+    }
 });
 
-app.use("/api/v1/roles", roleRoutes);
+app.use('/api/v1/roles', roleRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/employees', employeeRoutes);
+app.use('/api/v1/companies', companyRoutes);
+app.use('/api/v1/setores', setorRoutes);
+app.use('/api/v1/epis', epiRoutes);
+app.use('/api/v1/roles-epis', epiToRoleRoutes);
+app.use('/api/v1/epi-deliveries', epiDeliveryRoutes);
+app.use('/api/v1/epi-delivery-reports', epiDeliveryReportRoutes);
+app.use('/api/v1/quesitos', quesitoRoutes);
+app.use('/api/v1/roles-quesitos', quesitoToRoleRoutes);
+app.use('/api/v1/recruitment', recruitmentRoutes);
+app.use('/api/v1/ponto', pontoRoutes);
 
-app.use("/api/v1/users", userRoutes);
+app.use((erro, requisicao, resposta, _proximo) => {
+    const identificador = requisicao.idRequisicao || 'sem-id';
 
-app.use("/api/v1/employees", employeeRoutes);
+    if (process.env.NODE_ENV === 'production') {
+        console.error(`[${identificador}]`, erro.message);
+    } else {
+        console.error(`[${identificador}]`, erro.stack);
+    }
 
-app.use("/api/v1/companies", companyRoutes);
+    const codigoStatus = erro.statusCode || 500;
 
-app.use("/api/v1/setores", setorRoutes);
-
-app.use("/api/v1/epis", epiRoutes);
-
-app.use("/api/v1/roles-epis", epiToRoleRoutes);
-
-app.use("/api/v1/epi-deliveries", epiDeliveryRoutes);
-
-app.use("/api/v1/epi-delivery-reports", epiDeliveryReportRoutes);
-
-app.use("/api/v1/quesitos", quesitoRoutes);
-
-app.use("/api/v1/roles-quesitos", quesitoToRoleRoutes);
-
-app.use("/api/v1/recruitment", recruitmentRoutes);
-
-app.use("/api/v1/ponto", pontoRoutes);
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-
-  const statusCode = err.statusCode || 500;
-
-  res.status(statusCode).json({
-    error: err.message || 'Ocorreu um erro interno no servidor'
-  });
+    resposta.status(codigoStatus).json({
+        error: erro.message || 'Ocorreu um erro interno no servidor',
+        requestId: identificador
+    });
 });
 
 export default app;

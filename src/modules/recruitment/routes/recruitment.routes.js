@@ -7,26 +7,35 @@ import { middlewareUploadCurriculo } from '../middlewares/uploadCurriculoMiddlew
 import { ROLES_GESTAO_RECRUTAMENTO } from '../constants/recrutamentoConstantes.js';
 import { isAuthenticated } from '../../../shared/middlewares/auth.js';
 import { authorize } from '../../../shared/middlewares/rbac.js';
+import { limitadorTaxaRotasPublicas } from '../../../shared/middlewares/criarLimitadorTaxa.js';
 
 const { Router } = express;
 const recruitmentRoutes = Router();
 
-recruitmentRoutes.get('/publico/vagas/:id', (requisicao, resposta, proximo) =>
-    anuncioVagaController.getPublico(requisicao, resposta, proximo)
+recruitmentRoutes.get(
+    '/publico/vagas/:id',
+    limitadorTaxaRotasPublicas,
+    (requisicao, resposta, proximo) => anuncioVagaController.getPublico(requisicao, resposta, proximo)
 );
 
 recruitmentRoutes.post(
     '/publico/vagas/:id/candidaturas',
+    limitadorTaxaRotasPublicas,
     middlewareUploadCurriculo,
     (requisicao, resposta, proximo) => candidaturaController.createPublica(requisicao, resposta, proximo)
 );
 
-recruitmentRoutes.get('/publico/cadastro-contratacao/:token', (requisicao, resposta, proximo) =>
-    cadastroContratacaoController.getPublico(requisicao, resposta, proximo)
+recruitmentRoutes.get(
+    '/publico/cadastro-contratacao/:token',
+    limitadorTaxaRotasPublicas,
+    (requisicao, resposta, proximo) => cadastroContratacaoController.getPublico(requisicao, resposta, proximo)
 );
 
-recruitmentRoutes.post('/publico/cadastro-contratacao/:token', (requisicao, resposta, proximo) =>
-    cadastroContratacaoController.submeterPublico(requisicao, resposta, proximo)
+recruitmentRoutes.post(
+    '/publico/cadastro-contratacao/:token',
+    limitadorTaxaRotasPublicas,
+    (requisicao, resposta, proximo) =>
+        cadastroContratacaoController.submeterPublico(requisicao, resposta, proximo)
 );
 
 recruitmentRoutes.post(

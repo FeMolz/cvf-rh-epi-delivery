@@ -1,5 +1,5 @@
 import createEpiDeliveryService from '../services/CreateEpiDeliveryService.js';
-import epiDeliveryRepository from '../repositories/EpiDeliveryRepository.js';
+import listEpiDeliveriesByEmployeeService from '../services/ListEpiDeliveriesByEmployeeService.js';
 
 class EpiDeliveryController {
     async create(req, res, next) {
@@ -23,15 +23,18 @@ class EpiDeliveryController {
         }
     }
 
-    async listByEmployee(req, res, next) {
+    async listByEmployee(requisicao, resposta, proximo) {
         try {
-            const { employeeId } = req.params;
+            const entregas = await listEpiDeliveriesByEmployeeService.execute(
+                requisicao.params.employeeId
+            );
 
-            const deliveries = await epiDeliveryRepository.findByEmployeeId(employeeId);
-
-            return res.status(200).json(deliveries);
-        } catch (error) {
-            next(error);
+            return resposta.status(200).json(entregas);
+        } catch (erro) {
+            if (erro.statusCode === 400 || erro.statusCode === 404) {
+                return resposta.status(erro.statusCode).json({ error: erro.message });
+            }
+            return proximo(erro);
         }
     }
 }

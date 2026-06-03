@@ -1,32 +1,40 @@
-import epiDeliveryReportPdfProvider from './EpiDeliveryReportPdfProvider.js';
+import { jest } from '@jest/globals';
+
+const montarHtmlMock = jest.fn(() => '<html>relatorio</html>');
+const renderizarPdfMock = jest.fn(() => Promise.resolve(Buffer.from('%PDF-test')));
+
+jest.unstable_mockModule('./montarHtmlRelatorioEntregaEpi.js', () => ({
+    montarHtmlRelatorioEntregaEpi: montarHtmlMock
+}));
+
+jest.unstable_mockModule('./renderizarHtmlParaPdf.js', () => ({
+    renderizarHtmlParaPdf: renderizarPdfMock
+}));
+
+const epiDeliveryReportPdfProvider = (await import('./EpiDeliveryReportPdfProvider.js')).default;
 
 describe('EpiDeliveryReportPdfProvider', () => {
-    it('gerarBufferPdf deve retornar PDF em buffer com conteudo minimo', async () => {
-        const bufferPdf = await epiDeliveryReportPdfProvider.gerarBufferPdf({
-            nomeFuncionario: 'Usuario Teste',
-            cpfFuncionario: '12345678901',
-            nomeCargo: 'Operador',
-            nomeEmpresa: 'Empresa Teste',
-            textoPeriodoReferencia: '01/02/2026 a 15/02/2026',
-            entregasTabela: [
-                { dataEntrega: '05/02/2026', nomeEquipamento: 'Capacete', numeroCa: '11070' }
-            ]
-        });
-        expect(Buffer.isBuffer(bufferPdf)).toBe(true);
-        expect(bufferPdf.length).toBeGreaterThan(400);
-        expect(bufferPdf.subarray(0, 4).toString()).toBe('%PDF');
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('gerarBufferPdf deve aceitar lista de entregas vazia', async () => {
-        const bufferPdf = await epiDeliveryReportPdfProvider.gerarBufferPdf({
-            nomeFuncionario: 'Usuario Teste',
-            cpfFuncionario: '12345678901',
-            nomeCargo: 'Operador',
-            nomeEmpresa: 'Empresa Teste',
-            textoPeriodoReferencia: '01/02/2026 a 02/02/2026',
-            entregasTabela: []
-        });
+    const payloadExemplo = {
+        nomeFuncionario: 'Usuario Teste',
+        nomeCargo: 'Operador',
+        nomeEmpresa: 'Empresa Teste',
+        nomeSetor: 'Almoxarifado',
+        textoPeriodoReferencia: '01/02/2026 a 15/02/2026',
+        entregasTabela: [
+            { dataEntrega: '05/02/2026', nomeEquipamento: 'Capacete', numeroCa: '11070' }
+        ]
+    };
+
+    it('gerarBufferPdf deve montar HTML e renderizar PDF', async () => {
+        const bufferPdf = await epiDeliveryReportPdfProvider.gerarBufferPdf(payloadExemplo);
+
+        expect(montarHtmlMock).toHaveBeenCalledWith(payloadExemplo);
+        expect(renderizarPdfMock).toHaveBeenCalledWith('<html>relatorio</html>');
         expect(Buffer.isBuffer(bufferPdf)).toBe(true);
-        expect(bufferPdf.subarray(0, 4).toString()).toBe('%PDF');
+        expect(bufferPdf.toString()).toBe('%PDF-test');
     });
 });

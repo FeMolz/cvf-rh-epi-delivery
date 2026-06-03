@@ -4,16 +4,29 @@ const { Router } = express;
 import epiController from '../controllers/EpiController.js';
 import { isAuthenticated } from '../../../shared/middlewares/auth.js';
 import { authorize } from '../../../shared/middlewares/rbac.js';
+import { PAPEIS_GESTAO_RH, PAPEIS_OPERACAO_EPI } from '../../../shared/constants/papeisUsuarioConstantes.js';
 
 const epiRoutes = Router();
 
-// Buscar informações de um EPI pelo CA (salva localmente se não existir)
-epiRoutes.get('/:caNumber', isAuthenticated, authorize(['ADMIN', 'ADMINISTRATIVO', 'ALMOXARIFADO']), epiController.findByCa);
+epiRoutes.get(
+    '/:caNumber',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) => epiController.findByCa(requisicao, resposta, proximo)
+);
 
-// Listar EPIs cacheados localmente
-epiRoutes.get('/', isAuthenticated, authorize(['ADMIN', 'ADMINISTRATIVO', 'ALMOXARIFADO']), epiController.findAllLocal);
+epiRoutes.get(
+    '/',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) => epiController.findAllLocal(requisicao, resposta, proximo)
+);
 
-// Alterar a periodicidade de um EPI vinculado a um cargo
-epiRoutes.put('/periodicity', isAuthenticated, authorize(['ADMIN', 'ADMINISTRATIVO']), epiController.changePeriodicity);
+epiRoutes.put(
+    '/periodicity',
+    isAuthenticated,
+    authorize(PAPEIS_GESTAO_RH),
+    (requisicao, resposta, proximo) => epiController.changePeriodicity(requisicao, resposta, proximo)
+);
 
 export default epiRoutes;

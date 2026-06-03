@@ -1,5 +1,10 @@
 import epiDeliveryRepository from '../repositories/EpiDeliveryRepository.js';
+import employeeRepository from '../../employees/repositories/EmployeeRepository.js';
 import fetchEpiFromApiService from '../../epis/services/FetchEpiFromApiService.js';
+import {
+    MENSAGEM_FALHA_PERSISTIR_ENTREGAS,
+    MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
+} from '../constants/entregaEpiConstantes.js';
 
 class CreateEpiDeliveryService {
     async execute({ employeeId, caNumbers, deliveredById }) {
@@ -7,15 +12,15 @@ class CreateEpiDeliveryService {
             throw new Error('employeeId, caNumbers (array) e deliveredById são obrigatórios.');
         }
 
-        // 1. Validar se o funcionário existe via repositório
-        const employee = await epiDeliveryRepository.findEmployeeById(employeeId);
+        const identificadorFuncionario = String(employeeId).trim();
+        const funcionario = await employeeRepository.findById(identificadorFuncionario);
 
-        if (!employee) {
-            throw new Error('Funcionário não encontrado.');
+        if (!funcionario || funcionario.deletedAt) {
+            throw new Error(MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO);
         }
 
         // 2. Buscar as regras de periodicidade para o cargo do funcionário
-        const roleEpis = await epiDeliveryRepository.findRoleEpisByRoleId(employee.roleId);
+        const roleEpis = await epiDeliveryRepository.findRoleEpisByRoleId(funcionario.roleId);
 
         const deliveriesData = [];
         const currentDate = new Date();
@@ -36,7 +41,7 @@ class CreateEpiDeliveryService {
             }
 
             deliveriesData.push({
-                employeeId: employee.id,
+                employeeId: funcionario.id,
                 epiId: epi.id,
                 deliveredById: deliveredById,
                 deliveryDate: currentDate,
@@ -44,12 +49,15 @@ class CreateEpiDeliveryService {
             });
         }
 
-        // 4. Salvar todas as entregas em lote no banco
-        await epiDeliveryRepository.createBatch(deliveriesData);
+        const resultadoPersistencia = await epiDeliveryRepository.createBatch(deliveriesData);
+
+        if (resultadoPersistencia.count !== deliveriesData.length) {
+            throw new Error(MENSAGEM_FALHA_PERSISTIR_ENTREGAS);
+        }
 
         return {
-            message: `${deliveriesData.length} EPI(s) entregue(s) com sucesso.`,
-            count: deliveriesData.length
+            message: `${resultadoPersistencia.count} EPI(s) entregue(s) com sucesso.`,
+            count: resultadoPersistencia.count
         };
     }
 }

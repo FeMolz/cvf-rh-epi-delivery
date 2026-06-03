@@ -4,16 +4,16 @@ const createEpiDeliveryServiceMock = {
     execute: jest.fn()
 };
 
-const epiDeliveryRepositoryMock = {
-    findByEmployeeId: jest.fn()
+const listEpiDeliveriesByEmployeeServiceMock = {
+    execute: jest.fn()
 };
 
 jest.unstable_mockModule('../services/CreateEpiDeliveryService.js', () => ({
     default: createEpiDeliveryServiceMock
 }));
 
-jest.unstable_mockModule('../repositories/EpiDeliveryRepository.js', () => ({
-    default: epiDeliveryRepositoryMock
+jest.unstable_mockModule('../services/ListEpiDeliveriesByEmployeeService.js', () => ({
+    default: listEpiDeliveriesByEmployeeServiceMock
 }));
 
 const epiDeliveryController = (await import('./EpiDeliveryController.js')).default;
@@ -24,34 +24,52 @@ describe('EpiDeliveryController', () => {
     });
 
     it('create should return 201 on success', async () => {
-        const mockReq = { 
+        const requisicao = {
             body: { employeeId: '1', caNumbers: ['11070', '4280'] },
             user: { id: 'admin1' }
         };
-        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-        const mockNext = jest.fn();
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
 
         createEpiDeliveryServiceMock.execute.mockResolvedValue({ count: 2 });
-        
-        await epiDeliveryController.create(mockReq, mockRes, mockNext);
 
-        expect(mockRes.status).toHaveBeenCalledWith(201);
-        expect(mockRes.json).toHaveBeenCalledWith({ count: 2 });
+        await epiDeliveryController.create(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(201);
+        expect(resposta.json).toHaveBeenCalledWith({ count: 2 });
         expect(createEpiDeliveryServiceMock.execute).toHaveBeenCalledWith({
-            employeeId: '1', caNumbers: ['11070', '4280'], deliveredById: 'admin1'
+            employeeId: '1',
+            caNumbers: ['11070', '4280'],
+            deliveredById: 'admin1'
         });
     });
 
-    it('listByEmployee should return 200 and list', async () => {
-        const mockReq = { params: { employeeId: '1' } };
-        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-        const mockNext = jest.fn();
+    it('listByEmployee deve retornar 200 com a lista', async () => {
+        const requisicao = { params: { employeeId: '1' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
 
-        epiDeliveryRepositoryMock.findByEmployeeId.mockResolvedValue([{ id: 'del1' }]);
-        
-        await epiDeliveryController.listByEmployee(mockReq, mockRes, mockNext);
+        listEpiDeliveriesByEmployeeServiceMock.execute.mockResolvedValue([{ id: 'del1' }]);
 
-        expect(mockRes.status).toHaveBeenCalledWith(200);
-        expect(mockRes.json).toHaveBeenCalledWith([{ id: 'del1' }]);
+        await epiDeliveryController.listByEmployee(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith([{ id: 'del1' }]);
+    });
+
+    it('listByEmployee deve retornar 404 quando funcionário não existir', async () => {
+        const requisicao = { params: { employeeId: 'inexistente' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        listEpiDeliveriesByEmployeeServiceMock.execute.mockRejectedValue({
+            message: 'Funcionário não encontrado.',
+            statusCode: 404
+        });
+
+        await epiDeliveryController.listByEmployee(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).not.toHaveBeenCalled();
     });
 });

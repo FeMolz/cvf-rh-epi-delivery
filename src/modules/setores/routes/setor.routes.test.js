@@ -3,7 +3,14 @@ import request from 'supertest';
 import express from 'express';
 
 jest.unstable_mockModule('../../../shared/middlewares/auth.js', () => ({
-    isAuthenticated: jest.fn((request, response, next) => next())
+    isAuthenticated: jest.fn((requisicao, _resposta, proximo) => {
+        requisicao.user = { role: 'ADMIN' };
+        return proximo();
+    })
+}));
+
+jest.unstable_mockModule('../../../shared/middlewares/rbac.js', () => ({
+    authorize: jest.fn(() => (_requisicao, _resposta, proximo) => proximo())
 }));
 
 jest.unstable_mockModule('../controllers/SetorController.js', () => ({

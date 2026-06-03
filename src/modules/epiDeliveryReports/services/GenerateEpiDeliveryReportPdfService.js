@@ -49,9 +49,9 @@ class GenerateEpiDeliveryReportPdfService {
 
         const bufferPdf = await epiDeliveryReportPdfProvider.gerarBufferPdf({
             nomeFuncionario: contextoFuncionario.name,
-            cpfFuncionario: contextoFuncionario.cpf,
             nomeCargo: contextoFuncionario.role.name,
             nomeEmpresa: contextoFuncionario.company.name,
+            nomeSetor: contextoFuncionario.setor.nome,
             textoPeriodoReferencia,
             entregasTabela
         });

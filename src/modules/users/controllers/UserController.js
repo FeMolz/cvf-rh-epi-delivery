@@ -1,142 +1,139 @@
-import createUserService from "../services/CreateUserService.js";
-import userRepository from "../repositories/UserRepository.js";
-import authenticateUserService from "../services/AuthenticateUserService.js";
-import bcrypt from 'bcryptjs';
+import createUserService from '../services/CreateUserService.js';
+import authenticateUserService from '../services/AuthenticateUserService.js';
+import listUsersService from '../services/ListUsersService.js';
+import findUserByIdService from '../services/FindUserByIdService.js';
+import findUserByEmailService from '../services/FindUserByEmailService.js';
+import updateUserService from '../services/UpdateUserService.js';
+import deleteUserService from '../services/DeleteUserService.js';
+import deleteMeService from '../services/DeleteMeService.js';
+import changePasswordService from '../services/ChangePasswordService.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
+import {
+    MENSAGEM_CAMPOS_OBRIGATORIOS_CRIAR_USUARIO,
+    MENSAGEM_EMAIL_SENHA_OBRIGATORIOS_LOGIN
+} from '../constants/usuarioConstantes.js';
 
 class UserController {
-    async create(req, res) {
+    constructor() {
+        this.create = this.create.bind(this);
+        this.login = this.login.bind(this);
+        this.findAll = this.findAll.bind(this);
+        this.findById = this.findById.bind(this);
+        this.findByEmail = this.findByEmail.bind(this);
+        this.update = this.update.bind(this);
+        this.delete = this.delete.bind(this);
+        this.deleteMe = this.deleteMe.bind(this);
+        this.changePassword = this.changePassword.bind(this);
+    }
+
+    async create(requisicao, resposta, proximo) {
         try {
-            const { name, email, password, role } = req.body;
+            const { name, email, password, role } = requisicao.body;
 
             if (!name || !email || !password) {
-                return res.status(400).json({ error: "Missing required fields" });
+                throw criarErroHttp(MENSAGEM_CAMPOS_OBRIGATORIOS_CRIAR_USUARIO);
             }
 
-            const result = await createUserService.execute({ name, email, password, role });
+            const usuario = await createUserService.execute({
+                name,
+                email,
+                password,
+                role,
+                papelSolicitante: requisicao.user?.role
+            });
 
-            if (result instanceof Error) {
-                return res.status(400).json({ error: result.message });
-            }
-
-            return res.status(201).json(result);
-
-        } catch (error) {
-            console.error("Error creating user:", error);
-            return res.status(500).json({ error: "Internal server error" });
+            return resposta.status(201).json(usuario);
+        } catch (erro) {
+            return proximo(erro);
         }
     }
 
-    async findAll(req, res) {
+    async login(requisicao, resposta, proximo) {
         try {
-            const users = await userRepository.findAll();
-            return res.json(users);
-
-        } catch (error) {
-            console.error("Error finding users:", error);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
-
-    async findById(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await userRepository.findById(id);
-
-            return res.json(user);
-        } catch (error) {
-            console.error("Error finding user:", error);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
-
-    async findByEmail(req, res) {
-        try {
-            const { email } = req.params;
-            const user = await userRepository.findByEmail(email);
-
-            return res.json(user);
-
-        } catch (error) {
-            console.error("Error finding user:", error);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
-
-    async update(req, res) {
-        try {
-            const { id } = req.params;
-            const { name, email, role } = req.body;
-            const user = await userRepository.update(id, { name, email, role });
-
-            return res.json(user);
-
-        } catch (error) {
-            console.error("Error updating user:", error);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
-
-    async delete(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await userRepository.delete(id);
-
-            return res.json(user);
-
-        } catch (error) {
-            if (error.code === 'NOT_FOUND') {
-                return res.status(404).json({ error: 'Usuário não encontrado.' });
-            }
-
-            console.error('Error deleting user:', error);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-    }
-
-    async deleteMe(req, res) {
-        try {
-            const userId = req.user.id;
-            const user = await userRepository.delete(userId);
-
-            return res.json({ message: "Sua conta foi excluída com sucesso." });
-
-        } catch (error) {
-            console.error("Error deleting own account:", error);
-            return res.status(500).json({ error: "Internal server error" });
-        }
-    }
-
-    // ... existing imports remain
-
-    async changePassword(req, res) {
-        try {
-            const { id } = req.params;
-            const { password } = req.body;
-            if (!password) {
-                return res.status(400).json({ error: 'Nova senha não informada.' });
-            }
-            const passwordHash = await bcrypt.hash(password, 10);
-            const user = await userRepository.changePassword(id, passwordHash);
-            return res.json(user);
-        } catch (error) {
-            console.error('Error changing password:', error);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-    }
-
-    async login(req, res) {
-        try {
-            const { email, password } = req.body;
+            const { email, password } = requisicao.body;
 
             if (!email || !password) {
-                return res.status(400).json({ error: "Email e senha são obrigatórios." });
+                throw criarErroHttp(MENSAGEM_EMAIL_SENHA_OBRIGATORIOS_LOGIN);
             }
 
-            const result = await authenticateUserService.execute({ email, password });
+            const resultado = await authenticateUserService.execute({ email, password });
+            return resposta.json(resultado);
+        } catch (erro) {
+            erro.statusCode = erro.statusCode || 401;
+            return proximo(erro);
+        }
+    }
 
-            return res.json(result);
-        } catch (error) {
-            return res.status(401).json({ error: error.message });
+    async findAll(_requisicao, resposta, proximo) {
+        try {
+            const usuarios = await listUsersService.execute();
+            return resposta.json(usuarios);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async findById(requisicao, resposta, proximo) {
+        try {
+            const usuario = await findUserByIdService.execute(requisicao.params.id);
+            return resposta.json(usuario);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async findByEmail(requisicao, resposta, proximo) {
+        try {
+            const usuario = await findUserByEmailService.execute(requisicao.params.email);
+            return resposta.json(usuario);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async update(requisicao, resposta, proximo) {
+        try {
+            const { name, email, role } = requisicao.body;
+            const usuario = await updateUserService.execute(
+                requisicao.params.id,
+                { name, email, role },
+                requisicao.user.role
+            );
+            return resposta.json(usuario);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async delete(requisicao, resposta, proximo) {
+        try {
+            const usuario = await deleteUserService.execute(requisicao.params.id);
+            return resposta.json(usuario);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async deleteMe(requisicao, resposta, proximo) {
+        try {
+            const resultado = await deleteMeService.execute(requisicao.user.id);
+            return resposta.json(resultado);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async changePassword(requisicao, resposta, proximo) {
+        try {
+            const usuario = await changePasswordService.execute({
+                identificadorUsuarioAlvo: requisicao.params.id,
+                novaSenha: requisicao.body.password,
+                identificadorUsuarioAutenticado: requisicao.user.id,
+                papelUsuarioAutenticado: requisicao.user.role
+            });
+            return resposta.json(usuario);
+        } catch (erro) {
+            return proximo(erro);
         }
     }
 }

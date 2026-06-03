@@ -52,41 +52,53 @@ src/modules/users/
 │   └── user.routes.test.js
 └── services/
     ├── AuthenticateUserService.js
+    ├── ChangePasswordService.js
     ├── CreateUserService.js
-    └── CreateUserService.test.js
+    ├── DeleteMeService.js
+    ├── DeleteUserService.js
+    ├── FindUserByEmailService.js
+    ├── FindUserByIdService.js
+    ├── ListUsersService.js
+    └── UpdateUserService.js
 ```
+
+Constantes de papéis e grupos RBAC compartilhados: `src/shared/constants/papeisUsuarioConstantes.js`.
 
 ## 4. Regras de Negócio e Arquitetura
 
-O sistema emprega a arquitetura **Repository / Service / Controller**, focando no princípio da responsabilidade única:
+O sistema emprega a arquitetura **Repository / Service / Controller**, focando no princípio da responsabilidade única. O **controller** apenas extrai dados da requisição, delega ao service e repassa erros ao handler global via `next(erro)`.
 
 ### Serviços Principais
 - **`CreateUserService.js`**:
-  - Responsável por validar os dados antes do cadastro. 
-  - **Bloqueio de ADMIN:** Não permite o registro de contas com o papel `ADMIN`. Contas administrativas só podem ser geradas via scripts ou seeding no banco.
-  - **Fallback:** Caso nenhum `role` seja informado no momento do cadastro, ele assume por padrão a permissão `COLABORADOR`.
-  - Transforma a senha em uma versão encriptada utilizando bcrypt.
+  - Valida e-mail único e gera `passwordHash` com bcrypt.
+  - **Papel `ADMIN`:** só pode ser atribuído se o solicitante (`papelSolicitante`) for `ADMIN`; caso contrário retorna `403`.
+  - **Padrão:** sem `role` no body, assume `COLABORADOR`.
+  - A rota `POST /users` exige JWT + papel `ADMIN` (não é mais cadastro público).
 
 - **`AuthenticateUserService.js`**:
-  - Verifica a existência do e-mail no banco e compara o hash da senha armazenada com a recebida.
-  - Após validar com sucesso, cria um token via `jsonwebtoken` utilizando o segredo contido no arquivo `env.js`, que é devolvido junto aos dados primários do usuário.
+  - Verifica e-mail e senha; emite JWT com segredo de `env.js`.
+  - A rota de login usa **rate limit** (`limitadorTaxaLogin` — ver `RATE_LIMIT_LOGIN_MAX` no `.env`).
+
+- **`ListUsersService`**, **`FindUserByIdService`**, **`FindUserByEmailService`**: leitura administrativa.
+- **`UpdateUserService`**: atualização por `ADMIN` ou `ADMINISTRATIVO` (`PAPEIS_GESTAO_RH`).
+- **`DeleteUserService`**, **`DeleteMeService`**: exclusão por admin ou autoexclusão autenticada.
+- **`ChangePasswordService`**: altera senha do próprio usuário **ou** de qualquer usuário se o autenticado for `ADMIN`; demais papéis recebem `403` ao tentar alterar senha de terceiros.
 
 ## 5. Endpoints / Rotas Disponíveis
 
 Todas as rotas estão montadas e registradas no arquivo `src/app.js` no prefixo base `/api/v1/users`.
 
-Abaixo a lista de rotas, onde as exceções como login e registro primário são públicas.
-
 | Método   | Endpoint                  | Permissões Exigidas           | Descrição                                         |
 |----------|---------------------------|-------------------------------|---------------------------------------------------|
-| `POST`   | `/api/v1/users`           | Pública                       | Cria um novo usuário no sistema.                  |
-| `POST`   | `/api/v1/users/login`     | Pública                       | Autentica no sistema e retorna o Token JWT.       |
+| `POST`   | `/api/v1/users`           | `ADMIN` (JWT)                 | Cria um novo usuário no sistema.                  |
+| `POST`   | `/api/v1/users/login`     | Pública (com rate limit)      | Autentica e retorna o Token JWT.                  |
 | `GET`    | `/api/v1/users`           | `ADMIN`                       | Lista todos os usuários cadastrados.              |
+| `GET`    | `/api/v1/users/:id`       | `ADMIN`                       | Busca usuário pelo ID.                            |
 | `PUT`    | `/api/v1/users/:id`       | `ADMIN`, `ADMINISTRATIVO`     | Atualiza dados de um usuário pelo ID.             |
-| `DELETE` | `/api/v1/users/:id`       | `ADMIN`                       | Deleta a conta de um usuário (apenas admins).     |
-| `GET`    | `/api/v1/users/findByEmail/:email` | `ADMIN` | Busca usuário pelo email. |
-| `DELETE` | `/api/v1/users/me`        | Estar logado (Token Válido)   | Exclui a própria conta do usuário requisitante.   |
-| `PUT`    | `/api/v1/users/password/:id`| Estar logado                | Altera a senha.                                   |
+| `DELETE` | `/api/v1/users/:id`       | `ADMIN`                       | Deleta a conta de um usuário.                     |
+| `GET`    | `/api/v1/users/findByEmail/:email` | `ADMIN` | Busca usuário pelo e-mail.                |
+| `DELETE` | `/api/v1/users/me`        | JWT válido                    | Exclui a própria conta.                           |
+| `PUT`    | `/api/v1/users/password/:id`| Próprio usuário ou `ADMIN` | Altera a senha do usuário alvo.                   |
 
 ### Exemplo de Retorno do Login
 ```json
@@ -105,18 +117,22 @@ Abaixo a lista de rotas, onde as exceções como login e registro primário são
 Seguindo o padrão do restante da aplicação, os testes utilizam ESModules através do `jest.unstable_mockModule` no ambiente do Node.
 
 - **`UserRepository.test.js`**: Os métodos do Prisma (`prisma.user.create`, `findUnique`, etc.) são inteiramente mockados para validação da passagem de objetos.
-- **`CreateUserService.test.js` e `UserController.test.js`**: Focam em conferir as respostas de bloqueio, erro `400` em falta de campos, bem como a validação da exceção na geração do perfil tipo `ADMIN`.
+- **`CreateUserService.test.js`**: bloqueio de `ADMIN` sem solicitante admin, e-mail duplicado.
+- **`ChangePasswordService.test.js`**: próprio usuário, admin alterando terceiro, senha vazia, usuário inexistente.
+- **`ListUsersService.test.js`**, **`FindUserByIdService.test.js`**, **`FindUserByEmailService.test.js`**, **`UpdateUserService.test.js`**, **`DeleteUserService.test.js`**, **`DeleteMeService.test.js`**: regras unitárias com repositório mockado.
+- **`UserController.test.js`**: delegação a todos os services, validações de entrada e `next(erro)`.
 - **`user.routes.test.js`**: Utiliza `supertest` para varrer os caminhos abertos da API e certificar-se da comunicação perfeita entre a porta da API e os retornos simulados pelo controller mockado.
 
 ---
 
 ## 7. Exemplos de Uso (Postman / Insomnia)
 
-> ⚠️ **Importante:** Com exceção das rotas públicas (Cadastro comum e Login), as demais exigem a passagem do Token JWT gerado no login, via **Authorization > Bearer Token**.
+> ⚠️ **Importante:** Apenas o **login** é público (com limite de taxa). Demais rotas exigem header `Authorization: Bearer` com o token JWT.
 
-### Cadastro Comum (Público)
+### Criar usuário (requer ADMIN)
 - **Método:** `POST`
 - **URL:** `http://localhost:3000/api/v1/users`
+- **Headers:** `Authorization: Bearer <token_admin>`
 - **Body (JSON):**
 ```json
 {

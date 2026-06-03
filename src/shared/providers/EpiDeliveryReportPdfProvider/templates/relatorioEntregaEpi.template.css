@@ -1,0 +1,198 @@
+@page {
+    size: A4;
+    margin: 12mm 14mm 18mm;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10pt;
+    color: #1f2328;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.relatorio {
+    width: 100%;
+    max-width: 100%;
+}
+
+.cabecalho {
+    background: linear-gradient(135deg, #124873 0%, #1a6fa8 100%);
+    color: #fff;
+    padding: 20px 22px 18px;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 0;
+}
+
+.cabecalho__titulo {
+    margin: 0;
+    font-size: 17pt;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cabecalho__subtitulo {
+    margin: 6px 0 0;
+    font-size: 9pt;
+    opacity: 0.92;
+}
+
+.faixa-periodo {
+    background: #e8f1f8;
+    border: 1px solid #c5d9e8;
+    border-top: none;
+    padding: 10px 22px;
+    font-size: 9.5pt;
+}
+
+.faixa-periodo strong {
+    color: #124873;
+    margin-right: 6px;
+}
+
+.identificacao {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    padding: 18px 22px;
+    background: #f6f8fa;
+    border: 1px solid #d8dee4;
+    border-top: none;
+    margin-bottom: 22px;
+}
+
+.campo-identificacao {
+    margin: 0;
+}
+
+.campo-identificacao dt {
+    margin: 0 0 4px;
+    font-size: 8pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #57606a;
+}
+
+.campo-identificacao dd {
+    margin: 0;
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: #1f2328;
+    line-height: 1.35;
+}
+
+.secao-entregas__titulo {
+    margin: 0 0 10px;
+    font-size: 11pt;
+    font-weight: 700;
+    color: #124873;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #1a6fa8;
+}
+
+.tabela-entregas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+}
+
+.tabela-entregas thead th {
+    background: #dce8f2;
+    color: #124873;
+    font-weight: 700;
+    text-align: left;
+    padding: 9px 10px;
+    border: 1px solid #b8cddc;
+}
+
+.tabela-entregas tbody td {
+    padding: 8px 10px;
+    border: 1px solid #d8dee4;
+    vertical-align: top;
+}
+
+.tabela-entregas tbody tr:nth-child(even) td {
+    background: #fafbfc;
+}
+
+.tabela-entregas col.col-data {
+    width: 18%;
+}
+
+.tabela-entregas col.col-equipamento {
+    width: 54%;
+}
+
+.tabela-entregas col.col-ca {
+    width: 28%;
+}
+
+.celula-vazia {
+    text-align: center;
+    color: #57606a;
+    font-style: italic;
+    padding: 16px !important;
+}
+
+.assinaturas {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 48px;
+    padding-top: 8px;
+    page-break-inside: avoid;
+}
+
+.assinatura {
+    flex: 1;
+    max-width: 48%;
+}
+
+.assinatura__linha {
+    border-top: 1px solid #1f2328;
+    height: 0;
+    margin-bottom: 8px;
+}
+
+.assinatura__rotulo {
+    font-size: 8.5pt;
+    color: #57606a;
+    text-align: center;
+}
+
+.rodape {
+    margin-top: 28px;
+    font-size: 7.5pt;
+    color: #8b949e;
+    text-align: left;
+}
+
+@media print {
+    .relatorio {
+        page-break-after: auto;
+    }
+
+    .assinaturas {
+        break-inside: avoid;
+    }
+
+    .tabela-entregas thead {
+        display: table-header-group;
+    }
+
+    .tabela-entregas tr {
+        break-inside: avoid;
+    }
+}

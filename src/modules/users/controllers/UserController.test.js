@@ -1,39 +1,50 @@
 import { jest } from '@jest/globals';
 
-const createUserServiceMock = {
-    execute: jest.fn()
-};
-
-const authenticateUserServiceMock = {
-    execute: jest.fn()
-};
-
-const userRepositoryMock = {
-    findAll: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    changePassword: jest.fn()
-};
+const createUserServiceMock = { execute: jest.fn() };
+const authenticateUserServiceMock = { execute: jest.fn() };
+const listUsersServiceMock = { execute: jest.fn() };
+const findUserByIdServiceMock = { execute: jest.fn() };
+const findUserByEmailServiceMock = { execute: jest.fn() };
+const updateUserServiceMock = { execute: jest.fn() };
+const deleteUserServiceMock = { execute: jest.fn() };
+const deleteMeServiceMock = { execute: jest.fn() };
+const changePasswordServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/CreateUserService.js', () => ({
     default: createUserServiceMock
 }));
-
 jest.unstable_mockModule('../services/AuthenticateUserService.js', () => ({
     default: authenticateUserServiceMock
 }));
-
-jest.unstable_mockModule('../repositories/UserRepository.js', () => ({
-    default: userRepositoryMock
+jest.unstable_mockModule('../services/ListUsersService.js', () => ({
+    default: listUsersServiceMock
+}));
+jest.unstable_mockModule('../services/FindUserByIdService.js', () => ({
+    default: findUserByIdServiceMock
+}));
+jest.unstable_mockModule('../services/FindUserByEmailService.js', () => ({
+    default: findUserByEmailServiceMock
+}));
+jest.unstable_mockModule('../services/UpdateUserService.js', () => ({
+    default: updateUserServiceMock
+}));
+jest.unstable_mockModule('../services/DeleteUserService.js', () => ({
+    default: deleteUserServiceMock
+}));
+jest.unstable_mockModule('../services/DeleteMeService.js', () => ({
+    default: deleteMeServiceMock
+}));
+jest.unstable_mockModule('../services/ChangePasswordService.js', () => ({
+    default: changePasswordServiceMock
 }));
 
 const userController = (await import('./UserController.js')).default;
 
-const mockResponse = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
+const criarRespostaMock = () => {
+    const resposta = {};
+    resposta.status = jest.fn().mockReturnValue(resposta);
+    resposta.json = jest.fn().mockReturnValue(resposta);
+    return resposta;
 };
 
 describe('UserController', () => {
@@ -41,71 +52,153 @@ describe('UserController', () => {
         jest.clearAllMocks();
     });
 
-    it('deve criar um usuário com sucesso (201)', async () => {
-        const req = { body: { name: 'Teste', email: 'teste@teste.com', password: '123' } };
-        const res = mockResponse();
+    it('deve criar usuário e retornar 201', async () => {
+        const requisicao = {
+            body: { name: 'Teste', email: 'teste@teste.com', password: '123' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
         createUserServiceMock.execute.mockResolvedValue({ id: '1', name: 'Teste' });
+        await userController.create(requisicao, resposta, proximo);
 
-        await userController.create(req, res);
-
-        expect(createUserServiceMock.execute).toHaveBeenCalledWith(req.body);
-        expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.json).toHaveBeenCalledWith({ id: '1', name: 'Teste' });
+        expect(resposta.status).toHaveBeenCalledWith(201);
+        expect(proximo).not.toHaveBeenCalled();
     });
 
-    it('deve retornar erro 400 se faltar campos no create', async () => {
-        const req = { body: { name: 'Teste' } }; // faltando email e password
-        const res = mockResponse();
+    it('deve encaminhar erro de validação na criação', async () => {
+        const requisicao = { body: { name: 'Teste' }, user: { role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
-        await userController.create(req, res);
+        await userController.create(requisicao, resposta, proximo);
 
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Missing required fields' });
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: 'Nome, e-mail e senha são obrigatórios.',
+                statusCode: 400
+            })
+        );
     });
 
     it('deve realizar login com sucesso', async () => {
-        const req = { body: { email: 'teste@teste.com', password: '123' } };
-        const res = mockResponse();
+        const requisicao = { body: { email: 'teste@teste.com', password: '123' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
-        authenticateUserServiceMock.execute.mockResolvedValue({ token: 'jwt_token', user: { id: '1' } });
+        authenticateUserServiceMock.execute.mockResolvedValue({ token: 'jwt' });
+        await userController.login(requisicao, resposta, proximo);
 
-        await userController.login(req, res);
-
-        expect(authenticateUserServiceMock.execute).toHaveBeenCalledWith(req.body);
-        expect(res.json).toHaveBeenCalledWith({ token: 'jwt_token', user: { id: '1' } });
+        expect(resposta.json).toHaveBeenCalledWith({ token: 'jwt' });
     });
 
-    it('deve retornar erro 400 se faltar email ou senha no login', async () => {
-        const req = { body: { email: 'teste@teste.com' } };
-        const res = mockResponse();
+    it('deve excluir a própria conta', async () => {
+        const requisicao = { user: { id: '1' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
-        await userController.login(req, res);
+        deleteMeServiceMock.execute.mockResolvedValue({ message: 'ok' });
+        await userController.deleteMe(requisicao, resposta, proximo);
 
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ error: 'Email e senha são obrigatórios.' });
+        expect(deleteMeServiceMock.execute).toHaveBeenCalledWith('1');
     });
 
-    it('deve excluir a própria conta (deleteMe)', async () => {
-        const req = { user: { id: '1' } };
-        const res = mockResponse();
+    it('deve listar usuários', async () => {
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
-        userRepositoryMock.delete.mockResolvedValue({ id: '1' });
+        listUsersServiceMock.execute.mockResolvedValue([{ id: '1' }]);
+        await userController.findAll({}, resposta, proximo);
 
-        await userController.deleteMe(req, res);
-
-        expect(userRepositoryMock.delete).toHaveBeenCalledWith('1');
-        expect(res.json).toHaveBeenCalledWith({ message: 'Sua conta foi excluída com sucesso.' });
+        expect(resposta.json).toHaveBeenCalledWith([{ id: '1' }]);
     });
 
-    it('deve listar todos os usuários', async () => {
-        const req = {};
-        const res = mockResponse();
+    it('deve buscar usuário por id', async () => {
+        const requisicao = { params: { id: '1' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
 
-        userRepositoryMock.findAll.mockResolvedValue([{ id: '1' }]);
+        findUserByIdServiceMock.execute.mockResolvedValue({ id: '1' });
+        await userController.findById(requisicao, resposta, proximo);
 
-        await userController.findAll(req, res);
+        expect(findUserByIdServiceMock.execute).toHaveBeenCalledWith('1');
+        expect(resposta.json).toHaveBeenCalledWith({ id: '1' });
+    });
 
-        expect(res.json).toHaveBeenCalledWith([{ id: '1' }]);
+    it('deve buscar usuário por e-mail', async () => {
+        const requisicao = { params: { email: 'teste@teste.com' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        findUserByEmailServiceMock.execute.mockResolvedValue({ id: '1', email: 'teste@teste.com' });
+        await userController.findByEmail(requisicao, resposta, proximo);
+
+        expect(findUserByEmailServiceMock.execute).toHaveBeenCalledWith('teste@teste.com');
+    });
+
+    it('deve atualizar usuário', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { name: 'Novo' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        updateUserServiceMock.execute.mockResolvedValue({ id: '1', name: 'Novo' });
+        await userController.update(requisicao, resposta, proximo);
+
+        expect(updateUserServiceMock.execute).toHaveBeenCalledWith(
+            '1',
+            { name: 'Novo', email: undefined, role: undefined },
+            'ADMIN'
+        );
+    });
+
+    it('deve excluir usuário por id', async () => {
+        const requisicao = { params: { id: '1' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        deleteUserServiceMock.execute.mockResolvedValue({ id: '1' });
+        await userController.delete(requisicao, resposta, proximo);
+
+        expect(deleteUserServiceMock.execute).toHaveBeenCalledWith('1');
+    });
+
+    it('deve alterar senha delegando ao service', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { password: 'nova123' },
+            user: { id: '1', role: 'COLABORADOR' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        changePasswordServiceMock.execute.mockResolvedValue({ id: '1' });
+        await userController.changePassword(requisicao, resposta, proximo);
+
+        expect(changePasswordServiceMock.execute).toHaveBeenCalledWith({
+            identificadorUsuarioAlvo: '1',
+            novaSenha: 'nova123',
+            identificadorUsuarioAutenticado: '1',
+            papelUsuarioAutenticado: 'COLABORADOR'
+        });
+    });
+
+    it('deve encaminhar erro de login sem campos obrigatórios', async () => {
+        const requisicao = { body: { email: 'teste@teste.com' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        await userController.login(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: 'E-mail e senha são obrigatórios.',
+                statusCode: 400
+            })
+        );
     });
 });

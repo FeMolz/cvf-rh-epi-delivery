@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{TITULO_DOCUMENTO}}</title>
+    <style>{{ESTILOS_CSS}}</style>
+</head>
+<body>
+    <article class="relatorio">
+        <header class="cabecalho">
+            <h1 class="cabecalho__titulo">{{TITULO_RELATORIO}}</h1>
+            <p class="cabecalho__subtitulo">{{SUBTITULO_RELATORIO}}</p>
+        </header>
+
+        <div class="faixa-periodo">
+            <strong>{{ROTULO_PERIODO}}:</strong>
+            <span>{{TEXTO_PERIODO}}</span>
+        </div>
+
+        <dl class="identificacao">
+            <div class="campo-identificacao">
+                <dt>{{ROTULO_FUNCIONARIO}}</dt>
+                <dd>{{NOME_FUNCIONARIO}}</dd>
+            </div>
+            <div class="campo-identificacao">
+                <dt>{{ROTULO_EMPRESA}}</dt>
+                <dd>{{NOME_EMPRESA}}</dd>
+            </div>
+            <div class="campo-identificacao">
+                <dt>{{ROTULO_CARGO}}</dt>
+                <dd>{{NOME_CARGO}}</dd>
+            </div>
+            <div class="campo-identificacao">
+                <dt>{{ROTULO_SETOR}}</dt>
+                <dd>{{NOME_SETOR}}</dd>
+            </div>
+        </dl>
+
+        <section class="secao-entregas">
+            <h2 class="secao-entregas__titulo">{{ROTULO_SECAO_ENTREGAS}}</h2>
+            <table class="tabela-entregas" aria-label="{{ROTULO_SECAO_ENTREGAS}}">
+                <colgroup>
+                    <col class="col-data" />
+                    <col class="col-equipamento" />
+                    <col class="col-ca" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">{{COLUNA_DATA}}</th>
+                        <th scope="col">{{COLUNA_EQUIPAMENTO}}</th>
+                        <th scope="col">{{COLUNA_CA}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{LINHAS_TABELA_ENTREGAS}}
+                </tbody>
+            </table>
+        </section>
+
+        <footer class="assinaturas">
+            <div class="assinatura">
+                <div class="assinatura__linha" aria-hidden="true"></div>
+                <p class="assinatura__rotulo">{{ROTULO_ASSINATURA_FUNCIONARIO}}</p>
+            </div>
+            <div class="assinatura">
+                <div class="assinatura__linha" aria-hidden="true"></div>
+                <p class="assinatura__rotulo">{{ROTULO_ASSINATURA_RH}}</p>
+            </div>
+        </footer>
+
+        <p class="rodape">{{TEXTO_RODAPE}}</p>
+    </article>
+</body>
+</html>

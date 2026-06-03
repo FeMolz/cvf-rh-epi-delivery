@@ -4,7 +4,7 @@ Este documento descreve a arquitetura, as regras de negócio e os endpoints do m
 
 ## 1. Visão Geral
 
-O módulo complementa o de **Entregas de EPI** (`epiDeliveries`): lê os registros `EpiDelivery` no período informado, monta um documento PDF (via `pdf-lib` no provider compartilhado) e persiste o **binário do PDF** (`pdfConteudo`, `BYTEA` no PostgreSQL) na linha `EpiDeliveryReport`, junto com período UTC e flags operacionais. As listagens e respostas JSON **não** incluem o campo binário (apenas metadados). Depende do repositório `EpiDeliveryRepository` apenas para a consulta por intervalo de `deliveryDate`. O usuário que emite o relatório é registrado em `generatedByUserId` a partir do token JWT.
+O módulo complementa o de **Entregas de EPI** (`epiDeliveries`): lê os registros `EpiDelivery` no período informado, monta um documento PDF a partir de **template HTML/CSS** (renderizado com Puppeteer no provider compartilhado) e persiste o **binário do PDF** (`pdfConteudo`, `BYTEA` no PostgreSQL) na linha `EpiDeliveryReport`, junto com período UTC e flags operacionais. As listagens e respostas JSON **não** incluem o campo binário (apenas metadados). Depende do repositório `EpiDeliveryRepository` apenas para a consulta por intervalo de `deliveryDate`. O usuário que emite o relatório é registrado em `generatedByUserId` a partir do token JWT.
 
 ## 2. Modelo de Dados
 
@@ -68,6 +68,18 @@ src/modules/epiDeliveryReports/
     └── periodoRelatorioEntregaEpi.test.js
 
 src/shared/providers/EpiDeliveryReportPdfProvider/
+├── constants/
+│   └── relatorioEntregaEpiPdfConstantes.js
+├── templates/
+│   ├── relatorioEntregaEpi.template.css
+│   └── relatorioEntregaEpi.template.html
+├── utils/
+│   ├── escaparHtml.js
+│   └── escaparHtml.test.js
+├── montarHtmlRelatorioEntregaEpi.js
+├── montarHtmlRelatorioEntregaEpi.test.js
+├── renderizarHtmlParaPdf.js
+├── renderizarHtmlParaPdf.test.js
 ├── EpiDeliveryReportPdfProvider.js
 └── EpiDeliveryReportPdfProvider.test.js
 ```
@@ -82,9 +94,9 @@ src/shared/providers/EpiDeliveryReportPdfProvider/
 ### `GenerateEpiDeliveryReportPdfService`
 
 - Valida `employeeId`, `periodoInicio`, `periodoFim` e `generatedByUserId`.
-- Busca funcionário ativo (`deletedAt` nulo) com cargo e empresa para o cabeçalho do PDF.
+- Busca funcionário ativo (`deletedAt` nulo) com cargo, empresa e setor para o cabeçalho do PDF.
 - Lista entregas com `EpiDeliveryRepository.findDeliveriesByEmployeeIdAndDeliveryDateRange` filtrando por `deliveryDate` no intervalo.
-- Gera o PDF com `EpiDeliveryReportPdfProvider`: **tabela** com colunas data da entrega (pt-BR, UTC), equipamento e número do CA; faixa superior institucional, bloco de identificação do colaborador e rodapé com assinaturas.
+- Gera o PDF com `EpiDeliveryReportPdfProvider`: identificação (funcionário, empresa, cargo, setor, período), **tabela** de EPIs entregues (data pt-BR UTC, equipamento, CA) e duas linhas de assinatura (funcionário e RH/SST).
 - Grava o binário em `EpiDeliveryReport.pdfConteudo` (PostgreSQL `BYTEA`) numa única transação de criação do registro, com flags `foiImpresso`, `foiEncaminhado` e `foiAssinado` em `false`.
 
 ### `ListPendingEpiDeliveryReportsService`
@@ -111,7 +123,9 @@ src/shared/providers/EpiDeliveryReportPdfProvider/
 
 ### `EpiDeliveryReportPdfProvider` (compartilhado)
 
-- Monta layout A4 com `pdf-lib`: faixa superior em tons de azul, título, bloco de dados do colaborador (caixa com borda), **tabela** de entregas com cabeçalho e linhas zebradas, divisórias verticais entre colunas, assinaturas e rodapé; quebra de página na tabela quando necessário (cabeçalho repetido).
+- `montarHtmlRelatorioEntregaEpi`: injeta dados no template `templates/relatorioEntregaEpi.template.html` e estilos em `relatorioEntregaEpi.template.css` (layout A4, cabeçalho azul, grade de identificação, tabela zebrada, assinaturas).
+- `renderizarHtmlParaPdf`: converte o HTML em PDF via **Puppeteer** (`printBackground`, margens A4).
+- Textos e rótulos centralizados em `constants/relatorioEntregaEpiPdfConstantes.js`; valores dinâmicos passam por `escaparHtml`.
 
 ### `EpiDeliveryReportController`
 
