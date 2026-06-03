@@ -15,20 +15,34 @@ describe('FindUserByIdService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve retornar o usuário quando encontrado', async () => {
-        const usuario = { id: '1', name: 'Maria' };
-        userRepositoryMock.findById.mockResolvedValue(usuario);
+    it('deve retornar isActive para ADMIN', async () => {
+        userRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            name: 'Maria',
+            isActive: true
+        });
 
-        const resultado = await findUserByIdService.execute('1');
+        const resultado = await findUserByIdService.execute('1', 'ADMIN');
 
-        expect(resultado).toEqual(usuario);
-        expect(userRepositoryMock.findById).toHaveBeenCalledWith('1');
+        expect(resultado.isActive).toBe(true);
+    });
+
+    it('deve ocultar isActive para não ADMIN', async () => {
+        userRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            name: 'Maria',
+            isActive: false
+        });
+
+        const resultado = await findUserByIdService.execute('1', 'ADMINISTRATIVO');
+
+        expect(resultado.isActive).toBeUndefined();
     });
 
     it('deve lançar 404 quando o usuário não existir', async () => {
         userRepositoryMock.findById.mockResolvedValue(null);
 
-        await expect(findUserByIdService.execute('inexistente')).rejects.toMatchObject({
+        await expect(findUserByIdService.execute('inexistente', 'ADMIN')).rejects.toMatchObject({
             message: 'Usuário não encontrado.',
             statusCode: 404
         });

@@ -44,13 +44,29 @@ describe('AuthenticateUserService', () => {
         ).rejects.toThrow('Email ou senha incorretos.');
     });
 
+    it('deve lançar erro quando usuário está inativo', async () => {
+        userRepositoryMock.findByEmail.mockResolvedValue({
+            id: '1',
+            email: 'a@b.com',
+            passwordHash: 'hash',
+            name: 'Usuário',
+            role: 'ADMIN',
+            isActive: false
+        });
+
+        await expect(
+            authenticateUserService.execute({ email: 'a@b.com', password: '123' })
+        ).rejects.toThrow('Usuário inativo. Entre em contato com o administrador do sistema.');
+    });
+
     it('deve lançar erro quando senha não confere', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue({
             id: '1',
             email: 'a@b.com',
             passwordHash: 'hash',
             name: 'Usuário',
-            role: 'ADMIN'
+            role: 'ADMIN',
+            isActive: true
         });
         bcrypt.compare.mockResolvedValue(false);
 
@@ -65,7 +81,8 @@ describe('AuthenticateUserService', () => {
             email: 'a@b.com',
             passwordHash: 'hash',
             name: 'Usuário',
-            role: 'ADMIN'
+            role: 'ADMIN',
+            isActive: true
         };
 
         userRepositoryMock.findByEmail.mockResolvedValue(usuario);

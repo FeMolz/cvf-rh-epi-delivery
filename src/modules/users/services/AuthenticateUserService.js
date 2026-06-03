@@ -1,14 +1,19 @@
-import userRepository from "../repositories/UserRepository.js";
+import userRepository from '../repositories/UserRepository.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import env from '../../../config/env.js';
+import { MENSAGEM_USUARIO_INATIVO } from '../constants/usuarioConstantes.js';
 
 class AuthenticateUserService {
     async execute({ email, password }) {
         const user = await userRepository.findByEmail(email);
 
         if (!user) {
-            throw new Error("Email ou senha incorretos.");
+            throw new Error('Email ou senha incorretos.');
+        }
+
+        if (!user.isActive) {
+            throw new Error(MENSAGEM_USUARIO_INATIVO);
         }
 
         const passwordMatch = await bcrypt.compare(password, user.passwordHash);

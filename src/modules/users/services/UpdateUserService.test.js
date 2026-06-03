@@ -18,7 +18,11 @@ describe('UpdateUserService', () => {
 
     it('deve atualizar o usuário quando existir', async () => {
         userRepositoryMock.findById.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
-        userRepositoryMock.update.mockResolvedValue({ id: '1', name: 'Novo Nome' });
+        userRepositoryMock.update.mockResolvedValue({
+            id: '1',
+            name: 'Novo Nome',
+            isActive: true
+        });
 
         const resultado = await updateUserService.execute(
             '1',
@@ -28,6 +32,16 @@ describe('UpdateUserService', () => {
 
         expect(resultado.name).toBe('Novo Nome');
         expect(userRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'Novo Nome' });
+        expect(resultado.isActive).toBeUndefined();
+    });
+
+    it('deve rejeitar tentativa de alterar isActive', async () => {
+        await expect(
+            updateUserService.execute('1', { isActive: false }, 'ADMIN')
+        ).rejects.toMatchObject({
+            message: 'O campo isActive não pode ser alterado pela API.',
+            statusCode: 400
+        });
     });
 
     it('deve lançar 404 quando o usuário não existir', async () => {

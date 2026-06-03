@@ -67,19 +67,18 @@ describe('UserController', () => {
         expect(proximo).not.toHaveBeenCalled();
     });
 
-    it('deve encaminhar erro de validação na criação', async () => {
+    it('deve retornar 400 na criação sem campos obrigatórios', async () => {
         const requisicao = { body: { name: 'Teste' }, user: { role: 'ADMIN' } };
         const resposta = criarRespostaMock();
         const proximo = jest.fn();
 
         await userController.create(requisicao, resposta, proximo);
 
-        expect(proximo).toHaveBeenCalledWith(
-            expect.objectContaining({
-                message: 'Nome, e-mail e senha são obrigatórios.',
-                statusCode: 400
-            })
-        );
+        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(resposta.json).toHaveBeenCalledWith({
+            error: 'Nome, e-mail e senha são obrigatórios.'
+        });
+        expect(proximo).not.toHaveBeenCalled();
     });
 
     it('deve realizar login com sucesso', async () => {
@@ -108,33 +107,35 @@ describe('UserController', () => {
         const resposta = criarRespostaMock();
         const proximo = jest.fn();
 
-        listUsersServiceMock.execute.mockResolvedValue([{ id: '1' }]);
-        await userController.findAll({}, resposta, proximo);
+        listUsersServiceMock.execute.mockResolvedValue([{ id: '1', isActive: true }]);
+        await userController.findAll({ user: { role: 'ADMIN' } }, resposta, proximo);
 
-        expect(resposta.json).toHaveBeenCalledWith([{ id: '1' }]);
+        expect(listUsersServiceMock.execute).toHaveBeenCalledWith('ADMIN');
+
+        expect(resposta.json).toHaveBeenCalledWith([{ id: '1', isActive: true }]);
     });
 
     it('deve buscar usuário por id', async () => {
-        const requisicao = { params: { id: '1' } };
+        const requisicao = { params: { id: '1' }, user: { role: 'ADMIN' } };
         const resposta = criarRespostaMock();
         const proximo = jest.fn();
 
         findUserByIdServiceMock.execute.mockResolvedValue({ id: '1' });
         await userController.findById(requisicao, resposta, proximo);
 
-        expect(findUserByIdServiceMock.execute).toHaveBeenCalledWith('1');
+        expect(findUserByIdServiceMock.execute).toHaveBeenCalledWith('1', 'ADMIN');
         expect(resposta.json).toHaveBeenCalledWith({ id: '1' });
     });
 
     it('deve buscar usuário por e-mail', async () => {
-        const requisicao = { params: { email: 'teste@teste.com' } };
+        const requisicao = { params: { email: 'teste@teste.com' }, user: { role: 'ADMIN' } };
         const resposta = criarRespostaMock();
         const proximo = jest.fn();
 
         findUserByEmailServiceMock.execute.mockResolvedValue({ id: '1', email: 'teste@teste.com' });
         await userController.findByEmail(requisicao, resposta, proximo);
 
-        expect(findUserByEmailServiceMock.execute).toHaveBeenCalledWith('teste@teste.com');
+        expect(findUserByEmailServiceMock.execute).toHaveBeenCalledWith('teste@teste.com', 'ADMIN');
     });
 
     it('deve atualizar usuário', async () => {
@@ -149,15 +150,11 @@ describe('UserController', () => {
         updateUserServiceMock.execute.mockResolvedValue({ id: '1', name: 'Novo' });
         await userController.update(requisicao, resposta, proximo);
 
-        expect(updateUserServiceMock.execute).toHaveBeenCalledWith(
-            '1',
-            { name: 'Novo', email: undefined, role: undefined },
-            'ADMIN'
-        );
+        expect(updateUserServiceMock.execute).toHaveBeenCalledWith('1', { name: 'Novo' }, 'ADMIN');
     });
 
     it('deve excluir usuário por id', async () => {
-        const requisicao = { params: { id: '1' } };
+        const requisicao = { params: { id: '1' }, user: { role: 'ADMIN' } };
         const resposta = criarRespostaMock();
         const proximo = jest.fn();
 

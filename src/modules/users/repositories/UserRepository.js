@@ -1,67 +1,77 @@
 import prisma from '../../../config/database.js';
 
-class UserRepository {
-    async create(data) {
-        const user = await prisma.user.create({
-            data,
+/** Campos retornados em consultas da API (sem passwordHash). */
+export const SELECAO_USUARIO_CONSULTA = {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+    isActive: true,
+    lastLogin: true,
+    createdAt: true,
+    updatedAt: true
+};
 
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true
-            }
+class UserRepository {
+    async create(dadosCriacao) {
+        return prisma.user.create({
+            data: dadosCriacao,
+            select: SELECAO_USUARIO_CONSULTA
         });
-        return user;
     }
 
     async findByEmail(email) {
-        const user = await prisma.user.findUnique({
-            where: { email },
+        return prisma.user.findUnique({
+            where: { email }
         });
-        return user;
     }
 
     async findAll() {
-        return prisma.user.findMany();
-    }
-
-    async update(id, data) {
-        return prisma.user.update({
-            where: { id },
-            data
+        return prisma.user.findMany({
+            select: SELECAO_USUARIO_CONSULTA,
+            orderBy: { name: 'asc' }
         });
     }
 
-    // UserRepository - adiciona findById
-async findById(id) {
-    return prisma.user.findUnique({
-        where: { id },
-        select: { id: true, name: true, email: true, role: true }
-    });
-}
-
-// Atualiza método delete para usar findById antes de excluir
-async delete(id) {
-    // Verifica se o usuário existe antes de tentar deletar
-    const existing = await this.findById(id);
-    if (!existing) {
-        // Lança erro que será capturado no controller
-        const error = new Error('Usuário não encontrado');
-        error.code = 'NOT_FOUND';
-        throw error;
+    async findById(identificadorUsuario) {
+        return prisma.user.findUnique({
+            where: { id: identificadorUsuario },
+            select: SELECAO_USUARIO_CONSULTA
+        });
     }
-    return prisma.user.delete({
-        where: { id }
-    });
-}
 
-    async changePassword(id, newPassword) {
+    /**
+     * @param {string} identificadorUsuario
+     * @param {{ name?: string, email?: string, role?: string }} dadosAtualizacao
+     */
+    async update(identificadorUsuario, dadosAtualizacao) {
         return prisma.user.update({
-            where: { id },
-            data: { passwordHash: newPassword }
+            where: { id: identificadorUsuario },
+            data: dadosAtualizacao,
+            select: SELECAO_USUARIO_CONSULTA
+        });
+    }
+
+    async delete(identificadorUsuario) {
+        const existente = await this.findById(identificadorUsuario);
+
+        if (!existente) {
+            const erro = new Error('Usuário não encontrado');
+            erro.code = 'NOT_FOUND';
+            throw erro;
+        }
+
+        return prisma.user.delete({
+            where: { id: identificadorUsuario },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+    }
+
+    async changePassword(identificadorUsuario, hashSenha) {
+        return prisma.user.update({
+            where: { id: identificadorUsuario },
+            data: { passwordHash: hashSenha },
+            select: SELECAO_USUARIO_CONSULTA
         });
     }
 }

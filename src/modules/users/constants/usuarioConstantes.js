@@ -25,4 +25,10 @@ export const MENSAGEM_USUARIO_NAO_ENCONTRADO = 'Usuário não encontrado.';
 export const MENSAGEM_CONTA_EXCLUIDA_SUCESSO =
     'Sua conta foi excluída com sucesso.';
 
+export const MENSAGEM_USUARIO_INATIVO =
+    'Usuário inativo. Entre em contato com o administrador do sistema.';
+
+export const MENSAGEM_ISACTIVE_NAO_EDITAVEL =
+    'O campo isActive não pode ser alterado pela API.';
+
 export { PAPEL_ADMIN };

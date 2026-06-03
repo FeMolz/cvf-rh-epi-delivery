@@ -72,8 +72,9 @@ O sistema emprega a arquitetura **Repository / Service / Controller**, focando n
 - **`CreateUserService.js`**:
   - Valida e-mail único e gera `passwordHash` com bcrypt.
   - **Papel `ADMIN`:** só pode ser atribuído se o solicitante (`papelSolicitante`) for `ADMIN`; caso contrário retorna `403`.
-  - **Padrão:** sem `role` no body, assume `COLABORADOR`.
-  - A rota `POST /users` exige JWT + papel `ADMIN` (não é mais cadastro público).
+- **Padrão:** sem `role` no body, assume `COLABORADOR`.
+- **`isActive`:** definido apenas no banco (padrão `true` no Prisma). **Não** pode ser enviado no `PUT`; tentativa retorna `400`. Usado no **login** para bloquear usuário inativo. Nas respostas GET, só quem tem papel **`ADMIN`** recebe o campo `isActive`.
+- A rota `POST /users` exige JWT + papel `ADMIN` (não é mais cadastro público).
 
 - **`AuthenticateUserService.js`**:
   - Verifica e-mail e senha; emite JWT com segredo de `env.js`.
@@ -162,11 +163,11 @@ Seguindo o padrão do restante da aplicação, os testes utilizam ESModules atra
 ### Atualizar Usuário
 - **Método:** `PUT`
 - **URL:** `http://localhost:3000/api/v1/users/id-do-usuario`
-- **Body (JSON):**
+- **Body (JSON):** apenas `name`, `email` e `role` (não envie `isActive`).
 ```json
 {
   "name": "José Silva",
-  "isActive": false
+  "email": "jose.silva@empresa.com"
 }
 ```
 

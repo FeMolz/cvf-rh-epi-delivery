@@ -41,7 +41,11 @@ describe('CreateUserService', () => {
     it('deve permitir ADMIN criar usuário ADMIN', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue(null);
         bcryptMock.hash.mockResolvedValue('hash');
-        userRepositoryMock.create.mockResolvedValue({ id: '1', role: 'ADMIN' });
+        userRepositoryMock.create.mockResolvedValue({
+            id: '1',
+            role: 'ADMIN',
+            isActive: true
+        });
 
         const resultado = await createUserService.execute({
             name: 'Admin',
@@ -52,6 +56,7 @@ describe('CreateUserService', () => {
         });
 
         expect(resultado.role).toBe('ADMIN');
+        expect(resultado.isActive).toBe(true);
     });
 
     it('deve lançar erro se o e-mail já estiver cadastrado', async () => {

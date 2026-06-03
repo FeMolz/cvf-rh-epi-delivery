@@ -2,17 +2,28 @@ import userRepository from '../repositories/UserRepository.js';
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import {
+    MENSAGEM_ISACTIVE_NAO_EDITAVEL,
     MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN,
     MENSAGEM_USUARIO_NAO_ENCONTRADO
 } from '../constants/usuarioConstantes.js';
+import { formatarRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
+import {
+    contemCampoIsActiveNosDados,
+    extrairDadosAtualizaveisUsuario
+} from '../utils/extrairDadosAtualizaveisUsuario.js';
 
 class UpdateUserService {
     /**
      * @param {string} identificadorUsuario
-     * @param {{ name?: string, email?: string, role?: string }} dadosAtualizacao
+     * @param {Record<string, unknown>} dadosAtualizacaoBrutos
      * @param {string} papelSolicitante
      */
-    async execute(identificadorUsuario, dadosAtualizacao, papelSolicitante) {
+    async execute(identificadorUsuario, dadosAtualizacaoBrutos, papelSolicitante) {
+        if (contemCampoIsActiveNosDados(dadosAtualizacaoBrutos)) {
+            throw criarErroHttp(MENSAGEM_ISACTIVE_NAO_EDITAVEL, 400);
+        }
+
+        const dadosAtualizacao = extrairDadosAtualizaveisUsuario(dadosAtualizacaoBrutos);
         const usuarioExistente = await userRepository.findById(identificadorUsuario);
 
         if (!usuarioExistente) {
@@ -23,7 +34,8 @@ class UpdateUserService {
             throw criarErroHttp(MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN, 403);
         }
 
-        return userRepository.update(identificadorUsuario, dadosAtualizacao);
+        const usuarioAtualizado = await userRepository.update(identificadorUsuario, dadosAtualizacao);
+        return formatarRespostaUsuario(usuarioAtualizado, papelSolicitante);
     }
 }
 

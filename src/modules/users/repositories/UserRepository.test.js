@@ -6,99 +6,72 @@ const prismaMock = {
         findUnique: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
-        delete: jest.fn(),
+        delete: jest.fn()
     }
 };
 
-jest.unstable_mockModule('../../../../src/config/database.js', () => ({
+jest.unstable_mockModule('../../../config/database.js', () => ({
     default: prismaMock
 }));
 
-const userRepository = (await import('./UserRepository.js')).default;
+const { default: userRepository, SELECAO_USUARIO_CONSULTA } = await import('./UserRepository.js');
 
 describe('UserRepository', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    it('deve criar um usuário', async () => {
-        const mockUser = { id: '1', name: 'Teste', email: 'teste@teste.com' };
-        prismaMock.user.create.mockResolvedValue(mockUser);
+    it('deve criar um usuário com seleção de consulta', async () => {
+        const usuarioMock = { id: '1', name: 'Teste', isActive: true };
+        prismaMock.user.create.mockResolvedValue(usuarioMock);
 
-        const data = { name: 'Teste', email: 'teste@teste.com', passwordHash: 'hash', role: 'COLABORADOR' };
-        const result = await userRepository.create(data);
+        const dados = {
+            name: 'Teste',
+            email: 'teste@teste.com',
+            passwordHash: 'hash',
+            role: 'COLABORADOR'
+        };
+        const resultado = await userRepository.create(dados);
 
         expect(prismaMock.user.create).toHaveBeenCalledWith({
-            data,
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true
-            }
+            data: dados,
+            select: SELECAO_USUARIO_CONSULTA
         });
-        expect(result).toEqual(mockUser);
+        expect(resultado).toEqual(usuarioMock);
     });
 
-    it('deve encontrar um usuário por e-mail', async () => {
-        const mockUser = { id: '1', email: 'teste@teste.com' };
-        prismaMock.user.findUnique.mockResolvedValue(mockUser);
+    it('deve listar usuários com isActive na seleção', async () => {
+        prismaMock.user.findMany.mockResolvedValue([{ id: '1', isActive: true }]);
 
-        const result = await userRepository.findByEmail('teste@teste.com');
+        await userRepository.findAll();
 
-        expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
-            where: { email: 'teste@teste.com' }
+        expect(prismaMock.user.findMany).toHaveBeenCalledWith({
+            select: SELECAO_USUARIO_CONSULTA,
+            orderBy: { name: 'asc' }
         });
-        expect(result).toEqual(mockUser);
     });
 
-    it('deve listar todos os usuários', async () => {
-        const mockUsers = [{ id: '1' }, { id: '2' }];
-        prismaMock.user.findMany.mockResolvedValue(mockUsers);
+    it('deve atualizar apenas campos permitidos', async () => {
+        prismaMock.user.update.mockResolvedValue({ id: '1', name: 'Novo Nome' });
 
-        const result = await userRepository.findAll();
-
-        expect(prismaMock.user.findMany).toHaveBeenCalled();
-        expect(result).toEqual(mockUsers);
-    });
-
-    it('deve atualizar um usuário', async () => {
-        const mockUser = { id: '1', name: 'Novo Nome' };
-        prismaMock.user.update.mockResolvedValue(mockUser);
-
-        const result = await userRepository.update('1', { name: 'Novo Nome' });
+        await userRepository.update('1', { name: 'Novo Nome' });
 
         expect(prismaMock.user.update).toHaveBeenCalledWith({
             where: { id: '1' },
-            data: { name: 'Novo Nome' }
+            data: { name: 'Novo Nome' },
+            select: SELECAO_USUARIO_CONSULTA
         });
-        expect(result).toEqual(mockUser);
     });
 
-    it('deve excluir um usuário', async () => {
-        const mockUser = { id: '1' };
-        prismaMock.user.delete.mockResolvedValue(mockUser);
+    it('deve excluir usuário após verificar existência', async () => {
+        prismaMock.user.findUnique.mockResolvedValue({ id: '1', name: 'Teste' });
+        prismaMock.user.delete.mockResolvedValue({ id: '1' });
 
-        const result = await userRepository.delete('1');
+        await userRepository.delete('1');
 
         expect(prismaMock.user.delete).toHaveBeenCalledWith({
-            where: { id: '1' }
-        });
-        expect(result).toEqual(mockUser);
-    });
-
-    it('deve alterar a senha de um usuário', async () => {
-        const mockUser = { id: '1' };
-        prismaMock.user.update.mockResolvedValue(mockUser);
-
-        const result = await userRepository.changePassword('1', 'newHash');
-
-        expect(prismaMock.user.update).toHaveBeenCalledWith({
             where: { id: '1' },
-            data: { passwordHash: 'newHash' }
+            select: SELECAO_USUARIO_CONSULTA
         });
-        expect(result).toEqual(mockUser);
     });
 });

@@ -1,19 +1,21 @@
 import userRepository from '../repositories/UserRepository.js';
 import { criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { MENSAGEM_USUARIO_NAO_ENCONTRADO } from '../constants/usuarioConstantes.js';
+import { formatarRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
 
 class FindUserByIdService {
     /**
      * @param {string} identificadorUsuario
+     * @param {string} papelVisualizador
      */
-    async execute(identificadorUsuario) {
+    async execute(identificadorUsuario, papelVisualizador) {
         const usuario = await userRepository.findById(identificadorUsuario);
 
         if (!usuario) {
             throw criarErroNaoEncontrado(MENSAGEM_USUARIO_NAO_ENCONTRADO);
         }
 
-        return usuario;
+        return formatarRespostaUsuario(usuario, papelVisualizador);
     }
 }
 

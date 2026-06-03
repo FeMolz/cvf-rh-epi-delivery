@@ -1,8 +1,13 @@
 import userRepository from '../repositories/UserRepository.js';
+import { formatarListaRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
 
 class ListUsersService {
-    async execute() {
-        return userRepository.findAll();
+    /**
+     * @param {string} papelVisualizador
+     */
+    async execute(papelVisualizador) {
+        const usuarios = await userRepository.findAll();
+        return formatarListaRespostaUsuario(usuarios, papelVisualizador);
     }
 }
 

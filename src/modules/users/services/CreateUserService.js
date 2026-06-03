@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import userRepository from '../repositories/UserRepository.js';
 import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
+import { formatarRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
 import {
     MENSAGEM_EMAIL_JA_CADASTRADO,
     MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN,
@@ -34,12 +35,14 @@ class CreateUserService {
 
         const hashSenha = await bcrypt.hash(password, 10);
 
-        return userRepository.create({
+        const usuarioCriado = await userRepository.create({
             name,
             email,
             passwordHash: hashSenha,
             role: papelInformado
         });
+
+        return formatarRespostaUsuario(usuarioCriado, papelSolicitante);
     }
 }
 

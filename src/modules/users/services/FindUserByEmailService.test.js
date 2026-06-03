@@ -19,14 +19,16 @@ describe('FindUserByEmailService', () => {
         userRepositoryMock.findByEmail.mockResolvedValue({
             id: '1',
             email: 'maria@teste.com',
+            isActive: true,
             passwordHash: 'hash-secreto'
         });
 
-        const resultado = await findUserByEmailService.execute('maria@teste.com');
+        const resultado = await findUserByEmailService.execute('maria@teste.com', 'ADMIN');
 
         expect(resultado).toEqual({
             id: '1',
-            email: 'maria@teste.com'
+            email: 'maria@teste.com',
+            isActive: true
         });
         expect(resultado.passwordHash).toBeUndefined();
     });

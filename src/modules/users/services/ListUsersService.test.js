@@ -15,13 +15,24 @@ describe('ListUsersService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve retornar a lista de usuários do repositório', async () => {
-        const usuarios = [{ id: '1' }, { id: '2' }];
-        userRepositoryMock.findAll.mockResolvedValue(usuarios);
+    it('deve retornar isActive na lista para ADMIN', async () => {
+        userRepositoryMock.findAll.mockResolvedValue([
+            { id: '1', name: 'A', isActive: true },
+            { id: '2', name: 'B', isActive: false }
+        ]);
 
-        const resultado = await listUsersService.execute();
+        const resultado = await listUsersService.execute('ADMIN');
 
-        expect(resultado).toEqual(usuarios);
-        expect(userRepositoryMock.findAll).toHaveBeenCalledTimes(1);
+        expect(resultado[0].isActive).toBe(true);
+        expect(resultado[1].isActive).toBe(false);
+    });
+
+    it('deve ocultar isActive para visualizador não ADMIN', async () => {
+        userRepositoryMock.findAll.mockResolvedValue([{ id: '1', name: 'A', isActive: true }]);
+
+        const resultado = await listUsersService.execute('ADMINISTRATIVO');
+
+        expect(resultado[0].isActive).toBeUndefined();
+        expect(resultado[0].name).toBe('A');
     });
 });
