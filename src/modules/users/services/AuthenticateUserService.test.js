@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
 
 const userRepositoryMock = {
-    findByEmail: jest.fn()
+    findByEmail: jest.fn(),
+    marcarUsuarioOnline: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/UserRepository.js', () => ({
@@ -49,21 +50,6 @@ describe('AuthenticateUserService', () => {
         ).rejects.toThrow('E-mail ou senha incorretos.');
     });
 
-    it('deve lançar a mesma mensagem quando usuário estiver inativo', async () => {
-        userRepositoryMock.findByEmail.mockResolvedValue({
-            id: '1',
-            email: 'a@b.com',
-            passwordHash: 'hash',
-            name: 'Usuário',
-            role: 'ADMIN',
-            isActive: false
-        });
-
-        await expect(
-            authenticateUserService.execute({ email: 'a@b.com', password: '123' })
-        ).rejects.toThrow('E-mail ou senha incorretos.');
-    });
-
     it('deve lançar erro quando senha não confere', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue({
             id: '1',
@@ -91,6 +77,7 @@ describe('AuthenticateUserService', () => {
         };
 
         userRepositoryMock.findByEmail.mockResolvedValue(usuario);
+        userRepositoryMock.marcarUsuarioOnline.mockResolvedValue(usuario);
         bcrypt.compare.mockResolvedValue(true);
         jwt.sign.mockReturnValue('token-jwt');
 

@@ -37,7 +37,7 @@ model User {
     email        String    @unique
     passwordHash String
     role         UserRole
-    isActive     Boolean   @default(true)
+    isActive     Boolean   @default(false)
     // ...
 }
 
@@ -49,7 +49,7 @@ model CadastroContratacao {
 }
 ```
 
-- **`isActive`**: usuário inativo não autentica e não passa no middleware mesmo com JWT antigo.
+- **`isActive`**: indicador de **presença online** (login → `true`, logout → `false`). Visível para ADMIN; não bloqueia autenticação.
 - **`tokenAcesso`**: link público de cadastro pós-aprovação de candidatura; validade temporal baseada em `createdAt` (não há campo `expiraEm` no schema — a expiração é calculada na aplicação).
 
 ---
@@ -93,13 +93,14 @@ Na inicialização, o servidor **não sobe** se:
 | Tamanho mínimo do `JWT_SECRET` | 16 caracteres | 32 caracteres |
 | `DATABASE_URL` | Obrigatório | Obrigatório |
 | `CORS_ORIGINS` | Opcional (CORS aberto se omitido) | Obrigatório, lista explícita (não pode ser `*`) |
+| `REDIS_URL` | Opcional (rate limit em memória) | Obrigatório |
 
 ### 4.2 Autenticação (`isAuthenticated`)
 
 1. Exige header `Authorization: Bearer <token>`.
 2. Valida assinatura e expiração do JWT com `env.JWT_SECRET` (sem fallback).
 3. Busca o usuário no banco (`UserRepository.findSessaoPorId`).
-4. Rejeita se usuário não existir ou `isActive === false`.
+4. Rejeita se usuário não existir.
 5. Popula `req.user` com **id, role e email do banco** (papel desatualizado no token é ignorado).
 
 ### 4.3 Login (`AuthenticateUserService`)
@@ -130,7 +131,7 @@ Mensagem de erro: `A senha deve ter no mínimo 8 caracteres, incluindo letras e 
 | Login | 20 req / 15 min | `RATE_LIMIT_LOGIN_MAX` |
 | Rotas públicas de recrutamento | 60 req / 15 min | `RATE_LIMIT_PUBLICO_MAX` |
 
-Implementação em memória (`Map`) — adequada para **uma instância**. Em cluster, considerar Redis no futuro.
+Implementação com **Redis** (`REDIS_URL`) via `ioredis`; em desenvolvimento, se Redis não estiver configurado, usa fallback em memória. Em **produção**, `REDIS_URL` é obrigatória.
 
 ### 4.7 CORS e headers
 
@@ -151,7 +152,7 @@ Número do CA aceito apenas como dígitos (`1`–`20` caracteres) antes de `fetc
 
 ### 4.10 Auditoria
 
-Eventos registrados em `console.info` como JSON (`tipo: AUDITORIA_SEGURANCA`):
+Eventos registrados em `console.info` como JSON **e persistidos** na tabela `EventoAuditoriaSeguranca`:
 
 | Evento | Quando |
 |--------|--------|
@@ -159,8 +160,13 @@ Eventos registrados em `console.info` como JSON (`tipo: AUDITORIA_SEGURANCA`):
 | `ALTERACAO_SENHA` | Senha alterada |
 | `DOWNLOAD_CURRICULO` | RH baixa currículo |
 | `CONVITE_CADASTRO_GERADO` | Link público de cadastro criado |
+| `LOGOUT` | Usuário encerrou sessão (`POST /users/logout`) |
 
-Em produção, encaminhe esses logs para agregador (CloudWatch, Loki, etc.).
+Em produção, encaminhe os logs de console para agregador (CloudWatch, Loki, etc.) e consulte a tabela para auditoria histórica.
+
+### 4.12 Health check protegido
+
+Em `NODE_ENV=production`, se `HEALTH_CHECK_TOKEN` estiver definido, `GET /health` exige header `X-Health-Token` com o mesmo valor.
 
 ### 4.11 Seeds e scripts de desenvolvimento
 
@@ -177,7 +183,8 @@ Em produção, encaminhe esses logs para agregador (CloudWatch, Loki, etc.).
 
 | Método | Endpoint | Proteção adicional |
 |--------|----------|-------------------|
-| GET | `/health` | Nenhuma (reconhecimento de infra) |
+| GET | `/health` | Em produção com `HEALTH_CHECK_TOKEN`: header `X-Health-Token` |
+| POST | `/api/v1/users/logout` | JWT (marca presença offline) |
 | POST | `/api/v1/users/login` | Rate limit login |
 | GET | `/api/v1/recruitment/publico/vagas/:id` | Rate limit público |
 | POST | `/api/v1/recruitment/publico/vagas/:id/candidaturas` | Rate limit + upload validado |
@@ -194,7 +201,9 @@ Todas as demais rotas sob `/api/v1/*` exigem `isAuthenticated` + `authorize(...)
 | Arquivo | Cenários |
 |---------|----------|
 | `src/config/validarConfiguracaoAmbiente.test.js` | JWT, CORS em produção |
-| `src/shared/middlewares/auth.test.js` | Token válido, inativo, inválido |
+| `src/shared/middlewares/auth.test.js` | Token válido, usuário inexistente, inválido |
+| `src/shared/middlewares/protegerHealthCheck.test.js` | Token de health em produção |
+| `src/shared/middlewares/criarLimitadorTaxa.test.js` | Rate limit (memória/Redis) |
 | `src/shared/utils/validarSenha.test.js` | Política de senha |
 | `src/shared/utils/validarNumeroCaEpi.test.js` | CA numérico |
 | `src/modules/recruitment/utils/validarArquivoCurriculo.test.js` | MIME, extensão, magic bytes |
@@ -229,6 +238,9 @@ TRUST_PROXY_SALTOS=1
 RATE_LIMIT_GLOBAL_MAX=300
 RATE_LIMIT_LOGIN_MAX=20
 RATE_LIMIT_PUBLICO_MAX=60
+
+REDIS_URL="redis://localhost:6379"
+HEALTH_CHECK_TOKEN="token-secreto-monitoramento"
 
 TOKEN_CADASTRO_VALIDADE_DIAS=7
 
@@ -277,7 +289,8 @@ Authorization: Bearer <seu_token_jwt>
 - [ ] `ADMIN_SEED_PASSWORD` forte; não usar seed padrão em produção
 - [ ] `.env` fora do Git (já listado no `.gitignore`)
 - [ ] Logs de auditoria coletados
-- [ ] Revisar exposição do `/health` (rede interna ou monitoramento apenas)
+- [ ] `REDIS_URL` configurada (rate limit distribuído entre instâncias)
+- [ ] `HEALTH_CHECK_TOKEN` definido e header `X-Health-Token` no monitoramento
 
 ---
 

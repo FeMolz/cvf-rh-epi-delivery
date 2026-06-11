@@ -15,7 +15,10 @@ export const SELECAO_USUARIO_CONSULTA = {
 class UserRepository {
     async create(dadosCriacao) {
         return prisma.user.create({
-            data: dadosCriacao,
+            data: {
+                ...dadosCriacao,
+                isActive: false
+            },
             select: SELECAO_USUARIO_CONSULTA
         });
     }
@@ -46,9 +49,27 @@ class UserRepository {
             select: {
                 id: true,
                 email: true,
-                role: true,
-                isActive: true
+                role: true
             }
+        });
+    }
+
+    async marcarUsuarioOnline(identificadorUsuario) {
+        return prisma.user.update({
+            where: { id: identificadorUsuario },
+            data: {
+                isActive: true,
+                lastLogin: new Date()
+            },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+    }
+
+    async marcarUsuarioOffline(identificadorUsuario) {
+        return prisma.user.update({
+            where: { id: identificadorUsuario },
+            data: { isActive: false },
+            select: SELECAO_USUARIO_CONSULTA
         });
     }
 

@@ -63,6 +63,15 @@ class QuesitoRepository {
             data: dadosQuesito
         });
     }
+
+    /**
+     * @param {string} identificadorQuesito
+     */
+    async delete(identificadorQuesito) {
+        return prisma.quesito.delete({
+            where: { id: identificadorQuesito }
+        });
+    }
 }
 
 export default new QuesitoRepository();

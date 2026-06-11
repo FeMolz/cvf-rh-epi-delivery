@@ -3,6 +3,12 @@
 # Pare com: docker compose -f docker-compose.test.yml down -v
 
 services:
+  redis-teste:
+    image: redis:7-alpine
+    container_name: rh-system-redis-teste
+    ports:
+      - "6379:6379"
+
   postgres-teste:
     image: postgres:16-alpine
     container_name: rh-system-postgres-teste

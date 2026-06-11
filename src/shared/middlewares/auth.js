@@ -35,7 +35,7 @@ export const isAuthenticated = async (requisicao, resposta, proximo) => {
 
         const usuarioSessao = await userRepository.findSessaoPorId(identificadorUsuario);
 
-        if (!usuarioSessao || !usuarioSessao.isActive) {
+        if (!usuarioSessao) {
             return resposta.status(401).json({
                 status: 'error',
                 message: 'Token de autenticação inválido ou expirado.'

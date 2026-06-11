@@ -44,7 +44,7 @@ describe('CreateUserService', () => {
         userRepositoryMock.create.mockResolvedValue({
             id: '1',
             role: 'ADMIN',
-            isActive: true
+            isActive: false
         });
 
         const resultado = await createUserService.execute({
@@ -56,7 +56,7 @@ describe('CreateUserService', () => {
         });
 
         expect(resultado.role).toBe('ADMIN');
-        expect(resultado.isActive).toBe(true);
+        expect(resultado.isActive).toBe(false);
     });
 
     it('deve lançar erro se o e-mail já estiver cadastrado', async () => {

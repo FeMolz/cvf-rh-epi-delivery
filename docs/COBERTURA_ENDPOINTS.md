@@ -41,6 +41,7 @@ Os arquivos `*.routes.test.js` montam um Express mínimo, mockam autenticação/
 |--------|----------|------|------------|
 | POST | `/` | ADMIN | ✅ |
 | POST | `/login` | Público | ✅ |
+| POST | `/logout` | JWT | ✅ |
 | DELETE | `/me` | JWT | ✅ |
 | GET | `/` | ADMIN | ✅ |
 | GET | `/findByEmail/:email` | ADMIN | ✅ |
@@ -144,6 +145,7 @@ Regras: 🔧 `AuthenticateUserService`, `UpdateUserService` (isActive não edit�
 | GET | `/todos` | ✅ |
 | GET | `/` | ✅ |
 | PUT | `/:id` | ✅ |
+| DELETE | `/:id` | ✅ |
 
 ---
 

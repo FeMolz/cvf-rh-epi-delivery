@@ -39,7 +39,7 @@ describe('UpdateUserService', () => {
         await expect(
             updateUserService.execute('1', { isActive: false }, 'ADMIN')
         ).rejects.toMatchObject({
-            message: 'O campo isActive não pode ser alterado pela API.',
+            message: 'O campo isActive não pode ser alterado manualmente pela API. Ele reflete presença online (login/logout).',
             statusCode: 400
         });
     });

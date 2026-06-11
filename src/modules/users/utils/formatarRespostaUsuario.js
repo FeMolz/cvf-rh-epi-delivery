@@ -1,7 +1,7 @@
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 
 /**
- * Remove senha e oculta isActive para quem não é ADMIN.
+ * Remove senha. Para ADMIN, expõe isActive (presença online) e lastLogin.
  * @param {Record<string, unknown>} usuario
  * @param {string} [papelVisualizador]
  * @returns {Record<string, unknown>}
@@ -11,10 +11,10 @@ export function formatarRespostaUsuario(usuario, papelVisualizador) {
         return usuario;
     }
 
-    const { passwordHash: _senha, isActive, ...dadosSemSenha } = usuario;
+    const { passwordHash: _senha, isActive, lastLogin, ...dadosSemSenha } = usuario;
 
     if (papelVisualizador === PAPEL_ADMIN) {
-        return { ...dadosSemSenha, isActive };
+        return { ...dadosSemSenha, isActive, lastLogin };
     }
 
     return dadosSemSenha;

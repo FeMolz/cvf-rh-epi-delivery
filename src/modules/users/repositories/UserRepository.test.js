@@ -34,7 +34,7 @@ describe('UserRepository', () => {
         const resultado = await userRepository.create(dados);
 
         expect(prismaMock.user.create).toHaveBeenCalledWith({
-            data: dados,
+            data: { ...dados, isActive: false },
             select: SELECAO_USUARIO_CONSULTA
         });
         expect(resultado).toEqual(usuarioMock);

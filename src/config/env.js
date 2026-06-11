@@ -6,6 +6,7 @@ import {
 } from '../shared/constants/segurancaConstantes.js';
 import {
     validarOrigensCorsProducao,
+    validarRedisProducao,
     validarSegredoJwt
 } from './validarConfiguracaoAmbiente.js';
 
@@ -13,6 +14,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 validarSegredoJwt(process.env.JWT_SECRET, NODE_ENV);
 validarOrigensCorsProducao(process.env.CORS_ORIGINS, NODE_ENV);
+validarRedisProducao(process.env.REDIS_URL, NODE_ENV);
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined in environment variables');
@@ -32,7 +34,9 @@ const env = {
     RATE_LIMIT_GLOBAL_MAX:
         Number(process.env.RATE_LIMIT_GLOBAL_MAX) || LIMITE_REQUISICOES_GLOBAL_PADRAO,
     RATE_LIMIT_LOGIN_MAX: Number(process.env.RATE_LIMIT_LOGIN_MAX) || 20,
-    RATE_LIMIT_PUBLICO_MAX: Number(process.env.RATE_LIMIT_PUBLICO_MAX) || 60
+    RATE_LIMIT_PUBLICO_MAX: Number(process.env.RATE_LIMIT_PUBLICO_MAX) || 60,
+    REDIS_URL: process.env.REDIS_URL || null,
+    HEALTH_CHECK_TOKEN: process.env.HEALTH_CHECK_TOKEN || null
 };
 
 export default env;

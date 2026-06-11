@@ -36,6 +36,20 @@ export function validarSegredoJwt(segredoJwt, nodeEnv) {
  * @param {string | undefined} origensCors
  * @param {string} nodeEnv
  */
+/**
+ * @param {string | undefined} urlRedis
+ * @param {string} nodeEnv
+ */
+export function validarRedisProducao(urlRedis, nodeEnv) {
+    if (nodeEnv !== 'production') {
+        return;
+    }
+
+    if (!urlRedis || String(urlRedis).trim() === '') {
+        throw new Error('REDIS_URL é obrigatória em produção para rate limit distribuído.');
+    }
+}
+
 export function validarOrigensCorsProducao(origensCors, nodeEnv) {
     if (nodeEnv !== 'production') {
         return;

@@ -6,7 +6,8 @@ const quesitoControllerMock = {
     create: jest.fn((req, res) => res.status(201).json({ id: 1 })),
     listAll: jest.fn((req, res) => res.status(200).json([{ id: 1 }, { id: 2 }])),
     list: jest.fn((req, res) => res.status(200).json([{ id: 1 }])),
-    update: jest.fn((req, res) => res.status(200).json({ id: req.params.id, nome: 'atualizado' }))
+    update: jest.fn((req, res) => res.status(200).json({ id: req.params.id, nome: 'atualizado' })),
+    delete: jest.fn((req, res) => res.status(200).json({ id: req.params.id }))
 };
 
 const authMiddlewareMock = {
@@ -64,6 +65,12 @@ describe('Quesito Routes', () => {
         const resposta = await request(app).get('/quesitos');
         expect(resposta.statusCode).toBe(200);
         expect(quesitoControllerMock.list).toHaveBeenCalled();
+    });
+
+    it('DELETE /quesitos/:id deve chamar quesitoController.delete', async () => {
+        const resposta = await request(app).delete('/quesitos/uuid-1');
+        expect(resposta.statusCode).toBe(200);
+        expect(quesitoControllerMock.delete).toHaveBeenCalled();
     });
 
     it('PUT /quesitos/:id deve chamar quesitoController.update', async () => {

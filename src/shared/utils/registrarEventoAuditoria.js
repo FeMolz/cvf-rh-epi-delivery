@@ -1,4 +1,5 @@
 import { TIPOS_EVENTO_AUDITORIA } from '../constants/segurancaConstantes.js';
+import eventoAuditoriaSegurancaRepository from '../repositories/EventoAuditoriaSegurancaRepository.js';
 
 export { TIPOS_EVENTO_AUDITORIA };
 
@@ -15,4 +16,10 @@ export function registrarEventoAuditoria(tipoEvento, detalhes = {}) {
     };
 
     console.info(JSON.stringify(registro));
+
+    eventoAuditoriaSegurancaRepository
+        .registrar(tipoEvento, detalhes)
+        .catch((erro) => {
+            console.error('[Auditoria] Falha ao persistir evento:', erro.message);
+        });
 }

@@ -22,6 +22,12 @@ userRoutes.post(
     (requisicao, resposta, proximo) => userController.login(requisicao, resposta, proximo)
 );
 
+userRoutes.post(
+    '/logout',
+    isAuthenticated,
+    (requisicao, resposta, proximo) => userController.logout(requisicao, resposta, proximo)
+);
+
 userRoutes.delete(
     '/me',
     isAuthenticated,

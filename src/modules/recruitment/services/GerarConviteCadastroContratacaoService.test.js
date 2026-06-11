@@ -20,6 +20,11 @@ jest.unstable_mockModule('../repositories/CadastroContratacaoRepository.js', () 
     default: cadastroContratacaoRepositoryMock
 }));
 
+jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', () => ({
+    registrarEventoAuditoria: jest.fn(),
+    TIPOS_EVENTO_AUDITORIA: { CONVITE_CADASTRO_GERADO: 'CONVITE_CADASTRO_GERADO' }
+}));
+
 const gerarConviteCadastroContratacaoService = (
     await import('./GerarConviteCadastroContratacaoService.js')
 ).default;

@@ -1,5 +1,10 @@
 import { jest } from '@jest/globals';
-import { registrarEventoAuditoria, TIPOS_EVENTO_AUDITORIA } from './registrarEventoAuditoria.js';
+
+jest.unstable_mockModule('../repositories/EventoAuditoriaSegurancaRepository.js', () => ({
+    default: { registrar: jest.fn().mockResolvedValue({ id: '1' }) }
+}));
+
+const { registrarEventoAuditoria, TIPOS_EVENTO_AUDITORIA } = await import('./registrarEventoAuditoria.js');
 
 describe('registrarEventoAuditoria', () => {
     it('deve registrar evento em JSON no console', () => {

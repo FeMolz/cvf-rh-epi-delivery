@@ -110,7 +110,7 @@ model User {
     email        String    @unique
     passwordHash String
     role         UserRole
-    isActive     Boolean   @default(true)
+    isActive     Boolean   @default(false)
     lastLogin    DateTime?
 
     epiDeliveries EpiDelivery[]
@@ -428,4 +428,14 @@ model CadastroContratacao {
 
     @@index([status])
     @@index([tokenAcesso])
+}
+
+model EventoAuditoriaSeguranca {
+    id           String   @id @default(uuid())
+    tipoEvento   String
+    detalhes     Json     @default("{}")
+    registradoEm DateTime @default(now())
+
+    @@index([tipoEvento])
+    @@index([registradoEm])
 }

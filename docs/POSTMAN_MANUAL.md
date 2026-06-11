@@ -21,7 +21,8 @@ Header padrão nas rotas protegidas: `Authorization: Bearer {{tokenAdmin}}`
 | # | O que validar | Método | Endpoint | Esperado |
 |---|---------------|--------|----------|----------|
 | 0.1 | API + banco OK | GET | `/health` | `200`, `database: "OK"` |
-| 0.2 | Banco indisponível | GET | `/health` | (pare o Postgres) `503` |
+| 0.2 | Health em produção | GET | `/health` | Com `HEALTH_CHECK_TOKEN` → header `X-Health-Token` obrigatório |
+| 0.3 | Banco indisponível | GET | `/health` | (pare o Postgres) `503` |
 
 ---
 
@@ -31,14 +32,15 @@ Header padrão nas rotas protegidas: `Authorization: Bearer {{tokenAdmin}}`
 |---|---------|--------|----------|--------------|
 | 1.1 | Login válido | POST | `/api/v1/users/login` | `{ "email", "password" }` → token + user **sem** `isActive` |
 | 1.2 | Login senha errada | POST | `/api/v1/users/login` | `401` |
-| 1.3 | Login usuário inativo | POST | `/api/v1/users/login` | `isActive: false` no banco → mensagem inativo |
-| 1.4 | Criar usuário (ADMIN) | POST | `/api/v1/users` | Bearer ADMIN; ver `isActive` na resposta |
-| 1.5 | Listar usuários | GET | `/api/v1/users` | ADMIN vê `isActive`; teste com token não-ADMIN se tiver rota |
-| 1.6 | Atualizar sem `isActive` | PUT | `/api/v1/users/:id` | só `name`, `email`, `role` |
-| 1.7 | Tentar enviar `isActive` | PUT | `/api/v1/users/:id` | `{ "isActive": false }` → `400` |
-| 1.8 | Alterar própria senha | PUT | `/api/v1/users/password/:id` | token do próprio usuário |
-| 1.9 | ADMIN altera senha de outro | PUT | `/api/v1/users/password/:id` | token ADMIN |
-| 1.10 | Excluir própria conta | DELETE | `/api/v1/users/me` | |
+| 1.3 | Presença após login | GET | `/api/v1/users` | ADMIN vê usuário logado com `isActive: true` e `lastLogin` |
+| 1.4 | Logout | POST | `/api/v1/users/logout` | Bearer do usuário → `isActive: false` na listagem ADMIN |
+| 1.5 | Criar usuário (ADMIN) | POST | `/api/v1/users` | Bearer ADMIN; novo usuário nasce com `isActive: false` |
+| 1.6 | Listar usuários | GET | `/api/v1/users` | ADMIN vê `isActive` e `lastLogin` |
+| 1.7 | Atualizar sem `isActive` | PUT | `/api/v1/users/:id` | só `name`, `email`, `role` |
+| 1.8 | Tentar enviar `isActive` | PUT | `/api/v1/users/:id` | `{ "isActive": false }` → `400` |
+| 1.9 | Alterar própria senha | PUT | `/api/v1/users/password/:id` | token do próprio usuário |
+| 1.10 | ADMIN altera senha de outro | PUT | `/api/v1/users/password/:id` | token ADMIN |
+| 1.11 | Excluir própria conta | DELETE | `/api/v1/users/me` | |
 
 ---
 
@@ -141,7 +143,7 @@ Requer `SECULLUM_*` no `.env.test` (ver [PONTO.md](./PONTO.md) e [CONFIG_PONTO.m
 ## O que **não** precisa repetir no Postman se `npm test` passou
 
 - Cada rota “bate no controller certo” (62 testes `test:routes`)  
-- Regras de `isActive`, período de relatório, validação de CPF, etc. (services)  
+- Regras de presença online (`isActive`), período de relatório, validação de CPF, etc. (services)  
 - Montagem HTML do PDF (unitário; só validar visual no passo 4.6)
 
 ---

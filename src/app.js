@@ -5,6 +5,7 @@ import { configurarCors } from './shared/middlewares/configurarCors.js';
 import { configurarHelmet } from './shared/middlewares/configurarHelmet.js';
 import { identificadorRequisicao } from './shared/middlewares/identificadorRequisicao.js';
 import { limitadorTaxaGlobal } from './shared/middlewares/criarLimitadorTaxa.js';
+import { protegerHealthCheck } from './shared/middlewares/protegerHealthCheck.js';
 
 const app = express();
 
@@ -35,7 +36,7 @@ import quesitoToRoleRoutes from './modules/chaining/quesitoToRole/routes/quesito
 import recruitmentRoutes from './modules/recruitment/routes/recruitment.routes.js';
 import pontoRoutes from './modules/ponto/routes/ponto.routes.js';
 
-app.get('/health', async (_requisicao, resposta) => {
+app.get('/health', protegerHealthCheck(), async (_requisicao, resposta) => {
     try {
         await prisma.$queryRaw`SELECT 1`;
         return resposta.status(200).json({

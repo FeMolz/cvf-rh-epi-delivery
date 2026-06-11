@@ -68,7 +68,9 @@ src/modules/quesitos/
     ├── ListQuesitosService.js
     ├── ListQuesitosService.test.js
     ├── UpdateQuesitoService.js
-    └── UpdateQuesitoService.test.js
+    ├── UpdateQuesitoService.test.js
+    ├── DeleteQuesitoService.js
+    └── DeleteQuesitoService.test.js
 
 src/modules/chaining/quesitoToRole/
 ├── controllers/
@@ -96,6 +98,7 @@ src/modules/chaining/quesitoToRole/
 | **QuesitoRepository** | Único acesso Prisma à entidade `Quesito` (criar, buscar por `nome`, por `id`, listar por `bloco`, listar ordenado). |
 | **CreateQuesitoService** | Valida `nome`, `descricao` e `bloco` (trim); impede duplicidade de `nome`. |
 | **UpdateQuesitoService** | Atualização parcial por `id`; valida campos informados; impede `nome` duplicado em outro quesito. |
+| **DeleteQuesitoService** | Remove quesito por `id`; vínculos em `RoleQuesito` são excluídos em cascata pelo Prisma. |
 | **ListAllQuesitosService** | Retorna todos os quesitos ordenados por `bloco` e `nome` (rota `/todos`). |
 | **ListQuesitosService** | Filtros mutuamente exclusivos: `nome` (retorna um registro ou erro 404 tratado no controller) ou `bloco` (lista); sem query retorna todos ordenados por `bloco` e `nome`. |
 | **QuesitoController** | Encaminha `req` para serviços e mapeia mensagens conhecidas para HTTP 400/404; demais erros vão ao handler global. |
@@ -117,6 +120,7 @@ Base da API: prefixo `/api/v1`.
 | `PUT` | `/api/v1/quesitos/:id` | `ADMIN`, `ADMINISTRATIVO` | Atualiza quesito (parcial: `nome`, `descricao` e/ou `bloco`). |
 | `GET` | `/api/v1/quesitos/todos` | `ADMIN`, `ADMINISTRATIVO` | Lista **todos** os quesitos (ordenados por bloco e nome). |
 | `GET` | `/api/v1/quesitos` | `ADMIN`, `ADMINISTRATIVO` | Sem query: lista todos. Com `?bloco=` ou `?nome=` aplica filtros (não usar `nome` e `bloco` juntos). |
+| `DELETE` | `/api/v1/quesitos/:id` | `ADMIN`, `ADMINISTRATIVO` | Remove quesito pelo ID. |
 
 ### Chaining Cargo–Quesito (`/api/v1/roles-quesitos`)
 
@@ -131,7 +135,7 @@ Base da API: prefixo `/api/v1`.
 Cenários cobertos com `jest.unstable_mockModule` (sem banco real):
 
 - **QuesitoRepository**: chamadas Prisma para `create`, `findByNome`, `findManyByBloco`, `findAllOrdered`, `findById`.
-- **CreateQuesitoService** / **ListQuesitosService**: validações, duplicidade de nome, filtros exclusivos e listagens.
+- **CreateQuesitoService** / **ListQuesitosService** / **DeleteQuesitoService**: validações, duplicidade de nome, exclusão e filtros exclusivos.
 - **QuesitoController** e **quesito.routes**: integração superficial com middlewares mockados.
 - **RoleQuesitoRepository**, **LinkQuesitoToRoleService**, **UnlinkQuesitoFromRoleService**, **ListQuesitosVinculadosAoCargoService**, **QuesitoToRoleController**, **quesitoToRole.routes**: fluxos de vínculo, desvinculo e listagem por cargo.
 
@@ -234,6 +238,12 @@ Quesitos já vinculados são ignorados (não geram erro); `quantidadeJaExistente
 
 ```http
 GET /api/v1/roles-quesitos/<uuid-do-cargo>
+```
+
+**Excluir quesito**
+
+```http
+DELETE /api/v1/quesitos/<uuid-do-quesito>
 ```
 
 **Desvincular**

@@ -12,7 +12,7 @@ class AuthenticateUserService {
     async execute({ email, password }) {
         const usuario = await userRepository.findByEmail(email);
 
-        if (!usuario || !usuario.isActive) {
+        if (!usuario) {
             throw new Error(MENSAGEM_CREDENCIAIS_LOGIN_INVALIDAS);
         }
 
@@ -21,6 +21,8 @@ class AuthenticateUserService {
         if (!senhaConfere) {
             throw new Error(MENSAGEM_CREDENCIAIS_LOGIN_INVALIDAS);
         }
+
+        const usuarioOnline = await userRepository.marcarUsuarioOnline(usuario.id);
 
         const token = jwt.sign(
             { id: usuario.id, role: usuario.role, email: usuario.email },
@@ -35,10 +37,10 @@ class AuthenticateUserService {
 
         return {
             user: {
-                id: usuario.id,
-                name: usuario.name,
-                email: usuario.email,
-                role: usuario.role
+                id: usuarioOnline.id,
+                name: usuarioOnline.name,
+                email: usuarioOnline.email,
+                role: usuarioOnline.role
             },
             token
         };

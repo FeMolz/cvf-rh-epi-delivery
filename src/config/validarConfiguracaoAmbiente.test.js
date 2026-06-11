@@ -1,5 +1,6 @@
 import {
     validarOrigensCorsProducao,
+    validarRedisProducao,
     validarSegredoJwt
 } from './validarConfiguracaoAmbiente.js';
 
@@ -10,6 +11,10 @@ describe('validarConfiguracaoAmbiente', () => {
 
     it('deve exigir tamanho mínimo do JWT em produção', () => {
         expect(() => validarSegredoJwt('curto', 'production')).toThrow('32 caracteres');
+    });
+
+    it('deve exigir REDIS_URL em produção', () => {
+        expect(() => validarRedisProducao(undefined, 'production')).toThrow('REDIS_URL');
     });
 
     it('deve exigir CORS explícito em produção', () => {

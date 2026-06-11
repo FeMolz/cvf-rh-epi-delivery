@@ -11,7 +11,8 @@ const userControllerMock = {
     findByEmail: jest.fn((req, res) => res.status(200).json({ id: '1' })),
     update: jest.fn((req, res) => res.status(200).json({ id: '1' })),
     delete: jest.fn((req, res) => res.status(200).json({ id: '1' })),
-    changePassword: jest.fn((req, res) => res.status(200).json({ id: '1' }))
+    changePassword: jest.fn((req, res) => res.status(200).json({ id: '1' })),
+    logout: jest.fn((req, res) => res.status(200).json({ id: '1', isActive: false }))
 };
 
 const authMiddlewareMock = {
@@ -27,6 +28,10 @@ const rbacMiddlewareMock = {
 
 jest.unstable_mockModule('../controllers/UserController.js', () => ({
     default: userControllerMock
+}));
+
+jest.unstable_mockModule('../../../shared/middlewares/criarLimitadorTaxa.js', () => ({
+    limitadorTaxaLogin: (_req, _res, next) => next()
 }));
 
 jest.unstable_mockModule('../../../../src/shared/middlewares/auth.js', () => ({
@@ -52,6 +57,12 @@ describe('User Routes', () => {
         const res = await request(app).post('/users').send({ name: 'Teste', email: 'teste@teste.com', password: '123' });
         expect(res.statusCode).toBe(201);
         expect(userControllerMock.create).toHaveBeenCalled();
+    });
+
+    it('POST /users/logout deve chamar userController.logout', async () => {
+        const resposta = await request(app).post('/users/logout');
+        expect(resposta.statusCode).toBe(200);
+        expect(userControllerMock.logout).toHaveBeenCalled();
     });
 
     it('POST /users/login deve chamar userController.login', async () => {

@@ -2,6 +2,7 @@ import createQuesitoService from '../services/CreateQuesitoService.js';
 import listAllQuesitosService from '../services/ListAllQuesitosService.js';
 import listQuesitosService from '../services/ListQuesitosService.js';
 import updateQuesitoService from '../services/UpdateQuesitoService.js';
+import deleteQuesitoService from '../services/DeleteQuesitoService.js';
 import {
     MENSAGEM_BLOCO_QUESITO_OBRIGATORIO,
     MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS,
@@ -59,6 +60,18 @@ class QuesitoController {
             }
             if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
                 return response.status(400).json({ error: erro.message });
+            }
+            return next(erro);
+        }
+    }
+
+    async delete(request, response, next) {
+        try {
+            const quesitoExcluido = await deleteQuesitoService.execute(request.params.id);
+            return response.status(200).json(quesitoExcluido);
+        } catch (erro) {
+            if (erro.statusCode === 404) {
+                return response.status(404).json({ error: erro.message });
             }
             return next(erro);
         }

@@ -35,4 +35,11 @@ quesitoRoutes.put(
     (req, res, next) => quesitoController.update(req, res, next)
 );
 
+quesitoRoutes.delete(
+    '/:id',
+    isAuthenticated,
+    authorize(['ADMIN', 'ADMINISTRATIVO']),
+    (req, res, next) => quesitoController.delete(req, res, next)
+);
+
 export default quesitoRoutes;

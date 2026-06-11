@@ -58,8 +58,7 @@ describe('isAuthenticated Middleware', () => {
         userRepositoryMock.findSessaoPorId.mockResolvedValue({
             id: 'uuid-1',
             role: 'ADMIN',
-            email: 'admin@teste.com',
-            isActive: true
+            email: 'admin@teste.com'
         });
 
         await isAuthenticated(requisicao, resposta, mockNext);
@@ -72,7 +71,7 @@ describe('isAuthenticated Middleware', () => {
         expect(mockNext).toHaveBeenCalled();
     });
 
-    it('deve retornar 401 quando usuário estiver inativo no banco', async () => {
+    it('deve autenticar usuário offline (isActive=false indica ausência de sessão, não bloqueio)', async () => {
         const tokenValido = jwt.sign({ id: 'uuid-1' }, 'segredo-teste-local-16');
         const requisicao = { headers: { authorization: `Bearer ${tokenValido}` } };
         const resposta = mockResponse();
@@ -80,14 +79,12 @@ describe('isAuthenticated Middleware', () => {
         userRepositoryMock.findSessaoPorId.mockResolvedValue({
             id: 'uuid-1',
             role: 'COLABORADOR',
-            email: 'user@teste.com',
-            isActive: false
+            email: 'user@teste.com'
         });
 
         await isAuthenticated(requisicao, resposta, mockNext);
 
-        expect(resposta.status).toHaveBeenCalledWith(401);
-        expect(mockNext).not.toHaveBeenCalled();
+        expect(mockNext).toHaveBeenCalled();
     });
 
     it('deve retornar 401 se o token for inválido', async () => {

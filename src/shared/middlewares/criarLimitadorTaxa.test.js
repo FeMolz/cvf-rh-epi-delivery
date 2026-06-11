@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { criarLimitadorTaxa } from './criarLimitadorTaxa.js';
+import { criarLimitadorTaxaMemoria } from './criarLimitadorTaxaMemoria.js';
 
 const criarRespostaMock = () => {
     const resposta = {};
@@ -8,9 +8,9 @@ const criarRespostaMock = () => {
     return resposta;
 };
 
-describe('criarLimitadorTaxa', () => {
+describe('criarLimitadorTaxaMemoria', () => {
     it('deve permitir requisições dentro do limite', () => {
-        const limitador = criarLimitadorTaxa({
+        const limitador = criarLimitadorTaxaMemoria({
             janelaMs: 60_000,
             limiteRequisicoes: 2
         });
@@ -26,7 +26,7 @@ describe('criarLimitadorTaxa', () => {
     });
 
     it('deve retornar 429 ao exceder o limite na janela', () => {
-        const limitador = criarLimitadorTaxa({
+        const limitador = criarLimitadorTaxaMemoria({
             janelaMs: 60_000,
             limiteRequisicoes: 2,
             mensagem: 'Limite atingido'
