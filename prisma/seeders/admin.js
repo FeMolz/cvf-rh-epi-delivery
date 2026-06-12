@@ -39,28 +39,25 @@ async function main() {
         process.exit(1);
     }
 
-    const existingAdmin = await prisma.user.findUnique({
-        where: { email: adminEmail }
-    });
-
-    if (existingAdmin) {
-        console.log(`O usuário administrador com o email ${adminEmail} já existe.`);
-        return;
-    }
-
     const passwordHash = await bcrypt.hash(senhaFinal, 10);
 
-    await prisma.user.create({
-        data: {
+    await prisma.user.upsert({
+        where: { email: adminEmail },
+        update: {
+            name: adminName,
+            passwordHash,
+            role: UserRole.ADMIN
+        },
+        create: {
             name: adminName,
             email: adminEmail,
             passwordHash,
             role: UserRole.ADMIN,
-            isActive: true
+            isActive: false
         }
     });
 
-    console.log('✅ Usuário administrador criado com sucesso!');
+    console.log('✅ Usuário administrador sincronizado com sucesso!');
     console.log('-------------------------------------------');
     console.log(`Email: ${adminEmail}`);
     if (!ambienteProducao) {

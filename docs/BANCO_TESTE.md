@@ -64,19 +64,40 @@ Equivalente a migrations em banco vazio; adequado para ambiente de teste.
 
 ## 4. Popular dados iniciais (seeds)
 
-Ordem sugerida:
+Popula **todos os módulos** (usuários, empresas, setores, cargos, funcionários, EPIs, quesitos, entregas, relatórios PDF, recrutamento e auditoria):
 
 ```bash
 npm run db:test:seed
 ```
 
-Para EPIs no cache (opcional, requer `CAEPI_API_URL`):
+Equivalente manual:
+
+```bash
+npm run seed:all:test
+```
+
+Em desenvolvimento (`.env`):
+
+```bash
+npm run seed:all
+```
+
+### Credenciais padrão dos usuários de seed
+
+| E-mail | Papel | Senha |
+|--------|-------|-------|
+| `admin@rhsystem.com` | ADMIN | `AlterarSenha123!` (ou `ADMIN_SEED_PASSWORD`) |
+| `administrativo@rhsystem.com` | ADMINISTRATIVO | `AlterarSenha123!` |
+| `almoxarifado@rhsystem.com` | ALMOXARIFADO | `AlterarSenha123!` |
+| `colaborador@rhsystem.com` | COLABORADOR | `AlterarSenha123!` |
+
+### EPIs via API externa (opcional)
+
+Requer `CAEPI_API_URL` rodando:
 
 ```bash
 node prisma/scripts/executar-com-ambiente-teste.mjs prisma/seeders/seed_epis.js
 ```
-
-Credenciais padrão do seed admin: veja saída do terminal ao rodar `admin.js`.
 
 Token JWT para o Postman:
 
@@ -110,11 +131,11 @@ Apaga o volume Docker (se usar compose de teste), recria schema e roda seeds bá
 
 ## 7. Desenvolvimento vs teste vs produção
 
-| Ambiente | Arquivo env | Banco | Uso |
-|----------|-----------|-------|-----|
-| Dev diário | `.env` | `rh_system` (ex.) | Codar no dia a dia |
-| Teste manual | `.env.test` | `rh_system_test` | Postman, PDF, Secullum |
-| Produção | servidor | cliente | Deploy |
+| Ambiente     | Arquivo env | Banco             | Uso                    |
+| ------------ | ----------- | ----------------- | ---------------------- |
+| Dev diário   | `.env`      | `rh_system` (ex.) | Codar no dia a dia     |
+| Teste manual | `.env.test` | `rh_system_test`  | Postman, PDF, Secullum |
+| Produção     | servidor    | cliente           | Deploy                 |
 
 Os testes Jest (`npm test`) **não usam** esse banco — usam mocks. O banco de teste é só para você validar integração real.
 

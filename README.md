@@ -151,7 +151,9 @@ Utilize `POST /api/v1/users/login` para obter o token JWT.
 | Comando npm | Equivalente |
 |-------------|----------------|
 | `npm run seed:companies` | `node prisma/seeders/seed_companies.js` |
-| `npm run seed:test-data` | `node prisma/seeders/seed_test_data.js` |
+| `npm run seed:all` | `node prisma/seeders/seed_sistema_completo.js` (todos os módulos) |
+| `npm run seed:all:test` | seed completo usando `.env.test` |
+| `npm run seed:test-data` | alias de `seed:all` |
 | `npm run seed:epis` | `node prisma/seeders/seed_epis.js` |
 | `npm run seed:dev-token` | `node prisma/seeders/generate-dev-token.js` |
 

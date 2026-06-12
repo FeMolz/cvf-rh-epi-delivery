@@ -32,10 +32,7 @@ if (apenasSchema) {
 }
 
 const seeders = [
-    'prisma/seeders/admin.js',
-    'prisma/seeders/seed_companies.js',
-    'prisma/seeders/seed_setores.js',
-    'prisma/seeders/seed_test_data.js'
+    'prisma/seeders/seed_sistema_completo.js'
 ];
 
 for (const seedRelativo of seeders) {
