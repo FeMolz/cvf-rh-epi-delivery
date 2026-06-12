@@ -2,24 +2,20 @@ import createEpiDeliveryService from '../services/CreateEpiDeliveryService.js';
 import listEpiDeliveriesByEmployeeService from '../services/ListEpiDeliveriesByEmployeeService.js';
 
 class EpiDeliveryController {
-    async create(req, res, next) {
+    async create(requisicao, resposta, proximo) {
         try {
-            const { employeeId, caNumbers } = req.body;
-            // Pegamos o ID do usuário que está fazendo a requisição
-            const deliveredById = req.user.id;
+            const { employeeId, caNumbers } = requisicao.body;
+            const deliveredById = requisicao.user.id;
 
-            const result = await createEpiDeliveryService.execute({
+            const resultado = await createEpiDeliveryService.execute({
                 employeeId,
                 caNumbers,
                 deliveredById
             });
 
-            return res.status(201).json(result);
-        } catch (error) {
-            if (error.message.includes('obrigatórios') || error.message.includes('não encontrado')) {
-                return res.status(400).json({ error: error.message });
-            }
-            next(error);
+            return resposta.status(201).json(resultado);
+        } catch (erro) {
+            return proximo(erro);
         }
     }
 
@@ -31,9 +27,6 @@ class EpiDeliveryController {
 
             return resposta.status(200).json(entregas);
         } catch (erro) {
-            if (erro.statusCode === 400 || erro.statusCode === 404) {
-                return resposta.status(erro.statusCode).json({ error: erro.message });
-            }
             return proximo(erro);
         }
     }

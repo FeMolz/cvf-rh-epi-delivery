@@ -1,4 +1,5 @@
 import prisma from '../../../config/database.js';
+import { criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { CAMPOS_SELECAO_FUNCIONARIO } from '../constants/funcionarioConstantes.js';
 
 const SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS = {
@@ -83,9 +84,7 @@ class EmployeeRepository {
     async delete(id) {
         const existing = await this.findById(id);
         if (!existing || existing.deletedAt) {
-            const error = new Error('Funcionário não encontrado');
-            error.code = 'NOT_FOUND';
-            throw error;
+            throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
         return prisma.employee.update({
             where: { id },

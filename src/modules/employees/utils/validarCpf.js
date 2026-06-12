@@ -2,6 +2,7 @@ import {
     MENSAGEM_CPF_DIGITOS_VERIFICADORES_INVALIDOS,
     MENSAGEM_CPF_FORMATO_INVALIDO
 } from '../constants/funcionarioConstantes.js';
+import { lancarErroFuncionario } from './lancarErroFuncionario.js';
 
 const PADRAO_CPF_FORMATADO = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 
@@ -54,12 +55,12 @@ export function validarCpf(cpf) {
     const cpfInformado = String(cpf).trim();
 
     if (!PADRAO_CPF_FORMATADO.test(cpfInformado)) {
-        throw new Error(MENSAGEM_CPF_FORMATO_INVALIDO);
+        lancarErroFuncionario(MENSAGEM_CPF_FORMATO_INVALIDO);
     }
 
     const digitos = extrairDigitosCpf(cpfInformado);
     if (digitos.length !== 11 || !possuiDigitosVerificadoresValidos(digitos)) {
-        throw new Error(MENSAGEM_CPF_DIGITOS_VERIFICADORES_INVALIDOS);
+        lancarErroFuncionario(MENSAGEM_CPF_DIGITOS_VERIFICADORES_INVALIDOS);
     }
 
     return cpfInformado;

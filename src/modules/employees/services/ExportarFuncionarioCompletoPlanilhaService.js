@@ -1,3 +1,4 @@
+import { criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import employeeRepository from '../repositories/EmployeeRepository.js';
 import { montarParesExportacaoFichaFuncionario } from '../utils/montarParesExportacaoFichaFuncionario.js';
 import planilhaFuncionarioProvider from '../../../shared/providers/PlanilhaFuncionarioProvider/PlanilhaFuncionarioProvider.js';
@@ -13,9 +14,7 @@ class ExportarFuncionarioCompletoPlanilhaService {
         );
 
         if (!funcionario || funcionario.deletedAt) {
-            const erro = new Error('Funcionário não encontrado');
-            erro.code = 'NOT_FOUND';
-            throw erro;
+            throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
 
         const paresCampoValor = montarParesExportacaoFichaFuncionario(funcionario);

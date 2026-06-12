@@ -33,6 +33,16 @@ try {
 
 Use `lancarErroRecrutamento(mensagem)` de `src/modules/recruitment/utils/lancarErroRecrutamento.js`, que aplica 400/404 conforme a constante.
 
+## Módulo employees
+
+Use `lancarErroFuncionario(mensagem)` de `src/modules/employees/utils/lancarErroFuncionario.js` para validações e `criarErroNaoEncontrado` quando o recurso não existir.
+
+Controllers do módulo delegam erros com `proximo(erro)` — sem `normalizarErroServico`.
+
+## Módulo epiDeliveries
+
+Services já usam `criarErroHttp` / `criarErroNaoEncontrado`. Controllers delegam com `proximo(erro)`.
+
 ## Testes
 
 ```javascript

@@ -80,7 +80,7 @@ describe('EmployeeRepository', () => {
 
   it('should throw NOT_FOUND error when deleting non‑existent employee', async () => {
     prismaMock.employee.findUnique.mockResolvedValue(null);
-    await expect(repo.delete(99)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(repo.delete(99)).rejects.toMatchObject({ statusCode: 404 });
   });
 });
 

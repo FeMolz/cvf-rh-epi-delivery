@@ -137,7 +137,16 @@ Apaga o volume Docker (se usar compose de teste), recria schema e roda seeds bá
 | Teste manual | `.env.test` | `rh_system_test`  | Postman, PDF, Secullum |
 | Produção     | servidor    | cliente           | Deploy                 |
 
-Os testes Jest (`npm test`) **não usam** esse banco — usam mocks. O banco de teste é só para você validar integração real.
+Os testes Jest unitários (`npm test`) usam mocks. Para validar filtros de funcionários e pausa de EPI contra o banco real:
+
+```bash
+docker compose -f docker-compose.test.yml up -d
+npm run db:test:push
+set RUN_INTEGRATION_TESTS=true
+npm run test:integracao
+```
+
+No CI (GitHub Actions), os testes de integração rodam automaticamente com PostgreSQL após `prisma db push`.
 
 ---
 

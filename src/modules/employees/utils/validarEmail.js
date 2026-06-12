@@ -1,4 +1,5 @@
 import { MENSAGEM_EMAIL_INVALIDO } from '../constants/funcionarioConstantes.js';
+import { lancarErroFuncionario } from './lancarErroFuncionario.js';
 
 const PADRAO_EMAIL = /^[a-z0-9](?:[a-z0-9._%+-]*[a-z0-9])?@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,}$/;
 const TAMANHO_MAXIMO_EMAIL = 254;
@@ -15,7 +16,7 @@ export function validarEmail(email) {
         emailNormalizado.length > TAMANHO_MAXIMO_EMAIL ||
         !PADRAO_EMAIL.test(emailNormalizado)
     ) {
-        throw new Error(MENSAGEM_EMAIL_INVALIDO);
+        lancarErroFuncionario(MENSAGEM_EMAIL_INVALIDO);
     }
 
     return emailNormalizado;

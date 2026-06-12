@@ -6,6 +6,7 @@ import {
     MENSAGEM_EMAIL_DUPLICADO
 } from '../constants/funcionarioConstantes.js';
 import { montarDadosFuncionario } from '../utils/montarDadosFuncionario.js';
+import { lancarErroFuncionario } from '../utils/lancarErroFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
 import { validarTelefone } from '../utils/validarTelefone.js';
@@ -18,15 +19,15 @@ class CreateEmployeeService {
         const { name, cpf, email, telefone, companyId, roleId, setorId, birthDate } = entrada;
 
         if (!name || !cpf || !email || !telefone || !companyId || !roleId || !setorId) {
-            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
+            lancarErroFuncionario(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
 
         if (birthDate === undefined || birthDate === null) {
-            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
+            lancarErroFuncionario(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
 
         if (typeof birthDate === 'string' && birthDate.trim() === '') {
-            throw new Error(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
+            lancarErroFuncionario(MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO);
         }
 
         const cpfValidado = validarCpf(cpf);
@@ -39,7 +40,7 @@ class CreateEmployeeService {
                 : new Date(typeof birthDate === 'string' ? birthDate.trim() : birthDate);
 
         if (Number.isNaN(dataNascimento.getTime())) {
-            throw new Error(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
+            lancarErroFuncionario(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
         }
 
         const digitosCpfInformado = extrairDigitosCpf(cpfValidado);
@@ -50,10 +51,10 @@ class CreateEmployeeService {
                 funcionario => extrairDigitosCpf(funcionario.cpf) === digitosCpfInformado
             )
         ) {
-            throw new Error(MENSAGEM_CPF_DUPLICADO);
+            lancarErroFuncionario(MENSAGEM_CPF_DUPLICADO);
         }
         if (funcionarios.some(funcionario => funcionario.email === emailValidado)) {
-            throw new Error(MENSAGEM_EMAIL_DUPLICADO);
+            lancarErroFuncionario(MENSAGEM_EMAIL_DUPLICADO);
         }
 
         const dadosFuncionario = montarDadosFuncionario({

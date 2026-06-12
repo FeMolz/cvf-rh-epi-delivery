@@ -5,11 +5,7 @@ import exportarListaFuncionariosPlanilhaService from '../services/ExportarListaF
 import findEmployeeByIdService from '../services/FindEmployeeByIdService.js';
 import listEmployeesService from '../services/ListEmployeesService.js';
 import updateEmployeeService from '../services/UpdateEmployeeService.js';
-import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
-import {
-    MENSAGEM_FILTRO_EXPORTACAO_INVALIDO,
-    TIPO_MIME_PLANILHA_XLSX
-} from '../constants/funcionarioExportacaoConstantes.js';
+import { TIPO_MIME_PLANILHA_XLSX } from '../constants/funcionarioExportacaoConstantes.js';
 
 class EmployeeController {
     constructor() {
@@ -27,7 +23,7 @@ class EmployeeController {
             const funcionario = await createEmployeeService.execute(request.body);
             return response.status(201).json(funcionario);
         } catch (erro) {
-            return next(this.normalizarErroServico(erro));
+            return next(erro);
         }
     }
 
@@ -42,11 +38,11 @@ class EmployeeController {
 
     async exportarLista(request, response, next) {
         try {
-            const filtro = request.query.filtro;
+            const filtro = request.query?.filtro;
             const resultado = await exportarListaFuncionariosPlanilhaService.execute(filtro);
             return this.enviarPlanilha(response, resultado);
         } catch (erro) {
-            return next(this.normalizarErroServico(erro));
+            return next(erro);
         }
     }
 
@@ -56,7 +52,7 @@ class EmployeeController {
             const resultado = await exportarFuncionarioCompletoPlanilhaService.execute(id);
             return this.enviarPlanilha(response, resultado);
         } catch (erro) {
-            return next(this.normalizarErroServico(erro));
+            return next(erro);
         }
     }
 
@@ -85,7 +81,7 @@ class EmployeeController {
             const funcionario = await updateEmployeeService.execute(id, request.body);
             return response.json(funcionario);
         } catch (erro) {
-            return next(this.normalizarErroServico(erro));
+            return next(erro);
         }
     }
 
@@ -97,32 +93,6 @@ class EmployeeController {
         } catch (erro) {
             return next(erro);
         }
-    }
-
-    /**
-     * @param {Error} erro
-     * @returns {Error}
-     */
-    normalizarErroServico(erro) {
-        if (erro.statusCode) {
-            return erro;
-        }
-
-        if (erro.code === 'NOT_FOUND') {
-            erro.statusCode = 404;
-            return erro;
-        }
-
-        if (erro.message === MENSAGEM_FILTRO_EXPORTACAO_INVALIDO) {
-            return criarErroHttp(erro.message);
-        }
-
-        if (erro.message) {
-            return criarErroHttp(erro.message);
-        }
-
-        erro.statusCode = 500;
-        return erro;
     }
 }
 

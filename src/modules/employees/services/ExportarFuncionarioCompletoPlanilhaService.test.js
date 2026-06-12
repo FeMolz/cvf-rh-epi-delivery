@@ -62,7 +62,7 @@ describe('ExportarFuncionarioCompletoPlanilhaService', () => {
         employeeRepositoryMock.findByIdParaExportacaoFicha.mockResolvedValue(null);
 
         await expect(exportarFuncionarioCompletoPlanilhaService.execute('99')).rejects.toMatchObject(
-            { code: 'NOT_FOUND' }
+            { statusCode: 404 }
         );
     });
 });

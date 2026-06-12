@@ -73,29 +73,25 @@ describe('EmployeeController', () => {
         const request = { body: {} };
         const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
         const next = jest.fn();
-        const erro = new Error('Campos obrigatórios ausentes');
+        const erro = Object.assign(new Error('Campos obrigatórios ausentes'), { statusCode: 400 });
 
         createEmployeeServiceMock.execute.mockRejectedValue(erro);
         await employeeController.create(request, response, next);
 
-        expect(next).toHaveBeenCalledWith(
-            expect.objectContaining({ message: erro.message, statusCode: 400 })
-        );
+        expect(next).toHaveBeenCalledWith(erro);
     });
 
-    it('deve normalizar erro na criação quando handler é passado desvinculado ao Express', async () => {
+    it('deve encaminhar erro na criação quando handler é passado desvinculado ao Express', async () => {
         const request = { body: {} };
         const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
         const next = jest.fn();
-        const erro = new Error('Campos obrigatórios ausentes');
+        const erro = Object.assign(new Error('Campos obrigatórios ausentes'), { statusCode: 400 });
         const handlerDesvinculado = employeeController.create;
 
         createEmployeeServiceMock.execute.mockRejectedValue(erro);
         await handlerDesvinculado(request, response, next);
 
-        expect(next).toHaveBeenCalledWith(
-            expect.objectContaining({ message: erro.message, statusCode: 400 })
-        );
+        expect(next).toHaveBeenCalledWith(erro);
     });
 
     it('deve retornar todos os funcionários', async () => {
@@ -152,14 +148,15 @@ describe('EmployeeController', () => {
         const request = { params: { id: 1 }, body: { cpf: 'invalido' } };
         const response = { json: jest.fn(), status: jest.fn().mockReturnThis() };
         const next = jest.fn();
-        const erro = new Error('CPF inválido. Os dígitos verificadores não conferem.');
+        const erro = Object.assign(
+            new Error('CPF inválido. Os dígitos verificadores não conferem.'),
+            { statusCode: 400 }
+        );
 
         updateEmployeeServiceMock.execute.mockRejectedValue(erro);
         await employeeController.update(request, response, next);
 
-        expect(next).toHaveBeenCalledWith(
-            expect.objectContaining({ message: erro.message, statusCode: 400 })
-        );
+        expect(next).toHaveBeenCalledWith(erro);
     });
 
     it('deve excluir funcionário', async () => {

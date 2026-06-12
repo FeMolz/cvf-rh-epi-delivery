@@ -1,4 +1,4 @@
-import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
+import { lancarErroFuncionario } from './lancarErroFuncionario.js';
 import {
     FILTRO_LISTAGEM_FUNCIONARIOS_AFASTADOS,
     FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS,
@@ -39,7 +39,7 @@ export function montarFiltroConsultaFuncionarios(filtroBruto) {
         .toLowerCase();
 
     if (!FILTROS_LISTAGEM_FUNCIONARIOS.includes(filtroNormalizado)) {
-        throw criarErroHttp(MENSAGEM_FILTRO_FUNCIONARIO_INVALIDO, 400);
+        lancarErroFuncionario(MENSAGEM_FILTRO_FUNCIONARIO_INVALIDO);
     }
 
     return MAPA_FILTRO_PARA_STATUS[filtroNormalizado] ?? {};

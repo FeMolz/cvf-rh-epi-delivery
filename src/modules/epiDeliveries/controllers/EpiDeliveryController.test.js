@@ -57,19 +57,34 @@ describe('EpiDeliveryController', () => {
         expect(resposta.json).toHaveBeenCalledWith([{ id: 'del1' }]);
     });
 
-    it('listByEmployee deve retornar 404 quando funcionário não existir', async () => {
+    it('listByEmployee deve encaminhar 404 ao next quando funcionário não existir', async () => {
         const requisicao = { params: { employeeId: 'inexistente' } };
         const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
         const proximo = jest.fn();
+        const erro = Object.assign(new Error('Funcionário não encontrado.'), { statusCode: 404 });
 
-        listEpiDeliveriesByEmployeeServiceMock.execute.mockRejectedValue({
-            message: 'Funcionário não encontrado.',
-            statusCode: 404
-        });
+        listEpiDeliveriesByEmployeeServiceMock.execute.mockRejectedValue(erro);
 
         await epiDeliveryController.listByEmployee(requisicao, resposta, proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
-        expect(proximo).not.toHaveBeenCalled();
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('create deve encaminhar erro de validação ao next', async () => {
+        const requisicao = {
+            body: { employeeId: '', caNumbers: [] },
+            user: { id: 'admin1' }
+        };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+        const erro = Object.assign(new Error('employeeId, caNumbers (array) e deliveredById são obrigatórios.'), {
+            statusCode: 400
+        });
+
+        createEpiDeliveryServiceMock.execute.mockRejectedValue(erro);
+
+        await epiDeliveryController.create(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
     });
 });
