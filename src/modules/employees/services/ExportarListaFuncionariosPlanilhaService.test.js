@@ -1,5 +1,4 @@
 import { jest } from '@jest/globals';
-import { MENSAGEM_FILTRO_EXPORTACAO_INVALIDO } from '../constants/funcionarioExportacaoConstantes.js';
 
 const employeeRepositoryMock = {
     findManyParaExportacaoLista: jest.fn()
@@ -46,15 +45,15 @@ describe('ExportarListaFuncionariosPlanilhaService', () => {
         const resultado = await exportarListaFuncionariosPlanilhaService.execute();
 
         expect(employeeRepositoryMock.findManyParaExportacaoLista).toHaveBeenCalledWith({
-            status: { in: ['ATIVO', 'FERIAS', 'LICENCA_MATERNIDADE', 'LICENCA_MED'] }
+            status: { in: ['ATIVO'] }
         });
         expect(resultado.buffer).toBeInstanceOf(Buffer);
         expect(resultado.nomeArquivo).toMatch(/^funcionarios-ativos-/);
     });
 
     it('deve rejeitar filtro inválido', async () => {
-        await expect(exportarListaFuncionariosPlanilhaService.execute('invalido')).rejects.toThrow(
-            MENSAGEM_FILTRO_EXPORTACAO_INVALIDO
-        );
+        await expect(exportarListaFuncionariosPlanilhaService.execute('invalido')).rejects.toMatchObject({
+            statusCode: 400
+        });
     });
 });

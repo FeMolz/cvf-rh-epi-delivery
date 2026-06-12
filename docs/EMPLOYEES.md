@@ -118,14 +118,20 @@ Para executar qualquer requisição, é necessário apresentar um JWT válido (`
 
 ### Exportação em planilha (XLSX)
 
-**Lista resumida** — `GET /api/v1/employees/export/lista?filtro=ativos`
+**Listagem** — `GET /api/v1/employees?filtro=ativos`
+
+**Lista resumida (export)** — `GET /api/v1/employees/export/lista?filtro=ativos`
 
 Query `filtro` (opcional, padrão `ativos`):
 
 | Valor | Funcionários incluídos |
 |-------|-------------------------|
-| `ativos` | `ATIVO`, `FERIAS`, `LICENCA_MATERNIDADE`, `LICENCA_MED` |
+| `ativos` | Somente `ATIVO` |
+| `afastados` | `FERIAS`, `LICENCA_MATERNIDADE`, `LICENCA_MED` |
 | `inativos` | `INATIVO`, `DESLIGADO`, `RESCINDIDO`, `APOSENTADO` |
+| `ferias` | `FERIAS` |
+| `licenca_maternidade` | `LICENCA_MATERNIDADE` |
+| `licenca_med` | `LICENCA_MED` |
 | `todos` | Todos não excluídos (soft delete) |
 
 Colunas da planilha: **Nome**, **Cargo**, **Setor**, **Status**, **Data de demissão** (preenchida somente quando o status é inativo).

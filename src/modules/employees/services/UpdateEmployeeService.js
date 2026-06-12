@@ -1,8 +1,10 @@
-import employeeRepository from '../repositories/EmployeeRepository.js';
+import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
+import gerenciarPeriodicidadeEpiFuncionarioService from '../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js';
 import {
     MENSAGEM_CPF_DUPLICADO,
     MENSAGEM_EMAIL_DUPLICADO
 } from '../constants/funcionarioConstantes.js';
+import employeeRepository from '../repositories/EmployeeRepository.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
 import { validarTelefone } from '../utils/validarTelefone.js';
@@ -15,9 +17,7 @@ class UpdateEmployeeService {
     async execute(funcionarioId, entrada) {
         const funcionarioExistente = await employeeRepository.findById(funcionarioId);
         if (!funcionarioExistente || funcionarioExistente.deletedAt) {
-            const erro = new Error('Funcionário não encontrado');
-            erro.code = 'NOT_FOUND';
-            throw erro;
+            throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
 
         const dadosAtualizacao = { ...entrada };
@@ -42,17 +42,27 @@ class UpdateEmployeeService {
                     funcionario => extrairDigitosCpf(funcionario.cpf) === digitosCpf
                 )
             ) {
-                throw new Error(MENSAGEM_CPF_DUPLICADO);
+                throw criarErroHttp(MENSAGEM_CPF_DUPLICADO);
             }
         }
 
         if (dadosAtualizacao.email !== undefined) {
             if (outrosFuncionarios.some(funcionario => funcionario.email === dadosAtualizacao.email)) {
-                throw new Error(MENSAGEM_EMAIL_DUPLICADO);
+                throw criarErroHttp(MENSAGEM_EMAIL_DUPLICADO);
             }
         }
 
-        return employeeRepository.update(funcionarioId, dadosAtualizacao);
+        const funcionarioAtualizado = await employeeRepository.update(funcionarioId, dadosAtualizacao);
+
+        if (dadosAtualizacao.status !== undefined) {
+            await gerenciarPeriodicidadeEpiFuncionarioService.sincronizarPorMudancaStatus(
+                funcionarioExistente.status,
+                funcionarioAtualizado.status,
+                funcionarioId
+            );
+        }
+
+        return funcionarioAtualizado;
     }
 }
 

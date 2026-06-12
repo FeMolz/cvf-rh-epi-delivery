@@ -10,6 +10,14 @@ jest.unstable_mockModule('../repositories/EmployeeRepository.js', () => ({
     default: employeeRepositoryMock
 }));
 
+const gerenciarPeriodicidadeEpiFuncionarioServiceMock = {
+    sincronizarPorMudancaStatus: jest.fn()
+};
+
+jest.unstable_mockModule('../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js', () => ({
+    default: gerenciarPeriodicidadeEpiFuncionarioServiceMock
+}));
+
 const updateEmployeeService = (await import('./UpdateEmployeeService.js')).default;
 
 const CPF_VALIDO = '529.982.247-25';
@@ -35,7 +43,7 @@ describe('UpdateEmployeeService', () => {
         employeeRepositoryMock.findById.mockResolvedValue(null);
 
         await expect(updateEmployeeService.execute('99', { name: 'Teste' })).rejects.toMatchObject({
-            code: 'NOT_FOUND'
+            statusCode: 404
         });
     });
 

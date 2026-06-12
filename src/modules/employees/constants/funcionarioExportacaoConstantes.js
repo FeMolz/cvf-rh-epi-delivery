@@ -1,27 +1,17 @@
-/** Filtros aceitos na exportação da lista de funcionários. */
+import { FILTROS_LISTAGEM_FUNCIONARIOS } from './funcionarioStatusConstantes.js';
+
+/** Filtros aceitos na exportação (alinhados à listagem GET /employees). */
 export const FILTRO_EXPORTACAO_ATIVOS = 'ativos';
 export const FILTRO_EXPORTACAO_INATIVOS = 'inativos';
 export const FILTRO_EXPORTACAO_TODOS = 'todos';
 
-export const FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS = [
-    FILTRO_EXPORTACAO_ATIVOS,
-    FILTRO_EXPORTACAO_INATIVOS,
-    FILTRO_EXPORTACAO_TODOS
-];
+export const FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS = FILTROS_LISTAGEM_FUNCIONARIOS;
 
-export const STATUS_FUNCIONARIO_ATIVOS = [
-    'ATIVO',
-    'FERIAS',
-    'LICENCA_MATERNIDADE',
-    'LICENCA_MED'
-];
-
-export const STATUS_FUNCIONARIO_INATIVOS = [
-    'INATIVO',
-    'DESLIGADO',
-    'RESCINDIDO',
-    'APOSENTADO'
-];
+export {
+    STATUS_FUNCIONARIO_AFASTADOS,
+    STATUS_FUNCIONARIO_EM_EXERCICIO as STATUS_FUNCIONARIO_ATIVOS,
+    STATUS_FUNCIONARIO_INATIVOS
+} from './funcionarioStatusConstantes.js';
 
 export const TIPO_MIME_PLANILHA_XLSX =
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

@@ -25,11 +25,25 @@ jest.unstable_mockModule('../../epis/services/FetchEpiFromApiService.js', () => 
     default: fetchEpiFromApiServiceMock
 }));
 
+const gerenciarPeriodicidadeEpiFuncionarioServiceMock = {
+    funcionarioPossuiPeriodicidadeEpiAtiva: jest.fn()
+};
+
+jest.unstable_mockModule('./GerenciarPeriodicidadeEpiFuncionarioService.js', () => ({
+    default: gerenciarPeriodicidadeEpiFuncionarioServiceMock
+}));
+
 const createEpiDeliveryService = (await import('./CreateEpiDeliveryService.js')).default;
 
 describe('CreateEpiDeliveryService', () => {
     afterEach(() => {
         jest.clearAllMocks();
+    });
+
+    beforeEach(() => {
+        gerenciarPeriodicidadeEpiFuncionarioServiceMock.funcionarioPossuiPeriodicidadeEpiAtiva.mockReturnValue(
+            true
+        );
     });
 
     it('should throw error if fields are missing', async () => {
@@ -46,7 +60,12 @@ describe('CreateEpiDeliveryService', () => {
     });
 
     it('should process multiple deliveries with correct periodicity', async () => {
-        employeeRepositoryMock.findById.mockResolvedValue({ id: '1', roleId: 'role1', deletedAt: null });
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            roleId: 'role1',
+            status: 'ATIVO',
+            deletedAt: null
+        });
         epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([{ epiId: 'epi1', periodicityDays: 30 }]);
         
         fetchEpiFromApiServiceMock.execute.mockResolvedValueOnce({ id: 'epi1' }); // Found in role
@@ -67,8 +86,39 @@ describe('CreateEpiDeliveryService', () => {
         expect(createBatchArgs[1].nextDueDate).toBeNull();
     });
 
+    it('não deve calcular vencimento quando funcionário não está ATIVO', async () => {
+        gerenciarPeriodicidadeEpiFuncionarioServiceMock.funcionarioPossuiPeriodicidadeEpiAtiva.mockReturnValue(
+            false
+        );
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            roleId: 'role1',
+            status: 'FERIAS',
+            deletedAt: null
+        });
+        epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([
+            { epiId: 'epi1', periodicityDays: 30 }
+        ]);
+        fetchEpiFromApiServiceMock.execute.mockResolvedValue({ id: 'epi1' });
+        epiDeliveryRepositoryMock.createBatch.mockResolvedValue({ count: 1 });
+
+        await createEpiDeliveryService.execute({
+            employeeId: '1',
+            caNumbers: ['11070'],
+            deliveredById: '2'
+        });
+
+        const entrega = epiDeliveryRepositoryMock.createBatch.mock.calls[0][0][0];
+        expect(entrega.nextDueDate).toBeNull();
+    });
+
     it('deve falhar quando createMany não persistir todas as entregas', async () => {
-        employeeRepositoryMock.findById.mockResolvedValue({ id: '1', roleId: 'role1', deletedAt: null });
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            roleId: 'role1',
+            status: 'ATIVO',
+            deletedAt: null
+        });
         epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([]);
         fetchEpiFromApiServiceMock.execute.mockResolvedValue({ id: 'epi1' });
         epiDeliveryRepositoryMock.createBatch.mockResolvedValue({ count: 0 });

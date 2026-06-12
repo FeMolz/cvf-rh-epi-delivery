@@ -8,6 +8,7 @@ import { MENSAGEM_DATA_NASCIMENTO_INVALIDA } from '../../employees/constants/fun
 import { validarCpf } from '../../employees/utils/validarCpf.js';
 import { validarEmail } from '../../employees/utils/validarEmail.js';
 import { validarTelefone } from '../../employees/utils/validarTelefone.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 /**
  * @param {object} entrada
@@ -15,13 +16,13 @@ import { validarTelefone } from '../../employees/utils/validarTelefone.js';
  */
 export function validarDadosFuncionarioCadastroContratacao(entrada, vinculosBloqueados) {
     if (entrada.roleId && entrada.roleId !== vinculosBloqueados.roleId) {
-        throw new Error(MENSAGEM_CARGO_NAO_EDITAVEL);
+        lancarErroRecrutamento(MENSAGEM_CARGO_NAO_EDITAVEL);
     }
     if (entrada.companyId && entrada.companyId !== vinculosBloqueados.companyId) {
-        throw new Error(MENSAGEM_EMPRESA_NAO_EDITAVEL);
+        lancarErroRecrutamento(MENSAGEM_EMPRESA_NAO_EDITAVEL);
     }
     if (entrada.setorId && entrada.setorId !== vinculosBloqueados.setorId) {
-        throw new Error(MENSAGEM_SETOR_NAO_EDITAVEL);
+        lancarErroRecrutamento(MENSAGEM_SETOR_NAO_EDITAVEL);
     }
 
     const nome = typeof entrada.name === 'string' ? entrada.name.trim() : '';
@@ -31,7 +32,7 @@ export function validarDadosFuncionarioCadastroContratacao(entrada, vinculosBloq
     const dataNascimentoBruta = entrada.birthDate;
 
     if (!nome || !cpfBruto || !emailBruto || !telefoneBruto || !dataNascimentoBruta) {
-        throw new Error(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
+        lancarErroRecrutamento(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
     }
 
     const cpf = validarCpf(cpfBruto);
@@ -44,7 +45,7 @@ export function validarDadosFuncionarioCadastroContratacao(entrada, vinculosBloq
             : new Date(typeof dataNascimentoBruta === 'string' ? dataNascimentoBruta.trim() : dataNascimentoBruta);
 
     if (Number.isNaN(dataNascimento.getTime())) {
-        throw new Error(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
+        lancarErroRecrutamento(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
     }
 
     return {

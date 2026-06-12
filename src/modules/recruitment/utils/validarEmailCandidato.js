@@ -1,4 +1,5 @@
 import { MENSAGEM_EMAIL_INVALIDO } from '../constants/recrutamentoConstantes.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -7,6 +8,6 @@ const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export function validarEmailCandidato(email) {
     if (!REGEX_EMAIL.test(email)) {
-        throw new Error(MENSAGEM_EMAIL_INVALIDO);
+        lancarErroRecrutamento(MENSAGEM_EMAIL_INVALIDO);
     }
 }

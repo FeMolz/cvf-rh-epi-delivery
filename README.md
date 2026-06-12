@@ -27,6 +27,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Checklist Postman (testes manuais)](./docs/POSTMAN_MANUAL.md)** - O que ainda validar na mão (PDF, Secullum, upload, JWT).
 - 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
+- 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
 ---
 
 ## 🚀 Como executar este projeto em outra máquina

@@ -4,6 +4,7 @@ import {
     STATUS_ANUNCIO_VAGA
 } from '../constants/recrutamentoConstantes.js';
 import anuncioVagaRepository from '../repositories/AnuncioVagaRepository.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class UpdateStatusAnuncioVagaService {
     /**
@@ -14,12 +15,12 @@ class UpdateStatusAnuncioVagaService {
         const status = typeof entrada.status === 'string' ? entrada.status.trim().toUpperCase() : '';
 
         if (!Object.values(STATUS_ANUNCIO_VAGA).includes(status)) {
-            throw new Error(MENSAGEM_STATUS_ANUNCIO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_STATUS_ANUNCIO_INVALIDO);
         }
 
         const anuncioExistente = await anuncioVagaRepository.findById(identificadorAnuncio);
         if (!anuncioExistente) {
-            throw new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
         }
 
         return anuncioVagaRepository.update(identificadorAnuncio, { status });

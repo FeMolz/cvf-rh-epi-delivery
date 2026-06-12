@@ -62,7 +62,7 @@ class EmployeeController {
 
     async findAll(request, response, next) {
         try {
-            const funcionarios = await listEmployeesService.execute();
+            const funcionarios = await listEmployeesService.execute(request.query?.filtro);
             return response.json(funcionarios);
         } catch (erro) {
             return next(erro);

@@ -13,6 +13,7 @@ import {
     MENSAGEM_TITULO_VAGA_OBRIGATORIO,
     TIPOS_CONTRATACAO_VAGA
 } from '../constants/recrutamentoConstantes.js';
+import { lancarErroRecrutamento } from './lancarErroRecrutamento.js';
 
 /**
  * @param {object} entrada
@@ -41,22 +42,22 @@ export function normalizarCamposAnuncioVaga(entrada, opcoes = { obrigatorio: tru
     const setorId = typeof entrada.setorId === 'string' ? entrada.setorId.trim() : '';
 
     if (opcoes.obrigatorio) {
-        if (!tituloVaga) throw new Error(MENSAGEM_TITULO_VAGA_OBRIGATORIO);
-        if (!apresentacaoEmpresa) throw new Error(MENSAGEM_APRESENTACAO_EMPRESA_OBRIGATORIA);
-        if (!sobreVaga) throw new Error(MENSAGEM_SOBRE_VAGA_OBRIGATORIA);
-        if (!responsabilidades) throw new Error(MENSAGEM_RESPONSABILIDADES_OBRIGATORIAS);
-        if (!requisitos) throw new Error(MENSAGEM_REQUISITOS_OBRIGATORIOS);
-        if (!beneficios) throw new Error(MENSAGEM_BENEFICIOS_OBRIGATORIOS);
-        if (!localTrabalho) throw new Error(MENSAGEM_LOCAL_TRABALHO_OBRIGATORIO);
-        if (!jornadaTrabalho) throw new Error(MENSAGEM_JORNADA_TRABALHO_OBRIGATORIA);
-        if (!tipoContratacao) throw new Error(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
-        if (!roleId) throw new Error(MENSAGEM_ROLE_ID_OBRIGATORIO);
-        if (!companyId) throw new Error(MENSAGEM_COMPANY_ID_OBRIGATORIO);
-        if (!setorId) throw new Error(MENSAGEM_SETOR_ID_OBRIGATORIO);
+        if (!tituloVaga) lancarErroRecrutamento(MENSAGEM_TITULO_VAGA_OBRIGATORIO);
+        if (!apresentacaoEmpresa) lancarErroRecrutamento(MENSAGEM_APRESENTACAO_EMPRESA_OBRIGATORIA);
+        if (!sobreVaga) lancarErroRecrutamento(MENSAGEM_SOBRE_VAGA_OBRIGATORIA);
+        if (!responsabilidades) lancarErroRecrutamento(MENSAGEM_RESPONSABILIDADES_OBRIGATORIAS);
+        if (!requisitos) lancarErroRecrutamento(MENSAGEM_REQUISITOS_OBRIGATORIOS);
+        if (!beneficios) lancarErroRecrutamento(MENSAGEM_BENEFICIOS_OBRIGATORIOS);
+        if (!localTrabalho) lancarErroRecrutamento(MENSAGEM_LOCAL_TRABALHO_OBRIGATORIO);
+        if (!jornadaTrabalho) lancarErroRecrutamento(MENSAGEM_JORNADA_TRABALHO_OBRIGATORIA);
+        if (!tipoContratacao) lancarErroRecrutamento(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
+        if (!roleId) lancarErroRecrutamento(MENSAGEM_ROLE_ID_OBRIGATORIO);
+        if (!companyId) lancarErroRecrutamento(MENSAGEM_COMPANY_ID_OBRIGATORIO);
+        if (!setorId) lancarErroRecrutamento(MENSAGEM_SETOR_ID_OBRIGATORIO);
     }
 
     if (tipoContratacao && !Object.values(TIPOS_CONTRATACAO_VAGA).includes(tipoContratacao)) {
-        throw new Error(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
+        lancarErroRecrutamento(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
     }
 
     return {

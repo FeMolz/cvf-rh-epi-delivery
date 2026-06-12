@@ -1,15 +1,10 @@
-import {
-    FILTRO_EXPORTACAO_ATIVOS,
-    FILTRO_EXPORTACAO_INATIVOS,
-    FILTRO_EXPORTACAO_TODOS,
-    FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS,
-    MENSAGEM_FILTRO_EXPORTACAO_INVALIDO,
-    STATUS_FUNCIONARIO_ATIVOS,
-    STATUS_FUNCIONARIO_INATIVOS
-} from '../constants/funcionarioExportacaoConstantes.js';
-import employeeRepository from '../repositories/EmployeeRepository.js';
-import { montarLinhasExportacaoListaFuncionarios } from '../utils/montarLinhasExportacaoListaFuncionarios.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 import planilhaFuncionarioProvider from '../../../shared/providers/PlanilhaFuncionarioProvider/PlanilhaFuncionarioProvider.js';
+import { FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS } from '../constants/funcionarioStatusConstantes.js';
+import { FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS } from '../constants/funcionarioExportacaoConstantes.js';
+import employeeRepository from '../repositories/EmployeeRepository.js';
+import { montarFiltroConsultaFuncionarios } from '../utils/montarFiltroConsultaFuncionarios.js';
+import { montarLinhasExportacaoListaFuncionarios } from '../utils/montarLinhasExportacaoListaFuncionarios.js';
 
 class ExportarListaFuncionariosPlanilhaService {
     /**
@@ -17,16 +12,18 @@ class ExportarListaFuncionariosPlanilhaService {
      * @returns {Promise<{ buffer: Buffer, nomeArquivo: string }>}
      */
     async execute(filtroExportacao) {
-        const filtroNormalizado = String(filtroExportacao || FILTRO_EXPORTACAO_ATIVOS)
+        const filtroNormalizado = String(filtroExportacao || FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS)
             .trim()
             .toLowerCase();
 
         if (!FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS.includes(filtroNormalizado)) {
-            throw new Error(MENSAGEM_FILTRO_EXPORTACAO_INVALIDO);
+            throw criarErroHttp(
+                'Filtro de exportação inválido. Use os mesmos valores da listagem: ativos, afastados, inativos, todos, ferias, licenca_maternidade, licenca_med ou um status válido.'
+            );
         }
 
-        const filtroStatus = this.montarFiltroStatus(filtroNormalizado);
-        const funcionarios = await employeeRepository.findManyParaExportacaoLista(filtroStatus);
+        const filtroConsulta = montarFiltroConsultaFuncionarios(filtroNormalizado);
+        const funcionarios = await employeeRepository.findManyParaExportacaoLista(filtroConsulta);
         const linhas = montarLinhasExportacaoListaFuncionarios(funcionarios);
         const buffer = await planilhaFuncionarioProvider.gerarPlanilhaListaFuncionarios(linhas);
 
@@ -34,20 +31,6 @@ class ExportarListaFuncionariosPlanilhaService {
         const nomeArquivo = `funcionarios-${filtroNormalizado}-${dataAtual}.xlsx`;
 
         return { buffer, nomeArquivo };
-    }
-
-    /**
-     * @param {string} filtroExportacao
-     * @returns {{ status?: { in: string[] } }}
-     */
-    montarFiltroStatus(filtroExportacao) {
-        if (filtroExportacao === FILTRO_EXPORTACAO_ATIVOS) {
-            return { status: { in: STATUS_FUNCIONARIO_ATIVOS } };
-        }
-        if (filtroExportacao === FILTRO_EXPORTACAO_INATIVOS) {
-            return { status: { in: STATUS_FUNCIONARIO_INATIVOS } };
-        }
-        return {};
     }
 }
 

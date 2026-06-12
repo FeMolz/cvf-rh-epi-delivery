@@ -12,6 +12,7 @@ import anuncioVagaRepository from '../repositories/AnuncioVagaRepository.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
 import { validarArquivoCurriculo } from '../utils/validarArquivoCurriculo.js';
 import { validarEmailCandidato } from '../utils/validarEmailCandidato.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class CreateCandidaturaService {
     /**
@@ -22,10 +23,10 @@ class CreateCandidaturaService {
     async execute(identificadorAnuncio, dadosFormulario, arquivoCurriculo) {
         const anuncio = await anuncioVagaRepository.findById(identificadorAnuncio);
         if (!anuncio) {
-            throw new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
         }
         if (anuncio.status !== STATUS_ANUNCIO_VAGA.ATIVA) {
-            throw new Error(MENSAGEM_ANUNCIO_NAO_ATIVO);
+            lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ATIVO);
         }
 
         const nomeCompleto =
@@ -36,11 +37,11 @@ class CreateCandidaturaService {
         const cidade = typeof dadosFormulario.cidade === 'string' ? dadosFormulario.cidade.trim() : '';
         const estado = typeof dadosFormulario.estado === 'string' ? dadosFormulario.estado.trim() : '';
 
-        if (!nomeCompleto) throw new Error(MENSAGEM_NOME_COMPLETO_OBRIGATORIO);
-        if (!email) throw new Error(MENSAGEM_EMAIL_OBRIGATORIO);
-        if (!telefone) throw new Error(MENSAGEM_TELEFONE_OBRIGATORIO);
-        if (!cidade) throw new Error(MENSAGEM_CIDADE_OBRIGATORIA);
-        if (!estado) throw new Error(MENSAGEM_ESTADO_OBRIGATORIO);
+        if (!nomeCompleto) lancarErroRecrutamento(MENSAGEM_NOME_COMPLETO_OBRIGATORIO);
+        if (!email) lancarErroRecrutamento(MENSAGEM_EMAIL_OBRIGATORIO);
+        if (!telefone) lancarErroRecrutamento(MENSAGEM_TELEFONE_OBRIGATORIO);
+        if (!cidade) lancarErroRecrutamento(MENSAGEM_CIDADE_OBRIGATORIA);
+        if (!estado) lancarErroRecrutamento(MENSAGEM_ESTADO_OBRIGATORIO);
 
         validarEmailCandidato(email);
 

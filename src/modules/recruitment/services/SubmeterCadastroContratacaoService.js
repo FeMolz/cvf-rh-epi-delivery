@@ -9,6 +9,7 @@ import { montarDadosPersistenciaCadastroContratacao } from '../utils/montarDados
 import { rejeitarCamposRhNoEnvioCandidato } from '../utils/rejeitarCamposRhNoEnvioCandidato.js';
 import { validarDadosFuncionarioCadastroContratacao } from '../utils/validarDadosFuncionarioCadastroContratacao.js';
 import { tokenCadastroContratacaoExpirado } from '../utils/tokenCadastroContratacaoExpirado.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class SubmeterCadastroContratacaoService {
     /**
@@ -18,24 +19,24 @@ class SubmeterCadastroContratacaoService {
     async execute(tokenAcesso, corpoRequisicao) {
         const token = typeof tokenAcesso === 'string' ? tokenAcesso.trim() : '';
         if (!token) {
-            throw new Error(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
         }
 
         const cadastro = await cadastroContratacaoRepository.findByToken(token);
         if (!cadastro) {
-            throw new Error(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
         }
 
         if (tokenCadastroContratacaoExpirado(cadastro.createdAt)) {
-            throw new Error(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
         }
 
         if (cadastro.status === STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH) {
-            throw new Error(MENSAGEM_CADASTRO_JA_ENVIADO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_JA_ENVIADO);
         }
 
         if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO) {
-            throw new Error(MENSAGEM_CADASTRO_JA_ENVIADO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_JA_ENVIADO);
         }
 
         rejeitarCamposRhNoEnvioCandidato(corpoRequisicao);

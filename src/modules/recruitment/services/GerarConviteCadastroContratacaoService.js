@@ -12,6 +12,7 @@ import {
     registrarEventoAuditoria,
     TIPOS_EVENTO_AUDITORIA
 } from '../../../shared/utils/registrarEventoAuditoria.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class GerarConviteCadastroContratacaoService {
     /**
@@ -20,12 +21,12 @@ class GerarConviteCadastroContratacaoService {
     async execute(identificadorCandidatura) {
         const candidatura = await candidaturaRepository.findById(identificadorCandidatura);
         if (!candidatura) {
-            throw new Error(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
+            lancarErroRecrutamento(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
         }
 
         const anuncio = candidatura.anuncioVaga;
         if (!anuncio?.roleId || !anuncio?.companyId || !anuncio?.setorId) {
-            throw new Error(MENSAGEM_VAGA_SEM_VINCULOS_CONTRATACAO);
+            lancarErroRecrutamento(MENSAGEM_VAGA_SEM_VINCULOS_CONTRATACAO);
         }
 
         const conviteExistente = await cadastroContratacaoRepository.findByCandidaturaId(
@@ -36,7 +37,7 @@ class GerarConviteCadastroContratacaoService {
             conviteExistente &&
             conviteExistente.status !== STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO
         ) {
-            throw new Error(MENSAGEM_CONVITE_CADASTRO_JA_EXISTE);
+            lancarErroRecrutamento(MENSAGEM_CONVITE_CADASTRO_JA_EXISTE);
         }
 
         const tokenAcesso = randomUUID();

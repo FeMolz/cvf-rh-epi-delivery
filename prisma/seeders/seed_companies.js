@@ -56,6 +56,7 @@ async function main() {
         
     } catch (error) {
         console.error("Erro ao criar/atualizar empresas:", error);
+        process.exit(1);
     } finally {
         await prisma.$disconnect();
     }

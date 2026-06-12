@@ -6,6 +6,7 @@ import {
 } from '../constants/recrutamentoConstantes.js';
 import cadastroContratacaoRepository from '../repositories/CadastroContratacaoRepository.js';
 import { tokenCadastroContratacaoExpirado } from '../utils/tokenCadastroContratacaoExpirado.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class GetCadastroContratacaoPublicoService {
     /**
@@ -14,20 +15,20 @@ class GetCadastroContratacaoPublicoService {
     async execute(tokenAcesso) {
         const token = typeof tokenAcesso === 'string' ? tokenAcesso.trim() : '';
         if (!token) {
-            throw new Error(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
         }
 
         const cadastro = await cadastroContratacaoRepository.findByToken(token);
         if (!cadastro) {
-            throw new Error(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
         }
 
         if (tokenCadastroContratacaoExpirado(cadastro.createdAt)) {
-            throw new Error(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_TOKEN_CADASTRO_INVALIDO);
         }
 
         if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO) {
-            throw new Error(MENSAGEM_CADASTRO_NAO_DISPONIVEL_PREENCHIMENTO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_NAO_DISPONIVEL_PREENCHIMENTO);
         }
 
         const candidatura = cadastro.candidatura;

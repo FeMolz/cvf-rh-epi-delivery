@@ -42,6 +42,12 @@ function criarMocksResposta() {
     };
 }
 
+function criarErroHttpTeste(mensagem, statusCode) {
+    const erro = new Error(mensagem);
+    erro.statusCode = statusCode;
+    return erro;
+}
+
 describe('AnuncioVagaController', () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -65,17 +71,18 @@ describe('AnuncioVagaController', () => {
         expect(proximo).not.toHaveBeenCalled();
     });
 
-    it('create deve retornar 400 para erro de validacao conhecido', async () => {
+    it('create deve encaminhar erro de validacao ao next', async () => {
         createAnuncioVagaServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_TITULO_VAGA_OBRIGATORIO)
+            criarErroHttpTeste(MENSAGEM_TITULO_VAGA_OBRIGATORIO, 400)
         );
         const resposta = criarMocksResposta();
         const proximo = jest.fn();
 
         await anuncioVagaController.create({ body: {}, user: { id: '1' } }, resposta, proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
-        expect(proximo).not.toHaveBeenCalled();
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_TITULO_VAGA_OBRIGATORIO, statusCode: 400 })
+        );
     });
 
     it('create deve encaminhar erro desconhecido ao next', async () => {
@@ -110,24 +117,30 @@ describe('AnuncioVagaController', () => {
         expect(resposta.json).toHaveBeenCalledWith(anuncio);
     });
 
-    it('getById deve retornar 404 quando anuncio nao existe', async () => {
-        getAnuncioVagaServiceMock.execute.mockRejectedValue(new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO));
-        const resposta = criarMocksResposta();
+    it('getById deve encaminhar 404 ao next quando anuncio nao existe', async () => {
+        getAnuncioVagaServiceMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_ANUNCIO_NAO_ENCONTRADO, 404)
+        );
+        const proximo = jest.fn();
 
-        await anuncioVagaController.getById({ params: { id: 'x' } }, resposta, jest.fn());
+        await anuncioVagaController.getById({ params: { id: 'x' } }, criarMocksResposta(), proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_ANUNCIO_NAO_ENCONTRADO, statusCode: 404 })
+        );
     });
 
-    it('getPublico deve retornar 404 quando anuncio nao esta ativo', async () => {
+    it('getPublico deve encaminhar 404 ao next quando anuncio nao esta ativo', async () => {
         getAnuncioVagaPublicoServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_ANUNCIO_NAO_ATIVO)
+            criarErroHttpTeste(MENSAGEM_ANUNCIO_NAO_ATIVO, 404)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
-        await anuncioVagaController.getPublico({ params: { id: 'v1' } }, resposta, jest.fn());
+        await anuncioVagaController.getPublico({ params: { id: 'v1' } }, criarMocksResposta(), proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_ANUNCIO_NAO_ATIVO, statusCode: 404 })
+        );
     });
 
     it('update deve retornar 200 quando servico atualiza com sucesso', async () => {
@@ -145,29 +158,37 @@ describe('AnuncioVagaController', () => {
         expect(resposta.status).toHaveBeenCalledWith(200);
     });
 
-    it('update deve retornar 400 quando campos de atualizacao estao vazios', async () => {
+    it('update deve encaminhar 400 ao next quando campos de atualizacao estao vazios', async () => {
         updateAnuncioVagaServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS)
+            criarErroHttpTeste(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS, 400)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
-        await anuncioVagaController.update({ params: { id: 'v1' }, body: {} }, resposta, jest.fn());
+        await anuncioVagaController.update(
+            { params: { id: 'v1' }, body: {} },
+            criarMocksResposta(),
+            proximo
+        );
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS, statusCode: 400 })
+        );
     });
 
-    it('updateStatus deve retornar 400 para status invalido', async () => {
+    it('updateStatus deve encaminhar 400 ao next para status invalido', async () => {
         updateStatusAnuncioVagaServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_STATUS_ANUNCIO_INVALIDO)
+            criarErroHttpTeste(MENSAGEM_STATUS_ANUNCIO_INVALIDO, 400)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
         await anuncioVagaController.updateStatus(
             { params: { id: 'v1' }, body: { status: 'INVALIDO' } },
-            resposta,
-            jest.fn()
+            criarMocksResposta(),
+            proximo
         );
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_STATUS_ANUNCIO_INVALIDO, statusCode: 400 })
+        );
     });
 });

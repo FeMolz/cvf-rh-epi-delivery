@@ -43,7 +43,11 @@ describe('EmployeeRepository', () => {
     const mockList = [{ id: 1, name: 'John' }];
     prismaMock.employee.findMany.mockResolvedValue(mockList);
     const result = await repo.findAll();
-    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({ where: { deletedAt: null }, select: expect.any(Object) });
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where: { deletedAt: null },
+      select: expect.any(Object),
+      orderBy: [{ name: 'asc' }]
+    });
     expect(result).toEqual(mockList);
   });
 

@@ -292,6 +292,9 @@ model EpiDelivery {
 
     nextDueDate DateTime?
 
+    vencimentoSuspenso     DateTime?
+    periodicidadePausadaEm DateTime?
+
     termSigned Boolean @default(false)
 
     createdAt DateTime @default(now())

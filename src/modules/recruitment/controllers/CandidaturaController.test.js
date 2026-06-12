@@ -25,11 +25,6 @@ jest.unstable_mockModule('../services/DownloadCurriculoCandidaturaService.js', (
     default: downloadCurriculoCandidaturaServiceMock
 }));
 
-jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', () => ({
-    registrarEventoAuditoria: jest.fn(),
-    TIPOS_EVENTO_AUDITORIA: { DOWNLOAD_CURRICULO: 'DOWNLOAD_CURRICULO' }
-}));
-
 const candidaturaController = (await import('./CandidaturaController.js')).default;
 
 function criarMocksResposta() {
@@ -40,6 +35,12 @@ function criarMocksResposta() {
         attachment: jest.fn(),
         send: jest.fn()
     };
+}
+
+function criarErroHttpTeste(mensagem, statusCode) {
+    const erro = new Error(mensagem);
+    erro.statusCode = statusCode;
+    return erro;
 }
 
 describe('CandidaturaController', () => {
@@ -68,30 +69,38 @@ describe('CandidaturaController', () => {
         expect(resposta.json).toHaveBeenCalledWith(candidatura);
     });
 
-    it('createPublica deve retornar 400 para email obrigatorio', async () => {
-        createCandidaturaServiceMock.execute.mockRejectedValue(new Error(MENSAGEM_EMAIL_OBRIGATORIO));
-        const resposta = criarMocksResposta();
+    it('createPublica deve encaminhar 400 ao next para email obrigatorio', async () => {
+        createCandidaturaServiceMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_EMAIL_OBRIGATORIO, 400)
+        );
+        const proximo = jest.fn();
 
         await candidaturaController.createPublica(
             { params: { id: 'v1' }, body: {}, file: null },
-            resposta,
-            jest.fn()
+            criarMocksResposta(),
+            proximo
         );
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_EMAIL_OBRIGATORIO, statusCode: 400 })
+        );
     });
 
-    it('createPublica deve retornar 404 quando anuncio nao existe', async () => {
-        createCandidaturaServiceMock.execute.mockRejectedValue(new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO));
-        const resposta = criarMocksResposta();
+    it('createPublica deve encaminhar 404 ao next quando anuncio nao existe', async () => {
+        createCandidaturaServiceMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_ANUNCIO_NAO_ENCONTRADO, 404)
+        );
+        const proximo = jest.fn();
 
         await candidaturaController.createPublica(
             { params: { id: 'x' }, body: {}, file: {} },
-            resposta,
-            jest.fn()
+            criarMocksResposta(),
+            proximo
         );
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_ANUNCIO_NAO_ENCONTRADO, statusCode: 404 })
+        );
     });
 
     it('listByAnuncio deve retornar 200 com resultado do servico', async () => {
@@ -113,30 +122,34 @@ describe('CandidaturaController', () => {
         expect(resposta.json).toHaveBeenCalledWith(resultado);
     });
 
-    it('listByAnuncio deve retornar 400 para periodo invalido', async () => {
+    it('listByAnuncio deve encaminhar 400 ao next para periodo invalido', async () => {
         listCandidaturasServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_PERIODO_FILTRO_INVALIDO)
+            criarErroHttpTeste(MENSAGEM_PERIODO_FILTRO_INVALIDO, 400)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
         await candidaturaController.listByAnuncio(
             { params: { id: 'v1' }, query: {} },
-            resposta,
-            jest.fn()
+            criarMocksResposta(),
+            proximo
         );
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_PERIODO_FILTRO_INVALIDO, statusCode: 400 })
+        );
     });
 
-    it('getById deve retornar 404 quando candidatura nao existe', async () => {
+    it('getById deve encaminhar 404 ao next quando candidatura nao existe', async () => {
         getCandidaturaServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA)
+            criarErroHttpTeste(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA, 404)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
-        await candidaturaController.getById({ params: { id: 'x' } }, resposta, jest.fn());
+        await candidaturaController.getById({ params: { id: 'x' } }, criarMocksResposta(), proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_CANDIDATURA_NAO_ENCONTRADA, statusCode: 404 })
+        );
     });
 
     it('downloadCurriculo deve enviar arquivo com headers corretos', async () => {
@@ -148,21 +161,35 @@ describe('CandidaturaController', () => {
         });
         const resposta = criarMocksResposta();
 
-        await candidaturaController.downloadCurriculo({ params: { id: 'c1' } }, resposta, jest.fn());
+        await candidaturaController.downloadCurriculo(
+            { params: { id: 'c1' }, user: { id: 'u1', role: 'ADMIN' } },
+            resposta,
+            jest.fn()
+        );
 
+        expect(downloadCurriculoCandidaturaServiceMock.execute).toHaveBeenCalledWith('c1', {
+            identificadorUsuario: 'u1',
+            papelUsuario: 'ADMIN'
+        });
         expect(resposta.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
         expect(resposta.attachment).toHaveBeenCalledWith('cv.pdf');
         expect(resposta.send).toHaveBeenCalledWith(buffer);
     });
 
-    it('downloadCurriculo deve retornar 404 quando curriculo ausente', async () => {
+    it('downloadCurriculo deve encaminhar 404 ao next quando curriculo ausente', async () => {
         downloadCurriculoCandidaturaServiceMock.execute.mockRejectedValue(
-            new Error(MENSAGEM_CURRICULO_AUSENTE)
+            criarErroHttpTeste(MENSAGEM_CURRICULO_AUSENTE, 404)
         );
-        const resposta = criarMocksResposta();
+        const proximo = jest.fn();
 
-        await candidaturaController.downloadCurriculo({ params: { id: 'c1' } }, resposta, jest.fn());
+        await candidaturaController.downloadCurriculo(
+            { params: { id: 'c1' }, user: {} },
+            criarMocksResposta(),
+            proximo
+        );
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_CURRICULO_AUSENTE, statusCode: 404 })
+        );
     });
 });

@@ -1,5 +1,6 @@
 import { MENSAGEM_CANDIDATURA_NAO_ENCONTRADA } from '../constants/recrutamentoConstantes.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class GetCandidaturaService {
     /**
@@ -8,7 +9,7 @@ class GetCandidaturaService {
     async execute(identificadorCandidatura) {
         const candidatura = await candidaturaRepository.findById(identificadorCandidatura);
         if (!candidatura) {
-            throw new Error(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
+            lancarErroRecrutamento(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
         }
         return candidatura;
     }

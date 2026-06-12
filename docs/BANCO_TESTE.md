@@ -148,4 +148,4 @@ Os testes Jest (`npm test`) **não usam** esse banco — usam mocks. O banco de 
 3. `npm run db:test:push`
 4. `npm run db:test:seed`
 5. `npm run dev:test`
-6. Postman → `http://localhost:3001` + Bearer do `generate-dev-token`
+6. Postman → `http://127.0.0.1:3001` + login ou `node prisma/scripts/executar-com-ambiente-teste.mjs prisma/seeders/generate-dev-token.js`

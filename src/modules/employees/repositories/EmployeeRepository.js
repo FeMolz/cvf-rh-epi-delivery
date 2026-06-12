@@ -23,11 +23,22 @@ class EmployeeRepository {
         });
     }
 
-    async findAll() {
+    /**
+     * @param {{ status?: string | { in: string[] } }} filtroConsulta
+     */
+    async findManyComFiltro(filtroConsulta = {}) {
         return prisma.employee.findMany({
-            where: { deletedAt: null },
-            select: CAMPOS_SELECAO_FUNCIONARIO
+            where: {
+                deletedAt: null,
+                ...filtroConsulta
+            },
+            select: CAMPOS_SELECAO_FUNCIONARIO,
+            orderBy: [{ name: 'asc' }]
         });
+    }
+
+    async findAll() {
+        return this.findManyComFiltro();
     }
 
     async findById(id) {
@@ -51,11 +62,11 @@ class EmployeeRepository {
     /**
      * @param {{ status?: { in: string[] } }} filtroStatus
      */
-    async findManyParaExportacaoLista(filtroStatus) {
+    async findManyParaExportacaoLista(filtroConsulta) {
         return prisma.employee.findMany({
             where: {
                 deletedAt: null,
-                ...filtroStatus
+                ...filtroConsulta
             },
             select: SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS,
             orderBy: [{ name: 'asc' }]

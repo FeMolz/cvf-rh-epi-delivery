@@ -37,6 +37,7 @@ async function main() {
         console.log('\n=== TODOS OS SETORES ATUALIZADOS NO BANCO ===');
     } catch (erro) {
         console.error('Erro ao criar/atualizar setores:', erro);
+        process.exit(1);
     } finally {
         await prisma.$disconnect();
     }

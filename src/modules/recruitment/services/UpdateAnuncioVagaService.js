@@ -5,6 +5,7 @@ import {
     TIPOS_CONTRATACAO_VAGA
 } from '../constants/recrutamentoConstantes.js';
 import anuncioVagaRepository from '../repositories/AnuncioVagaRepository.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 const CAMPOS_EDITAVEIS = [
     'tituloVaga',
@@ -30,7 +31,7 @@ class UpdateAnuncioVagaService {
     async execute(identificadorAnuncio, corpoRequisicao) {
         const anuncioExistente = await anuncioVagaRepository.findById(identificadorAnuncio);
         if (!anuncioExistente) {
-            throw new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
         }
 
         const dadosAtualizacao = {};
@@ -50,7 +51,7 @@ class UpdateAnuncioVagaService {
             if (campo === 'tipoContratacao') {
                 const tipo = String(corpoRequisicao.tipoContratacao).trim().toUpperCase();
                 if (!Object.values(TIPOS_CONTRATACAO_VAGA).includes(tipo)) {
-                    throw new Error(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
+                    lancarErroRecrutamento(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
                 }
                 dadosAtualizacao.tipoContratacao = tipo;
                 continue;
@@ -60,7 +61,7 @@ class UpdateAnuncioVagaService {
         }
 
         if (Object.keys(dadosAtualizacao).length === 0) {
-            throw new Error(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS);
+            lancarErroRecrutamento(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS);
         }
 
         return anuncioVagaRepository.update(identificadorAnuncio, dadosAtualizacao);

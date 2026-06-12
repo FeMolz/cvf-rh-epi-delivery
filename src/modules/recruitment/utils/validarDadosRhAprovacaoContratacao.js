@@ -2,6 +2,7 @@ import {
     MENSAGEM_DATA_ADMISSAO_INVALIDA,
     MENSAGEM_DATA_ADMISSAO_OBRIGATORIA_RH
 } from '../constants/recrutamentoConstantes.js';
+import { lancarErroRecrutamento } from './lancarErroRecrutamento.js';
 
 /**
  * @param {object} entrada
@@ -10,11 +11,11 @@ export function validarDadosRhAprovacaoContratacao(entrada) {
     const dataAdmissaoBruta = entrada.admissionDate;
 
     if (dataAdmissaoBruta === undefined || dataAdmissaoBruta === null) {
-        throw new Error(MENSAGEM_DATA_ADMISSAO_OBRIGATORIA_RH);
+        lancarErroRecrutamento(MENSAGEM_DATA_ADMISSAO_OBRIGATORIA_RH);
     }
 
     if (typeof dataAdmissaoBruta === 'string' && dataAdmissaoBruta.trim() === '') {
-        throw new Error(MENSAGEM_DATA_ADMISSAO_OBRIGATORIA_RH);
+        lancarErroRecrutamento(MENSAGEM_DATA_ADMISSAO_OBRIGATORIA_RH);
     }
 
     const dataAdmissao =
@@ -23,7 +24,7 @@ export function validarDadosRhAprovacaoContratacao(entrada) {
             : new Date(typeof dataAdmissaoBruta === 'string' ? dataAdmissaoBruta.trim() : dataAdmissaoBruta);
 
     if (Number.isNaN(dataAdmissao.getTime())) {
-        throw new Error(MENSAGEM_DATA_ADMISSAO_INVALIDA);
+        lancarErroRecrutamento(MENSAGEM_DATA_ADMISSAO_INVALIDA);
     }
 
     return {

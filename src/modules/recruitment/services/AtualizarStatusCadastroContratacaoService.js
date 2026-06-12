@@ -8,6 +8,7 @@ import {
 } from '../constants/recrutamentoConstantes.js';
 import cadastroContratacaoRepository from '../repositories/CadastroContratacaoRepository.js';
 import { validarDadosRhAprovacaoContratacao } from '../utils/validarDadosRhAprovacaoContratacao.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class AtualizarStatusCadastroContratacaoService {
     /**
@@ -23,16 +24,16 @@ class AtualizarStatusCadastroContratacaoService {
                 STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO
             ].includes(status)
         ) {
-            throw new Error(MENSAGEM_STATUS_CADASTRO_INVALIDO);
+            lancarErroRecrutamento(MENSAGEM_STATUS_CADASTRO_INVALIDO);
         }
 
         const cadastro = await cadastroContratacaoRepository.findById(identificadorCadastro);
         if (!cadastro) {
-            throw new Error(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
         }
 
         if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH) {
-            throw new Error(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
         }
 
         if (status === STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO) {
@@ -47,7 +48,7 @@ class AtualizarStatusCadastroContratacaoService {
             !cadastro.telefone ||
             !cadastro.birthDate
         ) {
-            throw new Error(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
+            lancarErroRecrutamento(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
         }
 
         const dadosRh = validarDadosRhAprovacaoContratacao(entrada);

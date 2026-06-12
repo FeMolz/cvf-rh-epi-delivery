@@ -3,19 +3,31 @@ import {
     MENSAGEM_CURRICULO_AUSENTE
 } from '../constants/recrutamentoConstantes.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
+import {
+    registrarEventoAuditoria,
+    TIPOS_EVENTO_AUDITORIA
+} from '../../../shared/utils/registrarEventoAuditoria.js';
 
 class DownloadCurriculoCandidaturaService {
     /**
      * @param {string} identificadorCandidatura
+     * @param {{ identificadorUsuario?: string, papelUsuario?: string }} [contextoAuditoria]
      */
-    async execute(identificadorCandidatura) {
+    async execute(identificadorCandidatura, contextoAuditoria = {}) {
         const candidatura = await candidaturaRepository.findByIdComCurriculo(identificadorCandidatura);
         if (!candidatura) {
-            throw new Error(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
+            lancarErroRecrutamento(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA);
         }
         if (!candidatura.curriculoConteudo) {
-            throw new Error(MENSAGEM_CURRICULO_AUSENTE);
+            lancarErroRecrutamento(MENSAGEM_CURRICULO_AUSENTE);
         }
+
+        registrarEventoAuditoria(TIPOS_EVENTO_AUDITORIA.DOWNLOAD_CURRICULO, {
+            identificadorCandidatura,
+            identificadorUsuario: contextoAuditoria.identificadorUsuario,
+            papelUsuario: contextoAuditoria.papelUsuario
+        });
 
         return {
             bufferCurriculo: Buffer.from(candidatura.curriculoConteudo),

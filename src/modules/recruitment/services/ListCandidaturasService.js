@@ -2,6 +2,7 @@ import { MENSAGEM_ANUNCIO_NAO_ENCONTRADO } from '../constants/recrutamentoConsta
 import anuncioVagaRepository from '../repositories/AnuncioVagaRepository.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
 import { validarPeriodoFiltroCandidaturas } from '../utils/validarPeriodoFiltroCandidaturas.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 class ListCandidaturasService {
     /**
@@ -11,7 +12,7 @@ class ListCandidaturasService {
     async execute(identificadorAnuncio, filtros = {}) {
         const anuncio = await anuncioVagaRepository.findById(identificadorAnuncio);
         if (!anuncio) {
-            throw new Error(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
+            lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
         }
 
         const periodo = validarPeriodoFiltroCandidaturas(filtros);

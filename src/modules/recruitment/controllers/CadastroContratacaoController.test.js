@@ -36,6 +36,12 @@ function criarMocksResposta() {
     return { status: jest.fn().mockReturnThis(), json: jest.fn() };
 }
 
+function criarErroHttpTeste(mensagem, statusCode) {
+    const erro = new Error(mensagem);
+    erro.statusCode = statusCode;
+    return erro;
+}
+
 describe('CadastroContratacaoController', () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -50,22 +56,37 @@ describe('CadastroContratacaoController', () => {
         expect(resposta.status).toHaveBeenCalledWith(201);
     });
 
-    it('gerarConvite deve retornar 400 para convite duplicado', async () => {
-        gerarConviteMock.execute.mockRejectedValue(new Error(MENSAGEM_CONVITE_CADASTRO_JA_EXISTE));
-        const resposta = criarMocksResposta();
+    it('gerarConvite deve encaminhar 400 ao next para convite duplicado', async () => {
+        gerarConviteMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_CONVITE_CADASTRO_JA_EXISTE, 400)
+        );
+        const proximo = jest.fn();
 
-        await cadastroContratacaoController.gerarConvite({ params: { id: 'c1' } }, resposta, jest.fn());
+        await cadastroContratacaoController.gerarConvite(
+            { params: { id: 'c1' } },
+            criarMocksResposta(),
+            proximo
+        );
 
-        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: MENSAGEM_CONVITE_CADASTRO_JA_EXISTE, statusCode: 400 })
+        );
     });
 
-    it('getById deve retornar 404 quando nao encontrado', async () => {
-        getByIdMock.execute.mockRejectedValue(new Error(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO));
-        const resposta = criarMocksResposta();
+    it('getById deve encaminhar 404 ao next quando nao encontrado', async () => {
+        getByIdMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO, 404)
+        );
+        const proximo = jest.fn();
 
-        await cadastroContratacaoController.getById({ params: { id: 'x' } }, resposta, jest.fn());
+        await cadastroContratacaoController.getById({ params: { id: 'x' } }, criarMocksResposta(), proximo);
 
-        expect(resposta.status).toHaveBeenCalledWith(404);
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({
+                message: MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
+                statusCode: 404
+            })
+        );
     });
 
     it('atualizarStatus deve repassar user id ao servico', async () => {

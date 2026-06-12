@@ -7,6 +7,7 @@ import {
     TIPOS_MIME_CURRICULO_PERMITIDOS
 } from '../constants/recrutamentoConstantes.js';
 import { validarAssinaturaArquivoCurriculo } from './validarAssinaturaArquivoCurriculo.js';
+import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
 
 /**
  * @param {{ mimetype?: string, originalname?: string, size?: number, buffer?: Buffer } | undefined} arquivo
@@ -14,7 +15,7 @@ import { validarAssinaturaArquivoCurriculo } from './validarAssinaturaArquivoCur
  */
 export function validarArquivoCurriculo(arquivo) {
     if (!arquivo || !arquivo.buffer) {
-        throw new Error(MENSAGEM_CURRICULO_OBRIGATORIO);
+        lancarErroRecrutamento(MENSAGEM_CURRICULO_OBRIGATORIO);
     }
 
     const tipoMime = typeof arquivo.mimetype === 'string' ? arquivo.mimetype.trim().toLowerCase() : '';
@@ -29,11 +30,11 @@ export function validarArquivoCurriculo(arquivo) {
     const tipoMimeValido = TIPOS_MIME_CURRICULO_PERMITIDOS.includes(tipoMime);
 
     if (!tipoMimeValido || !extensaoValida) {
-        throw new Error(MENSAGEM_CURRICULO_TIPO_NAO_PERMITIDO);
+        lancarErroRecrutamento(MENSAGEM_CURRICULO_TIPO_NAO_PERMITIDO);
     }
 
     if (tamanhoBytes > TAMANHO_MAXIMO_CURRICULO_BYTES) {
-        throw new Error(MENSAGEM_CURRICULO_TAMANHO_EXCEDIDO);
+        lancarErroRecrutamento(MENSAGEM_CURRICULO_TAMANHO_EXCEDIDO);
     }
 
     validarAssinaturaArquivoCurriculo(arquivo.buffer, nomeArquivo);

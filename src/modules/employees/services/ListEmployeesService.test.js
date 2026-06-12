@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 
-const employeeRepositoryMock = { findAll: jest.fn() };
+const employeeRepositoryMock = { findManyComFiltro: jest.fn() };
 
 jest.unstable_mockModule('../repositories/EmployeeRepository.js', () => ({
     default: employeeRepositoryMock
@@ -13,21 +13,25 @@ describe('ListEmployeesService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve retornar lista de funcionarios ativos', async () => {
+    it('deve retornar lista de funcionários ativos por padrão', async () => {
         const lista = [{ id: '1', name: 'João' }, { id: '2', name: 'Maria' }];
-        employeeRepositoryMock.findAll.mockResolvedValue(lista);
+        employeeRepositoryMock.findManyComFiltro.mockResolvedValue(lista);
 
         const resultado = await listEmployeesService.execute();
 
-        expect(employeeRepositoryMock.findAll).toHaveBeenCalled();
+        expect(employeeRepositoryMock.findManyComFiltro).toHaveBeenCalledWith({
+            status: { in: ['ATIVO'] }
+        });
         expect(resultado).toEqual(lista);
     });
 
-    it('deve retornar lista vazia', async () => {
-        employeeRepositoryMock.findAll.mockResolvedValue([]);
+    it('deve aplicar filtro informado', async () => {
+        employeeRepositoryMock.findManyComFiltro.mockResolvedValue([]);
 
-        const resultado = await listEmployeesService.execute();
+        await listEmployeesService.execute('afastados');
 
-        expect(resultado).toEqual([]);
+        expect(employeeRepositoryMock.findManyComFiltro).toHaveBeenCalledWith({
+            status: { in: ['FERIAS', 'LICENCA_MATERNIDADE', 'LICENCA_MED'] }
+        });
     });
 });

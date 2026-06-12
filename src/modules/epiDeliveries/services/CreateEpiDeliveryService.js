@@ -1,6 +1,8 @@
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 import epiDeliveryRepository from '../repositories/EpiDeliveryRepository.js';
 import employeeRepository from '../../employees/repositories/EmployeeRepository.js';
 import fetchEpiFromApiService from '../../epis/services/FetchEpiFromApiService.js';
+import gerenciarPeriodicidadeEpiFuncionarioService from './GerenciarPeriodicidadeEpiFuncionarioService.js';
 import {
     MENSAGEM_FALHA_PERSISTIR_ENTREGAS,
     MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
@@ -9,15 +11,19 @@ import {
 class CreateEpiDeliveryService {
     async execute({ employeeId, caNumbers, deliveredById }) {
         if (!employeeId || !caNumbers || !Array.isArray(caNumbers) || caNumbers.length === 0 || !deliveredById) {
-            throw new Error('employeeId, caNumbers (array) e deliveredById são obrigatórios.');
+            throw criarErroHttp('employeeId, caNumbers (array) e deliveredById são obrigatórios.');
         }
 
         const identificadorFuncionario = String(employeeId).trim();
         const funcionario = await employeeRepository.findById(identificadorFuncionario);
 
         if (!funcionario || funcionario.deletedAt) {
-            throw new Error(MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO);
+            throw criarErroHttp(MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO, 404);
         }
+
+        const periodicidadeAtiva = gerenciarPeriodicidadeEpiFuncionarioService.funcionarioPossuiPeriodicidadeEpiAtiva(
+            funcionario.status
+        );
 
         // 2. Buscar as regras de periodicidade para o cargo do funcionário
         const roleEpis = await epiDeliveryRepository.findRoleEpisByRoleId(funcionario.roleId);
@@ -34,7 +40,7 @@ class CreateEpiDeliveryService {
             const roleEpiMatch = roleEpis.find(re => re.epiId === epi.id);
 
             let nextDueDate = null;
-            if (roleEpiMatch && roleEpiMatch.periodicityDays > 0) {
+            if (periodicidadeAtiva && roleEpiMatch && roleEpiMatch.periodicityDays > 0) {
                 const dueDate = new Date(currentDate);
                 dueDate.setDate(dueDate.getDate() + roleEpiMatch.periodicityDays);
                 nextDueDate = dueDate;
@@ -52,7 +58,7 @@ class CreateEpiDeliveryService {
         const resultadoPersistencia = await epiDeliveryRepository.createBatch(deliveriesData);
 
         if (resultadoPersistencia.count !== deliveriesData.length) {
-            throw new Error(MENSAGEM_FALHA_PERSISTIR_ENTREGAS);
+            throw criarErroHttp(MENSAGEM_FALHA_PERSISTIR_ENTREGAS, 500);
         }
 
         return {
