@@ -15,8 +15,13 @@ jest.unstable_mockModule('./config/env.js', () => ({
         JWT_SECRET: 'segredo-teste-local-16',
         TRUST_PROXY_SALTOS: 0,
         TOKEN_CADASTRO_VALIDADE_DIAS: 7,
-        RATE_LIMIT_GLOBAL_MAX: 1000
+        RATE_LIMIT_GLOBAL_MAX: 1000,
+        CAEPI_API_URL: 'http://localhost:8080'
     }
+}));
+
+jest.unstable_mockModule('./shared/providers/EpiProvider/verificarDisponibilidadeCaepi.js', () => ({
+    verificarDisponibilidadeCaepi: jest.fn().mockResolvedValue(true)
 }));
 
 const aplicacao = (await import('./app.js')).default;
@@ -34,7 +39,8 @@ describe('GET /health', () => {
         expect(resposta.statusCode).toBe(200);
         expect(resposta.body).toMatchObject({
             status: 'OK',
-            database: 'OK'
+            database: 'OK',
+            caepi: 'OK'
         });
     });
 

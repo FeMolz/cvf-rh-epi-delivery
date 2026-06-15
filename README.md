@@ -28,6 +28,8 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 - 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
+- 📄 **[PostgreSQL Supabase (produção)](./docs/SUPABASE.md)** - `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (migrations 5432).
+
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
@@ -35,34 +37,46 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 Siga o passo a passo abaixo para rodar a aplicação em um ambiente de desenvolvimento local zerado.
 
 ### 1. Pré-requisitos
+
 Certifique-se de ter as seguintes ferramentas instaladas:
+
 - **Node.js** (Versão 20+ recomendada)
 - **NPM** (Vem junto com o Node)
 - **PostgreSQL** (Servidor rodando localmente ou via Docker)
 
 ### 2. Clonando o Repositório
+
 Baixe o projeto e entre na pasta raiz:
+
 ```bash
 git clone https://github.com/FeMolz/CVF-System.git
 cd CVF-System
 ```
 
 ### 3. Instalando as Dependências
+
 O projeto conta com o Express, Prisma, adaptadores PG e Jest. Baixe tudo executando:
+
 ```bash
 npm install
 ```
 
 ### 4. Configuração das Variáveis de Ambiente
-Na raiz do projeto, crie um arquivo chamado `.env` (você pode se basear em variáveis locais que utilizar). 
+
+Na raiz do projeto, crie um arquivo chamado `.env` (você pode se basear em variáveis locais que utilizar).
 
 Este arquivo precisa, no mínimo, destas chaves:
+
 ```env
 # Porta em que a API vai responder
 PORT=3000
 
-# String de conexão com o banco de dados PostgreSQL
+# Desenvolvimento local — PostgreSQL na sua máquina
 DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/NOME_DO_BANCO?schema=public"
+
+# Produção (Supabase) — veja docs/SUPABASE.md e .env.production.example
+# DATABASE_URL="postgresql://postgres.PROJETO:SENHA@....pooler.supabase.com:6543/postgres?pgbouncer=true"
+# DIRECT_URL="postgresql://postgres.PROJETO:SENHA@....pooler.supabase.com:5432/postgres"
 
 # JWT (obrigatório; mín. 16 caracteres em dev, 32 em produção)
 JWT_SECRET="adicione_uma_chave_secreta_robusta_aqui_com_16_chars"
@@ -96,12 +110,13 @@ JWT_EXPIRES_IN="7d"
 ```
 
 ### 5. Configuração do Prisma (Banco de Dados)
-Este projeto usa a nova engine do Prisma com o adapter nativo do PG (`@prisma/adapter-pg`). 
+
+Este projeto usa a nova engine do Prisma com o adapter nativo do PG (`@prisma/adapter-pg`).
 Para criar as tabelas no seu banco PostgreSQL e gerar o Client que a API usará, execute:
 
 ```bash
 # 1. Empurra a estrutura do schema para o banco de dados vazio
-npx prisma db push 
+npx prisma db push
 
 # (Obs: se você já tiver o histórico de migrations criado, use `npx prisma migrate dev` no lugar)
 
@@ -110,7 +125,9 @@ npx prisma generate
 ```
 
 ### 6. Iniciando a Aplicação
+
 Tudo pronto! Para ligar o servidor de desenvolvimento com hot-reload (usando o `nodemon`), execute:
+
 ```bash
 npm run dev
 ```
@@ -120,12 +137,15 @@ npm run dev
 ## 🧪 Rotinas Úteis de Desenvolvimento
 
 ### Rodando os Testes Automatizados (Jest)
+
 A aplicação possui suporte nativo para ESModules no Jest (`--experimental-vm-modules`). Para verificar a integridade do código após alguma modificação, basta executar:
+
 ```bash
 npm test
 ```
 
 Para validar **todas as rotas HTTP** sem abrir o Postman (smoke de método, path e controller):
+
 ```bash
 npm run test:routes
 ```
@@ -133,15 +153,19 @@ npm run test:routes
 Consulte [docs/COBERTURA_ENDPOINTS.md](./docs/COBERTURA_ENDPOINTS.md) para a lista completa de endpoints cobertos.
 
 ### Criando uma Conta de Administrador Inicial (Seed)
+
 Caso você esteja subindo o sistema do zero e precise de um usuário com privilégios de **ADMIN** para começar a cadastrar outras coisas, criamos um seed para facilitar o processo.
 
 Execute o comando abaixo na raiz do projeto (ou use `npm run seed:admin`, que sempre usa a raiz do pacote):
+
 ```bash
 node prisma/seeders/admin.js
 ```
+
 Defina `ADMIN_SEED_EMAIL` e `ADMIN_SEED_PASSWORD` no `.env` antes de rodar (veja [docs/SEGURANCA.md](./docs/SEGURANCA.md)). Em produção, `ADMIN_SEED_PASSWORD` é obrigatória. O script não exibe a senha no console.
 
 Credenciais padrão de desenvolvimento (se variáveis não forem definidas):
+
 - **E-mail:** `admin@rhsystem.com`
 - **Senha:** `AlterarSenha123!` (apenas ambiente não-produtivo)
 
@@ -149,19 +173,20 @@ Utilize `POST /api/v1/users/login` para obter o token JWT.
 
 ### Outros seeders (mesmo carregamento de `.env` da raiz)
 
-| Comando npm | Equivalente |
-|-------------|----------------|
-| `npm run seed:companies` | `node prisma/seeders/seed_companies.js` |
-| `npm run seed:all` | `node prisma/seeders/seed_sistema_completo.js` (todos os módulos) |
-| `npm run seed:all:test` | seed completo usando `.env.test` |
-| `npm run seed:test-data` | alias de `seed:all` |
-| `npm run seed:epis` | `node prisma/seeders/seed_epis.js` |
-| `npm run seed:dev-token` | `node prisma/seeders/generate-dev-token.js` |
+| Comando npm              | Equivalente                                                       |
+| ------------------------ | ----------------------------------------------------------------- |
+| `npm run seed:companies` | `node prisma/seeders/seed_companies.js`                           |
+| `npm run seed:all`       | `node prisma/seeders/seed_sistema_completo.js` (todos os módulos) |
+| `npm run seed:all:test`  | seed completo usando `.env.test`                                  |
+| `npm run seed:test-data` | alias de `seed:all`                                               |
+| `npm run seed:epis`      | `node prisma/seeders/seed_epis.js`                                |
+| `npm run seed:dev-token` | `node prisma/seeders/generate-dev-token.js`                       |
 
 Todos os arquivos em `prisma/seeders/` importam `carregarAmbienteRaiz.js` primeiro, para que `DATABASE_URL` e `JWT_SECRET` venham do `.env` na raiz do repositório mesmo se o `cwd` do terminal não for a pasta do projeto.
 
 ### Gerando Token Local para Teste no Postman/Insomnia
-Enquanto estiver programando, você pode precisar acessar as rotas bloqueadas (como `/api/v1/roles`) sem ter que criar toda a árvore de usuário. 
+
+Enquanto estiver programando, você pode precisar acessar as rotas bloqueadas (como `/api/v1/roles`) sem ter que criar toda a árvore de usuário.
 
 Existe um script que lê o `.env` e devolve um token assinado para a role `ADMIN` (**somente desenvolvimento** — bloqueado em produção):
 

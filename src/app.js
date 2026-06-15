@@ -6,6 +6,7 @@ import { configurarHelmet } from './shared/middlewares/configurarHelmet.js';
 import { identificadorRequisicao } from './shared/middlewares/identificadorRequisicao.js';
 import { limitadorTaxaGlobal } from './shared/middlewares/criarLimitadorTaxa.js';
 import { protegerHealthCheck } from './shared/middlewares/protegerHealthCheck.js';
+import { verificarDisponibilidadeCaepi } from './shared/providers/EpiProvider/verificarDisponibilidadeCaepi.js';
 
 const app = express();
 
@@ -39,9 +40,13 @@ import pontoRoutes from './modules/ponto/routes/ponto.routes.js';
 app.get('/health', protegerHealthCheck(), async (_requisicao, resposta) => {
     try {
         await prisma.$queryRaw`SELECT 1`;
+
+        const caepiDisponivel = await verificarDisponibilidadeCaepi(env.CAEPI_API_URL);
+
         return resposta.status(200).json({
             status: 'OK',
             database: 'OK',
+            caepi: caepiDisponivel ? 'OK' : 'UNAVAILABLE',
             message: 'Sistema de RH e SST operacional'
         });
     } catch {

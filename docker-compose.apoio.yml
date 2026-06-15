@@ -1,0 +1,17 @@
+# Serviços de apoio do RH-System (produção e desenvolvimento).
+# API baseCAEPI + Redis — suba com: npm run docker:apoio:up
+
+services:
+  caepi-api:
+    image: joaoaugustomv/api_base_ca_epi:2.0
+    container_name: rh-system-caepi-api
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: rh-system-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

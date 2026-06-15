@@ -26,6 +26,14 @@
     "db:test:push": "node prisma/scripts/preparar-banco-teste.mjs --apenas-schema",
     "db:test:seed": "node prisma/scripts/preparar-banco-teste.mjs",
     "db:test:reset": "docker compose -f docker-compose.test.yml down -v && docker compose -f docker-compose.test.yml up -d && node prisma/scripts/preparar-banco-teste.mjs",
+    "db:prod:push": "node prisma/scripts/executar-com-ambiente-producao.mjs npx prisma db push",
+    "dev:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node src/server.js",
+    "seed:admin:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node prisma/seeders/admin.js",
+    "docker:apoio:up": "node scripts/iniciar-apoio-docker.mjs",
+    "docker:apoio:down": "docker compose -f docker-compose.apoio.yml down",
+    "start:com-apoio": "node scripts/iniciar-servidor-com-apoio.mjs",
+    "start:prod:com-apoio": "node scripts/iniciar-producao-com-apoio.mjs",
+    "dev:com-apoio": "node scripts/iniciar-apoio-docker.mjs && nodemon src/server.js",
     "lint": "eslint src"
   },
   "dependencies": {

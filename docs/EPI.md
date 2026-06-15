@@ -20,12 +20,30 @@ Para **testes locais manuais** (Postman, Insomnia, front em `localhost`), para o
 **Subir a API baseCAEPI via Docker** (Docker Desktop ou CLI):
 
 ```bash
+npm run docker:apoio:up
+```
+
+Isso sobe **API baseCAEPI** (porta 8080) e **Redis** (6379) via `docker-compose.apoio.yml` e aguarda a CAEPI ficar pronta.
+
+Equivalente manual:
+
+```bash
 docker run -d -p 8080:80 --name ca_api_epi joaoaugustomv/api_base_ca_epi:2.0
 ```
 
 - `-p 8080:80`: API disponível em `http://localhost:8080` no host.
 - `--name ca_api_epi`: facilita `docker stop ca_api_epi` e `docker rm ca_api_epi`.
 - Se o nome já existir, remova o container antigo antes de executar novamente.
+
+**Subir RH-System junto com CAEPI + Redis:**
+
+```bash
+npm run start:com-apoio          # desenvolvimento (.env)
+npm run start:prod:com-apoio     # produção (.env.production.local)
+npm run dev:com-apoio            # desenvolvimento com nodemon
+```
+
+Em **produção**, o servidor **aguarda** a API baseCAEPI responder antes de abrir a porta HTTP (`CAEPI_AGUARDAR_INICIO=true` por padrão). O `/health` também reporta `caepi: OK | UNAVAILABLE`.
 
 Depois:
 

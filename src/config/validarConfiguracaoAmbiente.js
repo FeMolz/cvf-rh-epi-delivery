@@ -50,6 +50,20 @@ export function validarRedisProducao(urlRedis, nodeEnv) {
     }
 }
 
+/**
+ * @param {string | undefined} urlCaepi
+ * @param {string} nodeEnv
+ */
+export function validarCaepiProducao(urlCaepi, nodeEnv) {
+    if (nodeEnv !== 'production') {
+        return;
+    }
+
+    if (!urlCaepi || String(urlCaepi).trim() === '') {
+        throw new Error('CAEPI_API_URL é obrigatória em produção para consulta de EPIs.');
+    }
+}
+
 export function validarOrigensCorsProducao(origensCors, nodeEnv) {
     if (nodeEnv !== 'production') {
         return;

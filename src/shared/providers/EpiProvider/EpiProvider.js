@@ -1,4 +1,5 @@
 import { validarNumeroCaEpi } from '../../utils/validarNumeroCaEpi.js';
+import env from '../../../config/env.js';
 
 /**
  * @param {unknown} valorBruto
@@ -69,7 +70,7 @@ class EpiProvider {
      * @returns {Promise<Object|null>}
      */
     async getEpiByCa(caNumber) {
-        const baseUrl = process.env.CAEPI_API_URL || 'http://localhost:8080';
+        const baseUrl = env.CAEPI_API_URL;
         const numeroCaValidado = validarNumeroCaEpi(caNumber);
 
         try {

@@ -1,4 +1,5 @@
 import {
+    validarCaepiProducao,
     validarOrigensCorsProducao,
     validarRedisProducao,
     validarSegredoJwt
@@ -15,6 +16,10 @@ describe('validarConfiguracaoAmbiente', () => {
 
     it('deve exigir REDIS_URL em produção', () => {
         expect(() => validarRedisProducao(undefined, 'production')).toThrow('REDIS_URL');
+    });
+
+    it('deve exigir CAEPI_API_URL em produção', () => {
+        expect(() => validarCaepiProducao(undefined, 'production')).toThrow('CAEPI_API_URL');
     });
 
     it('deve exigir CORS explícito em produção', () => {
