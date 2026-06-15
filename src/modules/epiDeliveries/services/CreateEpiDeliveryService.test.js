@@ -86,7 +86,7 @@ describe('CreateEpiDeliveryService', () => {
         expect(createBatchArgs[1].nextDueDate).toBeNull();
     });
 
-    it('não deve calcular vencimento quando funcionário não está ATIVO', async () => {
+    it('deve rejeitar entrega quando funcionário não está ATIVO', async () => {
         gerenciarPeriodicidadeEpiFuncionarioServiceMock.funcionarioPossuiPeriodicidadeEpiAtiva.mockReturnValue(
             false
         );
@@ -96,20 +96,16 @@ describe('CreateEpiDeliveryService', () => {
             status: 'FERIAS',
             deletedAt: null
         });
-        epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([
-            { epiId: 'epi1', periodicityDays: 30 }
-        ]);
-        fetchEpiFromApiServiceMock.execute.mockResolvedValue({ id: 'epi1' });
-        epiDeliveryRepositoryMock.createBatch.mockResolvedValue({ count: 1 });
 
-        await createEpiDeliveryService.execute({
-            employeeId: '1',
-            caNumbers: ['11070'],
-            deliveredById: '2'
-        });
+        await expect(
+            createEpiDeliveryService.execute({
+                employeeId: '1',
+                caNumbers: ['11070'],
+                deliveredById: '2'
+            })
+        ).rejects.toThrow('Funcionário com status diferente de ATIVO não pode receber EPIs.');
 
-        const entrega = epiDeliveryRepositoryMock.createBatch.mock.calls[0][0][0];
-        expect(entrega.nextDueDate).toBeNull();
+        expect(epiDeliveryRepositoryMock.createBatch).not.toHaveBeenCalled();
     });
 
     it('deve falhar quando createMany não persistir todas as entregas', async () => {

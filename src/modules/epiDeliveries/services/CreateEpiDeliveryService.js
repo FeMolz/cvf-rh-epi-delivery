@@ -5,6 +5,7 @@ import fetchEpiFromApiService from '../../epis/services/FetchEpiFromApiService.j
 import gerenciarPeriodicidadeEpiFuncionarioService from './GerenciarPeriodicidadeEpiFuncionarioService.js';
 import {
     MENSAGEM_FALHA_PERSISTIR_ENTREGAS,
+    MENSAGEM_FUNCIONARIO_INELEGIVEL_ENTREGA_EPI,
     MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
 } from '../constants/entregaEpiConstantes.js';
 
@@ -21,9 +22,13 @@ class CreateEpiDeliveryService {
             throw criarErroHttp(MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO, 404);
         }
 
-        const periodicidadeAtiva = gerenciarPeriodicidadeEpiFuncionarioService.funcionarioPossuiPeriodicidadeEpiAtiva(
-            funcionario.status
-        );
+        if (
+            !gerenciarPeriodicidadeEpiFuncionarioService.funcionarioPossuiPeriodicidadeEpiAtiva(
+                funcionario.status
+            )
+        ) {
+            throw criarErroHttp(MENSAGEM_FUNCIONARIO_INELEGIVEL_ENTREGA_EPI);
+        }
 
         // 2. Buscar as regras de periodicidade para o cargo do funcionário
         const roleEpis = await epiDeliveryRepository.findRoleEpisByRoleId(funcionario.roleId);
@@ -40,7 +45,7 @@ class CreateEpiDeliveryService {
             const roleEpiMatch = roleEpis.find(re => re.epiId === epi.id);
 
             let nextDueDate = null;
-            if (periodicidadeAtiva && roleEpiMatch && roleEpiMatch.periodicityDays > 0) {
+            if (roleEpiMatch && roleEpiMatch.periodicityDays > 0) {
                 const dueDate = new Date(currentDate);
                 dueDate.setDate(dueDate.getDate() + roleEpiMatch.periodicityDays);
                 nextDueDate = dueDate;

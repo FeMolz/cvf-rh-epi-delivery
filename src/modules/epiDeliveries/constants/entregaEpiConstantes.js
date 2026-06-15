@@ -3,5 +3,8 @@ export const MENSAGEM_IDENTIFICADOR_FUNCIONARIO_OBRIGATORIO =
 
 export const MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO = 'Funcionário não encontrado.';
 
+export const MENSAGEM_FUNCIONARIO_INELEGIVEL_ENTREGA_EPI =
+    'Funcionário com status diferente de ATIVO não pode receber EPIs.';
+
 export const MENSAGEM_FALHA_PERSISTIR_ENTREGAS =
     'Falha ao registrar uma ou mais entregas no banco de dados.';
