@@ -25,6 +25,8 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
 
       - name: Executar backup condicional
         id: backup
