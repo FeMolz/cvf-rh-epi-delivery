@@ -85,7 +85,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
       - name: Aplicar schema no banco de integração
-        run: npx prisma db push --skip-generate
+        run: npx prisma db push
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
