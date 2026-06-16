@@ -10,6 +10,11 @@ jest.unstable_mockModule('../repositories/CandidaturaRepository.js', () => ({
     default: candidaturaRepositoryMock
 }));
 
+jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', () => ({
+    registrarEventoAuditoria: jest.fn(),
+    TIPOS_EVENTO_AUDITORIA: { DOWNLOAD_CURRICULO: 'DOWNLOAD_CURRICULO' }
+}));
+
 const downloadCurriculoCandidaturaService = (
     await import('./DownloadCurriculoCandidaturaService.js')
 ).default;
