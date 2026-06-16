@@ -22,17 +22,24 @@ model Company {
 }
 ```
 
-## 3. Estrutura de Diretórios Simplificada
-Diferente dos outros módulos, o módulo de Companies dispensa a camada de `Service` e `Repository`, acessando o Prisma diretamente pelo Controller para a única função de listagem.
+## 3. Estrutura de Diretórios
+
+O módulo segue a arquitetura em camadas padrão do RH-System (Controller → Service → Repository), com escopo read-only na API.
 
 ```text
 src/modules/companies/
 ├── controllers/
 │   ├── CompanyController.js
 │   └── CompanyController.test.js
-└── routes/
-    ├── company.routes.js
-    └── company.routes.test.js
+├── repositories/
+│   ├── CompanyRepository.js
+│   └── CompanyRepository.test.js
+├── routes/
+│   ├── company.routes.js
+│   └── company.routes.test.js
+└── services/
+    ├── ListCompaniesService.js
+    └── ListCompaniesService.test.js
 ```
 
 ## 4. Estratégia de Cadastro (Seed com IDs Fixos)

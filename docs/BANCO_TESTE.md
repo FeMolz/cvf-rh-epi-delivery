@@ -84,12 +84,14 @@ npm run seed:all
 
 ### Credenciais padrão dos usuários de seed
 
-| E-mail | Papel | Senha |
-|--------|-------|-------|
-| `admin@rhsystem.com` | ADMIN | `AlterarSenha123!` (ou `ADMIN_SEED_PASSWORD`) |
-| `administrativo@rhsystem.com` | ADMINISTRATIVO | `AlterarSenha123!` |
-| `almoxarifado@rhsystem.com` | ALMOXARIFADO | `AlterarSenha123!` |
-| `colaborador@rhsystem.com` | COLABORADOR | `AlterarSenha123!` |
+
+| E-mail                        | Papel          | Senha                                         |
+| ----------------------------- | -------------- | --------------------------------------------- |
+| `admin@rhsystem.com`          | ADMIN          | `AlterarSenha123!` (ou `ADMIN_SEED_PASSWORD`) |
+| `administrativo@rhsystem.com` | ADMINISTRATIVO | `AlterarSenha123!`                            |
+| `almoxarifado@rhsystem.com`   | ALMOXARIFADO   | `AlterarSenha123!`                            |
+| `colaborador@rhsystem.com`    | COLABORADOR    | `AlterarSenha123!`                            |
+
 
 ### EPIs via API externa (opcional)
 
@@ -131,11 +133,13 @@ Apaga o volume Docker (se usar compose de teste), recria schema e roda seeds bá
 
 ## 7. Desenvolvimento vs teste vs produção
 
+
 | Ambiente     | Arquivo env | Banco             | Uso                    |
 | ------------ | ----------- | ----------------- | ---------------------- |
 | Dev diário   | `.env`      | `rh_system` (ex.) | Codar no dia a dia     |
 | Teste manual | `.env.test` | `rh_system_test`  | Postman, PDF, Secullum |
 | Produção     | servidor    | cliente           | Deploy                 |
+
 
 Os testes Jest unitários (`npm test`) usam mocks. Para validar filtros de funcionários e pausa de EPI contra o banco real:
 
@@ -158,3 +162,4 @@ No CI (GitHub Actions), os testes de integração rodam automaticamente com Post
 4. `npm run db:test:seed`
 5. `npm run dev:test`
 6. Postman → `http://127.0.0.1:3001` + login ou `node prisma/scripts/executar-com-ambiente-teste.mjs prisma/seeders/generate-dev-token.js`
+

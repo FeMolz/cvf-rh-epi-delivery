@@ -29,6 +29,8 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 - 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
 - 📄 **[PostgreSQL Supabase (produção)](./docs/SUPABASE.md)** - `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (migrations 5432).
+- 📄 **[Deploy e operação em produção](./docs/DEPLOY.md)** - Dockerfile, Docker Compose, CAEPI na nuvem, backup e fluxo de trabalho.
+- 📄 **[Branch protection (CI)](./docs/BRANCH_PROTECTION.md)** - Como bloquear merge na `main` sem testes passando.
 
 ---
 

@@ -354,3 +354,6 @@ buck-out/
 
 # PDFs gerados (relatórios de entrega de EPI)
 storage/epi-delivery-reports/*.pdf
+
+# Backups locais do PostgreSQL (gerados por scripts/backup-postgres-se-mudou.mjs)
+.backups/

@@ -1,0 +1,36 @@
+# Stack de produção: API RH-System + API baseCAEPI na mesma rede Docker.
+# Redis: use Redis Cloud (REDIS_URL no .env.production.local) — não sobe container local.
+#
+# Pré-requisito: .env.production.local preenchido (Supabase, JWT, Redis Cloud, CORS).
+#
+# Subir:
+#   npm run docker:prod:up
+#
+# CAEPI fica acessível na rede interna como http://caepi-api (porta 80 do container).
+# Para debug externo, a API CAEPI também expõe a porta 8080 do host.
+
+services:
+  caepi-api:
+    image: joaoaugustomv/api_base_ca_epi:2.0
+    container_name: rh-system-caepi-prod
+    ports:
+      - '8080:80'
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rh-system-api-prod
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env.production.local
+    environment:
+      NODE_ENV: production
+      CAEPI_API_URL: http://caepi-api
+      CAEPI_AGUARDAR_INICIO: 'true'
+    depends_on:
+      caepi-api:
+        condition: service_started
+    restart: unless-stopped

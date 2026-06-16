@@ -26,8 +26,17 @@ jobs:
       - name: Gerar Prisma Client
         run: npx prisma generate
 
+      - name: ESLint
+        run: npm run lint
+
       - name: Executar testes unitários
         run: npm test
+        env:
+          JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
+
+      - name: Smoke de rotas HTTP
+        run: npm run test:routes
         env:
           JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
