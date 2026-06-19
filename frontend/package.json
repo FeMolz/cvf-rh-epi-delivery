@@ -1,0 +1,10 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Frontend RH-System (em construção)",
+  "license": "MIT",
+  "scripts": {
+    "dev": "echo \"Frontend ainda não implementado. Escolha um framework (ex.: React, Next.js) e configure aqui.\" && exit 1"
+  }
+}

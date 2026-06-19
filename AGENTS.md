@@ -6,6 +6,24 @@ Ele detalha estritamente os padrões arquiteturais, a stack tecnológica e a for
 
 ---
 
+## 0. Monorepo
+
+O repositório é **fullstack** com npm workspaces:
+
+```text
+RH-System/
+├── backend/     # API Express + Prisma (código em backend/src/)
+├── frontend/    # App web (em construção)
+└── package.json # Scripts na raiz delegam com npm run … -w backend
+```
+
+- Código da API, Prisma, Docker e `docs/` do backend ficam em **`backend/`**.
+- Novos módulos HTTP seguem `backend/src/modules/…`; providers em `backend/src/shared/providers/`; middlewares em `backend/src/shared/middlewares/`.
+- Documentação de módulos da API: `backend/docs/`. Linkar em `backend/README.md`.
+- Frontend futuro: pasta `frontend/` (stack a definir).
+
+---
+
 ## 1. Stack Tecnológica
 
 O projeto foi construído utilizando tecnologias modernas e estritas no ecossistema JavaScript:
@@ -21,12 +39,12 @@ O projeto foi construído utilizando tecnologias modernas e estritas no ecossist
 
 ## 2. Arquitetura do Sistema
 
-Estamos utilizando uma **Arquitetura Baseada em Camadas (Layered Architecture)** aliada a princípios simplificados de **Domain-Driven Design (DDD)**. O código é divido em Módulos fortemente isolados localizados em `src/modules/`.
+Estamos utilizando uma **Arquitetura Baseada em Camadas (Layered Architecture)** aliada a princípios simplificados de **Domain-Driven Design (DDD)**. O código da API é dividido em Módulos fortemente isolados localizados em `backend/src/modules/`.
 
 Sempre que criar um novo módulo, a estrutura de pastas obrigatória é:
 
 ```text
-src/modules/[nome-do-modulo]/
+backend/src/modules/[nome-do-modulo]/
 ├── controllers/          # Lida exclusivamente com chamadas HTTP (req, res), valida códigos de status e retorna respostas JSON.
 ├── repositories/         # Única camada do módulo que tem a permissão de invocar o Prisma Client (Acesso a Banco de Dados).
 ├── routes/               # Configuração do router do express, e injeção de Middlewares (Autenticação/RBAC).
@@ -37,8 +55,8 @@ src/modules/[nome-do-modulo]/
 1. **Controller "Burro":** O Controller não deve conter regra de negócio, verificações de strings ou de banco. Ele apanha os dados, envia para a Service, aguarda e devolve a resposta HTTP.
 2. **Service Desacoplada do HTTP:** A Service não deve saber o que é `req`, `res` ou `next`. Ela recebe parâmetros primitivos ou objetos, faz validações, interage com Repositórios e lança erros no formato `throw new Error()`.
 3. **Single Responsibility (SRP):** Cada arquivo na pasta `services/` deve realizar apenas uma ação e ser exportado como Singleton (Ex: `class CreateUserService { ... }`).
-4. **Dependências Externas:** Se precisar de consumo de API de terceiros, coloque a lógica isolada de fetch na pasta `src/shared/providers/`.
-5. **Middlewares:** Código reutilizável de intercepção fica em `src/shared/middlewares/`.
+4. **Dependências Externas:** Se precisar de consumo de API de terceiros, coloque a lógica isolada de fetch na pasta `backend/src/shared/providers/`.
+5. **Middlewares:** Código reutilizável de intercepção fica em `backend/src/shared/middlewares/`.
 
 ---
 
@@ -57,7 +75,7 @@ Para manter a integridade deste repositório, o Agente de IA deve assumir o comp
 
 A documentação do RH-System deve ser mantida viva, imutável em padrão, e extremamente legível.
 
-1. **Onde Documentar:** Toda nova grande funcionalidade ou módulo deve gerar um arquivo `.md` na pasta raiz `docs/` (Ex: `FERIAS.md`).
+1. **Onde Documentar:** Toda nova grande funcionalidade ou módulo da API deve gerar um arquivo `.md` na pasta `backend/docs/` (Ex: `FERIAS.md`).
 2. **Estrutura Obrigatória da Documentação:** Ao criar o Markdown para um novo módulo, construa ele dividindo exatamente nessas 7 seções:
    - `1. Visão Geral`: Pra que serve o módulo e suas dependências.
    - `2. Modelo de Dados`: O schema exato extraído do Prisma (`schema.prisma`).
@@ -66,4 +84,4 @@ A documentação do RH-System deve ser mantida viva, imutável em padrão, e ext
    - `5. Endpoints / Rotas Disponíveis`: Tabela em Markdown contendo Método, Endpoint, Permissões de Segurança Exigidas, e Descrição.
    - `6. Testes Automatizados (Jest)`: Resumo informando os cenários de mocks realizados e testados.
    - `7. Exemplos de Uso (Postman / Insomnia)`: Fornecimento dos blocos de código JSON e rotas cruas para facilitar testes práticos.
-3. **Centralização:** O último passo após gerar/atualizar o arquivo `.md` na pasta `docs/` é sempre linká-lo na lista de módulos do arquivo principal `README.md`.
+3. **Centralização:** O último passo após gerar/atualizar o arquivo `.md` em `backend/docs/` é sempre linká-lo na lista de módulos do arquivo `backend/README.md`.

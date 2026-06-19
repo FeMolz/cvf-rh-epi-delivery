@@ -29,7 +29,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 - 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
 - 📄 **[PostgreSQL Supabase (produção)](./docs/SUPABASE.md)** - `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (migrations 5432).
-- 📄 **[Deploy e operação em produção](./docs/DEPLOY.md)** - Dockerfile, Docker Compose, CAEPI na nuvem, backup e fluxo de trabalho.
+- 📄 **[Deploy e operação em produção](./docs/DEPLOY.md)** - Dockerfile, Docker Compose, CD automático (GitHub Actions), backup e fluxo de trabalho.
 - 📄 **[Branch protection (CI)](./docs/BRANCH_PROTECTION.md)** - Como bloquear merge na `main` sem testes passando.
 
 ---
@@ -46,28 +46,33 @@ Certifique-se de ter as seguintes ferramentas instaladas:
 - **NPM** (Vem junto com o Node)
 - **PostgreSQL** (Servidor rodando localmente ou via Docker)
 
-### 2. Clonando o Repositório
-
-Baixe o projeto e entre na pasta raiz:
+### 2. Clonando o repositório (monorepo)
 
 ```bash
 git clone https://github.com/FeMolz/CVF-System.git
 cd CVF-System
+npm install
 ```
 
-### 3. Instalando as Dependências
+A API fica em `backend/`. Na raiz do monorepo, `npm run dev` já inicia o backend.
 
-O projeto conta com o Express, Prisma, adaptadores PG e Jest. Baixe tudo executando:
+### 3. Instalando as dependências
+
+Na **raiz do monorepo** (recomendado):
 
 ```bash
 npm install
 ```
 
-### 4. Configuração das Variáveis de Ambiente
+Ou apenas o backend:
 
-Na raiz do projeto, crie um arquivo chamado `.env` (você pode se basear em variáveis locais que utilizar).
+```bash
+cd backend && npm install
+```
 
-Este arquivo precisa, no mínimo, destas chaves:
+### 4. Configuração das variáveis de ambiente
+
+Crie `backend/.env` (ou `backend/.env.development.local`) com as chaves abaixo.
 
 ```env
 # Porta em que a API vai responder

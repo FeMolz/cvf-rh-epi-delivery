@@ -1,0 +1,28 @@
+{
+  "name": "rh-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo RH-System — API (backend) + frontend",
+  "license": "MIT",
+  "author": "Felipe Molz, João Gabriel W",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w backend",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "start": "npm run start -w backend",
+    "test": "npm test -w backend",
+    "test:integracao": "npm run test:integracao -w backend",
+    "test:routes": "npm run test:routes -w backend",
+    "lint": "npm run lint -w backend",
+    "deploy:prod": "npm run deploy:prod -w backend",
+    "docker:prod:up": "npm run docker:prod:up -w backend",
+    "docker:prod:down": "npm run docker:prod:down -w backend",
+    "db:prod:migrate": "npm run db:prod:migrate -w backend",
+    "seed:admin:prod": "npm run seed:admin:prod -w backend",
+    "backup:prod": "npm run backup:prod -w backend"
+  }
+}

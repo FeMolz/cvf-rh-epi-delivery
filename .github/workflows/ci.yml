@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ['**']
 
+defaults:
+  run:
+    working-directory: backend
+
 jobs:
   testes-unitarios:
     runs-on: ubuntu-latest
@@ -19,9 +23,11 @@ jobs:
         with:
           node-version: '20'
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Instalar dependências
         run: npm ci
+        working-directory: .
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
@@ -73,24 +79,29 @@ jobs:
         with:
           node-version: '20'
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Instalar dependências
         run: npm ci
+        working-directory: .
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
       - name: Gerar Prisma Client
         run: npx prisma generate
+        working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
       - name: Aplicar schema no banco de integração
         run: npx prisma db push
+        working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
 
       - name: Executar testes de integração
         run: npm run test:integracao
+        working-directory: backend
         env:
           RUN_INTEGRATION_TESTS: 'true'
           JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars

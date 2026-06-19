@@ -22,9 +22,11 @@ jobs:
         with:
           node-version: '20'
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Instalar dependências
         run: npm ci
+        working-directory: .
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
 
@@ -37,6 +39,7 @@ jobs:
           else
             echo "criado=false" >> "$GITHUB_OUTPUT"
           fi
+        working-directory: backend
         env:
           DATABASE_BACKUP_DIRECT_URL: ${{ secrets.DATABASE_BACKUP_DIRECT_URL }}
           BACKUP_DIR: ${{ runner.temp }}/backups

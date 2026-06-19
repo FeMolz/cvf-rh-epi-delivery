@@ -127,10 +127,7 @@ docker compose -f docker-compose.producao.yml logs -f api
 
 1. Desenvolver na branch `feature/...`.
 2. Abrir PR para `main` — o CI roda lint, testes unitários, smoke de rotas e integração.
-3. Após merge, na máquina de deploy ou pipeline:
-   - `git pull`
-   - `npm run db:prod:migrate` (se houver migrations novas)
-   - `docker compose -f docker-compose.producao.yml up -d --build` ou reiniciar o processo Node
+3. Após merge na `main`, o **CD** (`.github/workflows/deploy.yml`) faz deploy na VPS se o CI passou — ou rode `npm run deploy:prod` no servidor.
 
 ### Alteração só de dados
 
@@ -211,6 +208,102 @@ Para **impedir merge** com código quebrado, configure branch protection no GitH
 
 ---
 
+## 7.1 CD — deploy automático após CI (GitHub Actions)
+
+O workflow `.github/workflows/deploy.yml` faz deploy na VPS **automaticamente** quando:
+
+1. O workflow **CI** termina com **success** em um push na `main`, ou
+2. Você dispara manualmente em **Actions → Deploy producao → Run workflow**.
+
+### Fluxo
+
+```text
+push/merge na main → CI (testes) verde → Deploy producao → SSH no servidor → cd monorepo && npm run deploy:prod
+```
+
+O script `scripts/deploy-producao.mjs` no servidor executa:
+
+1. `git fetch` + `reset` para `origin/main`
+2. `npm ci --omit=dev` + `prisma generate`
+3. `npm run db:prod:migrate` (usa `.env.production.local` do servidor)
+4. `docker compose -f docker-compose.producao.yml up -d --build`
+5. Valida `GET http://127.0.0.1:3000/health`
+
+### Pré-requisitos no servidor (uma vez)
+
+| Requisito | Versão sugerida |
+|-----------|-----------------|
+| Linux (VPS) | Ubuntu 22.04+ |
+| Git | clone do repositório |
+| Node.js | 20+ |
+| Docker + Compose | plugin v2 |
+| `.env.production.local` | em `backend/` (nunca no Git) |
+
+```bash
+# Exemplo de preparação inicial no servidor (monorepo)
+git clone https://github.com/FeMolz/CVF-System.git
+cd CVF-System
+npm install
+cp backend/.env.production.example backend/.env.production.local   # edite com credenciais reais
+npm run db:prod:migrate
+npm run seed:admin:prod    # só primeira vez
+```
+
+`DEPLOY_PATH` no GitHub deve apontar para a **raiz do monorepo** (ex.: `/home/ubuntu/CVF-System`), não para `backend/`.
+
+### Secrets no GitHub (Settings → Secrets and variables → Actions)
+
+| Secret | Exemplo | Obrigatório |
+|--------|---------|--------------|
+| `DEPLOY_HOST` | `203.0.113.10` ou `api.suaempresa.com` | Sim |
+| `DEPLOY_USER` | `ubuntu` | Sim |
+| `DEPLOY_SSH_PRIVATE_KEY` | conteúdo da chave privada SSH (PEM) | Sim |
+| `DEPLOY_PATH` | `/home/ubuntu/CVF-System` | Sim |
+| `DEPLOY_PORT` | `22` | Não (padrão 22) |
+
+### Chave SSH para o deploy
+
+No **seu PC** (ou gere no servidor):
+
+```bash
+ssh-keygen -t ed25519 -C "github-deploy-rh-system" -f deploy_rh_system -N ""
+```
+
+- Cole o conteúdo de `deploy_rh_system.pub` em `~/.ssh/authorized_keys` **no servidor**
+- Cole o conteúdo de `deploy_rh_system` (privada) no secret `DEPLOY_SSH_PRIVATE_KEY`
+
+### Environment `production` (opcional, recomendado)
+
+Em **Settings → Environments → New environment** → nome `production`:
+
+- Pode exigir aprovação manual antes de cada deploy
+- Pode restringir à branch `main`
+
+O workflow já referencia `environment: production`.
+
+### Deploy manual (sem esperar CI)
+
+GitHub → **Actions** → **Deploy producao** → **Run workflow**.
+
+Ou no servidor:
+
+```bash
+cd /caminho/do/projeto
+npm run deploy:prod
+```
+
+### Rollback rápido
+
+```bash
+cd $DEPLOY_PATH
+git reset --hard <commit-anterior>
+npm run deploy:prod
+```
+
+Migrations já aplicadas **não** revertem automaticamente — planeje migrations compatíveis.
+
+---
+
 ## 8. Variáveis obrigatórias em produção
 
 | Variável | Notas |
@@ -232,6 +325,7 @@ Detalhes: [SEGURANCA.md](./SEGURANCA.md), [SUPABASE.md](./SUPABASE.md).
 | Comando | Uso |
 |---------|-----|
 | `npm run docker:prod:up` | API + CAEPI em produção |
+| `npm run deploy:prod` | Deploy completo no servidor (git + migrate + docker + health) |
 | `npm run db:prod:migrate` | Aplicar migrations no Supabase |
 | `npm run seed:admin:prod` | Primeiro admin |
 | `npm run backup:prod` | Backup local se banco mudou |
