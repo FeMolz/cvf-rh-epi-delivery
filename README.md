@@ -36,8 +36,10 @@ Configure o backend: copie `backend/.env.production.example` ou use `.env` / `.e
 | Comando | Descrição |
 |---------|-----------|
 | `npm run dev` | API em desenvolvimento (`backend`) |
+| `npm run dev:frontend` | App React em http://localhost:5173 |
 | `npm test` | Testes unitários do backend |
-| `npm run lint` | ESLint no backend |
+| `npm run test:frontend` | Testes Vitest do frontend |
+| `npm run lint` | ESLint backend + frontend |
 | `npm run docker:prod:up` | Stack Docker de produção (API + CAEPI) |
 
 Todos os scripts do backend também podem ser executados com `npm run <script> -w backend` ou dentro de `backend/`.
