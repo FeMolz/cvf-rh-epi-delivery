@@ -27,7 +27,9 @@ Na **raiz do monorepo**:
 
 ```bash
 npm install
-npm run dev:frontend      # http://localhost:5173
+npm run dev:frontend      # http://localhost:5173 (proxy → API porta 3000)
+npm run dev:test          # API teste (3001) + frontend (proxy → 3001)
+npm run dev:test:frontend # só frontend no modo teste (com backend já rodando)
 npm run test:frontend
 npm run lint:frontend
 ```
@@ -73,7 +75,17 @@ Abra **http://localhost:5173**
 - **Login:** `/login` — use o e-mail/senha do admin seed
 - **Cadastro:** `/usuarios/cadastro` — após login como ADMIN ou ADMINISTRATIVO
 
-O Vite faz **proxy** de `/api` → `localhost:3000` (não precisa configurar CORS em desenvolvimento).
+O Vite faz **proxy** de `/api` → `localhost` na porta definida por `RH_API_PORT` (3000 em `npm run dev`, 3001 em `npm run dev:test`).
+
+### Ambiente de teste (banco `rh_system_test`)
+
+Na raiz do monorepo:
+
+```bash
+npm run dev:test
+```
+
+Ou, em dois terminais: `npm run dev:test:backend` e `npm run dev:test:frontend`.
 
 ### 3. Variáveis (opcional)
 

@@ -115,9 +115,38 @@ node prisma/scripts/executar-com-ambiente-teste.mjs prisma/seeders/generate-dev-
 npm run dev:test
 ```
 
+Na **raiz do monorepo**, isso sobe API + frontend já com proxy na porta correta.
+
+Somente a API:
+
+```bash
+npm run dev:test:backend
+```
+
 Isso usa `PORT` e `DATABASE_URL` de `.env.test` (porta **3001** no exemplo, para não conflitar com `npm run dev` no 3000).
 
 Base URL no Postman: `http://localhost:3001`
+
+### Frontend apontando para a API de teste
+
+O proxy do Vite usa a variável `RH_API_PORT` (padrão **3000**). No modo teste ela é **3001** (`frontend/.env.test`).
+
+**Opção recomendada — um comando na raiz do monorepo:**
+
+```bash
+npm run dev:test
+```
+
+Sobe API (`dev:test` no backend, porta 3001) e frontend (`vite --mode test`, proxy na 3001).
+
+**Dois terminais:**
+
+```bash
+npm run dev:test:backend
+npm run dev:test:frontend
+```
+
+Para desenvolvimento normal (banco `.env`, porta 3000): `npm run dev:backend` + `npm run dev:frontend`.
 
 ---
 
@@ -160,6 +189,6 @@ No CI (GitHub Actions), os testes de integração rodam automaticamente com Post
 2. `copy .env.test.example .env.test`
 3. `npm run db:test:push`
 4. `npm run db:test:seed`
-5. `npm run dev:test`
-6. Postman → `http://127.0.0.1:3001` + login ou `node prisma/scripts/executar-com-ambiente-teste.mjs prisma/seeders/generate-dev-token.js`
+5. `npm run dev:test` (API + frontend) ou `npm run dev:test:backend` + `npm run dev:test:frontend`
+6. Navegador → `http://localhost:5173` ou Postman → `http://127.0.0.1:3001`
 
