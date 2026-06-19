@@ -81,6 +81,20 @@ class EmployeeRepository {
         });
     }
 
+    /**
+     * @param {string[]} identificadores
+     */
+    async findManyParaExportacaoFicha(identificadores) {
+        return prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                id: { in: identificadores }
+            },
+            select: SELECAO_EXPORTACAO_FICHA_FUNCIONARIO,
+            orderBy: [{ name: 'asc' }]
+        });
+    }
+
     async delete(id) {
         const existing = await this.findById(id);
         if (!existing || existing.deletedAt) {

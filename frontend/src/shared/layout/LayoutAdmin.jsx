@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
+import { IconeModulo } from '../components/IconeModulo.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { listarModulosVisiveis } from '../constants/modulosSistema.js';
 import { ROTULOS_PAPEIS } from '../constants/papeis.js';
@@ -37,11 +38,13 @@ export function LayoutAdmin() {
                                             `admin-sidebar__link${isActive ? ' admin-sidebar__link--ativo' : ''}`
                                         }
                                     >
-                                        {modulo.rotulo}
+                                        <IconeModulo id={modulo.id} />
+                                        <span className="admin-sidebar__rotulo">{modulo.rotulo}</span>
                                     </NavLink>
                                 ) : (
                                     <span className="admin-sidebar__link admin-sidebar__link--desabilitado">
-                                        {modulo.rotulo}
+                                        <IconeModulo id={modulo.id} />
+                                        <span className="admin-sidebar__rotulo">{modulo.rotulo}</span>
                                         <small>Em breve</small>
                                     </span>
                                 )}

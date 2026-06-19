@@ -52,8 +52,10 @@ Header padrão nas rotas protegidas: `Authorization: Bearer {{tokenAdmin}}`
 | 2.2 | CPF duplicado | POST | `/api/v1/employees` | mesmo CPF → erro |
 | 2.3 | Listar / buscar / atualizar | GET, PUT | `/api/v1/employees`, `/:id` |
 | 2.4 | Exportar lista (filtro ativos) | GET | `/api/v1/employees/export/lista?filtro=ativos` |
-| 2.5 | Exportar ficha Excel | GET | `/api/v1/employees/:id/export` |
-| 2.6 | Soft delete | DELETE | `/api/v1/employees/:id` |
+| 2.5 | Exportar lista por empresa | GET | `/api/v1/employees/export/lista?filtro=todos&companyId={uuid}` |
+| 2.6 | Exportar ficha completa (seleção) | GET | `/api/v1/employees/export/lista?ids={uuid1},{uuid2}` |
+| 2.7 | Exportar ficha Excel (um ID) | GET | `/api/v1/employees/:id/export` |
+| 2.8 | Soft delete | DELETE | `/api/v1/employees/:id` |
 
 ---
 

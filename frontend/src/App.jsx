@@ -8,8 +8,12 @@ import { RedirecionarAdminInicio } from './shared/layout/RedirecionarAdminInicio
 import { CadastroUsuarioPage } from './modules/usuarios/pages/CadastroUsuarioPage.jsx';
 import { DashboardAdminPage } from './modules/dashboard/pages/DashboardAdminPage.jsx';
 import { DetalheUsuarioPage } from './modules/usuarios/pages/DetalheUsuarioPage.jsx';
+import { GerenciamentoPage } from './modules/gerenciamento/pages/GerenciamentoPage.jsx';
 import { ListagemCargosPage } from './modules/cargos/pages/ListagemCargosPage.jsx';
 import { DetalheCargoPage } from './modules/cargos/pages/DetalheCargoPage.jsx';
+import { CadastroFuncionarioPage } from './modules/funcionarios/pages/CadastroFuncionarioPage.jsx';
+import { EdicaoFuncionarioPage } from './modules/funcionarios/pages/EdicaoFuncionarioPage.jsx';
+import { ListagemFuncionariosPage } from './modules/funcionarios/pages/ListagemFuncionariosPage.jsx';
 import { InicioPage } from './modules/usuarios/pages/InicioPage.jsx';
 import { LoginPage } from './modules/usuarios/pages/LoginPage.jsx';
 
@@ -24,13 +28,17 @@ export default function App() {
                     <Route element={<RotasProtegidas papeisPermitidos={PAPEIS_CADASTRO_USUARIO} />}>
                         <Route path="/admin" element={<LayoutAdmin />}>
                             <Route index element={<RedirecionarAdminInicio />} />
+                            <Route path="gerenciamento" element={<GerenciamentoPage />} />
                             <Route path="usuarios/cadastro" element={<CadastroUsuarioPage />} />
                             <Route path="cargos" element={<ListagemCargosPage />} />
                             <Route path="cargos/:id" element={<DetalheCargoPage />} />
+                            <Route path="funcionarios" element={<ListagemFuncionariosPage />} />
+                            <Route path="funcionarios/cadastro" element={<CadastroFuncionarioPage />} />
+                            <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />
+                            <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={[PAPEL_ADMIN]} />}>
                                 <Route path="dashboard" element={<DashboardAdminPage />} />
-                                <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
                             </Route>
                         </Route>
                     </Route>

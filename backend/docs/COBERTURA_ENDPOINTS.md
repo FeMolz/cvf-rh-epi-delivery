@@ -72,7 +72,7 @@ Regras: 🔧 `AuthenticateUserService`, `UpdateUserService` (isActive não edit�
 |--------|----------|------------|
 | POST | `/` | ✅ |
 | GET | `/` | ✅ |
-| GET | `/export/lista` | ✅ |
+| GET | `/export/lista` (`filtro`, `companyId`, `ids`) | ✅ |
 | GET | `/:id/export` | ✅ |
 | GET | `/:id` | ✅ |
 | PUT | `/:id` | ✅ |

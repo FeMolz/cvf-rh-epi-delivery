@@ -37,3 +37,55 @@ export async function requisicaoApi(caminho, opcoes = {}) {
 
     return dados;
 }
+
+/**
+ * @param {string} caminho
+ * @param {{ token?: string, nomeArquivoPadrao?: string }} [opcoes]
+ */
+export async function baixarArquivoApi(caminho, opcoes = {}) {
+    const { token, nomeArquivoPadrao = 'download.xlsx' } = opcoes;
+
+    /** @type {Record<string, string>} */
+    const cabecalhos = {};
+
+    if (token) {
+        cabecalhos.Authorization = `Bearer ${token}`;
+    }
+
+    const resposta = await fetch(`${URL_BASE_API}${caminho}`, {
+        headers: cabecalhos
+    });
+
+    if (!resposta.ok) {
+        const dados = await resposta.json().catch(() => ({}));
+        const mensagem =
+            typeof dados.error === 'string'
+                ? dados.error
+                : typeof dados.message === 'string'
+                  ? dados.message
+                  : 'Não foi possível baixar o arquivo.';
+
+        throw new Error(mensagem);
+    }
+
+    const blob = await resposta.blob();
+    let nomeArquivo = nomeArquivoPadrao;
+    const disposition = resposta.headers.get('Content-Disposition');
+
+    if (disposition) {
+        const correspondencia = disposition.match(/filename="?([^";\n]+)"?/);
+
+        if (correspondencia?.[1]) {
+            nomeArquivo = correspondencia[1];
+        }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}

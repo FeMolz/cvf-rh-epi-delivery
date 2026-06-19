@@ -31,8 +31,8 @@ export function LayoutAplicacao({ titulo, subtitulo, children }) {
                             <small>{ROTULOS_PAPEIS[user.role] || user.role}</small>
                         </div>
                         {podeCadastrarUsuarios ? (
-                            <Link className="layout__link" to="/usuarios/cadastro">
-                                Cadastrar usuário
+                            <Link className="layout__link" to="/admin/gerenciamento">
+                                Gerenciamento
                             </Link>
                         ) : null}
                         <button className="botao botao--secundario" type="button" onClick={aoSair}>

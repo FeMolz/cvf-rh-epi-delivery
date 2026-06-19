@@ -65,6 +65,10 @@ model Employee {
 O módulo segue a mesma arquitetura em camadas utilizada no restante do sistema:
 ```text
 src/modules/employees/
+├── constants/
+│   ├── funcionarioConstantes.js
+│   ├── funcionarioExportacaoConstantes.js
+│   └── funcionarioStatusConstantes.js
 ├── controllers/
 │   ├── EmployeeController.js
 │   └── EmployeeController.test.js
@@ -74,11 +78,20 @@ src/modules/employees/
 ├── routes/
 │   ├── employee.routes.js
 │   └── employee.routes.test.js
-└── services/
-    ├── CreateEmployeeService.js
-    └── CreateEmployeeService.test.js
+├── services/
+│   ├── CreateEmployeeService.js
+│   ├── UpdateEmployeeService.js
+│   ├── DeleteEmployeeService.js
+│   ├── ListEmployeesService.js
+│   ├── FindEmployeeByIdService.js
+│   ├── ExportarListaFuncionariosPlanilhaService.js
+│   └── ExportarFuncionarioCompletoPlanilhaService.js
+└── utils/
+    ├── montarDadosFuncionario.js
+    ├── montarFiltroConsultaFuncionarios.js
+    ├── montarLinhasExportacaoListaFuncionarios.js
+    └── montarParesExportacaoFichaFuncionario.js
 ```
-*(Nota: as rotas de testes para este módulo podem não estar totalmente visualizadas na árvore, mas seguem o padrão do repositório).*
 
 ## 4. Regras de Negócio e Arquitetura
 
@@ -93,12 +106,29 @@ O sistema utiliza a arquitetura **Repository / Service / Controller**, mantendo 
   - **Campos opcionais:** Demais dados pessoais, endereço e benefícios são aceitos quando enviados no body.
   - Define o valor padrão para o `status` como `ATIVO` na ausência de informação na request.
 
+- **`UpdateEmployeeService.js`**:
+  - Atualização parcial de funcionário existente (não excluído).
+  - Reaplica validações de CPF, e-mail e telefone quando esses campos são enviados.
+  - Converte strings de data (`YYYY-MM-DD`) em `Date` via `normalizarDatasAtualizacaoFuncionario` antes de persistir (`birthDate`, `admissionDate`, `resignationDate`).
+  - Rejeita `birthDate` inválida ou vazia após normalização (HTTP 400).
+  - Sincroniza periodicidade de EPI quando o `status` é alterado.
+
+- **`ExportarListaFuncionariosPlanilhaService.js`**:
+  - Gera planilha XLSX da **lista resumida** (nome, cargo, setor, status, data de demissão).
+  - Aceita filtro por status (`filtro`), por empresa (`companyId`) ou por seleção de IDs (`ids`).
+  - Quando `ids` é informado, **não** usa o formato de lista: exporta a **ficha completa** de cadastro de cada funcionário selecionado (uma aba por funcionário; arquivo único com nome `funcionarios-selecionados-AAAA-MM-DD.xlsx`, ou `funcionario-{nome}.xlsx` quando há apenas um ID).
+
+- **`ExportarFuncionarioCompletoPlanilhaService.js`**:
+  - Gera planilha XLSX campo/valor com todos os dados de um funcionário (`GET /:id/export`).
+
 ### Repositório
 - **`EmployeeRepository.js`**:
   - Manipula as transações com a base de dados via Prisma Client.
   - Especifica no `select` exatamente os campos a serem devolvidos, impedindo vazamento de dados internos na resposta da API.
+  - Inclui o relacionamento `role` (`id`, `name`) nas consultas de listagem e detalhe.
   - **Soft Delete:** A exclusão não é física (Hard Delete). Em vez de apagar o registro, o método `delete` atualiza o campo `deletedAt` com a data atual e muda o status do funcionário para `DESLIGADO`. Assim, o histórico e os vínculos (como entrega de EPIs) permanecem intactos.
   - O método `findAll` ignora automaticamente os funcionários deletados filtrando pela condição `deletedAt: null`.
+  - `findManyParaExportacaoLista` e `findManyParaExportacaoFicha` centralizam os `select` usados nas exportações em planilha.
 
 ## 5. Endpoints / Rotas Disponíveis
 
@@ -113,14 +143,33 @@ Para executar qualquer requisição, é necessário apresentar um JWT válido (`
 | `GET`    | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Retorna os dados de um funcionário específico.    |
 | `PUT`    | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Atualiza dados de um funcionário pelo ID.         |
 | `DELETE` | `/api/v1/employees/:id`   | `ADMIN`, `ADMINISTRATIVO`     | Realiza o Soft Delete do funcionário (mantém histórico).     |
-| `GET`    | `/api/v1/employees/export/lista` | `ADMIN`, `ADMINISTRATIVO` | Exporta planilha XLSX com lista resumida de funcionários. |
+| `GET`    | `/api/v1/employees/export/lista` | `ADMIN`, `ADMINISTRATIVO` | Exporta planilha XLSX (lista resumida ou ficha completa — ver abaixo). |
 | `GET`    | `/api/v1/employees/:id/export` | `ADMIN`, `ADMINISTRATIVO` | Exporta planilha XLSX com ficha completa de um funcionário. |
 
 ### Exportação em planilha (XLSX)
 
-**Listagem** — `GET /api/v1/employees?filtro=ativos`
+**Listagem JSON** — `GET /api/v1/employees?filtro=ativos`
 
-**Lista resumida (export)** — `GET /api/v1/employees/export/lista?filtro=ativos`
+Query `filtro` (opcional, padrão `ativos`): mesmos valores da tabela abaixo.
+
+**Exportação** — `GET /api/v1/employees/export/lista`
+
+Parâmetros de query (combináveis conforme regras abaixo):
+
+| Parâmetro | Obrigatório | Descrição |
+|-----------|-------------|-----------|
+| `filtro` | Não (padrão `ativos`) | Filtra por status na exportação em lista. Ignorado quando `ids` é informado. |
+| `companyId` | Não | Restringe a exportação em **lista resumida** aos funcionários da empresa informada. Ignorado quando `ids` é informado. |
+| `ids` | Não | IDs separados por vírgula. Quando presente, exporta a **ficha completa** de cada funcionário selecionado (prioridade sobre `companyId` e sobre o formato de lista). |
+
+**Regras de comportamento:**
+
+| Cenário | Formato gerado | Nome do arquivo (exemplo) |
+|---------|----------------|---------------------------|
+| `ids` com um ID | Ficha completa (aba **Funcionário**) | `funcionario-maria-silva.xlsx` |
+| `ids` com vários IDs | Ficha completa (uma aba por funcionário) | `funcionarios-selecionados-2026-06-15.xlsx` |
+| Sem `ids`, com `companyId` | Lista resumida da empresa | `funcionarios-empresa-{companyId}-2026-06-15.xlsx` |
+| Sem `ids` e sem `companyId` | Lista resumida conforme `filtro` | `funcionarios-ativos-2026-06-15.xlsx` |
 
 Query `filtro` (opcional, padrão `ativos`):
 
@@ -134,13 +183,15 @@ Query `filtro` (opcional, padrão `ativos`):
 | `licenca_med` | `LICENCA_MED` |
 | `todos` | Todos não excluídos (soft delete) |
 
-Colunas da planilha: **Nome**, **Cargo**, **Setor**, **Status**, **Data de demissão** (preenchida somente quando o status é inativo).
+Colunas da planilha de **lista resumida**: **Nome**, **Cargo**, **Setor**, **Status**, **Data de demissão** (preenchida somente quando o status é inativo).
+
+A planilha de **ficha completa** (por `ids` ou por `GET /:id/export`) usa duas colunas (**Campo** / **Valor**) com todos os dados de cadastro: pessoais, endereço, benefícios, cargo, empresa e setor.
 
 Resposta: arquivo `.xlsx` com `Content-Disposition: attachment`.
 
-**Ficha completa** — `GET /api/v1/employees/:id/export`
+**Ficha completa individual** — `GET /api/v1/employees/:id/export`
 
-Planilha em formato campo/valor com todos os dados do funcionário (pessoais, endereço, benefícios, cargo, empresa e setor).
+Equivalente à exportação com `ids` contendo um único ID. Planilha em formato campo/valor com todos os dados do funcionário.
 
 ### Exemplo de Retorno (POST e GET por ID)
 ```json
@@ -159,6 +210,8 @@ Planilha em formato campo/valor com todos os dados do funcionário (pessoais, en
   "resignationDate": null,
   "companyId": "comp-id-123",
   "company": { ... },
+  "roleId": "role-id-123",
+  "role": { "id": "role-id-123", "name": "Analista" },
   "createdAt": "2026-05-13T14:00:00.000Z",
   "updatedAt": "2026-05-13T14:00:00.000Z"
 }
@@ -169,6 +222,9 @@ Seguindo o padrão do restante da aplicação para ESModules, os testes da camad
 
 - **`EmployeeRepository.test.js`**: Os métodos expostos pelo banco de dados (o Prisma Client instanciado no `config/database.js`) foram integralmente mockados e testam o comportamento exato dos retornos, bem como checam o repasse de propriedades complexas de filtragem (`select`).
 - **`CreateEmployeeService.test.js`**: Confirma que as regras de negócio foram devidamente aplicadas — CPF duplicado, ausência de `birthDate` e data de nascimento inválida.
+- **`UpdateEmployeeService.test.js`**: Valida atualização parcial, conversão de datas string para `Date` e rejeição de CPF inválido.
+- **`ExportarListaFuncionariosPlanilhaService.test.js`**: Cobre exportação por `filtro`, por `companyId`, ficha completa por `ids` (um ou vários) e filtro inválido.
+- **`ExportarFuncionarioCompletoPlanilhaService.test.js`**: Cobre ficha individual e funcionário inexistente (404).
 - **`EmployeeController.test.js`**: Comprova o tratamento correto de solicitações, respostas e códigos HTTP correspondentes (ex: `201` para sucesso na criação, `404` para buscas por ID inexistente, e `400` para solicitações que não cumprem as requisições primárias de dados).
 
 ---
@@ -226,6 +282,22 @@ Seguindo o padrão do restante da aplicação para ESModules, os testes da camad
 ### Desligar Funcionário (Soft Delete)
 - **Método:** `DELETE`
 - **URL:** `http://localhost:3000/api/v1/employees/id-do-funcionario`
+- **Body:** *(Nenhum)*
+
+### Exportar lista resumida por empresa
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/employees/export/lista?filtro=todos&companyId=id-da-empresa`
+- **Body:** *(Nenhum)*
+
+### Exportar ficha completa de funcionários selecionados
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/employees/export/lista?ids=uuid-func-1,uuid-func-2`
+- **Body:** *(Nenhum)*
+- **Observação:** Com um único ID, o arquivo segue o padrão `funcionario-{nome}.xlsx`. Com vários IDs, uma aba por funcionário no mesmo arquivo.
+
+### Exportar ficha completa de um funcionário
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/employees/id-do-funcionario/export`
 - **Body:** *(Nenhum)*
 
 ---

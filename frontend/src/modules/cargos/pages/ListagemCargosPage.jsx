@@ -1,23 +1,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AbasModulo } from '../../../shared/components/AbasModulo.jsx';
+import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
-import { FormularioCargo } from '../components/FormularioCargo.jsx';
+import { IconeAbaCargos } from '../components/IconeAbaCargos.jsx';
 import { TabelaCargos } from '../components/TabelaCargos.jsx';
-import { criarCargo, listarCargos } from '../services/cargosApi.js';
+import { listarCargos } from '../services/cargosApi.js';
 import { filtrarCargos } from '../utils/listagemCargos.js';
+
+const ABAS_CARGOS = [
+    { id: 'ativos', rotulo: 'Ativos' },
+    { id: 'inativos', rotulo: 'Inativos' }
+];
 
 export function ListagemCargosPage() {
     const { token } = useAuth();
+    const [abaAtiva, setAbaAtiva] = useState('ativos');
     const [cargos, setCargos] = useState([]);
     const [carregando, setCarregando] = useState(true);
-    const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState('');
     const [termoBusca, setTermoBusca] = useState('');
     const [pagina, setPagina] = useState(1);
-    const [exibirNovoCargo, setExibirNovoCargo] = useState(false);
-    const [apenasInativos, setApenasInativos] = useState(false);
+
+    const apenasInativos = abaAtiva === 'inativos';
 
     const carregarCargos = useCallback(async () => {
         setCarregando(true);
@@ -53,98 +60,77 @@ export function ListagemCargosPage() {
 
     useEffect(() => {
         setPagina(1);
-        setExibirNovoCargo(false);
-    }, [apenasInativos]);
+        setTermoBusca('');
+    }, [abaAtiva]);
 
-    async function aoCadastrar(dados) {
-        setSalvando(true);
-
-        try {
-            await criarCargo(dados, token);
-            await carregarCargos();
-            setExibirNovoCargo(false);
-        } finally {
-            setSalvando(false);
-        }
-    }
+    const abasComIcone = ABAS_CARGOS.map((aba) => ({
+        ...aba,
+        icone: <IconeAbaCargos id={aba.id} />
+    }));
 
     return (
         <section className="admin-pagina">
             <header className="admin-pagina__cabecalho">
                 <h1>Cargos</h1>
+                <p className="admin-pagina__subtitulo">
+                    Consulte cargos ativos e inativos vinculados aos EPIs do sistema.
+                </p>
             </header>
 
-            <div className="painel">
-                <div className="painel__cabecalho">
-                    {exibirNovoCargo ? (
-                        <p className="painel__subtitulo">Cadastre um novo cargo</p>
+            <AbasModulo
+                abaAtiva={abaAtiva}
+                abas={abasComIcone}
+                rotuloAria="Situação dos cargos"
+                onTrocarAba={setAbaAtiva}
+            />
+
+            <div className="modulo-pesquisa">
+                <label className="campo-pesquisa campo-pesquisa--modulo">
+                    <span className="visually-hidden">Pesquisar cargos</span>
+                    <input
+                        type="search"
+                        placeholder="Buscar por nome ou descrição…"
+                        value={termoBusca}
+                        onChange={(evento) => setTermoBusca(evento.target.value)}
+                    />
+                </label>
+            </div>
+
+            <section className="gerenciamento-painel listagem-painel">
+                <CabecalhoListagemPainel
+                    icone={<IconeAbaCargos id={abaAtiva} />}
+                    titulo={apenasInativos ? 'Cargos inativos' : 'Cargos ativos'}
+                    descricao={
+                        apenasInativos
+                            ? 'Cargos desativados que não podem receber novos vínculos.'
+                            : 'Cargos disponíveis para funcionários e entregas de EPI.'
+                    }
+                />
+
+                <div className="listagem-painel__conteudo">
+                    {carregando ? (
+                        <p className="estado-carregando">Carregando cargos…</p>
+                    ) : erro ? (
+                        <p className="estado-erro" role="alert">
+                            {erro}
+                        </p>
                     ) : (
                         <>
-                            <label className="campo-pesquisa">
-                                <span className="visually-hidden">Pesquisar cargos</span>
-                                <input
-                                    type="search"
-                                    placeholder="Buscar por nome ou descrição…"
-                                    value={termoBusca}
-                                    onChange={(evento) => setTermoBusca(evento.target.value)}
-                                />
-                            </label>
-                            <label className="filtro-fixo">
-                                <input
-                                    type="checkbox"
-                                    checked={apenasInativos}
-                                    onChange={(evento) => setApenasInativos(evento.target.checked)}
-                                />
-                                Apenas inativos
-                            </label>
+                            <TabelaCargos cargos={paginacao.itens} />
+                            <Paginacao
+                                paginaAtual={paginacao.paginaAtual}
+                                totalPaginas={paginacao.totalPaginas}
+                                totalItens={paginacao.totalItens}
+                                rotuloItens="cargo(s)"
+                                onPaginaAnterior={() => setPagina((atual) => Math.max(1, atual - 1))}
+                                onProximaPagina={() =>
+                                    setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1))
+                                }
+                            />
                         </>
                     )}
-                    {!apenasInativos ? (
-                        <button
-                            className="botao botao--primario"
-                            type="button"
-                            onClick={() => setExibirNovoCargo((atual) => !atual)}
-                        >
-                            {exibirNovoCargo ? 'Cancelar' : 'Novo cargo'}
-                        </button>
-                    ) : null}
                 </div>
-
-                {exibirNovoCargo ? (
-                    <div className="painel__secao-formulario">
-                        <FormularioCargo
-                            rotuloEnviar="Cadastrar cargo"
-                            onSubmit={aoCadastrar}
-                            carregando={salvando}
-                        />
-                    </div>
-                ) : null}
-
-                {!exibirNovoCargo && carregando ? (
-                    <p className="estado-carregando">Carregando cargos…</p>
-                ) : null}
-
-                {!exibirNovoCargo && !carregando && erro ? (
-                    <p className="estado-erro" role="alert">
-                        {erro}
-                    </p>
-                ) : null}
-
-                {!exibirNovoCargo && !carregando && !erro ? (
-                    <>
-                        <TabelaCargos cargos={paginacao.itens} />
-                        <Paginacao
-                            paginaAtual={paginacao.paginaAtual}
-                            totalPaginas={paginacao.totalPaginas}
-                            totalItens={paginacao.totalItens}
-                            onPaginaAnterior={() => setPagina((atual) => Math.max(1, atual - 1))}
-                            onProximaPagina={() =>
-                                setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1))
-                            }
-                        />
-                    </>
-                ) : null}
-            </div>
+            </section>
         </section>
     );
 }

@@ -2,9 +2,11 @@ import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/cr
 import gerenciarPeriodicidadeEpiFuncionarioService from '../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js';
 import {
     MENSAGEM_CPF_DUPLICADO,
-    MENSAGEM_EMAIL_DUPLICADO
+    MENSAGEM_EMAIL_DUPLICADO,
+    MENSAGEM_DATA_NASCIMENTO_INVALIDA
 } from '../constants/funcionarioConstantes.js';
 import employeeRepository from '../repositories/EmployeeRepository.js';
+import { normalizarDatasAtualizacaoFuncionario } from '../utils/montarDadosFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
 import { validarTelefone } from '../utils/validarTelefone.js';
@@ -52,7 +54,19 @@ class UpdateEmployeeService {
             }
         }
 
-        const funcionarioAtualizado = await employeeRepository.update(funcionarioId, dadosAtualizacao);
+        const dadosNormalizados = normalizarDatasAtualizacaoFuncionario(dadosAtualizacao);
+
+        if (
+            dadosNormalizados.birthDate !== undefined &&
+            dadosNormalizados.birthDate === null
+        ) {
+            throw criarErroHttp(MENSAGEM_DATA_NASCIMENTO_INVALIDA);
+        }
+
+        const funcionarioAtualizado = await employeeRepository.update(
+            funcionarioId,
+            dadosNormalizados
+        );
 
         if (dadosAtualizacao.status !== undefined) {
             await gerenciarPeriodicidadeEpiFuncionarioService.sincronizarPorMudancaStatus(

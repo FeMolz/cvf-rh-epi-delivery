@@ -97,7 +97,7 @@ export function DetalheUsuarioPage() {
 
         try {
             await excluirUsuario(id, token);
-            navegar('/admin/dashboard');
+            navegar('/admin/gerenciamento');
         } catch (erroCapturado) {
             setErro(erroCapturado.message || 'Não foi possível excluir o usuário.');
             setSalvando(false);
@@ -114,7 +114,7 @@ export function DetalheUsuarioPage() {
                 <p className="estado-erro" role="alert">
                     {erro || 'Usuário não encontrado.'}
                 </p>
-                <Link to="/admin/dashboard">Voltar ao dashboard</Link>
+                <Link to="/admin/gerenciamento">Voltar ao gerenciamento</Link>
             </section>
         );
     }
@@ -212,7 +212,7 @@ export function DetalheUsuarioPage() {
                                 </button>
                             </div>
                             <div className="detalhe-usuario__acoes-secundarias">
-                                <Link className="botao botao--secundario" to="/admin/dashboard">
+                                <Link className="botao botao--secundario" to="/admin/gerenciamento">
                                     Voltar
                                 </Link>
                             </div>

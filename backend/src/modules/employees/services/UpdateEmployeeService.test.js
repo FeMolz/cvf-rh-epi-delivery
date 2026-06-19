@@ -54,4 +54,29 @@ describe('UpdateEmployeeService', () => {
             'CPF inválido. Use o formato xxx.xxx.xxx-xx (11 dígitos com pontos e hífen).'
         );
     });
+
+    it('deve converter datas string antes de atualizar', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'FERIAS' });
+
+        await updateEmployeeService.execute('1', {
+            birthDate: '1995-08-12',
+            admissionDate: '2026-05-10',
+            status: 'FERIAS'
+        });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({
+                birthDate: expect.any(Date),
+                admissionDate: expect.any(Date),
+                status: 'FERIAS'
+            })
+        );
+    });
 });

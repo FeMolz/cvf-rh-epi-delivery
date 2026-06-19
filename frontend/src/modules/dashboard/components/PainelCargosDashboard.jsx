@@ -1,18 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { filtrarCargos } from '../../cargos/utils/listagemCargos.js';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
+import { IconeAbaDashboard } from './IconeAbaDashboard.jsx';
 import { TabelaCargosDashboard } from './TabelaCargosDashboard.jsx';
 
-export function PainelCargosDashboard() {
+/**
+ * @param {{ termoBusca?: string }} props
+ */
+export function PainelCargosDashboard({ termoBusca = '' }) {
     const { token } = useAuth();
     const [cargos, setCargos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
-    const [termoBusca, setTermoBusca] = useState('');
     const [pagina, setPagina] = useState(1);
 
     useEffect(() => {
@@ -60,39 +64,35 @@ export function PainelCargosDashboard() {
     }, [termoBusca]);
 
     return (
-        <div className="painel">
-            <div className="painel__cabecalho">
-                <label className="campo-pesquisa">
-                    <span className="visually-hidden">Pesquisar cargos</span>
-                    <input
-                        type="search"
-                        placeholder="Buscar por nome, descrição ou status…"
-                        value={termoBusca}
-                        onChange={(evento) => setTermoBusca(evento.target.value)}
-                    />
-                </label>
-            </div>
+        <section className="gerenciamento-painel listagem-painel dashboard-painel">
+            <CabecalhoListagemPainel
+                icone={<IconeAbaDashboard id="cargos" />}
+                titulo="Cargos"
+                descricao="Listagem de cargos e quantidade de EPIs vinculados."
+            />
 
-            {carregando ? (
-                <p className="estado-carregando">Carregando cargos…</p>
-            ) : erro ? (
-                <p className="estado-erro" role="alert">
-                    {erro}
-                </p>
-            ) : (
-                <>
-                    <TabelaCargosDashboard cargos={paginacao.itens} />
-                    <Paginacao
-                        paginaAtual={paginacao.paginaAtual}
-                        totalPaginas={paginacao.totalPaginas}
-                        totalItens={paginacao.totalItens}
-                        onPaginaAnterior={() => setPagina((atual) => Math.max(1, atual - 1))}
-                        onProximaPagina={() =>
-                            setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1))
-                        }
-                    />
-                </>
-            )}
-        </div>
+            <div className="listagem-painel__conteudo dashboard-painel__conteudo">
+                {carregando ? (
+                    <p className="estado-carregando">Carregando cargos…</p>
+                ) : erro ? (
+                    <p className="estado-erro" role="alert">
+                        {erro}
+                    </p>
+                ) : (
+                    <>
+                        <TabelaCargosDashboard cargos={paginacao.itens} />
+                        <Paginacao
+                            paginaAtual={paginacao.paginaAtual}
+                            totalPaginas={paginacao.totalPaginas}
+                            totalItens={paginacao.totalItens}
+                            onPaginaAnterior={() => setPagina((atual) => Math.max(1, atual - 1))}
+                            onProximaPagina={() =>
+                                setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1))
+                            }
+                        />
+                    </>
+                )}
+            </div>
+        </section>
     );
 }

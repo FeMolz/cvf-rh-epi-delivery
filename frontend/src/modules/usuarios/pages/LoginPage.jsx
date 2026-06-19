@@ -22,7 +22,7 @@ export function LoginPage() {
         }
 
         if (usuario.role === PAPEL_ADMINISTRATIVO) {
-            navegar('/admin/usuarios/cadastro');
+            navegar('/admin/gerenciamento');
             return;
         }
 

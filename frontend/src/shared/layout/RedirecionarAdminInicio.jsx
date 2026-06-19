@@ -10,5 +10,5 @@ export function RedirecionarAdminInicio() {
         return <Navigate to="/admin/dashboard" replace />;
     }
 
-    return <Navigate to="/admin/usuarios/cadastro" replace />;
+    return <Navigate to="/admin/gerenciamento" replace />;
 }

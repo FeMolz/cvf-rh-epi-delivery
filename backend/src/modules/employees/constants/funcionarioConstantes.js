@@ -32,6 +32,12 @@ export const CAMPOS_SELECAO_FUNCIONARIO = {
     valeAlimentacao: true,
     planoSaude: true,
     roleId: true,
+    role: {
+        select: {
+            id: true,
+            name: true
+        }
+    },
     companyId: true,
     company: true,
     setorId: true,

@@ -40,4 +40,28 @@ describe('FormularioCadastroUsuario', () => {
             role: 'COLABORADOR'
         });
     });
+
+    it('deve enviar acesso derivando nome do e-mail', async () => {
+        const usuario = userEvent.setup();
+        const onSubmit = vi.fn().mockResolvedValue(undefined);
+
+        render(
+            <FormularioCadastroUsuario
+                variante="acesso"
+                papeisDisponiveis={['ADMINISTRATIVO', 'COLABORADOR']}
+                onSubmit={onSubmit}
+            />
+        );
+
+        await usuario.type(screen.getByLabelText(/identificador \/ e-mail/i), 'joao.silva@teste.com');
+        await usuario.type(screen.getByLabelText(/senha inicial/i), 'senha1234');
+        await usuario.click(screen.getByRole('button', { name: /criar novo acesso/i }));
+
+        expect(onSubmit).toHaveBeenCalledWith({
+            name: 'Joao Silva',
+            email: 'joao.silva@teste.com',
+            password: 'senha1234',
+            role: 'COLABORADOR'
+        });
+    });
 });

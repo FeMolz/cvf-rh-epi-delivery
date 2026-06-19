@@ -93,3 +93,42 @@ export function montarDadosFuncionario(entrada) {
 
     return dados;
 }
+
+const CAMPOS_DATA_FUNCIONARIO = ['birthDate', 'admissionDate', 'resignationDate'];
+
+/**
+ * Converte strings de data (YYYY-MM-DD) em Date para persistência no Prisma.
+ * @param {unknown} valor
+ * @returns {Date | null}
+ */
+export function converterDataFuncionario(valor) {
+    if (valor === null || valor === '') {
+        return null;
+    }
+
+    const data =
+        valor instanceof Date ? valor : new Date(typeof valor === 'string' ? valor.trim() : valor);
+
+    if (Number.isNaN(data.getTime())) {
+        return null;
+    }
+
+    return data;
+}
+
+/**
+ * Normaliza apenas os campos de data presentes em uma atualização parcial.
+ * @param {Record<string, unknown>} dadosAtualizacao
+ * @returns {Record<string, unknown>}
+ */
+export function normalizarDatasAtualizacaoFuncionario(dadosAtualizacao) {
+    const dados = { ...dadosAtualizacao };
+
+    for (const campo of CAMPOS_DATA_FUNCIONARIO) {
+        if (dados[campo] !== undefined) {
+            dados[campo] = converterDataFuncionario(dados[campo]);
+        }
+    }
+
+    return dados;
+}

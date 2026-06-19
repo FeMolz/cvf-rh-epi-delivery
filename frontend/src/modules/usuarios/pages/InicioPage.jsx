@@ -13,7 +13,7 @@ export function InicioPage() {
     }
 
     if (autenticado && podeCadastrarUsuarios) {
-        return <Navigate to="/admin/usuarios/cadastro" replace />;
+        return <Navigate to="/admin/gerenciamento" replace />;
     }
 
     if (!autenticado) {
@@ -37,10 +37,10 @@ export function InicioPage() {
             {podeCadastrarUsuarios ? (
                 <Link
                     className="botao botao--primario"
-                    to="/usuarios/cadastro"
+                    to="/admin/gerenciamento"
                     style={{ display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}
                 >
-                    Cadastrar novo usuário
+                    Ir para gerenciamento
                 </Link>
             ) : (
                 <p className="mensagem">

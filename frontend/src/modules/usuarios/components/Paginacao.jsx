@@ -6,7 +6,8 @@ const ITENS_POR_PAGINA_PADRAO = 10;
  *   totalPaginas: number,
  *   totalItens: number,
  *   onPaginaAnterior: () => void,
- *   onProximaPagina: () => void
+ *   onProximaPagina: () => void,
+ *   rotuloItens?: string
  * }} props
  */
 export function Paginacao({
@@ -14,16 +15,17 @@ export function Paginacao({
     totalPaginas,
     totalItens,
     onPaginaAnterior,
-    onProximaPagina
+    onProximaPagina,
+    rotuloItens = 'usuário(s)'
 }) {
     return (
         <div className="paginacao">
             <span className="paginacao__info">
-                Página {paginaAtual} de {totalPaginas} · {totalItens} usuário(s)
+                Página {paginaAtual} de {totalPaginas} · {totalItens} {rotuloItens}
             </span>
             <div className="paginacao__acoes">
                 <button
-                    className="botao botao--secundario"
+                    className="botao botao--primario botao--paginacao"
                     type="button"
                     disabled={paginaAtual <= 1}
                     onClick={onPaginaAnterior}
@@ -31,7 +33,7 @@ export function Paginacao({
                     Anterior
                 </button>
                 <button
-                    className="botao botao--secundario"
+                    className="botao botao--primario botao--paginacao"
                     type="button"
                     disabled={paginaAtual >= totalPaginas}
                     onClick={onProximaPagina}

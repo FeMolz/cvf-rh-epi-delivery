@@ -38,8 +38,12 @@ class EmployeeController {
 
     async exportarLista(request, response, next) {
         try {
-            const filtro = request.query?.filtro;
-            const resultado = await exportarListaFuncionariosPlanilhaService.execute(filtro);
+            const { filtro, companyId, ids } = request.query ?? {};
+            const resultado = await exportarListaFuncionariosPlanilhaService.execute({
+                filtro,
+                companyId,
+                ids
+            });
             return this.enviarPlanilha(response, resultado);
         } catch (erro) {
             return next(erro);

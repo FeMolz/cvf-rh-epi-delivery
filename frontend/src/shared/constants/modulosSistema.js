@@ -12,9 +12,9 @@ export const MODULOS_SISTEMA = [
         papeis: [PAPEL_ADMIN]
     },
     {
-        id: 'usuarios-cadastro',
-        rotulo: 'Cadastrar usuário',
-        rota: '/admin/usuarios/cadastro',
+        id: 'gerenciamento',
+        rotulo: 'Gerenciamento',
+        rota: '/admin/gerenciamento',
         papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
@@ -26,8 +26,8 @@ export const MODULOS_SISTEMA = [
     {
         id: 'employees',
         rotulo: 'Funcionários',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO],
-        emBreve: true
+        rota: '/admin/funcionarios',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
         id: 'companies',

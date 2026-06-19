@@ -8,12 +8,34 @@ html {
     font-size: 16px;
 }
 
+:root {
+    --cor-fundo-pagina: #f8fafc;
+    --cor-fundo-area: #f1f5f9;
+    --cor-superficie: #ffffff;
+    --cor-superficie-suave: #f8fafc;
+    --cor-borda: #e2e8f0;
+    --cor-borda-forte: #cbd5e1;
+    --cor-primaria: #2563eb;
+    --cor-primaria-escura: #1d4ed8;
+    --cor-texto: #0f172a;
+    --cor-texto-medio: #475569;
+    --cor-label: #334155;
+    --cor-label-tabela: #1e293b;
+    --cor-texto-suave: #64748b;
+    --cor-botao-secundario-fundo: #e2e8f0;
+    --cor-botao-secundario-texto: #334155;
+    --sombra-suave: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --sombra-painel: 0 4px 18px rgba(15, 23, 42, 0.07);
+    --sombra-cartao: 0 12px 32px rgba(15, 23, 42, 0.09);
+    --sombra-botao: 0 2px 8px rgba(37, 99, 235, 0.22);
+}
+
 body {
     margin: 0;
     min-width: 320px;
     font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    color: #0f172a;
-    background: #f8fafc;
+    color: var(--cor-texto);
+    background: var(--cor-fundo-pagina);
     -webkit-font-smoothing: antialiased;
 }
 

@@ -12,7 +12,7 @@ export function TabelaUsuariosDashboard({ usuarios }) {
     }
 
     return (
-        <div className="painel__tabela">
+        <div className="listagem-painel__tabela dashboard-painel__tabela">
             <table className="tabela-usuarios">
                 <thead>
                     <tr>

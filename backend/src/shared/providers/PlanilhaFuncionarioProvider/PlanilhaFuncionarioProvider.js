@@ -34,12 +34,11 @@ class PlanilhaFuncionarioProvider {
     }
 
     /**
+     * @param {import('exceljs').Workbook} workbook
      * @param {string} tituloPlanilha
      * @param {Array<{ campo: string, valor: string }>} paresCampoValor
-     * @returns {Promise<Buffer>}
      */
-    async gerarPlanilhaFichaFuncionario(tituloPlanilha, paresCampoValor) {
-        const workbook = new ExcelJS.Workbook();
+    adicionarFichaAoWorkbook(workbook, tituloPlanilha, paresCampoValor) {
         const worksheet = workbook.addWorksheet(tituloPlanilha);
 
         worksheet.columns = [
@@ -49,6 +48,57 @@ class PlanilhaFuncionarioProvider {
 
         worksheet.getRow(1).font = { bold: true };
         worksheet.addRows(paresCampoValor);
+    }
+
+    /**
+     * @param {string} tituloBase
+     * @param {Set<string>} titulosUsados
+     * @returns {string}
+     */
+    montarTituloAbaPlanilha(tituloBase, titulosUsados) {
+        const tituloSanitizado = String(tituloBase || 'Funcionario')
+            .replace(/[:\\/?*[\]]/g, '-')
+            .trim()
+            .slice(0, 31);
+
+        let titulo = tituloSanitizado || 'Funcionario';
+        let sufixo = 2;
+
+        while (titulosUsados.has(titulo)) {
+            const base = tituloSanitizado.slice(0, Math.max(1, 31 - String(sufixo).length - 1));
+            titulo = `${base}-${sufixo}`;
+            sufixo += 1;
+        }
+
+        titulosUsados.add(titulo);
+        return titulo;
+    }
+
+    /**
+     * @param {string} tituloPlanilha
+     * @param {Array<{ campo: string, valor: string }>} paresCampoValor
+     * @returns {Promise<Buffer>}
+     */
+    async gerarPlanilhaFichaFuncionario(tituloPlanilha, paresCampoValor) {
+        const workbook = new ExcelJS.Workbook();
+        this.adicionarFichaAoWorkbook(workbook, tituloPlanilha, paresCampoValor);
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        return Buffer.from(buffer);
+    }
+
+    /**
+     * @param {Array<{ tituloBase: string, paresCampoValor: Array<{ campo: string, valor: string }> }>} fichas
+     * @returns {Promise<Buffer>}
+     */
+    async gerarPlanilhaFichasFuncionarios(fichas) {
+        const workbook = new ExcelJS.Workbook();
+        const titulosUsados = new Set();
+
+        for (const ficha of fichas) {
+            const titulo = this.montarTituloAbaPlanilha(ficha.tituloBase, titulosUsados);
+            this.adicionarFichaAoWorkbook(workbook, titulo, ficha.paresCampoValor);
+        }
 
         const buffer = await workbook.xlsx.writeBuffer();
         return Buffer.from(buffer);
