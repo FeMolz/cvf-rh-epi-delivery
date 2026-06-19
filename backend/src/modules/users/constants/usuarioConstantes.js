@@ -17,6 +17,12 @@ export const MENSAGEM_SEM_PERMISSAO_ALTERAR_SENHA =
 export const MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_ADMIN =
     'Não é permitido definir o papel ADMIN.';
 
+export const MENSAGEM_SEM_PERMISSAO_DEFINIR_PAPEL_SUPERIOR =
+    'Não é permitido definir um papel superior ao seu.';
+
+export const MENSAGEM_SEM_PERMISSAO_CADASTRAR_USUARIO =
+    'Você não tem permissão para cadastrar usuários.';
+
 export const MENSAGEM_EMAIL_JA_CADASTRADO =
     'Este e-mail já está cadastrado no sistema.';
 

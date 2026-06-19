@@ -73,11 +73,13 @@ O sistema emprega a arquitetura **Repository / Service / Controller**, focando n
 
 ### Serviços Principais
 - **`CreateUserService.js`**:
+  - Apenas **`ADMIN`** e **`ADMINISTRATIVO`** podem cadastrar usuários (`PAPEIS_CADASTRO_USUARIO`).
   - Valida e-mail único e gera `passwordHash` com bcrypt.
-  - **Papel `ADMIN`:** só pode ser atribuído se o solicitante (`papelSolicitante`) for `ADMIN`; caso contrário retorna `403`.
+  - **Hierarquia de papéis:** o solicitante só pode atribuir o **próprio nível ou inferior** (`ADMIN` → todos; `ADMINISTRATIVO` → `ADMINISTRATIVO`, `ALMOXARIFADO`, `COLABORADOR`; demais papéis não cadastram).
+  - **Papel `ADMIN`:** só pode ser atribuído por outro `ADMIN`; caso contrário retorna `403`.
 - **Padrão:** sem `role` no body, assume `COLABORADOR`.
 - **`isActive`:** gerenciado automaticamente pelo sistema (presença online). No **login** passa a `true` e atualiza `lastLogin`; no **logout** (`POST /users/logout`) volta a `false`. **Não** pode ser enviado no `PUT`; tentativa retorna `400`. Nas respostas GET, só quem tem papel **`ADMIN`** recebe `isActive` e `lastLogin`.
-- A rota `POST /users` exige JWT + papel `ADMIN` (não é mais cadastro público).
+- A rota `POST /users` exige JWT + papel **`ADMIN`** ou **`ADMINISTRATIVO`** (não é cadastro público). O primeiro `ADMIN` é criado via seed (`seed:admin:prod`).
 
 - **`AuthenticateUserService.js`**:
   - Verifica e-mail e senha; emite JWT com segredo de `env.js`.
@@ -88,7 +90,7 @@ O sistema emprega a arquitetura **Repository / Service / Controller**, focando n
   - Marca o usuário autenticado como offline (`isActive: false`) e registra auditoria `LOGOUT`.
 
 - **`ListUsersService`**, **`FindUserByIdService`**, **`FindUserByEmailService`**: leitura administrativa.
-- **`UpdateUserService`**: atualização por `ADMIN` ou `ADMINISTRATIVO` (`PAPEIS_GESTAO_RH`).
+- **`UpdateUserService`**: atualização por `ADMIN` ou `ADMINISTRATIVO` (`PAPEIS_GESTAO_RH`). Ao alterar `role`, aplica a mesma hierarquia do cadastro (não pode promover acima do próprio nível).
 - **`DeleteUserService`**, **`DeleteMeService`**: exclusão por admin ou autoexclusão autenticada.
 - **`ChangePasswordService`**: altera senha do próprio usuário **ou** de qualquer usuário se o autenticado for `ADMIN`; demais papéis recebem `403` ao tentar alterar senha de terceiros.
 
@@ -98,7 +100,7 @@ Todas as rotas estão montadas e registradas no arquivo `src/app.js` no prefixo 
 
 | Método   | Endpoint                  | Permissões Exigidas           | Descrição                                         |
 |----------|---------------------------|-------------------------------|---------------------------------------------------|
-| `POST`   | `/api/v1/users`           | `ADMIN` (JWT)                 | Cria um novo usuário no sistema.                  |
+| `POST`   | `/api/v1/users`           | `ADMIN`, `ADMINISTRATIVO` (JWT) | Cria um novo usuário (hierarquia de papéis).      |
 | `POST`   | `/api/v1/users/login`     | Pública (com rate limit)      | Autentica e retorna o Token JWT.                  |
 | `POST`   | `/api/v1/users/logout`    | JWT válido                    | Encerra sessão e marca usuário offline.           |
 | `GET`    | `/api/v1/users`           | `ADMIN`                       | Lista todos os usuários cadastrados.              |
@@ -140,7 +142,7 @@ Seguindo o padrão do restante da aplicação, os testes utilizam ESModules atra
 
 > ⚠️ **Importante:** Apenas o **login** é público (com limite de taxa). Demais rotas exigem header `Authorization: Bearer` com o token JWT.
 
-### Criar usuário (requer ADMIN)
+### Criar usuário (requer ADMIN ou ADMINISTRATIVO)
 - **Método:** `POST`
 - **URL:** `http://localhost:3000/api/v1/users`
 - **Headers:** `Authorization: Bearer <token_admin>`

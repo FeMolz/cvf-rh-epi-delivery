@@ -85,4 +85,13 @@ describe('UpdateUserService', () => {
 
         expect(resultado.role).toBe('ADMIN');
     });
+
+    it('deve permitir ADMINISTRATIVO promover usuário para ALMOXARIFADO', async () => {
+        userRepositoryMock.findById.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
+        userRepositoryMock.update.mockResolvedValue({ id: '1', role: 'ALMOXARIFADO' });
+
+        const resultado = await updateUserService.execute('1', { role: 'ALMOXARIFADO' }, 'ADMINISTRATIVO');
+
+        expect(resultado.role).toBe('ALMOXARIFADO');
+    });
 });

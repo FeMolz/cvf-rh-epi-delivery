@@ -5,14 +5,14 @@ import userController from '../controllers/UserController.js';
 import { isAuthenticated } from '../../../shared/middlewares/auth.js';
 import { authorize } from '../../../shared/middlewares/rbac.js';
 import { limitadorTaxaLogin } from '../../../shared/middlewares/criarLimitadorTaxa.js';
-import { PAPEIS_GESTAO_RH, PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
+import { PAPEIS_GESTAO_RH, PAPEIS_CADASTRO_USUARIO, PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 
 const userRoutes = Router();
 
 userRoutes.post(
     '/',
     isAuthenticated,
-    authorize([PAPEL_ADMIN]),
+    authorize(PAPEIS_CADASTRO_USUARIO),
     (requisicao, resposta, proximo) => userController.create(requisicao, resposta, proximo)
 );
 
