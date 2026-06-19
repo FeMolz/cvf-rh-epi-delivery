@@ -15,24 +15,50 @@ describe('ListRolesService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve retornar lista de cargos do repositorio', async () => {
+    it('deve retornar lista de cargos ativos por padrao', async () => {
         const listaCargos = [
             { id: '1', name: 'Analista', description: 'Desc' },
             { id: '2', name: 'Gerente', description: 'Desc 2' }
         ];
         roleRepositoryMock.findAll.mockResolvedValue(listaCargos);
 
-        const resultado = await listRolesService.execute();
+        const resultado = await listRolesService.execute({ papelUsuario: 'ADMINISTRATIVO' });
 
-        expect(roleRepositoryMock.findAll).toHaveBeenCalled();
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            incluirInativos: false,
+            apenasInativos: false
+        });
         expect(resultado).toEqual(listaCargos);
     });
 
-    it('deve retornar lista vazia quando nao ha cargos', async () => {
+    it('deve listar cargos inativos para ADMIN', async () => {
         roleRepositoryMock.findAll.mockResolvedValue([]);
 
-        const resultado = await listRolesService.execute();
+        await listRolesService.execute({ incluirInativos: true, papelUsuario: 'ADMIN' });
 
-        expect(resultado).toEqual([]);
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            incluirInativos: true,
+            apenasInativos: false
+        });
+    });
+
+    it('deve listar apenas cargos inativos', async () => {
+        roleRepositoryMock.findAll.mockResolvedValue([]);
+
+        await listRolesService.execute({ apenasInativos: true, papelUsuario: 'ADMINISTRATIVO' });
+
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            incluirInativos: false,
+            apenasInativos: true
+        });
+    });
+
+    it('deve rejeitar listagem de inativos para nao ADMIN', async () => {
+        await expect(
+            listRolesService.execute({ incluirInativos: true, papelUsuario: 'ADMINISTRATIVO' })
+        ).rejects.toMatchObject({
+            message: 'Apenas administradores podem listar cargos inativos.',
+            statusCode: 403
+        });
     });
 });

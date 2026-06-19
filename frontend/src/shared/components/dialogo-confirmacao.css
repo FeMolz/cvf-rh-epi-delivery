@@ -1,0 +1,38 @@
+.dialogo-confirmacao {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.dialogo-confirmacao__cartao {
+    width: min(100%, 26rem);
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.85rem;
+    background: #fff;
+    box-shadow: 0 20px 48px rgba(15, 23, 42, 0.18);
+}
+
+.dialogo-confirmacao__titulo {
+    margin: 0 0 0.65rem;
+    font-size: 1.15rem;
+    color: #0f172a;
+}
+
+.dialogo-confirmacao__mensagem {
+    margin: 0 0 1.25rem;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.dialogo-confirmacao__acoes {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}

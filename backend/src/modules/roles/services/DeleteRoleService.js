@@ -12,7 +12,7 @@ class DeleteRoleService {
             throw criarErroNaoEncontrado('Cargo não encontrado');
         }
 
-        await roleRepository.delete(identificadorCargo);
+        await roleRepository.softDelete(identificadorCargo);
     }
 }
 

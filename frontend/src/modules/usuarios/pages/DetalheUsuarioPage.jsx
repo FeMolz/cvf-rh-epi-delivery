@@ -198,20 +198,24 @@ export function DetalheUsuarioPage() {
                         </div>
 
                         <div className="detalhe-usuario__acoes">
-                            <button className="botao botao--primario" type="submit" disabled={salvando}>
-                                {salvando ? 'Salvando…' : 'Salvar alterações'}
-                            </button>
-                            <Link className="botao botao--secundario" to="/admin/dashboard">
-                                Voltar
-                            </Link>
-                            <button
-                                className="botao botao--perigo"
-                                type="button"
-                                disabled={salvando || ehProprioUsuario}
-                                onClick={aoExcluir}
-                            >
-                                Excluir usuário
-                            </button>
+                            <div className="detalhe-usuario__acoes-principais">
+                                <button className="botao botao--primario" type="submit" disabled={salvando}>
+                                    {salvando ? 'Salvando…' : 'Salvar alterações'}
+                                </button>
+                                <button
+                                    className="botao botao--perigo"
+                                    type="button"
+                                    disabled={salvando || ehProprioUsuario}
+                                    onClick={aoExcluir}
+                                >
+                                    Excluir usuário
+                                </button>
+                            </div>
+                            <div className="detalhe-usuario__acoes-secundarias">
+                                <Link className="botao botao--secundario" to="/admin/dashboard">
+                                    Voltar
+                                </Link>
+                            </div>
                         </div>
                         {ehProprioUsuario ? (
                             <p className="formulario__rodape">Você não pode excluir a própria conta por aqui.</p>

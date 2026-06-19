@@ -5,8 +5,8 @@ const prismaMock = {
         create: jest.fn(),
         findMany: jest.fn(),
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         update: jest.fn(),
-        delete: jest.fn(),
         count: jest.fn(),
     }
 };
@@ -35,36 +35,81 @@ describe('RoleRepository', () => {
         expect(result).toEqual(createdRole);
     });
 
-    it('should find all roles', async () => {
-        const roles = [{ id: 1, name: 'ADMIN' }];
+    it('should find all active roles', async () => {
+        const roles = [{ id: 1, name: 'ADMIN', _count: { roleEpis: 2 } }];
         prismaMock.role.findMany.mockResolvedValue(roles);
 
         const result = await roleRepository.findAll();
 
-        expect(prismaMock.role.findMany).toHaveBeenCalled();
+        expect(prismaMock.role.findMany).toHaveBeenCalledWith({
+            where: { deletedAt: null },
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
         expect(result).toEqual(roles);
     });
 
+    it('should find all roles including inactive', async () => {
+        prismaMock.role.findMany.mockResolvedValue([]);
+
+        await roleRepository.findAll({ incluirInativos: true });
+
+        expect(prismaMock.role.findMany).toHaveBeenCalledWith({
+            where: undefined,
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
+    });
+
+    it('should find all inactive roles', async () => {
+        prismaMock.role.findMany.mockResolvedValue([]);
+
+        await roleRepository.findAll({ apenasInativos: true });
+
+        expect(prismaMock.role.findMany).toHaveBeenCalledWith({
+            where: { deletedAt: { not: null } },
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
+    });
+
     it('should find role by id', async () => {
-        const role = { id: 1, name: 'ADMIN' };
+        const role = { id: 1, name: 'ADMIN', _count: { roleEpis: 0 } };
         prismaMock.role.findUnique.mockResolvedValue(role);
 
         const result = await roleRepository.findById(1);
 
         expect(prismaMock.role.findUnique).toHaveBeenCalledWith({
-            where: { id: 1 }
+            where: { id: 1 },
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
+            }
         });
         expect(result).toEqual(role);
     });
 
-    it('should find role by name', async () => {
+    it('should find active role by name', async () => {
         const role = { id: 1, name: 'ADMIN' };
-        prismaMock.role.findUnique.mockResolvedValue(role);
+        prismaMock.role.findFirst.mockResolvedValue(role);
 
         const result = await roleRepository.findByName('ADMIN');
 
-        expect(prismaMock.role.findUnique).toHaveBeenCalledWith({
-            where: { name: 'ADMIN' }
+        expect(prismaMock.role.findFirst).toHaveBeenCalledWith({
+            where: { name: 'ADMIN', deletedAt: null }
         });
         expect(result).toEqual(role);
     });
@@ -82,51 +127,56 @@ describe('RoleRepository', () => {
         expect(result).toEqual(roleData);
     });
 
-    it('should delete a role', async () => {
-        const roleData = { id: 1, name: 'ADMIN' };
-        prismaMock.role.delete.mockResolvedValue(roleData);
+    it('should soft delete a role', async () => {
+        const roleData = { id: 1, name: 'ADMIN', deletedAt: new Date() };
+        prismaMock.role.update.mockResolvedValue(roleData);
 
-        const result = await roleRepository.delete(1);
+        const result = await roleRepository.softDelete(1);
 
-        expect(prismaMock.role.delete).toHaveBeenCalledWith({
-            where: { id: 1 }
+        expect(prismaMock.role.update).toHaveBeenCalledWith({
+            where: { id: 1 },
+            data: { deletedAt: expect.any(Date) }
         });
         expect(result).toEqual(roleData);
     });
 
-    it('should count roles', async () => {
+    it('should count active roles', async () => {
         prismaMock.role.count.mockResolvedValue(5);
 
         const result = await roleRepository.count();
 
-        expect(prismaMock.role.count).toHaveBeenCalled();
+        expect(prismaMock.role.count).toHaveBeenCalledWith({
+            where: { deletedAt: null }
+        });
         expect(result).toBe(5);
     });
 
-    it('should check if role exists', async () => {
-        prismaMock.role.findUnique.mockResolvedValue({ id: 1 });
+    it('should check if active role exists', async () => {
+        prismaMock.role.count.mockResolvedValue(1);
 
         const result = await roleRepository.exists(1);
 
-        expect(prismaMock.role.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
+        expect(prismaMock.role.count).toHaveBeenCalledWith({
+            where: { id: 1, deletedAt: null }
+        });
         expect(result).toBe(true);
     });
 
-    it('should return false if role does not exist', async () => {
-        prismaMock.role.findUnique.mockResolvedValue(null);
+    it('should return false if active role does not exist', async () => {
+        prismaMock.role.count.mockResolvedValue(0);
 
         const result = await roleRepository.exists(1);
 
         expect(result).toBe(false);
     });
 
-    it('should check if name is unique', async () => {
+    it('should check if name is unique among active roles', async () => {
         prismaMock.role.count.mockResolvedValue(0);
 
         const result = await roleRepository.isNameUnique('ADMIN');
 
         expect(prismaMock.role.count).toHaveBeenCalledWith({
-            where: { name: 'ADMIN' }
+            where: { name: 'ADMIN', deletedAt: null }
         });
         expect(result).toBe(true);
     });
@@ -139,6 +189,7 @@ describe('RoleRepository', () => {
         expect(prismaMock.role.count).toHaveBeenCalledWith({
             where: {
                 name: 'ADMIN',
+                deletedAt: null,
                 id: { not: 1 }
             }
         });

@@ -6,8 +6,10 @@ import { PAPEIS_CADASTRO_USUARIO, PAPEL_ADMIN } from './shared/constants/papeis.
 import { LayoutAdmin } from './shared/layout/LayoutAdmin.jsx';
 import { RedirecionarAdminInicio } from './shared/layout/RedirecionarAdminInicio.jsx';
 import { CadastroUsuarioPage } from './modules/usuarios/pages/CadastroUsuarioPage.jsx';
-import { DashboardAdminPage } from './modules/usuarios/pages/DashboardAdminPage.jsx';
+import { DashboardAdminPage } from './modules/dashboard/pages/DashboardAdminPage.jsx';
 import { DetalheUsuarioPage } from './modules/usuarios/pages/DetalheUsuarioPage.jsx';
+import { ListagemCargosPage } from './modules/cargos/pages/ListagemCargosPage.jsx';
+import { DetalheCargoPage } from './modules/cargos/pages/DetalheCargoPage.jsx';
 import { InicioPage } from './modules/usuarios/pages/InicioPage.jsx';
 import { LoginPage } from './modules/usuarios/pages/LoginPage.jsx';
 
@@ -23,6 +25,8 @@ export default function App() {
                         <Route path="/admin" element={<LayoutAdmin />}>
                             <Route index element={<RedirecionarAdminInicio />} />
                             <Route path="usuarios/cadastro" element={<CadastroUsuarioPage />} />
+                            <Route path="cargos" element={<ListagemCargosPage />} />
+                            <Route path="cargos/:id" element={<DetalheCargoPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={[PAPEL_ADMIN]} />}>
                                 <Route path="dashboard" element={<DashboardAdminPage />} />

@@ -20,8 +20,8 @@ export const MODULOS_SISTEMA = [
     {
         id: 'roles',
         rotulo: 'Cargos',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO],
-        emBreve: true
+        rota: '/admin/cargos',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
         id: 'employees',

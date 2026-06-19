@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 
 const roleRepositoryMock = {
     exists: jest.fn(),
-    delete: jest.fn()
+    softDelete: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/RoleRepository.js', () => ({
@@ -18,12 +18,12 @@ describe('DeleteRoleService', () => {
 
     it('deve excluir cargo quando existe', async () => {
         roleRepositoryMock.exists.mockResolvedValue(true);
-        roleRepositoryMock.delete.mockResolvedValue({ id: '1' });
+        roleRepositoryMock.softDelete.mockResolvedValue({ id: '1' });
 
         await deleteRoleService.execute('1');
 
         expect(roleRepositoryMock.exists).toHaveBeenCalledWith('1');
-        expect(roleRepositoryMock.delete).toHaveBeenCalledWith('1');
+        expect(roleRepositoryMock.softDelete).toHaveBeenCalledWith('1');
     });
 
     it('deve lancar erro 404 quando cargo nao existe', async () => {
@@ -34,6 +34,6 @@ describe('DeleteRoleService', () => {
             statusCode: 404
         });
 
-        expect(roleRepositoryMock.delete).not.toHaveBeenCalled();
+        expect(roleRepositoryMock.softDelete).not.toHaveBeenCalled();
     });
 });

@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth.js';
 import { listarModulosVisiveis } from '../constants/modulosSistema.js';
 import { ROTULOS_PAPEIS } from '../constants/papeis.js';
+import '../../modules/usuarios/components/layout-aplicacao.css';
 import './layout-admin.css';
 
 export function LayoutAdmin() {

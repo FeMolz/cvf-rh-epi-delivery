@@ -10,22 +10,47 @@ class RoleRepository {
         });
     }
 
-    async findAll() {
-        return prisma.role.findMany();
+    /**
+     * @param {{ incluirInativos?: boolean, apenasInativos?: boolean }} [opcoes]
+     */
+    async findAll({ incluirInativos = false, apenasInativos = false } = {}) {
+        let where;
+
+        if (apenasInativos) {
+            where = { deletedAt: { not: null } };
+        } else if (!incluirInativos) {
+            where = { deletedAt: null };
+        }
+
+        return prisma.role.findMany({
+            where,
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
     }
 
     async findById(id) {
         return prisma.role.findUnique({
             where: {
                 id
+            },
+            include: {
+                _count: {
+                    select: { roleEpis: true }
+                }
             }
         });
     }
 
     async findByName(name) {
-        return prisma.role.findUnique({
+        return prisma.role.findFirst({
             where: {
-                name
+                name,
+                deletedAt: null
             }
         });
     }
@@ -42,38 +67,49 @@ class RoleRepository {
         });
     }
 
-    async delete(id) {
-        return prisma.role.delete({
+    async softDelete(id) {
+        return prisma.role.update({
             where: {
                 id
+            },
+            data: {
+                deletedAt: new Date()
             }
         });
     }
 
     async count() {
-        return prisma.role.count();
+        return prisma.role.count({
+            where: { deletedAt: null }
+        });
     }
 
     async exists(id) {
-        const role = await this.findById(id);
-        return !!role;
+        const quantidade = await prisma.role.count({
+            where: {
+                id,
+                deletedAt: null
+            }
+        });
+
+        return quantidade > 0;
     }
 
     async isNameUnique(name, id = null) {
-        const query = {
-            where: {
-                name
-            }
+        const filtros = {
+            name,
+            deletedAt: null
         };
 
         if (id) {
-            query.where.id = {
-                not: id
-            };
+            filtros.id = { not: id };
         }
 
-        const count = await prisma.role.count(query);
-        return count === 0;
+        const quantidade = await prisma.role.count({
+            where: filtros
+        });
+
+        return quantidade === 0;
     }
 }
 

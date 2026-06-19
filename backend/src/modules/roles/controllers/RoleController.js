@@ -17,7 +17,13 @@ class RoleController {
 
     async findAll(request, response, next) {
         try {
-            const cargos = await listRolesService.execute();
+            const incluirInativos = request.query.incluirInativos === 'true';
+            const apenasInativos = request.query.apenasInativos === 'true';
+            const cargos = await listRolesService.execute({
+                incluirInativos,
+                apenasInativos,
+                papelUsuario: request.user?.role
+            });
             return response.status(200).json(cargos);
         } catch (erro) {
             return next(erro);

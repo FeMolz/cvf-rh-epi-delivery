@@ -133,6 +133,39 @@
     color: #0f172a;
 }
 
+.dashboard-abas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-abas__item {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.55rem;
+    padding: 0.55rem 1rem;
+    background: #fff;
+    color: #475569;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.dashboard-abas__item:hover {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.dashboard-abas__item--ativa {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.tabela-usuarios__linha--inativa {
+    opacity: 0.72;
+}
+
 .admin-pagina--centralizada {
     display: flex;
     flex-direction: column;
@@ -165,6 +198,33 @@
     justify-content: space-between;
     padding: 1rem 1.25rem;
     border-bottom: 1px solid #e2e8f0;
+}
+
+.painel__subtitulo {
+    margin: 0;
+    flex: 1;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.filtro-fixo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+}
+
+.filtro-fixo input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #2563eb;
+    cursor: pointer;
 }
 
 .campo-pesquisa {
@@ -274,6 +334,37 @@
     gap: 0.5rem;
 }
 
+.painel--formulario-inline,
+.painel__secao-formulario {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.formulario__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.formulario textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.55rem;
+    resize: vertical;
+    min-height: 5rem;
+    font: inherit;
+    color: #0f172a;
+    background: #fff;
+}
+
+.formulario textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
 .botao--bloco {
     width: 100%;
 }
@@ -317,9 +408,27 @@
 .detalhe-usuario__acoes {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.65rem;
     padding-top: 0.5rem;
     border-top: 1px solid #e2e8f0;
+}
+
+.detalhe-usuario__acoes-principais {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.detalhe-usuario__acoes-secundarias {
+    display: flex;
+    margin-left: auto;
+}
+
+.detalhe-usuario__acoes-secundarias--unica {
+    width: 100%;
+    justify-content: flex-end;
 }
 
 .botao--perigo {
