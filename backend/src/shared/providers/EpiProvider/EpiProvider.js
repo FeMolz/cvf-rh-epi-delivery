@@ -112,6 +112,51 @@ class EpiProvider {
             throw new Error('Erro interno ao tentar consultar o EPI.');
         }
     }
+
+    /**
+     * Busca EPIs na base pública por nome parecido (endpoint estendido da API baseCAEPI).
+     * @param {string} termo
+     * @returns {Promise<Array<{ caNumber: string, name: string }>>}
+     */
+    async buscarEpisPorNomeEquipamento(termo) {
+        const termoNormalizado = String(termo || '').trim();
+
+        if (!termoNormalizado) {
+            return [];
+        }
+
+        const baseUrl = env.CAEPI_API_URL;
+
+        try {
+            const response = await fetch(
+                `${baseUrl}/pesquisarPorNomeEquipamento/${encodeURIComponent(termoNormalizado)}`
+            );
+
+            if (response.status === 404) {
+                return [];
+            }
+
+            if (!response.ok) {
+                throw new Error(`Erro na API externa: ${response.statusText}`);
+            }
+
+            const dados = await response.json();
+
+            if (!Array.isArray(dados)) {
+                return [];
+            }
+
+            return dados
+                .map((item) => ({
+                    caNumber: String(item.caNumber || item.RegistroCA || '').trim(),
+                    name: String(item.name || item.NomeEquipamento || 'EPI Sem Nome').trim()
+                }))
+                .filter((item) => item.caNumber);
+        } catch (error) {
+            console.error('[EpiProvider] Erro ao pesquisar EPI por nome:', error.message);
+            throw new Error('Erro interno ao tentar consultar o EPI.');
+        }
+    }
 }
 
 export default new EpiProvider();

@@ -3,6 +3,7 @@ import { jest } from '@jest/globals';
 const fetchEpiFromApiServiceMock = { execute: jest.fn() };
 const changeEpiPeriodicityServiceMock = { execute: jest.fn() };
 const listCachedEpisServiceMock = { execute: jest.fn() };
+const searchEpisByNameExternoServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/FetchEpiFromApiService.js', () => ({
     default: fetchEpiFromApiServiceMock
@@ -12,6 +13,9 @@ jest.unstable_mockModule('../services/ChangeEpiPeriodicityService.js', () => ({
 }));
 jest.unstable_mockModule('../services/ListCachedEpisService.js', () => ({
     default: listCachedEpisServiceMock
+}));
+jest.unstable_mockModule('../services/SearchEpisByNameExternoService.js', () => ({
+    default: searchEpisByNameExternoServiceMock
 }));
 
 const epiController = (await import('./EpiController.js')).default;
@@ -44,5 +48,20 @@ describe('EpiController', () => {
         expect(proximo).toHaveBeenCalledWith(
             expect.objectContaining({ message: 'Not found', statusCode: 404 })
         );
+    });
+
+    it('deve retornar 200 ao buscar epis por nome', async () => {
+        const requisicao = { query: { nome: 'capacete' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        searchEpisByNameExternoServiceMock.execute.mockResolvedValue([
+            { caNumber: '11070', name: 'Capacete' }
+        ]);
+
+        await epiController.searchByName(requisicao, resposta, proximo);
+
+        expect(searchEpisByNameExternoServiceMock.execute).toHaveBeenCalledWith('capacete');
+        expect(resposta.status).toHaveBeenCalledWith(200);
     });
 });

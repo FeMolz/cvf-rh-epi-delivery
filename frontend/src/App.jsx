@@ -19,6 +19,8 @@ import { DetalheSetorPage } from './modules/setores/pages/DetalheSetorPage.jsx';
 import { CadastroFuncionarioPage } from './modules/funcionarios/pages/CadastroFuncionarioPage.jsx';
 import { EdicaoFuncionarioPage } from './modules/funcionarios/pages/EdicaoFuncionarioPage.jsx';
 import { ListagemFuncionariosPage } from './modules/funcionarios/pages/ListagemFuncionariosPage.jsx';
+import { ListagemEpisPage } from './modules/epis/pages/ListagemEpisPage.jsx';
+import { VinculoEpisCargoPage } from './modules/epis/pages/VinculoEpisCargoPage.jsx';
 import { InicioPage } from './modules/usuarios/pages/InicioPage.jsx';
 import { LoginPage } from './modules/usuarios/pages/LoginPage.jsx';
 
@@ -46,6 +48,8 @@ export default function App() {
                             <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />
                             <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
                             <Route path="noticias" element={<NoticiasPage />} />
+                            <Route path="epis" element={<ListagemEpisPage />} />
+                            <Route path="epis/vinculos" element={<VinculoEpisCargoPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={[PAPEL_ADMIN]} />}>
                                 <Route path="dashboard" element={<DashboardAdminPage />} />

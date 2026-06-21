@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(diretorioRaiz, '.env') });
 dotenv.config({ path: path.join(diretorioRaiz, '.env.production.local'), override: false });
 
 function executarDockerCompose() {
-    const resultado = spawnSync('docker', ['compose', '-f', 'docker-compose.apoio.yml', 'up', '-d'], {
+    const resultado = spawnSync('docker', ['compose', '-f', 'docker-compose.apoio.yml', 'up', '-d', '--build'], {
         cwd: diretorioRaiz,
         stdio: 'inherit',
         shell: true

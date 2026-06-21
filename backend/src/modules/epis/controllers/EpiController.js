@@ -1,6 +1,7 @@
 import fetchEpiFromApiService from '../services/FetchEpiFromApiService.js';
 import changeEpiPeriodicityService from '../services/ChangeEpiPeriodicityService.js';
 import listCachedEpisService from '../services/ListCachedEpisService.js';
+import searchEpisByNameExternoService from '../services/SearchEpisByNameExternoService.js';
 import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 
 class EpiController {
@@ -8,6 +9,7 @@ class EpiController {
         this.findByCa = this.findByCa.bind(this);
         this.changePeriodicity = this.changePeriodicity.bind(this);
         this.findAllLocal = this.findAllLocal.bind(this);
+        this.searchByName = this.searchByName.bind(this);
     }
 
     async findByCa(requisicao, resposta, proximo) {
@@ -41,6 +43,16 @@ class EpiController {
             return resposta.status(200).json(epis);
         } catch (erro) {
             return proximo(criarErroHttp('Erro ao buscar EPIs.', 500));
+        }
+    }
+
+    async searchByName(requisicao, resposta, proximo) {
+        try {
+            const nome = requisicao.query?.nome;
+            const resultados = await searchEpisByNameExternoService.execute(nome);
+            return resposta.status(200).json(resultados);
+        } catch (erro) {
+            return proximo(criarErroHttp(erro.message, erro.statusCode || 400));
         }
     }
 }

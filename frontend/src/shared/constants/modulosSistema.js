@@ -50,8 +50,8 @@ export const MODULOS_SISTEMA = [
     {
         id: 'epis',
         rotulo: 'EPIs',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO],
-        emBreve: true
+        rota: '/admin/epis',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
         id: 'epi-deliveries',

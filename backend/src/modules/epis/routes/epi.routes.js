@@ -9,6 +9,13 @@ import { PAPEIS_GESTAO_RH, PAPEIS_OPERACAO_EPI } from '../../../shared/constants
 const epiRoutes = Router();
 
 epiRoutes.get(
+    '/buscar-por-nome',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) => epiController.searchByName(requisicao, resposta, proximo)
+);
+
+epiRoutes.get(
     '/:caNumber',
     isAuthenticated,
     authorize(PAPEIS_OPERACAO_EPI),

@@ -3,7 +3,9 @@
 
 services:
   caepi-api:
-    image: joaoaugustomv/api_base_ca_epi:2.0
+    build:
+      context: ./docker/caepi-api-custom
+    image: rh-system-caepi-api:custom
     container_name: rh-system-caepi-api
     ports:
       - "8080:80"

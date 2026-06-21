@@ -23,12 +23,25 @@ Para **testes locais manuais** (Postman, Insomnia, front em `localhost`), para o
 npm run docker:apoio:up
 ```
 
-Isso sobe **API baseCAEPI** (porta 8080) e **Redis** (6379) via `docker-compose.apoio.yml` e aguarda a CAEPI ficar pronta.
+Isso sobe **API baseCAEPI customizada** (porta 8080) e **Redis** (6379) via `docker-compose.apoio.yml` e aguarda a CAEPI ficar pronta.
 
-Equivalente manual:
+A imagem `rh-system-caepi-api:custom` estende `joaoaugustomv/api_base_ca_epi:2.0` com o endpoint adicional:
+
+- `GET /pesquisarPorNomeEquipamento/{nome}` — busca equipamentos pelo nome (mínimo 2 caracteres no RH-System), retorna até 50 itens com `caNumber` e `name`.
+
+Código em `backend/docker/caepi-api-custom/`.
+
+Equivalente manual (sem busca por nome):
 
 ```bash
 docker run -d -p 8080:80 --name ca_api_epi joaoaugustomv/api_base_ca_epi:2.0
+```
+
+Para habilitar a busca por nome, use o compose acima ou reconstrua a imagem custom:
+
+```bash
+npm run docker:apoio:down
+npm run docker:apoio:up
 ```
 
 - `-p 8080:80`: API disponível em `http://localhost:8080` no host.
@@ -113,7 +126,9 @@ src/modules/epis/
     ├── FetchEpiFromApiService.js
     ├── FetchEpiFromApiService.test.js
     ├── ListCachedEpisService.js
-    └── ListCachedEpisService.test.js
+    ├── ListCachedEpisService.test.js
+    ├── SearchEpisByNameExternoService.js
+    └── SearchEpisByNameExternoService.test.js
 ```
 
 > **Regra arquitetural:** apenas `EpiRepository` no módulo `epis` invoca o Prisma para a entidade `Epi` nos fluxos de cache e consulta. Métodos de `RoleEpi` no mesmo repositório existem para o endpoint de periodicidade documentado em **CHAINING.md**. Controllers permanecem finos.
@@ -124,7 +139,8 @@ src/modules/epis/
 
 ### `EpiProvider`
 
-- Requisição: `GET {CAEPI_API_URL}/CA/:caNumber`.
+- Requisição por CA: `GET {CAEPI_API_URL}/CA/:caNumber`.
+- Requisição por nome: `GET {CAEPI_API_URL}/pesquisarPorNomeEquipamento/:termo` (imagem Docker customizada).
 - Converte `DataValidade` (formato usual `DD/MM/YYYY`) para `Date` UTC.
 - Calcula **`hasValidCaRegistration`** e define **`isActive`** com base em:
   - `Validade` ou `StatusValidade` como booleano (inclui strings `FALSO`, `false`, `0`, `NÃO`, etc.).
@@ -162,10 +178,17 @@ Mensagens de erro (resumo):
 
 - Delega a `EpiRepository.findAllEpis()` para `GET /api/v1/epis`.
 
+### `SearchEpisByNameExternoService`
+
+- Valida termo com mínimo de 2 caracteres.
+- Delega a `EpiProvider.buscarEpisPorNomeEquipamento(termo)` para `GET /api/v1/epis/buscar-por-nome`.
+- Retorna lista `{ caNumber, name }[]` da base pública (sem persistir no cache).
+
 ### `EpiController`
 
 - `findByCa`: sucesso **200**; falhas do `FetchEpiFromApiService` → **404** com `{ "error": "..." }`.
 - `findAllLocal`: lista cache; erro interno → **500**.
+- `searchByName`: query `?nome=`; sucesso **200** com array; termo inválido → **400**.
 
 ---
 
@@ -175,6 +198,7 @@ Base: **`/api/v1/epis`**
 
 | Método | Endpoint | Permissões | Descrição |
 |--------|----------|------------|-----------|
+| `GET` | `/buscar-por-nome?nome=` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Pesquisa EPIs na base pública pelo nome do equipamento. Retorna `[{ caNumber, name }]`. Mínimo 2 caracteres. |
 | `GET` | `/:caNumber` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Retorna EPI pelo CA (cache ou API). **404** se CA inexistente, validade inativa na API ou `isActive` false no cache. |
 | `GET` | `/` | ADMIN, ADMINISTRATIVO, ALMOXARIFADO | Lista todos os EPIs do cache local. |
 
@@ -190,6 +214,7 @@ Base: **`/api/v1/epis`**
 | `EpiRepository.test.js` | Prisma mockado; `findByCaNumber`, `createEpi`, `findAllEpis`. |
 | `FetchEpiFromApiService.test.js` | Cache hit ativo; cache `isActive` false; API nula; CA inválido sem `create`; criação completa. |
 | `ListCachedEpisService.test.js` | Delegação ao repositório. |
+| `SearchEpisByNameExternoService.test.js` | Termo curto; delegação ao provider; retorno da lista. |
 | `EpiController.test.js` / `epi.routes.test.js` | Controller e rotas com dependências mockadas. |
 
 Execução sugerida (PowerShell):
@@ -235,6 +260,28 @@ Resposta **404**:
 
 - **Método:** `GET`
 - **URL:** `http://localhost:3000/api/v1/epis`
+
+### Buscar EPIs por nome na base pública
+
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/epis/buscar-por-nome?nome=capacete`
+
+Resposta **200** (exemplo):
+
+```json
+[
+  { "caNumber": "11070", "name": "CAPACETE DE SEGURANÇA" },
+  { "caNumber": "12345", "name": "CAPACETE COM JUGULAR" }
+]
+```
+
+Resposta **400** (termo com menos de 2 caracteres):
+
+```json
+{
+  "error": "Informe ao menos 2 caracteres para pesquisar."
+}
+```
 
 ---
 

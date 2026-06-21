@@ -119,4 +119,20 @@ describe('EpiProvider', () => {
         expect(result.hasValidCaRegistration).toBe(false);
         expect(result.isActive).toBe(false);
     });
+
+    it('should return epis when searching by equipment name', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: true,
+                json: () =>
+                    Promise.resolve([
+                        { caNumber: '11070', name: 'Capacete de Segurança' }
+                    ])
+            })
+        );
+
+        const result = await epiProvider.buscarEpisPorNomeEquipamento('capacete');
+
+        expect(result).toEqual([{ caNumber: '11070', name: 'Capacete de Segurança' }]);
+    });
 });

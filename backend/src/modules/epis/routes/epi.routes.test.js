@@ -5,7 +5,8 @@ import express from 'express';
 const epiControllerMock = {
     findByCa: jest.fn((req, res) => res.status(200).json({ id: 1 })),
     findAllLocal: jest.fn((req, res) => res.status(200).json([{ id: 1 }])),
-    changePeriodicity: jest.fn((req, res) => res.status(200).json({ id: 1 }))
+    changePeriodicity: jest.fn((req, res) => res.status(200).json({ id: 1 })),
+    searchByName: jest.fn((req, res) => res.status(200).json([{ caNumber: '11070' }]))
 };
 
 const authMiddlewareMock = {
@@ -52,6 +53,12 @@ describe('Epi Routes', () => {
         const res = await request(app).get('/epis');
         expect(res.statusCode).toBe(200);
         expect(epiControllerMock.findAllLocal).toHaveBeenCalled();
+    });
+
+    it('GET /epis/buscar-por-nome deve chamar epiController.searchByName', async () => {
+        const res = await request(app).get('/epis/buscar-por-nome?nome=capacete');
+        expect(res.statusCode).toBe(200);
+        expect(epiControllerMock.searchByName).toHaveBeenCalled();
     });
 
     it('PUT /epis/periodicity deve chamar epiController.changePeriodicity', async () => {
