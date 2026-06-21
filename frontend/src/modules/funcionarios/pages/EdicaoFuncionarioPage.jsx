@@ -15,6 +15,7 @@ import {
 import { listarSetores } from '../services/setoresApi.js';
 import { mapearFuncionarioParaFormulario } from '../utils/mapearFuncionarioParaFormulario.js';
 import { montarPayloadFuncionario } from '../utils/montarPayloadFuncionario.js';
+import { montarEmpresasParaFormularioFuncionario } from '../utils/selecaoEmpresasFuncionario.js';
 
 export function EdicaoFuncionarioPage() {
     const { id } = useParams();
@@ -64,7 +65,13 @@ export function EdicaoFuncionarioPage() {
                     setNomeFuncionario(String(funcionario.name || ''));
                     setDados(mapearFuncionarioParaFormulario(funcionario));
                     setCargos(cargosDisponiveis);
-                    setEmpresas(listaEmpresas);
+                    setEmpresas(
+                        montarEmpresasParaFormularioFuncionario(
+                            listaEmpresas,
+                            funcionario.companyId,
+                            funcionario.company
+                        )
+                    );
                     setSetores(listaSetores);
                 }
             } catch (erroCapturado) {

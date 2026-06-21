@@ -1,6 +1,7 @@
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { statusFuncionarioEncerraVinculo } from '../../../shared/constants/funcionarioVinculoConstantes.js';
 import gerenciarPeriodicidadeEpiFuncionarioService from '../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js';
+import validarEmpresaAtivaParaVinculoService from '../../companies/services/ValidarEmpresaAtivaParaVinculoService.js';
 import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
 import {
     MENSAGEM_CPF_DUPLICADO,
@@ -45,6 +46,10 @@ class UpdateEmployeeService {
             dadosAtualizacao.roleId !== undefined
                 ? dadosAtualizacao.roleId
                 : funcionarioExistente.roleId;
+
+        if (dadosAtualizacao.companyId !== undefined) {
+            await validarEmpresaAtivaParaVinculoService.execute(String(dadosAtualizacao.companyId));
+        }
 
         if (dadosAtualizacao.roleId !== undefined || !statusFuncionarioEncerraVinculo(statusNovo)) {
             await validarCargoAtivoParaVinculoService.execute(String(roleIdEfetivo));

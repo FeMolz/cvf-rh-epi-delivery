@@ -8,3 +8,6 @@ export const MENSAGEM_EMPRESA_NAO_ENCONTRADA = 'Empresa não encontrada.';
 
 export const MENSAGEM_EXCLUSAO_EMPRESA_COM_FUNCIONARIOS_VINCULADOS =
     'Não é possível excluir esta empresa enquanto houver funcionários vinculados a ela.';
+
+export const MENSAGEM_EMPRESA_INATIVA_PARA_VINCULO =
+    'Não é possível vincular funcionários a uma empresa inativa.';

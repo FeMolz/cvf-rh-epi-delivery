@@ -17,6 +17,7 @@ import {
     filtrarFuncionarios,
     filtrarFuncionariosPorEmpresa
 } from '../utils/listagemFuncionarios.js';
+import { filtrarEmpresasAtivasParaFuncionario } from '../utils/selecaoEmpresasFuncionario.js';
 
 function IconeEmpresaFuncionarios() {
     return (
@@ -60,14 +61,16 @@ export function ListagemFuncionariosPage() {
                 listarFuncionarios(token, { filtro: 'todos' })
             ]);
 
-            setEmpresas(listaEmpresas);
+            setEmpresas(filtrarEmpresasAtivasParaFuncionario(listaEmpresas));
             setFuncionarios(listaFuncionarios);
             setEmpresaAtivaId((atual) => {
-                if (atual && listaEmpresas.some((empresa) => empresa.id === atual)) {
+                const empresasAtivas = filtrarEmpresasAtivasParaFuncionario(listaEmpresas);
+
+                if (atual && empresasAtivas.some((empresa) => empresa.id === atual)) {
                     return atual;
                 }
 
-                return listaEmpresas[0]?.id ? String(listaEmpresas[0].id) : '';
+                return empresasAtivas[0]?.id ? String(empresasAtivas[0].id) : '';
             });
         } catch (erroCapturado) {
             setErro(erroCapturado.message || 'Não foi possível carregar os funcionários.');

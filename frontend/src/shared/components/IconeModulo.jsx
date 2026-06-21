@@ -25,6 +25,15 @@ export function IconeModulo({ id, className = 'admin-sidebar__icone' }) {
                     <rect x="3" y="16" width="7" height="5" rx="1" />
                 </svg>
             );
+        case 'noticias':
+            return (
+                <svg {...propsSvg}>
+                    <path d="M4 19h16" />
+                    <path d="M4 4h16v12H4z" />
+                    <path d="M8 8h8" />
+                    <path d="M8 12h5" />
+                </svg>
+            );
         case 'gerenciamento':
             return (
                 <svg {...propsSvg}>

@@ -7,6 +7,7 @@ import { LayoutAdmin } from './shared/layout/LayoutAdmin.jsx';
 import { RedirecionarAdminInicio } from './shared/layout/RedirecionarAdminInicio.jsx';
 import { CadastroUsuarioPage } from './modules/usuarios/pages/CadastroUsuarioPage.jsx';
 import { DashboardAdminPage } from './modules/dashboard/pages/DashboardAdminPage.jsx';
+import { NoticiasPage } from './modules/noticias/pages/NoticiasPage.jsx';
 import { DetalheUsuarioPage } from './modules/usuarios/pages/DetalheUsuarioPage.jsx';
 import { GerenciamentoPage } from './modules/gerenciamento/pages/GerenciamentoPage.jsx';
 import { ListagemCargosPage } from './modules/cargos/pages/ListagemCargosPage.jsx';
@@ -44,6 +45,7 @@ export default function App() {
                             <Route path="funcionarios/cadastro" element={<CadastroFuncionarioPage />} />
                             <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />
                             <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
+                            <Route path="noticias" element={<NoticiasPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={[PAPEL_ADMIN]} />}>
                                 <Route path="dashboard" element={<DashboardAdminPage />} />

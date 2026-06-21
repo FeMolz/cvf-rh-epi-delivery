@@ -26,6 +26,14 @@ jest.unstable_mockModule('../../roles/services/ValidarCargoAtivoParaVinculoServi
     default: validarCargoAtivoParaVinculoServiceMock
 }));
 
+const validarEmpresaAtivaParaVinculoServiceMock = {
+    execute: jest.fn()
+};
+
+jest.unstable_mockModule('../../companies/services/ValidarEmpresaAtivaParaVinculoService.js', () => ({
+    default: validarEmpresaAtivaParaVinculoServiceMock
+}));
+
 const updateEmployeeService = (await import('./UpdateEmployeeService.js')).default;
 
 const CPF_VALIDO = '529.982.247-25';
@@ -34,6 +42,11 @@ const TELEFONE_VALIDO = '(11) 98888-7777';
 describe('UpdateEmployeeService', () => {
     afterEach(() => {
         jest.clearAllMocks();
+    });
+
+    beforeEach(() => {
+        validarEmpresaAtivaParaVinculoServiceMock.execute.mockResolvedValue(undefined);
+        validarCargoAtivoParaVinculoServiceMock.execute.mockResolvedValue(undefined);
     });
 
     it('deve atualizar funcionário com dados válidos', async () => {
@@ -116,6 +129,22 @@ describe('UpdateEmployeeService', () => {
                 deletedAt: null
             })
         );
+    });
+
+    it('deve validar empresa ativa ao alterar companyId', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1',
+            companyId: 'empresa-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', companyId: 'empresa-2' });
+
+        await updateEmployeeService.execute('1', { companyId: 'empresa-2' });
+
+        expect(validarEmpresaAtivaParaVinculoServiceMock.execute).toHaveBeenCalledWith('empresa-2');
     });
 
     it('deve converter datas string antes de atualizar', async () => {

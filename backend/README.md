@@ -16,6 +16,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
 - 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - CRUD de empresas; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
 - 📄 **[Módulo de Setores (Setores)](./docs/SETORES.md)** - CRUD de setores; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
+- 📄 **[Módulo de Notícias (Noticias)](./docs/NOTICIAS.md)** - Aniversariantes pessoais e de tempo de empresa do mês para a página administrativa.
 - 📄 **[Módulo de EPIs (Epis)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), cache local por CA, validade cadastral (`Validade`, `StatusValidade`, `Situacao`) e consulta/listagem.
 - 📄 **[Chaining (Cargo–EPI)](./docs/CHAINING.md)** - Vincular, listar e desvincular EPIs por cargo (`RoleEpi`), periodicidade de troca e rotas `/api/v1/roles-epis`.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).

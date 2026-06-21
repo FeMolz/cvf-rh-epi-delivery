@@ -1,4 +1,5 @@
 import employeeRepository from '../repositories/EmployeeRepository.js';
+import validarEmpresaAtivaParaVinculoService from '../../companies/services/ValidarEmpresaAtivaParaVinculoService.js';
 import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
 import {
     MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO,
@@ -58,6 +59,7 @@ class CreateEmployeeService {
             lancarErroFuncionario(MENSAGEM_EMAIL_DUPLICADO);
         }
 
+        await validarEmpresaAtivaParaVinculoService.execute(String(companyId));
         await validarCargoAtivoParaVinculoService.execute(String(roleId));
 
         const dadosFuncionario = montarDadosFuncionario({

@@ -12,6 +12,12 @@ export const MODULOS_SISTEMA = [
         papeis: [PAPEL_ADMIN]
     },
     {
+        id: 'noticias',
+        rotulo: 'Notícias',
+        rota: '/admin/noticias',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
+    },
+    {
         id: 'gerenciamento',
         rotulo: 'Gerenciamento',
         rota: '/admin/gerenciamento',

@@ -1,0 +1,26 @@
+.noticias-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.noticias-painel {
+    background: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    box-shadow: var(--sombra-suave);
+    padding: 1rem 1.1rem 1.15rem;
+}
+
+.noticias-painel__cabecalho h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.05rem;
+    color: var(--cor-label-tabela);
+}
+
+@media (max-width: 960px) {
+    .noticias-grade {
+        grid-template-columns: 1fr;
+    }
+}

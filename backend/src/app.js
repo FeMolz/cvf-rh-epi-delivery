@@ -36,6 +36,7 @@ import quesitoRoutes from './modules/quesitos/routes/quesito.routes.js';
 import quesitoToRoleRoutes from './modules/chaining/quesitoToRole/routes/quesitoToRole.routes.js';
 import recruitmentRoutes from './modules/recruitment/routes/recruitment.routes.js';
 import pontoRoutes from './modules/ponto/routes/ponto.routes.js';
+import noticiasRoutes from './modules/noticias/routes/noticias.routes.js';
 
 app.get('/health', protegerHealthCheck(), async (_requisicao, resposta) => {
     try {
@@ -71,6 +72,7 @@ app.use('/api/v1/quesitos', quesitoRoutes);
 app.use('/api/v1/roles-quesitos', quesitoToRoleRoutes);
 app.use('/api/v1/recruitment', recruitmentRoutes);
 app.use('/api/v1/ponto', pontoRoutes);
+app.use('/api/v1/noticias', noticiasRoutes);
 
 app.use((erro, requisicao, resposta, _proximo) => {
     const identificador = requisicao.idRequisicao || 'sem-id';
