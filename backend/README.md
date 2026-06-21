@@ -10,11 +10,12 @@ As regras de negócios, estrutura de pastas, endpoints disponíveis, permissões
 
 Antes de alterar algo em um módulo, é altamente recomendado a leitura da documentação correspondente:
 
+- 📄 **[Execução por ambiente (dev, teste, produção)](./docs/AMBIENTES.md)** - Passo a passo para subir API e frontend nos três ambientes.
 - 📄 **[Módulo de Usuários (Users)](./docs/USERS.md)** - Regras de cadastro, login, arquitetura e geração de Tokens JWT.
 - 📄 **[Módulo de Cargos (Roles)](./docs/ROLES.md)** - Explica como o padrão Repository/Service funciona para o gerenciamento das "roles".
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
-- 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - Detalha a arquitetura estática Read-Only das 4 empresas do banco.
-- 📄 **[Módulo de Setores (Setores)](./docs/SETORES.md)** - Listagem read-only de setores para vínculo com funcionários.
+- 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - CRUD de empresas; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
+- 📄 **[Módulo de Setores (Setores)](./docs/SETORES.md)** - CRUD de setores; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
 - 📄 **[Módulo de EPIs (Epis)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), cache local por CA, validade cadastral (`Validade`, `StatusValidade`, `Situacao`) e consulta/listagem.
 - 📄 **[Chaining (Cargo–EPI)](./docs/CHAINING.md)** - Vincular, listar e desvincular EPIs por cargo (`RoleEpi`), periodicidade de troca e rotas `/api/v1/roles-epis`.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
@@ -35,6 +36,8 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 ---
 
 ## 🚀 Como executar este projeto em outra máquina
+
+> **Guia completo (dev + teste + produção + frontend):** [docs/AMBIENTES.md](./docs/AMBIENTES.md)
 
 Siga o passo a passo abaixo para rodar a aplicação em um ambiente de desenvolvimento local zerado.
 

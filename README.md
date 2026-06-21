@@ -35,8 +35,10 @@ Configure o backend: copie `backend/.env.production.example` ou use `.env` / `.e
 
 | Comando | Descrição |
 |---------|-----------|
-| `npm run dev` | API em desenvolvimento (`backend`) |
+| `npm run dev` | API em desenvolvimento (`backend`, porta 3000) |
 | `npm run dev:frontend` | App React em http://localhost:5173 |
+| `npm run dev:test` | API de teste (3001) + frontend (proxy → 3001) |
+| `npm run db:test:seed -w backend` | Schema + seeds no banco `rh_system_test` |
 | `npm test` | Testes unitários do backend |
 | `npm run test:frontend` | Testes Vitest do frontend |
 | `npm run lint` | ESLint backend + frontend |
@@ -50,6 +52,7 @@ Todos os scripts do backend também podem ser executados com `npm run <script> -
 
 | Área | Onde |
 |------|------|
+| **Dev, teste e produção (passo a passo)** | [backend/docs/AMBIENTES.md](./backend/docs/AMBIENTES.md) |
 | API, módulos, endpoints | [backend/README.md](./backend/README.md) e [backend/docs/](./backend/docs/) |
 | Deploy e CD | [backend/docs/DEPLOY.md](./backend/docs/DEPLOY.md) |
 | Frontend | [frontend/README.md](./frontend/README.md) |

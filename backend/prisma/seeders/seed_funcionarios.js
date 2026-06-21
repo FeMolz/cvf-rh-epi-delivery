@@ -4,88 +4,47 @@ import { EmployeeStatus, EstadoCivil, GrauInstrucao } from '@prisma/client';
 
 import prisma from '../../src/config/database.js';
 import {
-    ID_EMPRESA_FILIAL_SUL,
-    ID_EMPRESA_MATRIZ,
-    ID_FUNCIONARIO_ANA,
-    ID_FUNCIONARIO_BRUNO,
-    ID_FUNCIONARIO_CARLA,
-    ID_SETOR_ALMOXARIFADO,
-    ID_SETOR_OBRAS,
-    ID_SETOR_TI
-} from './dados/identificadoresSeedConstantes.js';
+    QUANTIDADE_FUNCIONARIOS_SEED,
+    listarFuncionariosSeed
+} from './dados/conteudoVolumeSeedTeste.js';
 import { obterIdCargoPorNome } from './utils/resolverReferenciasSeed.js';
 
-const funcionariosDados = [
-    {
-        id: ID_FUNCIONARIO_ANA,
-        name: 'Ana Silva',
-        cpf: '529.982.247-25',
-        email: 'ana.silva@empresa.com',
-        telefone: '(11) 98888-7777',
-        birthDate: new Date('1992-04-12'),
-        admissionDate: new Date('2023-01-10'),
-        status: EmployeeStatus.ATIVO,
-        estadoCivil: EstadoCivil.SOLTEIRO,
-        grauInstrucao: GrauInstrucao.SUPERIOR_COMPLETO,
-        cidade: 'São Paulo',
-        estado: 'SP',
-        valeTransporte: true,
-        valeAlimentacao: true,
-        planoSaude: false,
-        nomeCargo: 'Analista de Sistemas',
-        companyId: ID_EMPRESA_MATRIZ,
-        setorId: ID_SETOR_TI
-    },
-    {
-        id: ID_FUNCIONARIO_BRUNO,
-        name: 'Bruno Costa',
-        cpf: '390.533.447-05',
-        email: 'bruno.costa@empresa.com',
-        telefone: '(21) 97777-6666',
-        birthDate: new Date('1988-09-20'),
-        admissionDate: new Date('2022-06-01'),
-        status: EmployeeStatus.ATIVO,
-        estadoCivil: EstadoCivil.CASADO,
-        grauInstrucao: GrauInstrucao.MEDIO_COMPLETO,
-        cidade: 'Rio de Janeiro',
-        estado: 'RJ',
-        pis: '12345678901',
-        valeTransporte: true,
-        valeAlimentacao: false,
-        planoSaude: true,
-        nomeCargo: 'Pedreiro',
-        companyId: ID_EMPRESA_FILIAL_SUL,
-        setorId: ID_SETOR_OBRAS
-    },
-    {
-        id: ID_FUNCIONARIO_CARLA,
-        name: 'Carla Mendes',
-        cpf: '123.456.789-09',
-        email: 'carla.mendes@empresa.com',
-        telefone: '(11) 96666-5555',
-        birthDate: new Date('1995-11-03'),
-        admissionDate: new Date('2024-02-15'),
-        status: EmployeeStatus.ATIVO,
-        estadoCivil: EstadoCivil.SOLTEIRO,
-        grauInstrucao: GrauInstrucao.SUPERIOR_INCOMPLETO,
-        cidade: 'São Paulo',
-        estado: 'SP',
-        valeTransporte: false,
-        valeAlimentacao: true,
-        planoSaude: true,
-        nomeCargo: 'Auxiliar Administrativo',
-        companyId: ID_EMPRESA_MATRIZ,
-        setorId: ID_SETOR_ALMOXARIFADO
-    }
+const ESTADOS_CIVIS = [
+    EstadoCivil.SOLTEIRO,
+    EstadoCivil.CASADO,
+    EstadoCivil.DIVORCIADO,
+    EstadoCivil.VIUVO
+];
+
+const GRAUS_INSTRUCAO = [
+    GrauInstrucao.MEDIO_COMPLETO,
+    GrauInstrucao.SUPERIOR_INCOMPLETO,
+    GrauInstrucao.SUPERIOR_COMPLETO,
+    GrauInstrucao.POS_GRADUACAO
 ];
 
 async function main() {
     console.log('Iniciando seed de funcionários...');
 
-    for (const funcionarioBruto of funcionariosDados) {
+    const funcionariosDados = listarFuncionariosSeed();
+
+    for (const [indice, funcionarioBruto] of funcionariosDados.entries()) {
         const { nomeCargo, ...funcionarioSemCargo } = funcionarioBruto;
         const roleId = await obterIdCargoPorNome(nomeCargo);
-        const funcionario = { ...funcionarioSemCargo, roleId };
+        const funcionario = {
+            ...funcionarioSemCargo,
+            roleId,
+            birthDate: new Date(1985 + (indice % 15), indice % 12, (indice % 27) + 1),
+            admissionDate: new Date(2020 + (indice % 5), indice % 12, (indice % 20) + 1),
+            status: EmployeeStatus.ATIVO,
+            estadoCivil: ESTADOS_CIVIS[indice % ESTADOS_CIVIS.length],
+            grauInstrucao: GRAUS_INSTRUCAO[indice % GRAUS_INSTRUCAO.length],
+            cidade: indice % 2 === 0 ? 'São Paulo' : 'Rio de Janeiro',
+            estado: indice % 2 === 0 ? 'SP' : 'RJ',
+            valeTransporte: indice % 2 === 0,
+            valeAlimentacao: indice % 3 !== 0,
+            planoSaude: indice % 4 === 0
+        };
 
         const existentePorCpf = await prisma.employee.findUnique({
             where: { cpf: funcionario.cpf }
@@ -103,11 +62,10 @@ async function main() {
             },
             create: funcionario
         });
-
-        console.log(`- Funcionário "${funcionario.name}" sincronizado.`);
     }
 
-    console.log('\n=== FUNCIONÁRIOS ATUALIZADOS ===');
+    console.log(`- ${funcionariosDados.length} funcionários sincronizados.`);
+    console.log(`\n=== FUNCIONÁRIOS ATUALIZADOS (${QUANTIDADE_FUNCIONARIOS_SEED} registros) ===`);
 }
 
 main()

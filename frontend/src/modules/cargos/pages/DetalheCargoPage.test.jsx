@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { DetalheCargoPage } from './DetalheCargoPage.jsx';
@@ -15,7 +16,7 @@ vi.mock('../services/cargosApi.js', () => ({
 }));
 
 const { useAuth } = await import('../../../shared/auth/useAuth.js');
-const { buscarCargoPorId } = await import('../services/cargosApi.js');
+const { buscarCargoPorId, excluirCargo } = await import('../services/cargosApi.js');
 
 function renderizarPagina(id = 'cargo-1') {
     return render(
@@ -81,5 +82,40 @@ describe('DetalheCargoPage', () => {
 
         expect(screen.getByRole('button', { name: /excluir cargo/i })).toBeInTheDocument();
         expect(screen.getByLabelText(/nome do cargo/i)).not.toBeDisabled();
+    });
+
+    it('deve exibir aviso quando exclusao for bloqueada por funcionarios vinculados', async () => {
+        const usuario = userEvent.setup();
+
+        buscarCargoPorId.mockResolvedValue({
+            id: 'cargo-1',
+            name: 'Operador',
+            description: 'Linha de produção',
+            deletedAt: null,
+            createdAt: '2024-01-01T12:00:00.000Z',
+            updatedAt: '2024-01-01T12:00:00.000Z',
+            _count: { roleEpis: 0 }
+        });
+
+        const erroBloqueio = new Error(
+            'Não é possível excluir este cargo enquanto houver funcionários vinculados a ele.'
+        );
+        erroBloqueio.statusCode = 409;
+        excluirCargo.mockRejectedValue(erroBloqueio);
+
+        renderizarPagina();
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /excluir cargo/i })).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /excluir cargo/i }));
+        await usuario.click(screen.getAllByRole('button', { name: /excluir cargo/i })[1]);
+
+        expect(
+            await screen.findByText(
+                /não é possível excluir este cargo enquanto houver funcionários vinculados a ele/i
+            )
+        ).toHaveClass('mensagem--aviso');
     });
 });

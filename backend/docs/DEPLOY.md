@@ -1,5 +1,7 @@
 # Deploy e operação em produção
 
+> **Guia geral (dev + teste + produção):** [AMBIENTES.md](./AMBIENTES.md)
+
 Guia para colocar a API RH-System na nuvem, trabalhar com o ambiente ativo e manter backups.
 
 ---

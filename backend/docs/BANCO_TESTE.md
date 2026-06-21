@@ -1,5 +1,7 @@
 # Banco de dados de teste (homologação local)
 
+> **Guia geral (dev + teste + produção):** [AMBIENTES.md](./AMBIENTES.md)
+
 Use um PostgreSQL **separado** do banco de desenvolvimento/produção para testes manuais no Postman. Assim você pode apagar dados, rodar seeds e emitir PDFs sem risco.
 
 ---

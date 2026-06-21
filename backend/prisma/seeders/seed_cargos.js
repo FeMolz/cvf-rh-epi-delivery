@@ -2,45 +2,50 @@ import './carregarAmbienteRaiz.js';
 
 import prisma from '../../src/config/database.js';
 import {
-    ID_CARGO_ANALISTA_SISTEMAS,
-    ID_CARGO_AUXILIAR_ADMINISTRATIVO,
-    ID_CARGO_PEDREIRO
-} from './dados/identificadoresSeedConstantes.js';
-
-const cargosDados = [
-    {
-        id: ID_CARGO_ANALISTA_SISTEMAS,
-        name: 'Analista de Sistemas',
-        description: 'Desenvolvimento, sustentação e integrações de sistemas.'
-    },
-    {
-        id: ID_CARGO_PEDREIRO,
-        name: 'Pedreiro',
-        description: 'Execução de serviços de alvenaria e acabamento em obras.'
-    },
-    {
-        id: ID_CARGO_AUXILIAR_ADMINISTRATIVO,
-        name: 'Auxiliar Administrativo',
-        description: 'Apoio administrativo, documentação e rotinas de RH.'
-    }
-];
+    QUANTIDADE_CARGOS_ATIVOS_SEED,
+    QUANTIDADE_CARGOS_INATIVOS_SEED,
+    listarCargosAtivosSeed,
+    listarCargosInativosSeed
+} from './dados/conteudoVolumeSeedTeste.js';
 
 async function main() {
     console.log('Iniciando seed de cargos...');
 
-    for (const cargo of cargosDados) {
+    const cargosAtivos = listarCargosAtivosSeed();
+    const cargosInativos = listarCargosInativosSeed();
+
+    for (const cargo of cargosAtivos) {
         await prisma.role.upsert({
             where: { name: cargo.name },
             update: {
-                description: cargo.description
+                description: cargo.description,
+                deletedAt: null
+            },
+            create: {
+                id: cargo.id,
+                name: cargo.name,
+                description: cargo.description,
+                deletedAt: null
+            }
+        });
+    }
+
+    for (const cargo of cargosInativos) {
+        await prisma.role.upsert({
+            where: { name: cargo.name },
+            update: {
+                description: cargo.description,
+                deletedAt: cargo.deletedAt
             },
             create: cargo
         });
-
-        console.log(`- Cargo "${cargo.name}" sincronizado.`);
     }
 
-    console.log('\n=== CARGOS ATUALIZADOS ===');
+    console.log(`- ${cargosAtivos.length} cargos ativos sincronizados.`);
+    console.log(`- ${cargosInativos.length} cargos inativos sincronizados.`);
+    console.log(
+        `\n=== CARGOS ATUALIZADOS (${QUANTIDADE_CARGOS_ATIVOS_SEED} ativos + ${QUANTIDADE_CARGOS_INATIVOS_SEED} inativos) ===`
+    );
 }
 
 main()

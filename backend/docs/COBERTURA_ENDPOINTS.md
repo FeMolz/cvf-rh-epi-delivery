@@ -85,6 +85,10 @@ Regras: 🔧 `AuthenticateUserService`, `UpdateUserService` (isActive não edit�
 | Método | Endpoint | Teste rota |
 |--------|----------|------------|
 | GET | `/` | ✅ |
+| POST | `/` | ✅ |
+| GET | `/:id` | ✅ |
+| PUT | `/:id` | ✅ |
+| DELETE | `/:id` | ✅ |
 
 ---
 
@@ -93,6 +97,10 @@ Regras: 🔧 `AuthenticateUserService`, `UpdateUserService` (isActive não edit�
 | Método | Endpoint | Teste rota |
 |--------|----------|------------|
 | GET | `/` | ✅ |
+| POST | `/` | ✅ |
+| GET | `/:id` | ✅ |
+| PUT | `/:id` | ✅ |
+| DELETE | `/:id` | ✅ |
 
 ---
 

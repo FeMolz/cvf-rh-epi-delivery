@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 
 const roleRepositoryMock = {
     exists: jest.fn(),
+    countEmployeesByRoleId: jest.fn(),
     softDelete: jest.fn()
 };
 
@@ -18,12 +19,26 @@ describe('DeleteRoleService', () => {
 
     it('deve excluir cargo quando existe', async () => {
         roleRepositoryMock.exists.mockResolvedValue(true);
+        roleRepositoryMock.countEmployeesByRoleId.mockResolvedValue(0);
         roleRepositoryMock.softDelete.mockResolvedValue({ id: '1' });
 
         await deleteRoleService.execute('1');
 
         expect(roleRepositoryMock.exists).toHaveBeenCalledWith('1');
+        expect(roleRepositoryMock.countEmployeesByRoleId).toHaveBeenCalledWith('1');
         expect(roleRepositoryMock.softDelete).toHaveBeenCalledWith('1');
+    });
+
+    it('deve lancar erro 409 quando cargo possui funcionarios vinculados', async () => {
+        roleRepositoryMock.exists.mockResolvedValue(true);
+        roleRepositoryMock.countEmployeesByRoleId.mockResolvedValue(2);
+
+        await expect(deleteRoleService.execute('1')).rejects.toMatchObject({
+            message: 'Não é possível excluir este cargo enquanto houver funcionários vinculados a ele.',
+            statusCode: 409
+        });
+
+        expect(roleRepositoryMock.softDelete).not.toHaveBeenCalled();
     });
 
     it('deve lancar erro 404 quando cargo nao existe', async () => {

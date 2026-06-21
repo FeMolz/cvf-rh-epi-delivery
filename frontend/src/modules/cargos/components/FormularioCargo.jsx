@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * @param {{
@@ -26,6 +26,30 @@ export function FormularioCargo({
     const [description, setDescription] = useState(valoresIniciais.description || '');
     const [erro, setErro] = useState('');
     const [sucesso, setSucesso] = useState('');
+
+    useEffect(() => {
+        if (!sucesso) {
+            return undefined;
+        }
+
+        const temporizador = setTimeout(() => {
+            setSucesso('');
+        }, 2000);
+
+        return () => clearTimeout(temporizador);
+    }, [sucesso]);
+
+    useEffect(() => {
+        if (!erro) {
+            return undefined;
+        }
+
+        const temporizador = setTimeout(() => {
+            setErro('');
+        }, 2000);
+
+        return () => clearTimeout(temporizador);
+    }, [erro]);
 
     async function aoEnviar(evento) {
         evento.preventDefault();

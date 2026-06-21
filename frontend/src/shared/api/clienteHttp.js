@@ -32,7 +32,9 @@ export async function requisicaoApi(caminho, opcoes = {}) {
                   ? dados.message
                   : 'Não foi possível concluir a operação.';
 
-        throw new Error(mensagem);
+        const erro = new Error(mensagem);
+        erro.statusCode = resposta.status;
+        throw erro;
     }
 
     return dados;

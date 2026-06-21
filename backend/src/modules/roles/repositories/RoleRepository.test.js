@@ -8,6 +8,9 @@ const prismaMock = {
         findFirst: jest.fn(),
         update: jest.fn(),
         count: jest.fn(),
+    },
+    employee: {
+        count: jest.fn(),
     }
 };
 
@@ -168,6 +171,20 @@ describe('RoleRepository', () => {
         const result = await roleRepository.exists(1);
 
         expect(result).toBe(false);
+    });
+
+    it('should count active employees linked to a role', async () => {
+        prismaMock.employee.count.mockResolvedValue(3);
+
+        const result = await roleRepository.countEmployeesByRoleId('cargo-1');
+
+        expect(prismaMock.employee.count).toHaveBeenCalledWith({
+            where: {
+                roleId: 'cargo-1',
+                deletedAt: null
+            }
+        });
+        expect(result).toBe(3);
     });
 
     it('should check if name is unique among active roles', async () => {

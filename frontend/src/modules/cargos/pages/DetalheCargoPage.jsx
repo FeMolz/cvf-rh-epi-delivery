@@ -18,6 +18,7 @@ export function DetalheCargoPage() {
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState('');
+    const [aviso, setAviso] = useState('');
     const [exibirConfirmacaoExclusao, setExibirConfirmacaoExclusao] = useState(false);
 
     useEffect(() => {
@@ -73,12 +74,21 @@ export function DetalheCargoPage() {
     async function confirmarExclusao() {
         setSalvando(true);
         setErro('');
+        setAviso('');
 
         try {
             await excluirCargo(id, token);
             navegar('/admin/cargos');
         } catch (erroCapturado) {
-            setErro(erroCapturado.message || 'Não foi possível excluir o cargo.');
+            if (erroCapturado.statusCode === 409) {
+                setAviso(
+                    erroCapturado.message ||
+                        'Não é possível excluir este cargo enquanto houver funcionários vinculados a ele.'
+                );
+            } else {
+                setErro(erroCapturado.message || 'Não foi possível excluir o cargo.');
+            }
+
             setSalvando(false);
             setExibirConfirmacaoExclusao(false);
         }
@@ -148,6 +158,12 @@ export function DetalheCargoPage() {
                     {erro ? (
                         <p className="mensagem mensagem--erro" role="alert">
                             {erro}
+                        </p>
+                    ) : null}
+
+                    {aviso ? (
+                        <p className="mensagem mensagem--aviso" role="status">
+                            {aviso}
                         </p>
                     ) : null}
 

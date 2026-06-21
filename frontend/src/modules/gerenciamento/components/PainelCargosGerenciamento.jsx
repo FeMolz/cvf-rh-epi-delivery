@@ -9,20 +9,12 @@ import { IconeAbaGerenciamento } from './IconeAbaGerenciamento.jsx';
 export function PainelCargosGerenciamento() {
     const { token } = useAuth();
     const [salvando, setSalvando] = useState(false);
-    const [sucesso, setSucesso] = useState('');
-    const [erro, setErro] = useState('');
 
     async function aoCadastrar(dados) {
         setSalvando(true);
-        setErro('');
-        setSucesso('');
 
         try {
             await criarCargo(dados, token);
-            setSucesso('Cargo cadastrado com sucesso.');
-        } catch (erroCapturado) {
-            setErro(erroCapturado.message || 'Não foi possível cadastrar o cargo.');
-            throw erroCapturado;
         } finally {
             setSalvando(false);
         }
@@ -37,17 +29,6 @@ export function PainelCargosGerenciamento() {
             />
 
             <div className="listagem-painel__conteudo">
-                {erro ? (
-                    <p className="mensagem mensagem--erro" role="alert">
-                        {erro}
-                    </p>
-                ) : null}
-                {sucesso ? (
-                    <p className="mensagem mensagem--sucesso" role="status">
-                        {sucesso}
-                    </p>
-                ) : null}
-
                 <FormularioCargo
                     rotuloEnviar="Cadastrar cargo"
                     onSubmit={aoCadastrar}

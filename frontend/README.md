@@ -23,7 +23,7 @@ frontend/src/
 
 ## Comandos
 
-Na **raiz do monorepo**:
+Na **raiz do monorepo** — guia completo: [backend/docs/AMBIENTES.md](../backend/docs/AMBIENTES.md)
 
 ```bash
 npm install

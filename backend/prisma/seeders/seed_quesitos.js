@@ -1,32 +1,20 @@
 import './carregarAmbienteRaiz.js';
 
 import prisma from '../../src/config/database.js';
-import { ID_QUESITO_AREA_SINALIZADA, ID_QUESITO_USO_EPI } from './dados/identificadoresSeedConstantes.js';
+import {
+    QUANTIDADE_QUESITOS_SEED,
+    listarCargosAtivosSeed,
+    listarQuesitosSeed,
+    montarVinculosCargoQuesitoSeed
+} from './dados/conteudoVolumeSeedTeste.js';
 import { obterIdCargoPorNome } from './utils/resolverReferenciasSeed.js';
-
-const quesitosDados = [
-    {
-        id: ID_QUESITO_USO_EPI,
-        nome: 'uso_epi_obrigatorio',
-        descricao: 'O colaborador utiliza EPI adequado às atividades?',
-        bloco: 'SST'
-    },
-    {
-        id: ID_QUESITO_AREA_SINALIZADA,
-        nome: 'area_sinalizada',
-        descricao: 'A área de trabalho está sinalizada conforme normas?',
-        bloco: 'SST'
-    }
-];
-
-const vinculosCargoQuesitoConfig = [
-    { nomeCargo: 'Pedreiro', quesitoId: ID_QUESITO_USO_EPI },
-    { nomeCargo: 'Pedreiro', quesitoId: ID_QUESITO_AREA_SINALIZADA },
-    { nomeCargo: 'Analista de Sistemas', quesitoId: ID_QUESITO_USO_EPI }
-];
 
 async function main() {
     console.log('Iniciando seed de quesitos...');
+
+    const quesitosDados = listarQuesitosSeed();
+    const cargosAtivos = listarCargosAtivosSeed();
+    const vinculosCargoQuesitoConfig = montarVinculosCargoQuesitoSeed(cargosAtivos, quesitosDados);
 
     for (const quesito of quesitosDados) {
         const existentePorNome = await prisma.quesito.findUnique({
@@ -46,9 +34,9 @@ async function main() {
             },
             create: quesito
         });
-
-        console.log(`- Quesito "${quesito.nome}" sincronizado.`);
     }
+
+    console.log(`- ${quesitosDados.length} quesitos sincronizados.`);
 
     for (const vinculoConfig of vinculosCargoQuesitoConfig) {
         const roleId = await obterIdCargoPorNome(vinculoConfig.nomeCargo);
@@ -68,7 +56,8 @@ async function main() {
         });
     }
 
-    console.log('\n=== QUESITOS E VÍNCULOS CARGO-QUESITO ATUALIZADOS ===');
+    console.log(`- ${vinculosCargoQuesitoConfig.length} vínculos cargo/quesito sincronizados.`);
+    console.log(`\n=== QUESITOS ATUALIZADOS (${QUANTIDADE_QUESITOS_SEED} registros) ===`);
 }
 
 main()

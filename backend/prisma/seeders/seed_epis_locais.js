@@ -1,32 +1,22 @@
 import './carregarAmbienteRaiz.js';
 
 import prisma from '../../src/config/database.js';
-import { ID_EPI_CAPACETE, ID_EPI_LUVA } from './dados/identificadoresSeedConstantes.js';
+import {
+    QUANTIDADE_CARGOS_COM_MINIMO_EPIS,
+    QUANTIDADE_EPIS_SEED,
+    MINIMO_EPIS_POR_CARGO_PRIORITARIO,
+    listarCargosAtivosSeed,
+    listarEpisSeed,
+    montarVinculosCargoEpiSeed
+} from './dados/conteudoVolumeSeedTeste.js';
 import { obterIdCargoPorNome } from './utils/resolverReferenciasSeed.js';
-
-const episDados = [
-    {
-        id: ID_EPI_CAPACETE,
-        name: 'Capacete de Segurança',
-        caNumber: '11070',
-        caExpirationDate: new Date('2028-12-31')
-    },
-    {
-        id: ID_EPI_LUVA,
-        name: 'Luva de Proteção',
-        caNumber: '4280',
-        caExpirationDate: new Date('2027-06-30')
-    }
-];
-
-const vinculosCargoEpiConfig = [
-    { nomeCargo: 'Analista de Sistemas', epiId: ID_EPI_CAPACETE, periodicityDays: 365 },
-    { nomeCargo: 'Pedreiro', epiId: ID_EPI_CAPACETE, periodicityDays: 180 },
-    { nomeCargo: 'Pedreiro', epiId: ID_EPI_LUVA, periodicityDays: 90 }
-];
 
 async function main() {
     console.log('Iniciando seed de EPIs locais (sem API CAEPI)...');
+
+    const episDados = listarEpisSeed();
+    const cargosAtivos = listarCargosAtivosSeed();
+    const vinculosCargoEpiConfig = montarVinculosCargoEpiSeed(episDados, cargosAtivos);
 
     for (const epi of episDados) {
         const existentePorCa = await prisma.epi.findUnique({
@@ -50,9 +40,9 @@ async function main() {
                 isActive: true
             }
         });
-
-        console.log(`- EPI CA ${epi.caNumber} sincronizado.`);
     }
+
+    console.log(`- ${episDados.length} EPIs sincronizados.`);
 
     for (const vinculoConfig of vinculosCargoEpiConfig) {
         const roleId = await obterIdCargoPorNome(vinculoConfig.nomeCargo);
@@ -73,11 +63,12 @@ async function main() {
                 periodicityDays: vinculoConfig.periodicityDays
             }
         });
-
-        console.log(`- Vínculo cargo/EPI "${vinculoConfig.nomeCargo}" sincronizado.`);
     }
 
-    console.log('\n=== EPIS E VÍNCULOS CARGO-EPI ATUALIZADOS ===');
+    console.log(`- ${vinculosCargoEpiConfig.length} vínculos cargo/EPI sincronizados.`);
+    console.log(
+        `\n=== EPIS E VÍNCULOS ATUALIZADOS (${QUANTIDADE_EPIS_SEED} EPIs; ${QUANTIDADE_CARGOS_COM_MINIMO_EPIS} cargos com >= ${MINIMO_EPIS_POR_CARGO_PRIORITARIO} EPIs) ===`
+    );
 }
 
 main()

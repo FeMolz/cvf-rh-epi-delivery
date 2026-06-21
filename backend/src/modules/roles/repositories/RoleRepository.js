@@ -95,6 +95,15 @@ class RoleRepository {
         return quantidade > 0;
     }
 
+    async countEmployeesByRoleId(id) {
+        return prisma.employee.count({
+            where: {
+                roleId: id,
+                deletedAt: null
+            }
+        });
+    }
+
     async isNameUnique(name, id = null) {
         const filtros = {
             name,
