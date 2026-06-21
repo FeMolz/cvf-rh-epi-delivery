@@ -1,5 +1,7 @@
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
+import { statusFuncionarioEncerraVinculo } from '../../../shared/constants/funcionarioVinculoConstantes.js';
 import gerenciarPeriodicidadeEpiFuncionarioService from '../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js';
+import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
 import {
     MENSAGEM_CPF_DUPLICADO,
     MENSAGEM_EMAIL_DUPLICADO,
@@ -18,11 +20,35 @@ class UpdateEmployeeService {
      */
     async execute(funcionarioId, entrada) {
         const funcionarioExistente = await employeeRepository.findById(funcionarioId);
-        if (!funcionarioExistente || funcionarioExistente.deletedAt) {
+        if (!funcionarioExistente) {
             throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
 
         const dadosAtualizacao = { ...entrada };
+        const statusAnterior = String(funcionarioExistente.status || '');
+        const statusNovo =
+            dadosAtualizacao.status !== undefined
+                ? String(dadosAtualizacao.status)
+                : statusAnterior;
+
+        if (dadosAtualizacao.status !== undefined) {
+            if (statusFuncionarioEncerraVinculo(statusNovo) && !statusFuncionarioEncerraVinculo(statusAnterior)) {
+                dadosAtualizacao.deletedAt = new Date();
+            }
+
+            if (!statusFuncionarioEncerraVinculo(statusNovo) && statusFuncionarioEncerraVinculo(statusAnterior)) {
+                dadosAtualizacao.deletedAt = null;
+            }
+        }
+
+        const roleIdEfetivo =
+            dadosAtualizacao.roleId !== undefined
+                ? dadosAtualizacao.roleId
+                : funcionarioExistente.roleId;
+
+        if (dadosAtualizacao.roleId !== undefined || !statusFuncionarioEncerraVinculo(statusNovo)) {
+            await validarCargoAtivoParaVinculoService.execute(String(roleIdEfetivo));
+        }
 
         if (entrada.cpf !== undefined) {
             dadosAtualizacao.cpf = validarCpf(entrada.cpf);

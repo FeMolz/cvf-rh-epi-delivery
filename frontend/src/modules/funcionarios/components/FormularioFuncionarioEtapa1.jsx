@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { CampoDataBr } from '../../../shared/components/CampoDataBr.jsx';
 import {
@@ -12,7 +12,8 @@ import {
     OPCOES_GRAU_INSTRUCAO,
     OPCOES_RACA_COR,
     OPCOES_STATUS_FUNCIONARIO,
-    STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO
+    STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO,
+    STATUS_FUNCIONARIO_ENCERRADOS
 } from '../utils/listagemFuncionarios.js';
 
 /**
@@ -67,6 +68,18 @@ export function FormularioFuncionarioEtapa1({
         resignationDate: String(valoresIniciais.resignationDate || '').slice(0, 10)
     });
     const [erro, setErro] = useState('');
+
+    const cargosParaSelecao = useMemo(() => {
+        const contratoEncerrado = STATUS_FUNCIONARIO_ENCERRADOS.includes(dados.status);
+
+        return cargos.filter((cargo) => {
+            if (cargo.deletedAt) {
+                return contratoEncerrado && String(cargo.id) === String(dados.roleId);
+            }
+
+            return true;
+        });
+    }, [cargos, dados.status, dados.roleId]);
 
     function atualizarCampo(campo, valor) {
         setDados((atual) => ({ ...atual, [campo]: valor }));
@@ -235,7 +248,7 @@ export function FormularioFuncionarioEtapa1({
                             required
                         >
                             <option value="">Selecione…</option>
-                            {cargos.map((cargo) => (
+                            {cargosParaSelecao.map((cargo) => (
                                 <option key={cargo.id} value={cargo.id}>
                                     {cargo.name}
                                 </option>

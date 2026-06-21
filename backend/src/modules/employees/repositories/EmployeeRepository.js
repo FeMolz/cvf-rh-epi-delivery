@@ -30,7 +30,6 @@ class EmployeeRepository {
     async findManyComFiltro(filtroConsulta = {}) {
         return prisma.employee.findMany({
             where: {
-                deletedAt: null,
                 ...filtroConsulta
             },
             select: CAMPOS_SELECAO_FUNCIONARIO,

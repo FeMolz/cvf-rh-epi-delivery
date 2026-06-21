@@ -138,16 +138,29 @@ export function ListagemFuncionariosPage() {
         });
     }
 
+    function alternarSelecaoTodos(ids, selecionar) {
+        setIdsSelecionados((atual) => {
+            const proximo = new Set(atual);
+
+            for (const id of ids) {
+                if (selecionar) {
+                    proximo.add(id);
+                } else {
+                    proximo.delete(id);
+                }
+            }
+
+            return proximo;
+        });
+    }
+
     async function aoBaixarRelatorio() {
         setBaixandoRelatorio(true);
         setErro('');
 
-        const idsMarcados = [...idsSelecionados];
         const opcoesRelatorio = { filtro: 'todos' };
 
-        if (idsMarcados.length > 0) {
-            opcoesRelatorio.ids = idsMarcados;
-        } else if (empresaAtivaId) {
+        if (empresaAtivaId) {
             opcoesRelatorio.companyId = empresaAtivaId;
         }
 
@@ -232,6 +245,7 @@ export function ListagemFuncionariosPage() {
                                 funcionarios={paginacao.itens}
                                 idsSelecionados={idsSelecionados}
                                 onAlternarSelecao={alternarSelecaoFuncionario}
+                                onAlternarSelecaoTodos={alternarSelecaoTodos}
                             />
                             <Paginacao
                                 paginaAtual={paginacao.paginaAtual}

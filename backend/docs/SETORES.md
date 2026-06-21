@@ -65,9 +65,9 @@ src/modules/setores/
 | `UpdateSetorService` | Atualiza nome e `isActive`; valida unicidade do nome. |
 | `DeleteSetorService` | Desativa setor (`isActive = false`). Bloqueia se houver funcionários ativos vinculados (409). |
 
-O seed inicial (`prisma/seeders/seed_setores.js`) continua disponível para carga de dados com UUIDs fixos.
+O cadastro em produção é feito pela API (`POST /api/v1/setores`). Em ambiente de teste, setores de exemplo são criados automaticamente pelo `seed_funcionarios.js` via `sincronizarEmpresasSetoresTeste`.
 
-### Setores cadastrados no seed
+### Setores de referência no banco de teste
 
 | Nome | UUID fixo |
 |------|-----------|
@@ -79,12 +79,6 @@ O seed inicial (`prisma/seeders/seed_setores.js`) continua disponível para carg
 | ALMOXARIFADO | `60606060-6060-6060-6060-606060606060` |
 | VIVANT | `70707070-7070-7070-7070-707070707070` |
 | RIO SPORTS | `80808080-8080-8080-8080-808080808080` |
-
-**Seed:**
-
-```bash
-npm run seed:setores
-```
 
 ## 5. Endpoints / Rotas Disponíveis
 

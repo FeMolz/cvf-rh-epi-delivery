@@ -31,14 +31,12 @@ describe('FindEmployeeByIdService', () => {
         });
     });
 
-    it('deve lancar erro 404 quando funcionario esta excluido', async () => {
-        employeeRepositoryMock.findById.mockResolvedValue({
-            id: '1',
-            deletedAt: new Date()
-        });
+    it('deve retornar funcionario desligado para permitir edicao administrativa', async () => {
+        const funcionario = { id: '1', name: 'João', deletedAt: new Date(), status: 'DESLIGADO' };
+        employeeRepositoryMock.findById.mockResolvedValue(funcionario);
 
-        await expect(findEmployeeByIdService.execute('1')).rejects.toMatchObject({
-            statusCode: 404
-        });
+        const resultado = await findEmployeeByIdService.execute('1');
+
+        expect(resultado).toEqual(funcionario);
     });
 });

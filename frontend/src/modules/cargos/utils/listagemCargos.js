@@ -2,7 +2,7 @@
  * @param {Record<string, unknown>} cargo
  */
 export function cargoEstaAtivo(cargo) {
-    return !cargo.deletedAt;
+    return cargo ? !cargo.deletedAt : false;
 }
 
 /**
@@ -10,6 +10,35 @@ export function cargoEstaAtivo(cargo) {
  */
 export function obterRotuloStatusCargo(cargo) {
     return cargoEstaAtivo(cargo) ? 'Ativo' : 'Inativo';
+}
+
+/**
+ * @param {Record<string, unknown>} cargo
+ */
+export function obterClasseStatusCargo(cargo) {
+    return cargoEstaAtivo(cargo)
+        ? 'status-badge status-badge--ativo'
+        : 'status-badge status-badge--offline';
+}
+
+/**
+ * @param {Record<string, unknown>} cargo
+ */
+export function obterQuantidadeFuncionarios(cargo) {
+    const contagem = cargo._count;
+
+    if (contagem && typeof contagem === 'object' && 'employees' in contagem) {
+        return Number(contagem.employees) || 0;
+    }
+
+    return 0;
+}
+
+/**
+ * @param {Record<string, unknown>} cargo
+ */
+export function cargoPodeSerDesativado(cargo) {
+    return cargoEstaAtivo(cargo) && obterQuantidadeFuncionarios(cargo) === 0;
 }
 
 /**

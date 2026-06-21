@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+    alterarSituacaoCargo,
     atualizarCargo,
+    baixarRelatorioCargos,
     buscarCargoPorId,
     criarCargo,
     excluirCargo,
@@ -9,10 +11,11 @@ import {
 } from './cargosApi.js';
 
 vi.mock('../../../shared/api/clienteHttp.js', () => ({
-    requisicaoApi: vi.fn()
+    requisicaoApi: vi.fn(),
+    baixarArquivoApi: vi.fn()
 }));
 
-const { requisicaoApi } = await import('../../../shared/api/clienteHttp.js');
+const { requisicaoApi, baixarArquivoApi } = await import('../../../shared/api/clienteHttp.js');
 
 describe('cargosApi', () => {
     it('deve listar cargos com token', async () => {
@@ -68,6 +71,40 @@ describe('cargosApi', () => {
             method: 'PUT',
             body: { name: 'Operador II' },
             token: 'jwt'
+        });
+    });
+
+    it('deve alterar situacao do cargo', async () => {
+        requisicaoApi.mockResolvedValue({ id: '1', deletedAt: null });
+
+        await alterarSituacaoCargo('1', true, 'jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/roles/1/situacao', {
+            method: 'PATCH',
+            body: { ativo: true },
+            token: 'jwt'
+        });
+    });
+
+    it('deve baixar relatorio de cargos ativos', async () => {
+        baixarArquivoApi.mockResolvedValue(undefined);
+
+        await baixarRelatorioCargos('jwt');
+
+        expect(baixarArquivoApi).toHaveBeenCalledWith('/roles/export/lista', {
+            token: 'jwt',
+            nomeArquivoPadrao: 'cargos.xlsx'
+        });
+    });
+
+    it('deve baixar relatorio de cargos inativos', async () => {
+        baixarArquivoApi.mockResolvedValue(undefined);
+
+        await baixarRelatorioCargos('jwt', { apenasInativos: true });
+
+        expect(baixarArquivoApi).toHaveBeenCalledWith('/roles/export/lista?apenasInativos=true', {
+            token: 'jwt',
+            nomeArquivoPadrao: 'cargos.xlsx'
         });
     });
 

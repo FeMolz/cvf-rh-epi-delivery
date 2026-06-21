@@ -12,8 +12,6 @@
     "dev": "npm run prisma:generate && nodemon src/server.js",
     "start": "node src/server.js",
     "seed:admin": "node prisma/seeders/admin.js",
-    "seed:companies": "node prisma/seeders/seed_companies.js",
-    "seed:setores": "node prisma/seeders/seed_setores.js",
     "seed:test-data": "node prisma/seeders/seed_sistema_completo.js",
     "seed:epis": "node prisma/seeders/seed_epis.js",
     "seed:dev-token": "node prisma/seeders/generate-dev-token.js",

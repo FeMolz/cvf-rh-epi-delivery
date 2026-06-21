@@ -3,11 +3,22 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { DialogoConfirmacao } from '../../../shared/components/DialogoConfirmacao.jsx';
-import { PAPEL_ADMIN } from '../../../shared/constants/papeis.js';
+import { PAPEIS_CADASTRO_USUARIO } from '../../../shared/constants/papeis.js';
 import { formatarDataHora } from '../../../shared/utils/listagemUsuarios.js';
 import { FormularioCargo } from '../components/FormularioCargo.jsx';
-import { atualizarCargo, buscarCargoPorId, excluirCargo } from '../services/cargosApi.js';
-import { cargoEstaAtivo, obterQuantidadeEpis, obterRotuloStatusCargo } from '../utils/listagemCargos.js';
+import {
+    alterarSituacaoCargo,
+    atualizarCargo,
+    buscarCargoPorId
+} from '../services/cargosApi.js';
+import {
+    cargoEstaAtivo,
+    cargoPodeSerDesativado,
+    obterClasseStatusCargo,
+    obterQuantidadeEpis,
+    obterQuantidadeFuncionarios,
+    obterRotuloStatusCargo
+} from '../utils/listagemCargos.js';
 
 export function DetalheCargoPage() {
     const { id } = useParams();
@@ -19,7 +30,7 @@ export function DetalheCargoPage() {
     const [salvando, setSalvando] = useState(false);
     const [erro, setErro] = useState('');
     const [aviso, setAviso] = useState('');
-    const [exibirConfirmacaoExclusao, setExibirConfirmacaoExclusao] = useState(false);
+    const [exibirConfirmacaoSituacao, setExibirConfirmacaoSituacao] = useState(false);
 
     useEffect(() => {
         let ativo = true;
@@ -67,30 +78,40 @@ export function DetalheCargoPage() {
         }
     }
 
-    function aoSolicitarExclusao() {
-        setExibirConfirmacaoExclusao(true);
-    }
+    async function confirmarAlteracaoSituacao() {
+        if (!cargo) {
+            return;
+        }
 
-    async function confirmarExclusao() {
+        const ativar = !cargoEstaAtivo(cargo);
         setSalvando(true);
         setErro('');
         setAviso('');
 
         try {
-            await excluirCargo(id, token);
-            navegar('/admin/cargos');
+            const atualizado = await alterarSituacaoCargo(id, ativar, token);
+            setCargo(atualizado);
+            setExibirConfirmacaoSituacao(false);
+
+            if (!ativar) {
+                navegar('/admin/cargos');
+            }
         } catch (erroCapturado) {
             if (erroCapturado.statusCode === 409) {
                 setAviso(
                     erroCapturado.message ||
-                        'Não é possível excluir este cargo enquanto houver funcionários vinculados a ele.'
+                        'Não é possível desativar este cargo enquanto houver funcionários cadastrados nele. Altere o cargo dos funcionários antes de continuar.'
                 );
             } else {
-                setErro(erroCapturado.message || 'Não foi possível excluir o cargo.');
+                setErro(
+                    erroCapturado.message ||
+                        `Não foi possível ${ativar ? 'reativar' : 'desativar'} o cargo.`
+                );
             }
 
+            setExibirConfirmacaoSituacao(false);
+        } finally {
             setSalvando(false);
-            setExibirConfirmacaoExclusao(false);
         }
     }
 
@@ -109,8 +130,10 @@ export function DetalheCargoPage() {
         );
     }
 
-    const podeExcluir = user?.role === PAPEL_ADMIN && cargoEstaAtivo(cargo);
+    const podeGerenciarSituacao = PAPEIS_CADASTRO_USUARIO.includes(user?.role);
     const cargoAtivo = cargoEstaAtivo(cargo);
+    const quantidadeFuncionarios = obterQuantidadeFuncionarios(cargo);
+    const podeDesativar = cargoPodeSerDesativado(cargo);
 
     return (
         <section className="admin-pagina">
@@ -124,11 +147,7 @@ export function DetalheCargoPage() {
                         <div className="detalhe-usuario__campo">
                             <span>Status</span>
                             <strong>
-                                <span
-                                    className={`status-badge ${
-                                        cargoAtivo ? 'status-badge--online' : 'status-badge--offline'
-                                    }`}
-                                >
+                                <span className={obterClasseStatusCargo(cargo)}>
                                     {obterRotuloStatusCargo(cargo)}
                                 </span>
                             </strong>
@@ -142,7 +161,11 @@ export function DetalheCargoPage() {
                             <strong>{obterQuantidadeEpis(cargo)}</strong>
                         </div>
                         <div className="detalhe-usuario__campo">
-                            <span>{cargoAtivo ? 'Atualizado em' : 'Excluído em'}</span>
+                            <span>Funcionários cadastrados</span>
+                            <strong>{quantidadeFuncionarios}</strong>
+                        </div>
+                        <div className="detalhe-usuario__campo">
+                            <span>{cargoAtivo ? 'Atualizado em' : 'Inativado em'}</span>
                             <strong>
                                 {formatarDataHora(cargoAtivo ? cargo.updatedAt : cargo.deletedAt)}
                             </strong>
@@ -151,7 +174,13 @@ export function DetalheCargoPage() {
 
                     {!cargoAtivo ? (
                         <p className="mensagem mensagem--aviso" role="status">
-                            Este cargo está inativo e não pode ser editado ou excluído novamente.
+                            Este cargo está inativo e não pode ser editado. Você pode reativá-lo se
+                            necessário.
+                        </p>
+                    ) : quantidadeFuncionarios > 0 ? (
+                        <p className="mensagem mensagem--aviso" role="status">
+                            Este cargo possui funcionários cadastrados. Altere o cargo de cada
+                            funcionário antes de desativá-lo.
                         </p>
                     ) : null}
 
@@ -183,14 +212,14 @@ export function DetalheCargoPage() {
                             </Link>
                         }
                         acaoExcluir={
-                            podeExcluir ? (
+                            podeGerenciarSituacao ? (
                                 <button
-                                    className="botao botao--perigo"
+                                    className={cargoAtivo ? 'botao botao--perigo' : 'botao botao--primario'}
                                     type="button"
-                                    disabled={salvando}
-                                    onClick={aoSolicitarExclusao}
+                                    disabled={salvando || (cargoAtivo && !podeDesativar)}
+                                    onClick={() => setExibirConfirmacaoSituacao(true)}
                                 >
-                                    Excluir cargo
+                                    {cargoAtivo ? 'Desativar cargo' : 'Reativar cargo'}
                                 </button>
                             ) : null
                         }
@@ -198,15 +227,19 @@ export function DetalheCargoPage() {
                 </div>
             </div>
 
-            {cargoAtivo ? (
+            {podeGerenciarSituacao ? (
                 <DialogoConfirmacao
-                    aberto={exibirConfirmacaoExclusao}
-                    titulo="Excluir cargo"
-                    mensagem={`Tem certeza que deseja excluir o cargo "${cargo.name}"? Esta ação não pode ser desfeita.`}
-                    rotuloConfirmar="Excluir cargo"
+                    aberto={exibirConfirmacaoSituacao}
+                    titulo={cargoAtivo ? 'Desativar cargo' : 'Reativar cargo'}
+                    mensagem={
+                        cargoAtivo
+                            ? `Desativar o cargo "${cargo.name}"? Ele deixará de aparecer nas listagens operacionais.`
+                            : `Reativar o cargo "${cargo.name}"?`
+                    }
+                    rotuloConfirmar={cargoAtivo ? 'Desativar cargo' : 'Reativar cargo'}
                     carregando={salvando}
-                    onConfirmar={confirmarExclusao}
-                    onCancelar={() => setExibirConfirmacaoExclusao(false)}
+                    onConfirmar={confirmarAlteracaoSituacao}
+                    onCancelar={() => setExibirConfirmacaoSituacao(false)}
                 />
             ) : null}
         </section>

@@ -53,11 +53,21 @@ describe('ListRolesService', () => {
         });
     });
 
-    it('deve rejeitar listagem de inativos para nao ADMIN', async () => {
+    it('deve listar cargos ativos e inativos para ADMINISTRATIVO', async () => {
+        roleRepositoryMock.findAll.mockResolvedValue([]);
+
+        await listRolesService.execute({ incluirInativos: true, papelUsuario: 'ADMINISTRATIVO' });
+
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            incluirInativos: true,
+            apenasInativos: false
+        });
+    });
+
+    it('deve rejeitar listagem de inativos para ALMOXARIFADO', async () => {
         await expect(
-            listRolesService.execute({ incluirInativos: true, papelUsuario: 'ADMINISTRATIVO' })
+            listRolesService.execute({ incluirInativos: true, papelUsuario: 'ALMOXARIFADO' })
         ).rejects.toMatchObject({
-            message: 'Apenas administradores podem listar cargos inativos.',
             statusCode: 403
         });
     });

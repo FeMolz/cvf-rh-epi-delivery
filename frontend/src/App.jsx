@@ -11,6 +11,10 @@ import { DetalheUsuarioPage } from './modules/usuarios/pages/DetalheUsuarioPage.
 import { GerenciamentoPage } from './modules/gerenciamento/pages/GerenciamentoPage.jsx';
 import { ListagemCargosPage } from './modules/cargos/pages/ListagemCargosPage.jsx';
 import { DetalheCargoPage } from './modules/cargos/pages/DetalheCargoPage.jsx';
+import { ListagemEmpresasPage } from './modules/empresas/pages/ListagemEmpresasPage.jsx';
+import { DetalheEmpresaPage } from './modules/empresas/pages/DetalheEmpresaPage.jsx';
+import { ListagemSetoresPage } from './modules/setores/pages/ListagemSetoresPage.jsx';
+import { DetalheSetorPage } from './modules/setores/pages/DetalheSetorPage.jsx';
 import { CadastroFuncionarioPage } from './modules/funcionarios/pages/CadastroFuncionarioPage.jsx';
 import { EdicaoFuncionarioPage } from './modules/funcionarios/pages/EdicaoFuncionarioPage.jsx';
 import { ListagemFuncionariosPage } from './modules/funcionarios/pages/ListagemFuncionariosPage.jsx';
@@ -32,6 +36,10 @@ export default function App() {
                             <Route path="usuarios/cadastro" element={<CadastroUsuarioPage />} />
                             <Route path="cargos" element={<ListagemCargosPage />} />
                             <Route path="cargos/:id" element={<DetalheCargoPage />} />
+                            <Route path="empresas" element={<ListagemEmpresasPage />} />
+                            <Route path="empresas/:id" element={<DetalheEmpresaPage />} />
+                            <Route path="setores" element={<ListagemSetoresPage />} />
+                            <Route path="setores/:id" element={<DetalheSetorPage />} />
                             <Route path="funcionarios" element={<ListagemFuncionariosPage />} />
                             <Route path="funcionarios/cadastro" element={<CadastroFuncionarioPage />} />
                             <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />

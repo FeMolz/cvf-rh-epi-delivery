@@ -1,4 +1,4 @@
-import { requisicaoApi } from '../../../shared/api/clienteHttp.js';
+import { baixarArquivoApi, requisicaoApi } from '../../../shared/api/clienteHttp.js';
 
 /**
  * @param {string} token
@@ -50,6 +50,39 @@ export function atualizarCargo(id, dados, token) {
     return requisicaoApi(`/roles/${id}`, {
         method: 'PUT',
         body: dados,
+        token
+    });
+}
+
+/**
+ * @param {string} id
+ * @param {string} token
+ */
+export function baixarRelatorioCargos(token, opcoes = {}) {
+    const parametros = new URLSearchParams();
+
+    if (opcoes.apenasInativos) {
+        parametros.set('apenasInativos', 'true');
+    }
+
+    const consulta = parametros.toString();
+    const caminho = consulta ? `/roles/export/lista?${consulta}` : '/roles/export/lista';
+
+    return baixarArquivoApi(caminho, {
+        token,
+        nomeArquivoPadrao: 'cargos.xlsx'
+    });
+}
+
+/**
+ * @param {string} id
+ * @param {boolean} ativo
+ * @param {string} token
+ */
+export function alterarSituacaoCargo(id, ativo, token) {
+    return requisicaoApi(`/roles/${id}/situacao`, {
+        method: 'PATCH',
+        body: { ativo },
         token
     });
 }

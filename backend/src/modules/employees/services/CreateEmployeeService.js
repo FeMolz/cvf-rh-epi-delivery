@@ -1,4 +1,5 @@
 import employeeRepository from '../repositories/EmployeeRepository.js';
+import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
 import {
     MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO,
     MENSAGEM_CPF_DUPLICADO,
@@ -56,6 +57,8 @@ class CreateEmployeeService {
         if (funcionarios.some(funcionario => funcionario.email === emailValidado)) {
             lancarErroFuncionario(MENSAGEM_EMAIL_DUPLICADO);
         }
+
+        await validarCargoAtivoParaVinculoService.execute(String(roleId));
 
         const dadosFuncionario = montarDadosFuncionario({
             ...entrada,

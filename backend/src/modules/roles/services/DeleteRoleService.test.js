@@ -34,7 +34,7 @@ describe('DeleteRoleService', () => {
         roleRepositoryMock.countEmployeesByRoleId.mockResolvedValue(2);
 
         await expect(deleteRoleService.execute('1')).rejects.toMatchObject({
-            message: 'Não é possível excluir este cargo enquanto houver funcionários vinculados a ele.',
+            message: 'Não é possível excluir este cargo enquanto houver funcionários cadastrados nele. Altere o cargo dos funcionários antes de continuar.',
             statusCode: 409
         });
 

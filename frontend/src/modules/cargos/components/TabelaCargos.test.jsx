@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { TabelaCargos } from './TabelaCargos.jsx';
 
 describe('TabelaCargos', () => {
-    it('deve exibir cargos com quantidade de EPIs', () => {
+    it('deve exibir cargos com quantidade de EPIs e badge de status', () => {
         render(
             <MemoryRouter>
                 <TabelaCargos
@@ -15,7 +15,7 @@ describe('TabelaCargos', () => {
                             name: 'Operador',
                             description: 'Linha 1',
                             createdAt: '2024-01-10T10:00:00.000Z',
-                            _count: { roleEpis: 4 }
+                            _count: { roleEpis: 4, employees: 0 }
                         }
                     ]}
                 />
@@ -25,6 +25,8 @@ describe('TabelaCargos', () => {
         expect(screen.getByRole('link', { name: 'Operador' })).toHaveAttribute('href', '/admin/cargos/1');
         expect(screen.getByText('Linha 1')).toBeInTheDocument();
         expect(screen.getByText('4')).toBeInTheDocument();
+        expect(screen.getByText('Ativo')).toHaveClass('status-badge--ativo');
+        expect(screen.queryByRole('switch')).not.toBeInTheDocument();
     });
 
     it('deve exibir estado vazio', () => {

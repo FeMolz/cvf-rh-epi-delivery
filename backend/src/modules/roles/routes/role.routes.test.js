@@ -6,8 +6,10 @@ import request from 'supertest';
 const roleControllerMock = {
     create: jest.fn((req, res) => res.status(201).send()),
     findAll: jest.fn((req, res) => res.status(200).send()),
+    exportarLista: jest.fn((req, res) => res.status(200).send(Buffer.from('xlsx'))),
     findById: jest.fn((req, res) => res.status(200).send()),
     update: jest.fn((req, res) => res.status(200).send()),
+    alterarSituacao: jest.fn((req, res) => res.status(200).send()),
     delete: jest.fn((req, res) => res.status(204).send()),
 };
 
@@ -61,6 +63,13 @@ describe('Role Routes', () => {
         expect(roleControllerMock.findAll).toHaveBeenCalled();
     });
 
+    it('should route GET /api/v1/roles/export/lista to exportarLista controller', async () => {
+        const response = await request(app).get('/api/v1/roles/export/lista');
+
+        expect(response.status).toBe(200);
+        expect(roleControllerMock.exportarLista).toHaveBeenCalled();
+    });
+
     it('should route GET /api/v1/roles/:id to findById controller with correct middlewares', async () => {
         const response = await request(app).get('/api/v1/roles/123');
         
@@ -75,6 +84,15 @@ describe('Role Routes', () => {
         expect(response.status).toBe(200);
         expect(authMiddlewareMock.isAuthenticated).toHaveBeenCalled();
         expect(roleControllerMock.update).toHaveBeenCalled();
+    });
+
+    it('should route PATCH /api/v1/roles/:id/situacao to alterarSituacao controller', async () => {
+        const response = await request(app)
+            .patch('/api/v1/roles/123/situacao')
+            .send({ ativo: false });
+
+        expect(response.status).toBe(200);
+        expect(roleControllerMock.alterarSituacao).toHaveBeenCalled();
     });
 
     it('should route DELETE /api/v1/roles/:id to delete controller with correct middlewares', async () => {

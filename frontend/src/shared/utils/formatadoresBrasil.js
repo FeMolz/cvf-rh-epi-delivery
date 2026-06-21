@@ -1,6 +1,38 @@
 /**
  * @param {unknown} valor
  */
+export function aplicarMascaraCnpj(valor) {
+    const digitos = String(valor).replace(/\D/g, '').slice(0, 14);
+
+    if (digitos.length <= 2) {
+        return digitos;
+    }
+
+    if (digitos.length <= 5) {
+        return `${digitos.slice(0, 2)}.${digitos.slice(2)}`;
+    }
+
+    if (digitos.length <= 8) {
+        return `${digitos.slice(0, 2)}.${digitos.slice(2, 5)}.${digitos.slice(5)}`;
+    }
+
+    if (digitos.length <= 12) {
+        return `${digitos.slice(0, 2)}.${digitos.slice(2, 5)}.${digitos.slice(5, 8)}/${digitos.slice(8)}`;
+    }
+
+    return `${digitos.slice(0, 2)}.${digitos.slice(2, 5)}.${digitos.slice(5, 8)}/${digitos.slice(8, 12)}-${digitos.slice(12)}`;
+}
+
+/**
+ * @param {unknown} cnpj
+ */
+export function cnpjEstaCompleto(cnpj) {
+    return /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(String(cnpj).trim());
+}
+
+/**
+ * @param {unknown} valor
+ */
 export function aplicarMascaraCpf(valor) {
     const digitos = String(valor).replace(/\D/g, '').slice(0, 11);
 

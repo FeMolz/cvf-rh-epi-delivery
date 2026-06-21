@@ -70,7 +70,7 @@ src/modules/companies/
 | `UpdateCompanyService` | Atualiza nome, CNPJ e `isActive`; valida unicidade de CNPJ. |
 | `DeleteCompanyService` | Desativa empresa (`isActive = false`). Bloqueia se houver funcionários ativos vinculados (409). |
 
-O seed inicial (`prisma/seeders/seed_companies.js`) continua disponível para carga de dados com UUIDs fixos em ambientes de desenvolvimento e teste.
+O cadastro em produção é feito pela API (`POST /api/v1/companies`). Em ambiente de teste, empresas de exemplo são criadas automaticamente pelo `seed_funcionarios.js` via `sincronizarEmpresasSetoresTeste`.
 
 ## 5. Endpoints / Rotas Disponíveis
 

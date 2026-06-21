@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { filtrarCargos, formatarData, obterQuantidadeEpis, obterRotuloStatusCargo } from './listagemCargos.js';
+import {
+    cargoPodeSerDesativado,
+    filtrarCargos,
+    formatarData,
+    obterClasseStatusCargo,
+    obterQuantidadeEpis,
+    obterQuantidadeFuncionarios,
+    obterRotuloStatusCargo
+} from './listagemCargos.js';
 
 describe('listagemCargos', () => {
     it('deve formatar data curta em pt-BR', () => {
@@ -17,6 +25,19 @@ describe('listagemCargos', () => {
     it('deve identificar status do cargo', () => {
         expect(obterRotuloStatusCargo({})).toBe('Ativo');
         expect(obterRotuloStatusCargo({ deletedAt: '2024-01-01' })).toBe('Inativo');
+        expect(obterClasseStatusCargo({})).toContain('status-badge--ativo');
+        expect(obterClasseStatusCargo({ deletedAt: '2024-01-01' })).toContain('status-badge--offline');
+    });
+
+    it('deve obter quantidade de funcionarios e regra de desativacao', () => {
+        const cargoComFuncionarios = { _count: { employees: 2 } };
+        const cargoSemFuncionarios = { _count: { employees: 0 } };
+
+        expect(obterQuantidadeFuncionarios(cargoComFuncionarios)).toBe(2);
+        expect(obterQuantidadeFuncionarios({})).toBe(0);
+        expect(cargoPodeSerDesativado(cargoComFuncionarios)).toBe(false);
+        expect(cargoPodeSerDesativado(cargoSemFuncionarios)).toBe(true);
+        expect(cargoPodeSerDesativado({ deletedAt: '2024-01-01', _count: { employees: 0 } })).toBe(false);
     });
 
     it('deve filtrar cargos por nome ou descrição', () => {

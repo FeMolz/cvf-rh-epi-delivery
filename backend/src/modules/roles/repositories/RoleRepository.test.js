@@ -48,7 +48,10 @@ describe('RoleRepository', () => {
             where: { deletedAt: null },
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             },
             orderBy: { name: 'asc' }
@@ -65,7 +68,10 @@ describe('RoleRepository', () => {
             where: undefined,
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             },
             orderBy: { name: 'asc' }
@@ -81,7 +87,10 @@ describe('RoleRepository', () => {
             where: { deletedAt: { not: null } },
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             },
             orderBy: { name: 'asc' }
@@ -98,7 +107,10 @@ describe('RoleRepository', () => {
             where: { id: 1 },
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             }
         });
@@ -179,10 +191,7 @@ describe('RoleRepository', () => {
         const result = await roleRepository.countEmployeesByRoleId('cargo-1');
 
         expect(prismaMock.employee.count).toHaveBeenCalledWith({
-            where: {
-                roleId: 'cargo-1',
-                deletedAt: null
-            }
+            where: { roleId: 'cargo-1' }
         });
         expect(result).toBe(3);
     });

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    aplicarMascaraCnpj,
     aplicarMascaraCpf,
     aplicarMascaraDataBr,
     aplicarMascaraTelefone,
+    cnpjEstaCompleto,
     cpfEstaCompleto,
     dataBrParaIso,
     dataIsoParaBr,
@@ -11,6 +13,11 @@ import {
 } from './formatadoresBrasil.js';
 
 describe('formatadoresBrasil', () => {
+    it('deve formatar cnpj enquanto digita', () => {
+        expect(aplicarMascaraCnpj('11222333000181')).toBe('11.222.333/0001-81');
+        expect(cnpjEstaCompleto('11.222.333/0001-81')).toBe(true);
+    });
+
     it('deve formatar cpf enquanto digita', () => {
         expect(aplicarMascaraCpf('52998224725')).toBe('529.982.247-25');
         expect(aplicarMascaraCpf('529.982.247-25')).toBe('529.982.247-25');

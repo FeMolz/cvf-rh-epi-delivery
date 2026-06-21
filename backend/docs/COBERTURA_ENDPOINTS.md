@@ -60,8 +60,10 @@ Regras: 🔧 `AuthenticateUserService`, `UpdateUserService` (isActive não edit�
 |--------|----------|------------|
 | POST | `/` | ✅ |
 | GET | `/` | ✅ |
+| GET | `/export/lista` (`apenasInativos`) | ✅ |
 | GET | `/:id` | ✅ |
 | PUT | `/:id` | ✅ |
+| PATCH | `/:id/situacao` | ✅ |
 | DELETE | `/:id` | ✅ |
 
 ---

@@ -1,6 +1,8 @@
 export const ABAS_GERENCIAMENTO = [
     { id: 'usuarios', rotulo: 'Usuários' },
     { id: 'cargos', rotulo: 'Cargos' },
+    { id: 'empresas', rotulo: 'Empresas' },
+    { id: 'setores', rotulo: 'Setores' },
     { id: 'funcionarios', rotulo: 'Funcionários' }
 ];
 

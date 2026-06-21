@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 
 import { AbasGerenciamento } from '../components/AbasGerenciamento.jsx';
 import { PainelCargosGerenciamento } from '../components/PainelCargosGerenciamento.jsx';
+import { PainelEmpresasGerenciamento } from '../components/PainelEmpresasGerenciamento.jsx';
 import { PainelFuncionariosGerenciamento } from '../components/PainelFuncionariosGerenciamento.jsx';
+import { PainelSetoresGerenciamento } from '../components/PainelSetoresGerenciamento.jsx';
 import { PainelUsuariosGerenciamento } from '../components/PainelUsuariosGerenciamento.jsx';
 import {
     ABA_GERENCIAMENTO_PADRAO,
@@ -32,6 +34,10 @@ export function GerenciamentoPage() {
         switch (abaAtiva) {
             case 'cargos':
                 return <PainelCargosGerenciamento />;
+            case 'empresas':
+                return <PainelEmpresasGerenciamento />;
+            case 'setores':
+                return <PainelSetoresGerenciamento />;
             case 'funcionarios':
                 return <PainelFuncionariosGerenciamento />;
             default:
@@ -44,7 +50,7 @@ export function GerenciamentoPage() {
             <header className="admin-pagina__cabecalho">
                 <h1>Gerenciamento</h1>
                 <p className="admin-pagina__subtitulo">
-                    Centralize os cadastros de usuários, cargos e funcionários do RH-System.
+                    Centralize os cadastros de usuários, cargos, empresas, setores e funcionários do RH-System.
                 </p>
             </header>
 

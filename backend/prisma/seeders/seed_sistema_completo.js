@@ -8,8 +8,6 @@ const diretorioSeeders = path.dirname(fileURLToPath(import.meta.url));
 
 const ordemSeeders = [
     'admin.js',
-    'seed_companies.js',
-    'seed_setores.js',
     'seed_usuarios_papeis.js',
     'seed_cargos.js',
     'seed_funcionarios.js',

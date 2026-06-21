@@ -26,7 +26,10 @@ class RoleRepository {
             where,
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             },
             orderBy: { name: 'asc' }
@@ -40,7 +43,10 @@ class RoleRepository {
             },
             include: {
                 _count: {
-                    select: { roleEpis: true }
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
                 }
             }
         });
@@ -78,6 +84,25 @@ class RoleRepository {
         });
     }
 
+    async reactivate(id) {
+        return prisma.role.update({
+            where: {
+                id
+            },
+            data: {
+                deletedAt: null
+            },
+            include: {
+                _count: {
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
+                }
+            }
+        });
+    }
+
     async count() {
         return prisma.role.count({
             where: { deletedAt: null }
@@ -97,10 +122,7 @@ class RoleRepository {
 
     async countEmployeesByRoleId(id) {
         return prisma.employee.count({
-            where: {
-                roleId: id,
-                deletedAt: null
-            }
+            where: { roleId: id }
         });
     }
 

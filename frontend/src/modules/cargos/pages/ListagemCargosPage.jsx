@@ -7,7 +7,7 @@ import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
 import { IconeAbaCargos } from '../components/IconeAbaCargos.jsx';
 import { TabelaCargos } from '../components/TabelaCargos.jsx';
-import { listarCargos } from '../services/cargosApi.js';
+import { baixarRelatorioCargos, listarCargos } from '../services/cargosApi.js';
 import { filtrarCargos } from '../utils/listagemCargos.js';
 
 const ABAS_CARGOS = [
@@ -20,6 +20,7 @@ export function ListagemCargosPage() {
     const [abaAtiva, setAbaAtiva] = useState('ativos');
     const [cargos, setCargos] = useState([]);
     const [carregando, setCarregando] = useState(true);
+    const [baixandoRelatorio, setBaixandoRelatorio] = useState(false);
     const [erro, setErro] = useState('');
     const [termoBusca, setTermoBusca] = useState('');
     const [pagina, setPagina] = useState(1);
@@ -63,6 +64,25 @@ export function ListagemCargosPage() {
         setTermoBusca('');
     }, [abaAtiva]);
 
+    async function aoBaixarRelatorio() {
+        setBaixandoRelatorio(true);
+        setErro('');
+
+        const opcoesRelatorio = {};
+
+        if (abaAtiva === 'inativos') {
+            opcoesRelatorio.apenasInativos = true;
+        }
+
+        try {
+            await baixarRelatorioCargos(token, opcoesRelatorio);
+        } catch (erroCapturado) {
+            setErro(erroCapturado.message || 'Não foi possível baixar o relatório.');
+        } finally {
+            setBaixandoRelatorio(false);
+        }
+    }
+
     const abasComIcone = ABAS_CARGOS.map((aba) => ({
         ...aba,
         icone: <IconeAbaCargos id={aba.id} />
@@ -104,6 +124,16 @@ export function ListagemCargosPage() {
                         apenasInativos
                             ? 'Cargos desativados que não podem receber novos vínculos.'
                             : 'Cargos disponíveis para funcionários e entregas de EPI.'
+                    }
+                    acoes={
+                        <button
+                            className="botao botao--primario"
+                            type="button"
+                            disabled={baixandoRelatorio || carregando}
+                            onClick={aoBaixarRelatorio}
+                        >
+                            {baixandoRelatorio ? 'Baixando…' : 'Download Relatório'}
+                        </button>
                     }
                 />
 

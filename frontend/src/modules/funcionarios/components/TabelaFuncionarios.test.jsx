@@ -53,6 +53,7 @@ describe('TabelaFuncionarios', () => {
                     ]}
                     idsSelecionados={new Set()}
                     onAlternarSelecao={onAlternarSelecao}
+                    onAlternarSelecaoTodos={vi.fn()}
                 />
             </MemoryRouter>
         );
@@ -60,6 +61,59 @@ describe('TabelaFuncionarios', () => {
         await usuario.click(screen.getByRole('checkbox', { name: /selecionar maria/i }));
 
         expect(onAlternarSelecao).toHaveBeenCalledWith('1');
+    });
+
+    it('deve selecionar e desmarcar todos os funcionarios visiveis', async () => {
+        const usuario = userEvent.setup();
+        const onAlternarSelecaoTodos = vi.fn();
+        const funcionarios = [
+            {
+                id: '1',
+                name: 'Maria',
+                status: 'ATIVO',
+                role: { name: 'Analista' },
+                company: { name: 'Empresa A' },
+                setor: { nome: 'RH' }
+            },
+            {
+                id: '2',
+                name: 'João',
+                status: 'ATIVO',
+                role: { name: 'Técnico' },
+                company: { name: 'Empresa A' },
+                setor: { nome: 'TI' }
+            }
+        ];
+
+        const { rerender } = render(
+            <MemoryRouter>
+                <TabelaFuncionarios
+                    funcionarios={funcionarios}
+                    idsSelecionados={new Set()}
+                    onAlternarSelecao={vi.fn()}
+                    onAlternarSelecaoTodos={onAlternarSelecaoTodos}
+                />
+            </MemoryRouter>
+        );
+
+        await usuario.click(screen.getByRole('checkbox', { name: /selecionar todos/i }));
+
+        expect(onAlternarSelecaoTodos).toHaveBeenCalledWith(['1', '2'], true);
+
+        rerender(
+            <MemoryRouter>
+                <TabelaFuncionarios
+                    funcionarios={funcionarios}
+                    idsSelecionados={new Set(['1', '2'])}
+                    onAlternarSelecao={vi.fn()}
+                    onAlternarSelecaoTodos={onAlternarSelecaoTodos}
+                />
+            </MemoryRouter>
+        );
+
+        await usuario.click(screen.getByRole('checkbox', { name: /selecionar todos/i }));
+
+        expect(onAlternarSelecaoTodos).toHaveBeenLastCalledWith(['1', '2'], false);
     });
 
     it('deve exibir estado vazio', () => {

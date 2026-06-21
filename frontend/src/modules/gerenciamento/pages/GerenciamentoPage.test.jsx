@@ -26,7 +26,18 @@ vi.mock('../../funcionarios/services/empresasApi.js', () => ({
 
 vi.mock('../../cargos/services/cargosApi.js', () => ({
     criarCargo: vi.fn(),
-    listarCargos: vi.fn().mockResolvedValue([])
+    listarCargos: vi.fn().mockResolvedValue([
+        { id: '1', name: 'Operador', description: 'Linha', deletedAt: null }
+    ]),
+    alterarSituacaoCargo: vi.fn()
+}));
+
+vi.mock('../../empresas/services/empresasApi.js', () => ({
+    criarEmpresa: vi.fn()
+}));
+
+vi.mock('../../setores/services/setoresApi.js', () => ({
+    criarSetor: vi.fn()
 }));
 
 vi.mock('../../funcionarios/services/funcionariosApi.js', () => ({
@@ -54,7 +65,7 @@ describe('GerenciamentoPage', () => {
         expect(screen.getByRole('link', { name: 'Editar' })).toHaveAttribute('href', '/admin/usuarios/2');
     });
 
-    it('deve exibir abas de cadastro de cargos e funcionários', async () => {
+    it('deve exibir abas de cadastro de cargos, empresas, setores e funcionários', async () => {
         const usuario = userEvent.setup();
 
         render(
@@ -66,6 +77,14 @@ describe('GerenciamentoPage', () => {
         await usuario.click(screen.getByRole('button', { name: 'Cargos' }));
         expect(screen.getByRole('heading', { name: 'Cargos' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cadastrar cargo' })).toBeInTheDocument();
+
+        await usuario.click(screen.getByRole('button', { name: 'Empresas' }));
+        expect(screen.getByRole('heading', { name: 'Empresas' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Cadastrar empresa' })).toBeInTheDocument();
+
+        await usuario.click(screen.getByRole('button', { name: 'Setores' }));
+        expect(screen.getByRole('heading', { name: 'Setores' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Cadastrar setor' })).toBeInTheDocument();
 
         await usuario.click(screen.getByRole('button', { name: 'Funcionários' }));
         expect(screen.getByRole('heading', { name: 'Funcionários' })).toBeInTheDocument();

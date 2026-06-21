@@ -10,6 +10,14 @@ jest.unstable_mockModule('../repositories/EmployeeRepository.js', () => ({
     default: employeeRepositoryMock
 }));
 
+const validarCargoAtivoParaVinculoServiceMock = {
+    execute: jest.fn()
+};
+
+jest.unstable_mockModule('../../roles/services/ValidarCargoAtivoParaVinculoService.js', () => ({
+    default: validarCargoAtivoParaVinculoServiceMock
+}));
+
 const createEmployeeService = (await import('./CreateEmployeeService.js')).default;
 
 const CPF_VALIDO = '529.982.247-25';

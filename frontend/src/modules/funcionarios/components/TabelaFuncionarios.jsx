@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -13,15 +14,35 @@ import {
  * @param {{
  *   funcionarios: Array<Record<string, unknown>>,
  *   idsSelecionados?: Set<string>,
- *   onAlternarSelecao?: (id: string) => void
+ *   onAlternarSelecao?: (id: string) => void,
+ *   onAlternarSelecaoTodos?: (ids: string[], selecionar: boolean) => void
  * }} props
  */
 export function TabelaFuncionarios({
     funcionarios,
     idsSelecionados = new Set(),
-    onAlternarSelecao
+    onAlternarSelecao,
+    onAlternarSelecaoTodos
 }) {
     const exibirSelecao = typeof onAlternarSelecao === 'function';
+    const refSelecionarTodos = useRef(null);
+
+    const idsVisiveis = useMemo(
+        () => funcionarios.map((funcionario) => String(funcionario.id)),
+        [funcionarios]
+    );
+
+    const todosSelecionados =
+        idsVisiveis.length > 0 && idsVisiveis.every((id) => idsSelecionados.has(id));
+
+    const algunsSelecionados =
+        idsVisiveis.some((id) => idsSelecionados.has(id)) && !todosSelecionados;
+
+    useEffect(() => {
+        if (refSelecionarTodos.current) {
+            refSelecionarTodos.current.indeterminate = algunsSelecionados;
+        }
+    }, [algunsSelecionados, idsVisiveis, idsSelecionados]);
 
     if (!funcionarios.length) {
         return (
@@ -36,7 +57,18 @@ export function TabelaFuncionarios({
                     <tr>
                         {exibirSelecao ? (
                             <th className="tabela-usuarios__coluna-selecao">
-                                <span className="visually-hidden">Selecionar</span>
+                                <label className="tabela-usuarios__selecao">
+                                    <span className="visually-hidden">Selecionar todos</span>
+                                    <input
+                                        ref={refSelecionarTodos}
+                                        type="checkbox"
+                                        checked={todosSelecionados}
+                                        disabled={typeof onAlternarSelecaoTodos !== 'function'}
+                                        onChange={() =>
+                                            onAlternarSelecaoTodos?.(idsVisiveis, !todosSelecionados)
+                                        }
+                                    />
+                                </label>
                             </th>
                         ) : null}
                         <th>Nome</th>

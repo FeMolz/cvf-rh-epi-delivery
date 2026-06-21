@@ -116,11 +116,21 @@ export function FormularioCargo({
                 />
             </div>
 
-            {somenteLeitura && linkVoltar ? (
+            {somenteLeitura && (linkVoltar || acaoExcluir) ? (
                 <div className="detalhe-usuario__acoes">
-                    <div className="detalhe-usuario__acoes-secundarias detalhe-usuario__acoes-secundarias--unica">
-                        {linkVoltar}
+                    <div
+                        className={
+                            acaoExcluir
+                                ? 'detalhe-usuario__acoes-principais'
+                                : 'detalhe-usuario__acoes-secundarias detalhe-usuario__acoes-secundarias--unica'
+                        }
+                    >
+                        {acaoExcluir}
+                        {!acaoExcluir ? linkVoltar : null}
                     </div>
+                    {acaoExcluir && linkVoltar ? (
+                        <div className="detalhe-usuario__acoes-secundarias">{linkVoltar}</div>
+                    ) : null}
                 </div>
             ) : null}
 

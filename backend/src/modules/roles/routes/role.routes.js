@@ -9,9 +9,23 @@ roleRoutes.post("/", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), ro
 
 roleRoutes.get("/", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO", "ALMOXARIFADO"]), roleController.findAll);
 
+roleRoutes.get(
+    "/export/lista",
+    isAuthenticated,
+    authorize(["ADMIN", "ADMINISTRATIVO", "ALMOXARIFADO"]),
+    (request, response, next) => roleController.exportarLista(request, response, next)
+);
+
 roleRoutes.get("/:id", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), roleController.findById);
 
 roleRoutes.put("/:id", isAuthenticated, authorize(["ADMIN", "ADMINISTRATIVO"]), roleController.update);
+
+roleRoutes.patch(
+    "/:id/situacao",
+    isAuthenticated,
+    authorize(["ADMIN", "ADMINISTRATIVO"]),
+    (request, response, next) => roleController.alterarSituacao(request, response, next)
+);
 
 roleRoutes.delete("/:id", isAuthenticated, authorize(["ADMIN"]), roleController.delete);
 

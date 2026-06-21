@@ -44,7 +44,7 @@ describe('EmployeeRepository', () => {
     prismaMock.employee.findMany.mockResolvedValue(mockList);
     const result = await repo.findAll();
     expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
-      where: { deletedAt: null },
+      where: {},
       select: expect.any(Object),
       orderBy: [{ name: 'asc' }]
     });

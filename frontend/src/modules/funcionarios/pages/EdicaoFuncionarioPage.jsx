@@ -47,9 +47,23 @@ export function EdicaoFuncionarioPage() {
                 ]);
 
                 if (ativo) {
+                    const cargosDisponiveis = [...listaCargos];
+                    const cargoAtualId = String(funcionario.roleId || '');
+                    const cargoNaLista = cargosDisponiveis.some(
+                        (cargo) => String(cargo.id) === cargoAtualId
+                    );
+
+                    if (cargoAtualId && !cargoNaLista && funcionario.role) {
+                        cargosDisponiveis.unshift({
+                            id: funcionario.role.id,
+                            name: `${funcionario.role.name} (inativo)`,
+                            deletedAt: 'inativo'
+                        });
+                    }
+
                     setNomeFuncionario(String(funcionario.name || ''));
                     setDados(mapearFuncionarioParaFormulario(funcionario));
-                    setCargos(listaCargos);
+                    setCargos(cargosDisponiveis);
                     setEmpresas(listaEmpresas);
                     setSetores(listaSetores);
                 }

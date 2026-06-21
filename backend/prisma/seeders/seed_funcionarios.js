@@ -8,6 +8,7 @@ import {
     listarFuncionariosSeed
 } from './dados/conteudoVolumeSeedTeste.js';
 import { obterIdCargoPorNome } from './utils/resolverReferenciasSeed.js';
+import { sincronizarEmpresasSetoresTeste } from './utils/sincronizarEmpresasSetoresTeste.js';
 
 const ESTADOS_CIVIS = [
     EstadoCivil.SOLTEIRO,
@@ -25,6 +26,9 @@ const GRAUS_INSTRUCAO = [
 
 async function main() {
     console.log('Iniciando seed de funcionários...');
+
+    await sincronizarEmpresasSetoresTeste();
+    console.log('- Empresas e setores de teste sincronizados.');
 
     const funcionariosDados = listarFuncionariosSeed();
 

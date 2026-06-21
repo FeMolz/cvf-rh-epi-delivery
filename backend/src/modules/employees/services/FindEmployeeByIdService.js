@@ -8,7 +8,7 @@ class FindEmployeeByIdService {
     async execute(identificadorFuncionario) {
         const funcionario = await employeeRepository.findById(identificadorFuncionario);
 
-        if (!funcionario || funcionario.deletedAt) {
+        if (!funcionario) {
             throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
 

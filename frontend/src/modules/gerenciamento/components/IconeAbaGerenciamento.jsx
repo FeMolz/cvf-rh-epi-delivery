@@ -55,6 +55,26 @@ export function IconeAbaGerenciamento({ id, className = 'gerenciamento-abas__ico
                     <path d="M19 8v6" />
                 </svg>
             );
+        case 'empresas':
+            return (
+                <svg {...propsSvg}>
+                    <path d="M3 21h18" />
+                    <path d="M9 8h1" />
+                    <path d="M9 12h1" />
+                    <path d="M9 16h1" />
+                    <path d="M14 8h1" />
+                    <path d="M14 12h1" />
+                    <path d="M14 16h1" />
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+                </svg>
+            );
+        case 'setores':
+            return (
+                <svg {...propsSvg}>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+            );
         case 'permissoes':
             return (
                 <svg {...propsSvg}>
