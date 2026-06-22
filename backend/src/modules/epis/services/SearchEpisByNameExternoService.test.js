@@ -1,11 +1,27 @@
 import { jest } from '@jest/globals';
 
+const envMock = {
+    CAEPI_USAR_SOMENTE_CACHE: false
+};
+
 const epiProviderMock = {
     buscarEpisPorNomeEquipamento: jest.fn()
 };
 
+const searchEpisByNameCacheServiceMock = {
+    execute: jest.fn()
+};
+
+jest.unstable_mockModule('../../../config/env.js', () => ({
+    default: envMock
+}));
+
 jest.unstable_mockModule('../../../shared/providers/EpiProvider/EpiProvider.js', () => ({
     default: epiProviderMock
+}));
+
+jest.unstable_mockModule('./SearchEpisByNameCacheService.js', () => ({
+    default: searchEpisByNameCacheServiceMock
 }));
 
 const searchEpisByNameExternoService = (await import('./SearchEpisByNameExternoService.js')).default;
@@ -13,6 +29,7 @@ const searchEpisByNameExternoService = (await import('./SearchEpisByNameExternoS
 describe('SearchEpisByNameExternoService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        envMock.CAEPI_USAR_SOMENTE_CACHE = false;
     });
 
     it('deve retornar epis encontrados por nome', async () => {
@@ -36,5 +53,18 @@ describe('SearchEpisByNameExternoService', () => {
         await expect(searchEpisByNameExternoService.execute('a')).rejects.toMatchObject({
             statusCode: 400
         });
+    });
+
+    it('deve usar cache local quando CAEPI_USAR_SOMENTE_CACHE estiver ativo', async () => {
+        envMock.CAEPI_USAR_SOMENTE_CACHE = true;
+        searchEpisByNameCacheServiceMock.execute.mockResolvedValue([
+            { caNumber: '11070', name: 'Capacete' }
+        ]);
+
+        const resultado = await searchEpisByNameExternoService.execute('cap');
+
+        expect(searchEpisByNameCacheServiceMock.execute).toHaveBeenCalledWith('cap');
+        expect(epiProviderMock.buscarEpisPorNomeEquipamento).not.toHaveBeenCalled();
+        expect(resultado).toEqual([{ caNumber: '11070', name: 'Capacete' }]);
     });
 });

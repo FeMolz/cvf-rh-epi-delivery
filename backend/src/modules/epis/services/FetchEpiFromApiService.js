@@ -1,9 +1,12 @@
 import epiRepository from '../repositories/EpiRepository.js';
 import epiProvider from '../../../shared/providers/EpiProvider/EpiProvider.js';
 import { validarNumeroCaEpi } from '../../../shared/utils/validarNumeroCaEpi.js';
+import env from '../../../config/env.js';
 
 const MENSAGEM_CA_SEM_VALIDADE = 'Este CA não possui validade ativa. Não é permitido utilizar este EPI.';
 const MENSAGEM_CA_NAO_ENCONTRADO = 'EPI com este CA não encontrado na base pública.';
+const MENSAGEM_CA_NAO_ENCONTRADO_CACHE
+    = 'EPI com este CA não está no cache local. Execute o seed de EPIs ou aguarde a API CAEPI.';
 const MENSAGEM_CA_INVALIDO_CADASTRO_OFICIAL
     = 'Este CA não possui validade ativa no cadastro oficial. Não é permitido utilizar este EPI.';
 
@@ -17,6 +20,10 @@ class FetchEpiFromApiService {
                 throw new Error(MENSAGEM_CA_SEM_VALIDADE);
             }
             return epi;
+        }
+
+        if (env.CAEPI_USAR_SOMENTE_CACHE) {
+            throw new Error(MENSAGEM_CA_NAO_ENCONTRADO_CACHE);
         }
 
         const epiData = await epiProvider.getEpiByCa(numeroCaValidado);

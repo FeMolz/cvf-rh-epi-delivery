@@ -52,6 +52,27 @@ describe('EpiRepository', () => {
         expect(prismaMock.epi.findMany).toHaveBeenCalledWith();
     });
 
+    it('findAtivosPorNomeContendo deve filtrar por nome', async () => {
+        prismaMock.epi.findMany.mockResolvedValue([{ caNumber: '11070', name: 'Capacete' }]);
+        const resultado = await epiRepository.findAtivosPorNomeContendo('cap', 10);
+        expect(resultado).toEqual([{ caNumber: '11070', name: 'Capacete' }]);
+        expect(prismaMock.epi.findMany).toHaveBeenCalledWith({
+            where: {
+                isActive: true,
+                name: {
+                    contains: 'cap',
+                    mode: 'insensitive'
+                }
+            },
+            take: 10,
+            select: {
+                caNumber: true,
+                name: true
+            },
+            orderBy: { name: 'asc' }
+        });
+    });
+
     it('findRoleEpiByCompositeKey deve buscar vínculo', async () => {
         prismaMock.roleEpi.findUnique.mockResolvedValue({ id: 're1' });
         const resultado = await epiRepository.findRoleEpiByCompositeKey('r1', 'e1');

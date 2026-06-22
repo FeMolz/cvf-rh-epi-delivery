@@ -17,6 +17,29 @@ class EpiRepository {
         return prisma.epi.findMany();
     }
 
+    /**
+     * @param {string} termo
+     * @param {number} limite
+     * @returns {Promise<Array<{ caNumber: string, name: string }>>}
+     */
+    async findAtivosPorNomeContendo(termo, limite) {
+        return prisma.epi.findMany({
+            where: {
+                isActive: true,
+                name: {
+                    contains: termo,
+                    mode: 'insensitive'
+                }
+            },
+            take: limite,
+            select: {
+                caNumber: true,
+                name: true
+            },
+            orderBy: { name: 'asc' }
+        });
+    }
+
     async findRoleEpiByCompositeKey(roleId, epiId) {
         return prisma.roleEpi.findUnique({
             where: {

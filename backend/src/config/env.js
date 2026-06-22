@@ -55,7 +55,8 @@ const env = {
     REDIS_URL: process.env.REDIS_URL || null,
     HEALTH_CHECK_TOKEN: process.env.HEALTH_CHECK_TOKEN || null,
     CAEPI_API_URL: process.env.CAEPI_API_URL || URL_PADRAO_CAEPI_API,
-    CAEPI_AGUARDAR_INICIO: resolverAguardarInicioCaepi()
+    CAEPI_AGUARDAR_INICIO: resolverAguardarInicioCaepi(),
+    CAEPI_USAR_SOMENTE_CACHE: process.env.CAEPI_USAR_SOMENTE_CACHE === 'true'
 };
 
 export default env;

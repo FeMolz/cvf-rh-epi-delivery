@@ -101,9 +101,10 @@ docker run --env-file backend/.env.production.local -p 3000:3000 rh-system-api
 |-------|-------|
 | **Root Directory** | *(vazio — raiz do repositório)* |
 | **Dockerfile Path** | `backend/Dockerfile` |
-| **Port** | `3000` |
 
 Não use `backend/` como Root Directory: o build falha com `package-lock.json: not found`.
+
+**Porta:** o Render injeta `PORT` automaticamente em runtime. A API já usa `process.env.PORT` (fallback `3000` só em local). **Não** defina `PORT` nas variáveis de ambiente do Render — se copiar `.env.production.local` com `PORT=3000`, remova essa linha ou o serviço pode não subir.
 
 A imagem inclui **Chromium** para geração de PDF (Puppeteer). Variável `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` já está no `Dockerfile`.
 

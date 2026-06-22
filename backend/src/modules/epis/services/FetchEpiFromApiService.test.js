@@ -1,5 +1,9 @@
 import { jest } from '@jest/globals';
 
+const envMock = {
+    CAEPI_USAR_SOMENTE_CACHE: false
+};
+
 const epiRepositoryMock = {
     findByCaNumber: jest.fn(),
     createEpi: jest.fn()
@@ -8,6 +12,10 @@ const epiRepositoryMock = {
 const epiProviderMock = {
     getEpiByCa: jest.fn()
 };
+
+jest.unstable_mockModule('../../../config/env.js', () => ({
+    default: envMock
+}));
 
 jest.unstable_mockModule('../repositories/EpiRepository.js', () => ({
     default: epiRepositoryMock
@@ -22,6 +30,7 @@ const fetchEpiFromApiService = (await import('./FetchEpiFromApiService.js')).def
 describe('FetchEpiFromApiService', () => {
     afterEach(() => {
         jest.clearAllMocks();
+        envMock.CAEPI_USAR_SOMENTE_CACHE = false;
     });
 
     it('should return local epi if it exists and is active', async () => {
@@ -84,5 +93,15 @@ describe('FetchEpiFromApiService', () => {
         const result = await fetchEpiFromApiService.execute('11070');
         expect(result).toEqual(createdEpi);
         expect(epiRepositoryMock.createEpi).toHaveBeenCalled();
+    });
+
+    it('should throw cache message when CA is missing and cache-only mode is enabled', async () => {
+        envMock.CAEPI_USAR_SOMENTE_CACHE = true;
+        epiRepositoryMock.findByCaNumber.mockResolvedValue(null);
+
+        await expect(fetchEpiFromApiService.execute('99999')).rejects.toThrow(
+            'EPI com este CA não está no cache local'
+        );
+        expect(epiProviderMock.getEpiByCa).not.toHaveBeenCalled();
     });
 });
