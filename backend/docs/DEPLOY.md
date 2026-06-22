@@ -87,10 +87,23 @@ Login: `POST /api/v1/users/login` com credenciais do seed.
 
 ### Build manual
 
+O `Dockerfile` usa o **monorepo inteiro** como contexto (o `package-lock.json` fica na raiz, não em `backend/`).
+
 ```bash
-docker build -t rh-system-api .
-docker run --env-file .env.production.local -p 3000:3000 rh-system-api
+# Na raiz do repositório
+docker build -f backend/Dockerfile -t rh-system-api .
+docker run --env-file backend/.env.production.local -p 3000:3000 rh-system-api
 ```
+
+### Web Service (Render, Railway, etc.)
+
+| Campo | Valor |
+|-------|-------|
+| **Root Directory** | *(vazio — raiz do repositório)* |
+| **Dockerfile Path** | `backend/Dockerfile` |
+| **Port** | `3000` |
+
+Não use `backend/` como Root Directory: o build falha com `package-lock.json: not found`.
 
 A imagem inclui **Chromium** para geração de PDF (Puppeteer). Variável `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` já está no `Dockerfile`.
 

@@ -21,8 +21,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     container_name: rh-system-api-prod
     ports:
       - '3000:3000'

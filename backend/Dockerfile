@@ -1,4 +1,5 @@
 # Imagem de produção da API RH-System (Node 20 + Chromium para PDFs via Puppeteer).
+# Build context: raiz do monorepo (não a pasta backend/).
 
 FROM node:20-bookworm-slim
 
@@ -16,13 +17,17 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+COPY backend/package.json ./backend/
 
-COPY prisma ./prisma
-COPY prisma.config.ts ./
+RUN npm ci --omit=dev --workspace=backend --ignore-scripts
+
+WORKDIR /app/backend
+
+COPY backend/prisma ./prisma
+COPY backend/prisma.config.ts ./
 RUN npx prisma generate
 
-COPY src ./src
+COPY backend/src ./src
 
 EXPOSE 3000
 
