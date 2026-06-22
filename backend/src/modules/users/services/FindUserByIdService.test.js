@@ -19,6 +19,7 @@ describe('FindUserByIdService', () => {
         userRepositoryMock.findById.mockResolvedValue({
             id: '1',
             name: 'Maria',
+            role: 'ADMINISTRATIVO',
             isActive: true
         });
 
@@ -31,6 +32,7 @@ describe('FindUserByIdService', () => {
         userRepositoryMock.findById.mockResolvedValue({
             id: '1',
             name: 'Maria',
+            role: 'ALMOXARIFADO',
             isActive: false
         });
 

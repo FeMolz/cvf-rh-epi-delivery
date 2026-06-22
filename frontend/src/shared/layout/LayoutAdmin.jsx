@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { LogoSistema, NOME_SISTEMA } from '../components/LogoSistema.jsx';
 import { IconeModulo } from '../components/IconeModulo.jsx';
+import { IconeSair } from '../components/IconeSair.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { listarModulosVisiveis } from '../constants/modulosSistema.js';
 import { ROTULOS_PAPEIS } from '../constants/papeis.js';
@@ -59,12 +60,20 @@ export function LayoutAdmin() {
 
                 <div className="admin-sidebar__rodape">
                     <div className="admin-sidebar__usuario">
-                        <span>{user?.name}</span>
+                        <div className="admin-sidebar__usuario-linha">
+                            <span className="admin-sidebar__usuario-nome">{user?.name}</span>
+                            <button
+                                className="admin-sidebar__sair"
+                                type="button"
+                                onClick={aoSair}
+                                title="Sair"
+                                aria-label="Sair"
+                            >
+                                <IconeSair />
+                            </button>
+                        </div>
                         <small>{ROTULOS_PAPEIS[user?.role] || user?.role}</small>
                     </div>
-                    <button className="botao botao--secundario botao--bloco" type="button" onClick={aoSair}>
-                        Sair
-                    </button>
                 </div>
             </aside>
 

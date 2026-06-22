@@ -20,6 +20,9 @@
     "test": "npm test -w backend",
     "test:frontend": "npm test -w frontend",
     "test:all": "npm test -w backend && npm test -w frontend",
+    "test:e2e": "playwright test -c playwright.config.mjs",
+    "test:e2e:ui": "playwright test -c playwright.config.mjs --ui",
+    "test:deploy": "npm run test:all && npm run test:e2e",
     "test:integracao": "npm run test:integracao -w backend",
     "test:routes": "npm run test:routes -w backend",
     "lint": "npm run lint -w backend && npm run lint -w frontend",
@@ -31,5 +34,8 @@
     "db:prod:migrate": "npm run db:prod:migrate -w backend",
     "seed:admin:prod": "npm run seed:admin:prod -w backend",
     "backup:prod": "npm run backup:prod -w backend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
   }
 }

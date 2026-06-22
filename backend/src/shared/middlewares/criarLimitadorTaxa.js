@@ -14,6 +14,10 @@ const JANELA_PADRAO_MS = 15 * 60 * 1000;
  * @returns {import('express').RequestHandler}
  */
 export function criarLimitadorTaxa(opcoes = {}) {
+    if (env.NODE_ENV === 'test') {
+        return (_requisicao, _resposta, proximo) => proximo();
+    }
+
     const janelaMs = opcoes.janelaMs ?? JANELA_PADRAO_MS;
     const limiteRequisicoes = opcoes.limiteRequisicoes ?? 100;
     const mensagem = opcoes.mensagem ?? 'Muitas requisições. Tente novamente mais tarde.';

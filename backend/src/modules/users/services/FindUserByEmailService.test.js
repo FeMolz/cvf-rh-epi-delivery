@@ -19,6 +19,7 @@ describe('FindUserByEmailService', () => {
         userRepositoryMock.findByEmail.mockResolvedValue({
             id: '1',
             email: 'maria@teste.com',
+            role: 'ADMINISTRATIVO',
             isActive: true,
             passwordHash: 'hash-secreto'
         });
@@ -28,7 +29,9 @@ describe('FindUserByEmailService', () => {
         expect(resultado).toEqual({
             id: '1',
             email: 'maria@teste.com',
-            isActive: true
+            role: 'ADMINISTRATIVO',
+            isActive: true,
+            lastLogin: undefined
         });
         expect(resultado.passwordHash).toBeUndefined();
     });

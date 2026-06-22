@@ -1,0 +1,58 @@
+import { expect, test } from '@playwright/test';
+import path from 'node:path';
+
+import { irParaAreaDoPerfil } from './helpers/login.js';
+
+const diretorioAuth = path.join(process.cwd(), 'e2e', '.auth');
+
+test.describe('Permissoes por papel (almoxarifado)', () => {
+    test.use({ storageState: path.join(diretorioAuth, 'almoxarifado.json') });
+
+    test('almoxarifado ve apenas entregas de EPI na navbar', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'almoxarifado');
+
+        await expect(page.getByRole('link', { name: 'Entregas de EPI' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Funcionários' })).toHaveCount(0);
+        await expect(page.getByRole('link', { name: 'Gerenciamento' })).toHaveCount(0);
+        await expect(page.getByRole('link', { name: 'Relatórios de entrega' })).toHaveCount(0);
+    });
+
+    test('almoxarifado nao acessa rotas de gestao', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'almoxarifado');
+
+        await page.goto('/admin/funcionarios');
+        await expect(page).toHaveURL(/\/admin\/epis\/entregas/);
+
+        await page.goto('/admin/gerenciamento');
+        await expect(page).toHaveURL(/\/admin\/epis\/entregas/);
+
+        await page.goto('/admin/epis/relatorios');
+        await expect(page).toHaveURL(/\/admin\/epis\/entregas/);
+    });
+});
+
+test.describe('Permissoes por papel (administrativo)', () => {
+    test.use({ storageState: path.join(diretorioAuth, 'administrativo.json') });
+
+    test('administrativo acessa modulos de gestao', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'administrativo');
+
+        await page.getByRole('link', { name: 'Funcionários' }).click();
+        await expect(page).toHaveURL(/\/admin\/funcionarios/);
+        await expect(page.getByRole('heading', { level: 1, name: 'Funcionários' })).toBeVisible();
+
+        await page.getByRole('link', { name: 'Notícias' }).click();
+        await expect(page).toHaveURL(/\/admin\/noticias/);
+
+        await page.getByRole('link', { name: 'Relatórios de entrega' }).click();
+        await expect(page).toHaveURL(/\/admin\/epis\/relatorios/);
+    });
+
+    test('administrativo acessa gerenciamento e empresas', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'administrativo');
+
+        await expect(page.getByRole('link', { name: 'Gerenciamento' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Empresas' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Setores' })).toBeVisible();
+    });
+});

@@ -1,14 +1,18 @@
 .admin-shell {
-    display: grid;
-    grid-template-columns: 17rem 1fr;
     min-height: 100vh;
     background: var(--cor-fundo-area);
 }
 
 .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    width: 17rem;
+    height: 100vh;
     padding: 1.25rem 1rem;
     background: #0f172a;
     color: #e2e8f0;
@@ -35,7 +39,6 @@
 
 .admin-sidebar__nav {
     flex: 1;
-    overflow-y: auto;
 }
 
 .admin-sidebar__lista {
@@ -106,14 +109,49 @@
 }
 
 .admin-sidebar__usuario {
-    margin-bottom: 0.75rem;
     padding: 0 0.35rem;
 }
 
-.admin-sidebar__usuario span {
-    display: block;
+.admin-sidebar__usuario-linha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-sidebar__usuario-nome {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-weight: 600;
     color: #fff;
+}
+
+.admin-sidebar__sair {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-sidebar__sair:hover {
+    background: #1e293b;
+    color: #fff;
+}
+
+.admin-sidebar__sair:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
 }
 
 .admin-sidebar__usuario small {
@@ -121,6 +159,8 @@
 }
 
 .admin-conteudo {
+    min-height: 100vh;
+    margin-left: 17rem;
     padding: 1.5rem;
     overflow-x: auto;
     background: var(--cor-fundo-pagina);
@@ -1256,18 +1296,44 @@
 }
 
 @media (max-width: 900px) {
-    .admin-shell {
-        grid-template-columns: 1fr;
+    .admin-sidebar {
+        right: 0;
+        width: auto;
+        height: auto;
+        max-height: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
     }
 
-    .admin-sidebar {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        max-height: none;
+    .admin-sidebar__marca {
+        flex: 1;
+        min-width: 0;
+        padding: 0;
+    }
+
+    .admin-sidebar__marca::after {
+        display: none;
     }
 
     .admin-sidebar__nav {
         display: none;
+    }
+
+    .admin-sidebar__rodape {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .admin-sidebar__usuario {
+        padding: 0;
+    }
+
+    .admin-conteudo {
+        margin-left: 0;
+        padding-top: 5.25rem;
     }
 }
