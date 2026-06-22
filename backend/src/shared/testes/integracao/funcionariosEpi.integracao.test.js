@@ -43,7 +43,10 @@ describeIntegracao('Integração — filtros de funcionários e pausa de EPI', (
     });
 
     it('mudança de ATIVO para FERIAS deve pausar periodicidade do EPI', async () => {
-        await updateEmployeeService.execute(dadosTeste.funcionarioAtivo.id, { status: 'FERIAS' });
+        await updateEmployeeService.execute(dadosTeste.funcionarioAtivo.id, {
+            status: 'FERIAS',
+            leaveReturnDate: '2026-08-01'
+        });
 
         const entregaAtualizada = await prisma.epiDelivery.findUnique({
             where: { id: dadosTeste.entregaEpi.id }
@@ -55,11 +58,22 @@ describeIntegracao('Integração — filtros de funcionários e pausa de EPI', (
     });
 
     it('retorno para ATIVO deve retomar periodicidade do EPI', async () => {
+        const pausaSimuladaEm = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        await prisma.epiDelivery.update({
+            where: { id: dadosTeste.entregaEpi.id },
+            data: { periodicidadePausadaEm: pausaSimuladaEm }
+        });
+
         await updateEmployeeService.execute(dadosTeste.funcionarioAtivo.id, { status: 'ATIVO' });
 
         const entregaRetomada = await prisma.epiDelivery.findUnique({
             where: { id: dadosTeste.entregaEpi.id }
         });
+
+        const vencimentoEsperado = new Date(
+            dadosTeste.vencimentoOriginal.getTime() +
+                (Date.now() - pausaSimuladaEm.getTime())
+        );
 
         expect(entregaRetomada.vencimentoSuspenso).toBeNull();
         expect(entregaRetomada.periodicidadePausadaEm).toBeNull();
@@ -67,5 +81,8 @@ describeIntegracao('Integração — filtros de funcionários e pausa de EPI', (
         expect(entregaRetomada.nextDueDate.getTime()).toBeGreaterThan(
             dadosTeste.vencimentoOriginal.getTime()
         );
+        expect(
+            Math.abs(entregaRetomada.nextDueDate.getTime() - vencimentoEsperado.getTime())
+        ).toBeLessThan(1000);
     });
 });
