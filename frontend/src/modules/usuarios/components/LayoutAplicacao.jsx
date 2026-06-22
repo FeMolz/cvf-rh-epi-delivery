@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { LogoSistema, NOME_SISTEMA } from '../../../shared/components/LogoSistema.jsx';
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { ROTULOS_PAPEIS } from '../../../shared/constants/papeis.js';
 import './layout-aplicacao.css';
@@ -7,6 +9,10 @@ import './layout-aplicacao.css';
 export function LayoutAplicacao({ titulo, subtitulo, children }) {
     const { user, logout, podeCadastrarUsuarios } = useAuth();
     const navegar = useNavigate();
+
+    useEffect(() => {
+        document.title = NOME_SISTEMA;
+    }, []);
 
     async function aoSair() {
         await logout();
@@ -17,11 +23,7 @@ export function LayoutAplicacao({ titulo, subtitulo, children }) {
         <div className="layout">
             <header className="layout__cabecalho">
                 <div className="layout__marca">
-                    <span className="layout__logo">RH</span>
-                    <div>
-                        <strong>RH-System</strong>
-                        <small>Gestão de pessoas e SST</small>
-                    </div>
+                    <LogoSistema className="logo-sistema--cabecalho" />
                 </div>
 
                 {user ? (

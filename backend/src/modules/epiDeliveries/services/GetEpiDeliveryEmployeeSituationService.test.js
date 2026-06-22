@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 const epiDeliveryRepositoryMock = {
-    findFuncionarioAtivoComEpisNoCargoPorId: jest.fn()
+    findFuncionarioAtivoPorId: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/EpiDeliveryRepository.js', () => ({
@@ -18,7 +18,7 @@ describe('GetEpiDeliveryEmployeeSituationService', () => {
     });
 
     it('deve retornar situacao dos epis do funcionario', async () => {
-        epiDeliveryRepositoryMock.findFuncionarioAtivoComEpisNoCargoPorId.mockResolvedValue({
+        epiDeliveryRepositoryMock.findFuncionarioAtivoPorId.mockResolvedValue({
             id: 'f1',
             name: 'Ana',
             roleId: 'r1',
@@ -47,7 +47,7 @@ describe('GetEpiDeliveryEmployeeSituationService', () => {
     });
 
     it('deve lançar 404 quando funcionario nao for elegivel', async () => {
-        epiDeliveryRepositoryMock.findFuncionarioAtivoComEpisNoCargoPorId.mockResolvedValue(null);
+        epiDeliveryRepositoryMock.findFuncionarioAtivoPorId.mockResolvedValue(null);
 
         await expect(getEpiDeliveryEmployeeSituationService.execute('x')).rejects.toMatchObject({
             statusCode: 404

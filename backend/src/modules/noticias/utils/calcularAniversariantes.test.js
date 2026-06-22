@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 import {
     calcularAnosTempoEmpresa,
     formatarDataAniversario,

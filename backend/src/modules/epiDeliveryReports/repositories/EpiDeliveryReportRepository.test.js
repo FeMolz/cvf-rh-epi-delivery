@@ -7,6 +7,7 @@ const prismaMock = {
     epiDeliveryReport: {
         create: jest.fn(),
         findMany: jest.fn(),
+        count: jest.fn(),
         findUnique: jest.fn(),
         update: jest.fn()
     }
@@ -77,6 +78,42 @@ describe('EpiDeliveryReportRepository', () => {
         expect(resultado).toEqual([{ id: 'r1' }]);
         expect(prismaMock.epiDeliveryReport.findMany).toHaveBeenCalledWith(
             expect.objectContaining({ where: { employeeId: 'e1' } })
+        );
+    });
+
+    it('findManyComFiltros deve aplicar filtros e paginacao', async () => {
+        prismaMock.epiDeliveryReport.findMany.mockResolvedValue([{ id: 'r1' }]);
+        prismaMock.epiDeliveryReport.count.mockResolvedValue(1);
+
+        const resultado = await epiDeliveryReportRepository.findManyComFiltros({
+            employeeId: 'e1',
+            foiAssinado: false,
+            emissaoInicio: new Date('2026-01-01T00:00:00.000Z'),
+            emissaoFim: new Date('2026-01-31T23:59:59.999Z'),
+            pagina: 2,
+            limite: 10
+        });
+
+        expect(resultado).toEqual({
+            itens: [{ id: 'r1' }],
+            pagina: 2,
+            limite: 10,
+            totalItens: 1,
+            totalPaginas: 1
+        });
+        expect(prismaMock.epiDeliveryReport.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    employeeId: 'e1',
+                    foiAssinado: false,
+                    createdAt: {
+                        gte: new Date('2026-01-01T00:00:00.000Z'),
+                        lte: new Date('2026-01-31T23:59:59.999Z')
+                    }
+                },
+                skip: 10,
+                take: 10
+            })
         );
     });
 

@@ -105,16 +105,11 @@ class EpiDeliveryRepository {
         });
     }
 
-    async findFuncionariosAtivosComEpisNoCargo() {
+    async findFuncionariosAtivos() {
         return prisma.employee.findMany({
             where: {
                 deletedAt: null,
-                status: 'ATIVO',
-                role: {
-                    roleEpis: {
-                        some: {}
-                    }
-                }
+                status: 'ATIVO'
             },
             select: {
                 id: true,
@@ -157,17 +152,12 @@ class EpiDeliveryRepository {
         });
     }
 
-    async findFuncionarioAtivoComEpisNoCargoPorId(employeeId) {
+    async findFuncionarioAtivoPorId(employeeId) {
         return prisma.employee.findFirst({
             where: {
                 id: employeeId,
                 deletedAt: null,
-                status: 'ATIVO',
-                role: {
-                    roleEpis: {
-                        some: {}
-                    }
-                }
+                status: 'ATIVO'
             },
             select: {
                 id: true,

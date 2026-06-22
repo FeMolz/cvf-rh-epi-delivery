@@ -17,7 +17,8 @@ function executarComando(comando, argumentos) {
 
 const apenasSchema = process.argv.includes('--apenas-schema');
 
-const urlBancoTeste = carregarAmbienteTeste();
+carregarAmbienteTeste();
+const urlBancoTeste = process.env.DATABASE_URL;
 
 process.env.RH_ENV_ARQUIVO = '.env.test';
 

@@ -11,6 +11,7 @@ export const CAMPOS_SELECAO_FUNCIONARIO = {
     status: true,
     admissionDate: true,
     resignationDate: true,
+    leaveReturnDate: true,
     nacionalidade: true,
     estadoCivil: true,
     racaCor: true,
@@ -71,3 +72,12 @@ export const MENSAGEM_CPF_DUPLICADO = 'CPF já cadastrado no sistema';
 export const MENSAGEM_EMAIL_DUPLICADO = 'E-mail já cadastrado no sistema';
 
 export const MENSAGEM_DATA_NASCIMENTO_INVALIDA = 'Data de nascimento inválida.';
+
+export const MENSAGEM_DATA_RETORNO_AFASTAMENTO_OBRIGATORIA =
+    'Informe a data prevista de retorno para férias ou licenças.';
+
+export const MENSAGEM_DATA_RETORNO_AFASTAMENTO_INVALIDA =
+    'Data prevista de retorno inválida.';
+
+export const MENSAGEM_DATA_RETORNO_AFASTAMENTO_PASSADA =
+    'A data prevista de retorno deve ser hoje ou uma data futura.';

@@ -1,3 +1,8 @@
+import {
+    MENSAGEM_CAEPI_BUSCA_POR_NOME_INDISPONIVEL,
+    MENSAGEM_CAEPI_INDISPONIVEL,
+    ROTA_BUSCA_CAEPI_POR_NOME
+} from '../../constants/caepiConstantes.js';
 import { validarNumeroCaEpi } from '../../utils/validarNumeroCaEpi.js';
 import env from '../../../config/env.js';
 
@@ -61,6 +66,65 @@ function cadastroPossuiValidadeAtivaNoOrgao(corpoRespostaCadastroCa) {
     }
 
     return true;
+}
+
+/**
+ * @param {Response} response
+ */
+async function interpretarRespostaBuscaPorNome(response) {
+    if (response.status === 404) {
+        let corpoResposta = null;
+
+        try {
+            corpoResposta = await response.json();
+        } catch {
+            corpoResposta = null;
+        }
+
+        if (corpoResposta?.detail === 'Not Found') {
+            throw new Error(MENSAGEM_CAEPI_BUSCA_POR_NOME_INDISPONIVEL);
+        }
+
+        return [];
+    }
+
+    if (!response.ok) {
+        throw new Error(`Erro na API externa: ${response.statusText}`);
+    }
+
+    const dados = await response.json();
+
+    if (!Array.isArray(dados)) {
+        return [];
+    }
+
+    return dados
+        .map((item) => ({
+            caNumber: String(item.caNumber || item.RegistroCA || '').trim(),
+            name: String(item.name || item.NomeEquipamento || 'EPI Sem Nome').trim()
+        }))
+        .filter((item) => item.caNumber);
+}
+
+/**
+ * @param {unknown} erro
+ * @returns {boolean}
+ */
+function erroIndicaApiCaepiIndisponivel(erro) {
+    if (!(erro instanceof Error)) {
+        return false;
+    }
+
+    const mensagem = erro.message.toLowerCase();
+    const codigoCausa = erro.cause && typeof erro.cause === 'object' && 'code' in erro.cause
+        ? String(erro.cause.code)
+        : '';
+
+    return (
+        mensagem.includes('fetch failed')
+        || codigoCausa === 'ECONNREFUSED'
+        || codigoCausa === 'ENOTFOUND'
+    );
 }
 
 class EpiProvider {
@@ -129,30 +193,19 @@ class EpiProvider {
 
         try {
             const response = await fetch(
-                `${baseUrl}/pesquisarPorNomeEquipamento/${encodeURIComponent(termoNormalizado)}`
+                `${baseUrl}${ROTA_BUSCA_CAEPI_POR_NOME}/${encodeURIComponent(termoNormalizado)}`
             );
 
-            if (response.status === 404) {
-                return [];
-            }
-
-            if (!response.ok) {
-                throw new Error(`Erro na API externa: ${response.statusText}`);
-            }
-
-            const dados = await response.json();
-
-            if (!Array.isArray(dados)) {
-                return [];
-            }
-
-            return dados
-                .map((item) => ({
-                    caNumber: String(item.caNumber || item.RegistroCA || '').trim(),
-                    name: String(item.name || item.NomeEquipamento || 'EPI Sem Nome').trim()
-                }))
-                .filter((item) => item.caNumber);
+            return await interpretarRespostaBuscaPorNome(response);
         } catch (error) {
+            if (error instanceof Error && error.message === MENSAGEM_CAEPI_BUSCA_POR_NOME_INDISPONIVEL) {
+                throw error;
+            }
+
+            if (erroIndicaApiCaepiIndisponivel(error)) {
+                throw new Error(MENSAGEM_CAEPI_INDISPONIVEL);
+            }
+
             console.error('[EpiProvider] Erro ao pesquisar EPI por nome:', error.message);
             throw new Error('Erro interno ao tentar consultar o EPI.');
         }

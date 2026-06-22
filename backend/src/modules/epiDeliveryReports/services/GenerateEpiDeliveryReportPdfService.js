@@ -8,11 +8,7 @@ import {
     MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
 } from '../constants/relatorioEntregaEpiConstantes.js';
 import { construirIntervaloEntregaUtc, formatarPeriodoParaPdf } from '../utils/periodoRelatorioEntregaEpi.js';
-
-const formatadorDataEntrega = new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeZone: 'UTC'
-});
+import { montarEntregasTabelaRelatorio } from '../utils/montarEntregasTabelaRelatorio.js';
 
 class GenerateEpiDeliveryReportPdfService {
     /**
@@ -39,11 +35,7 @@ class GenerateEpiDeliveryReportPdfService {
             limiteFinalEntrega
         );
 
-        const entregasTabela = entregasNoPeriodo.map((registroEntrega) => ({
-            dataEntrega: formatadorDataEntrega.format(registroEntrega.deliveryDate),
-            nomeEquipamento: registroEntrega.epi.name,
-            numeroCa: String(registroEntrega.epi.caNumber)
-        }));
+        const entregasTabela = montarEntregasTabelaRelatorio(entregasNoPeriodo);
 
         const textoPeriodoReferencia = formatarPeriodoParaPdf(limiteInicialEntrega, limiteFinalEntrega);
 

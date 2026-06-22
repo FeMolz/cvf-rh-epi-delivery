@@ -1,4 +1,5 @@
 import prisma from '../../../config/database.js';
+import { possuiEntregaPendenteEmissao } from '../utils/coberturaEntregaRelatorio.js';
 
 const SELECAO_FUNCIONARIO_RELATORIO = {
     id: true,
@@ -50,7 +51,8 @@ class EpiDeliveryReportRepository {
             return null;
         }
 
-        const { deletedAt: _excluidoEm, ...contextoRelatorio } = funcionario;
+        const contextoRelatorio = { ...funcionario };
+        delete contextoRelatorio.deletedAt;
         return contextoRelatorio;
     }
 
@@ -81,6 +83,75 @@ class EpiDeliveryReportRepository {
     }
 
     /**
+     * @param {{
+     *   employeeId?: string,
+     *   foiAssinado?: boolean,
+     *   emissaoInicio?: Date,
+     *   emissaoFim?: Date,
+     *   ultimosDias?: number,
+     *   pagina?: number,
+     *   limite?: number
+     * }} filtros
+     */
+    async findManyComFiltros(filtros = {}) {
+        const where = {};
+
+        if (filtros.employeeId) {
+            where.employeeId = filtros.employeeId;
+        }
+
+        if (typeof filtros.foiAssinado === 'boolean') {
+            where.foiAssinado = filtros.foiAssinado;
+        }
+
+        if (filtros.emissaoInicio || filtros.emissaoFim || filtros.ultimosDias) {
+            where.createdAt = {};
+
+            if (filtros.emissaoInicio) {
+                where.createdAt.gte = filtros.emissaoInicio;
+            }
+
+            if (filtros.emissaoFim) {
+                where.createdAt.lte = filtros.emissaoFim;
+            }
+
+            if (filtros.ultimosDias) {
+                const limiteRecente = new Date();
+                limiteRecente.setUTCDate(limiteRecente.getUTCDate() - filtros.ultimosDias);
+                limiteRecente.setUTCHours(0, 0, 0, 0);
+                where.createdAt.gte = limiteRecente;
+            }
+        }
+
+        const pagina = filtros.pagina ?? 1;
+        const limite = filtros.limite ?? 20;
+        const deslocamento = (pagina - 1) * limite;
+
+        const [itens, totalItens] = await Promise.all([
+            prisma.epiDeliveryReport.findMany({
+                where,
+                orderBy: { createdAt: 'desc' },
+                skip: deslocamento,
+                take: limite,
+                select: {
+                    ...SELECAO_RELATORIO_SEM_PDF,
+                    employee: { select: SELECAO_FUNCIONARIO_RELATORIO },
+                    generatedBy: { select: SELECAO_USUARIO_GERADOR }
+                }
+            }),
+            prisma.epiDeliveryReport.count({ where })
+        ]);
+
+        return {
+            itens,
+            pagina,
+            limite,
+            totalItens,
+            totalPaginas: Math.max(1, Math.ceil(totalItens / limite))
+        };
+    }
+
+    /**
      * @param {string} identificadorFuncionario
      */
     async findArchiveByEmployeeId(identificadorFuncionario) {
@@ -92,6 +163,75 @@ class EpiDeliveryReportRepository {
                 generatedBy: { select: SELECAO_USUARIO_GERADOR }
             }
         });
+    }
+
+    async findFuncionariosElegiveisEmissaoRelatorio() {
+        const funcionarios = await prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                epiDeliveries: { some: {} }
+            },
+            select: {
+                id: true,
+                name: true,
+                roleId: true,
+                role: { select: { name: true } },
+                epiDeliveries: { select: { deliveryDate: true } },
+                epiDeliveryReports: {
+                    select: {
+                        periodStartDate: true,
+                        periodEndDate: true
+                    }
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
+
+        return funcionarios
+            .filter((funcionario) =>
+                possuiEntregaPendenteEmissao(funcionario.epiDeliveries, funcionario.epiDeliveryReports)
+            )
+            .map((funcionario) => ({
+                id: funcionario.id,
+                name: funcionario.name,
+                roleId: funcionario.roleId,
+                roleName: funcionario.role?.name || '—'
+            }));
+    }
+
+    async findFuncionariosComHistoricoEmissoes() {
+        const agregados = await prisma.epiDeliveryReport.groupBy({
+            by: ['employeeId'],
+            _count: { id: true }
+        });
+
+        if (!agregados.length) {
+            return [];
+        }
+
+        const mapaContagem = new Map(
+            agregados.map((item) => [item.employeeId, item._count.id])
+        );
+
+        const funcionarios = await prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                id: { in: [...mapaContagem.keys()] }
+            },
+            select: {
+                id: true,
+                name: true,
+                role: { select: { name: true } }
+            },
+            orderBy: { name: 'asc' }
+        });
+
+        return funcionarios.map((funcionario) => ({
+            id: funcionario.id,
+            name: funcionario.name,
+            roleName: funcionario.role?.name || '—',
+            totalEmissoes: mapaContagem.get(funcionario.id) || 0
+        }));
     }
 
     /**

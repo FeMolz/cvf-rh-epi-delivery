@@ -1,16 +1,10 @@
-import { PAPEL_ADMIN, PAPEL_ADMINISTRATIVO } from '../constants/papeis.js';
+import { PAPEL_ADMIN, PAPEL_ADMINISTRATIVO, PAPEL_ALMOXARIFADO } from '../constants/papeis.js';
 
 /**
  * Módulos do RH-System para navegação lateral.
  * Itens sem `rota` aparecem como "em breve".
  */
 export const MODULOS_SISTEMA = [
-    {
-        id: 'dashboard',
-        rotulo: 'Dashboard',
-        rota: '/admin/dashboard',
-        papeis: [PAPEL_ADMIN]
-    },
     {
         id: 'noticias',
         rotulo: 'Notícias',
@@ -58,13 +52,13 @@ export const MODULOS_SISTEMA = [
         id: 'epi-deliveries',
         rotulo: 'Entregas de EPI',
         rota: '/admin/epis/entregas',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO, PAPEL_ALMOXARIFADO]
     },
     {
         id: 'epi-reports',
         rotulo: 'Relatórios de entrega',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO],
-        emBreve: true
+        rota: '/admin/epis/relatorios',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
         id: 'quesitos',

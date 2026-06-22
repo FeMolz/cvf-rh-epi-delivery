@@ -13,7 +13,9 @@ import {
     buscarSituacaoEpisFuncionario,
     registrarEntregaEpi
 } from '../services/epiEntregasApi.js';
+import { listarEpis } from '../../epis/services/episApi.js';
 import { obterDataIsoHoje } from '../utils/dataEntregaEpi.js';
+import '../../epis/pages/epis.css';
 import './entregasEpi.css';
 
 export function RegistroEntregaEpiPage() {
@@ -25,6 +27,7 @@ export function RegistroEntregaEpiPage() {
     const [funcionariosElegiveis, setFuncionariosElegiveis] = useState([]);
     const [funcionarioSelecionadoId, setFuncionarioSelecionadoId] = useState('');
     const [episFuncionario, setEpisFuncionario] = useState([]);
+    const [episCache, setEpisCache] = useState([]);
     const [episSelecionados, setEpisSelecionados] = useState([]);
     const [dataEntrega, setDataEntrega] = useState(() => obterDataIsoHoje());
 
@@ -34,8 +37,12 @@ export function RegistroEntregaEpiPage() {
     );
 
     const carregarPainel = useCallback(async () => {
-        const painel = await buscarPainelEntregasEpi(token);
+        const [painel, listaEpis] = await Promise.all([
+            buscarPainelEntregasEpi(token),
+            listarEpis(token)
+        ]);
         setFuncionariosElegiveis(painel.funcionariosElegiveis || []);
+        setEpisCache(listaEpis || []);
     }, [token]);
 
     const carregarSituacaoFuncionario = useCallback(
@@ -178,8 +185,10 @@ export function RegistroEntregaEpiPage() {
 
                         <div className="listagem-painel__conteudo">
                             <FormularioEntregaEpi
+                                token={token}
                                 funcionarios={funcionariosElegiveis}
                                 epis={episFuncionario}
+                                episCache={episCache}
                                 funcionarioSelecionadoId={funcionarioSelecionadoId}
                                 episSelecionados={episSelecionados}
                                 dataEntrega={dataEntrega}
@@ -198,12 +207,14 @@ export function RegistroEntregaEpiPage() {
                             titulo={
                                 funcionarioSelecionadoId
                                     ? `EPIs do funcionário ${funcionarioSelecionado?.name || ''}`
-                                    : 'Funcionários com EPIs no cargo'
+                                    : 'Funcionários ativos'
                             }
                             descricao={
                                 funcionarioSelecionadoId
-                                    ? 'Situação e validades dos EPIs vinculados ao cargo.'
-                                    : 'Funcionários ativos cujo cargo possui EPIs vinculados, com resumo da situação dos EPIs.'
+                                    ? episFuncionario.length
+                                        ? 'Situação e validades dos EPIs vinculados ao cargo.'
+                                        : 'Cargo sem EPIs vinculados — use a busca na base pública ou o cache para registrar entregas.'
+                                    : 'Todos os funcionários ativos. Selecione um nome para ver os EPIs do cargo ou registrar entrega.'
                             }
                         />
 

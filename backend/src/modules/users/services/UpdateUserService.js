@@ -2,7 +2,6 @@ import userRepository from '../repositories/UserRepository.js';
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { PAPEL_ADMIN } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import { MENSAGEM_SEM_PERMISSAO_EDITAR_USUARIO_ADMIN } from '../../../shared/constants/segurancaConstantes.js';
-import { PAPEIS_GESTAO_RH, PAPEIS_CADASTRO_USUARIO } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import { podeAtribuirPapelUsuario } from '../../../shared/utils/hierarquiaPapeisUsuario.js';
 import {
     MENSAGEM_ISACTIVE_NAO_EDITAVEL,

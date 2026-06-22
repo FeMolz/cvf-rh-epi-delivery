@@ -22,6 +22,7 @@ import {
     ID_SETOR_TI,
     ID_SETOR_VIVANT
 } from './identificadoresSeedConstantes.js';
+import { CAS_REAIS_EPIS_SEED } from './casReaisEpiSeedConstantes.js';
 import { gerarCpfValidoSeed } from '../utils/gerarCpfValidoSeed.js';
 
 export const QUANTIDADE_FUNCIONARIOS_SEED = 50;
@@ -251,7 +252,7 @@ export function listarEpisSeed() {
         epis.push({
             id,
             name: variante > 1 ? `${nomeBase} ${variante}` : nomeBase,
-            caNumber: indice === 0 ? '11070' : indice === 1 ? '4280' : `SEED-${String(indice + 1).padStart(5, '0')}`,
+            caNumber: CAS_REAIS_EPIS_SEED[indice],
             caExpirationDate: new Date(2027 + (indice % 3), (indice % 12) + 1, 15)
         });
     }

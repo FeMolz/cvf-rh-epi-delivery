@@ -20,6 +20,9 @@ export function mapearFuncionarioParaFormulario(funcionario) {
         resignationDate: funcionario.resignationDate
             ? String(funcionario.resignationDate).slice(0, 10)
             : '',
+        leaveReturnDate: funcionario.leaveReturnDate
+            ? String(funcionario.leaveReturnDate).slice(0, 10)
+            : '',
         status: String(funcionario.status || 'ATIVO'),
         companyId: String(funcionario.companyId || ''),
         roleId: String(funcionario.roleId || ''),

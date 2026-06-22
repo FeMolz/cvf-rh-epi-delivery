@@ -14,6 +14,7 @@ import {
     OPCOES_RACA_COR,
     OPCOES_STATUS_FUNCIONARIO,
     STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO,
+    STATUS_FUNCIONARIO_COM_DATA_RETORNO_AFASTAMENTO,
     STATUS_FUNCIONARIO_ENCERRADOS
 } from '../utils/listagemFuncionarios.js';
 
@@ -66,7 +67,8 @@ export function FormularioFuncionarioEtapa1({
         pis: String(valoresIniciais.pis || ''),
         chavePix: String(valoresIniciais.chavePix || ''),
         status: String(valoresIniciais.status || 'ATIVO'),
-        resignationDate: String(valoresIniciais.resignationDate || '').slice(0, 10)
+        resignationDate: String(valoresIniciais.resignationDate || '').slice(0, 10),
+        leaveReturnDate: String(valoresIniciais.leaveReturnDate || '').slice(0, 10)
     });
     const [erro, setErro] = useState('');
 
@@ -83,7 +85,19 @@ export function FormularioFuncionarioEtapa1({
     }, [cargos, dados.status, dados.roleId]);
 
     function atualizarCampo(campo, valor) {
-        setDados((atual) => ({ ...atual, [campo]: valor }));
+        setDados((atual) => {
+            const proximo = { ...atual, [campo]: valor };
+
+            if (campo === 'status' && !STATUS_FUNCIONARIO_COM_DATA_RETORNO_AFASTAMENTO.includes(valor)) {
+                proximo.leaveReturnDate = '';
+            }
+
+            if (campo === 'status' && !STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO.includes(valor)) {
+                proximo.resignationDate = '';
+            }
+
+            return proximo;
+        });
     }
 
     function validarDados() {
@@ -110,6 +124,13 @@ export function FormularioFuncionarioEtapa1({
 
         if (!telefoneEstaCompleto(dados.telefone)) {
             return 'Informe um telefone completo no formato (00) 00000-0000 ou (00) 0000-0000.';
+        }
+
+        if (
+            STATUS_FUNCIONARIO_COM_DATA_RETORNO_AFASTAMENTO.includes(dados.status) &&
+            !String(dados.leaveReturnDate || '').trim()
+        ) {
+            return 'Informe a data prevista de retorno para férias ou licenças.';
         }
 
         return null;
@@ -299,6 +320,16 @@ export function FormularioFuncionarioEtapa1({
                                 rotulo="Data de desligamento"
                                 value={dados.resignationDate}
                                 onChange={(valor) => atualizarCampo('resignationDate', valor)}
+                            />
+                        ) : null}
+
+                        {STATUS_FUNCIONARIO_COM_DATA_RETORNO_AFASTAMENTO.includes(dados.status) ? (
+                            <CampoDataBr
+                                id="funcionario-retorno-afastamento"
+                                rotulo="Data prevista de retorno"
+                                value={dados.leaveReturnDate}
+                                onChange={(valor) => atualizarCampo('leaveReturnDate', valor)}
+                                required
                             />
                         ) : null}
                     </div>

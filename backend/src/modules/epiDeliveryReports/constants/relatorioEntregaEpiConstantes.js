@@ -10,3 +10,8 @@ export const MENSAGEM_FLAGS_OBRIGATORIAS = 'Informe ao menos um dos campos: foiI
 export const MENSAGEM_CAMPOS_OBRIGATORIOS_EMISSAO = 'employeeId, periodoInicio e periodoFim sao obrigatorios.';
 export const MENSAGEM_IDENTIFICADOR_FUNCIONARIO_OBRIGATORIO = 'identificadorFuncionario e obrigatorio.';
 export const MENSAGEM_IDENTIFICADOR_RELATORIO_OBRIGATORIO = 'identificadorRelatorio e obrigatorio.';
+
+export const LIMITE_PADRAO_LISTAGEM_RELATORIOS = 20;
+export const LIMITE_MAXIMO_LISTAGEM_RELATORIOS = 100;
+export const PAGINA_PADRAO_LISTAGEM_RELATORIOS = 1;
+export const DIAS_JANELA_ULTIMAS_EMISSOES_RELATORIO = 15;

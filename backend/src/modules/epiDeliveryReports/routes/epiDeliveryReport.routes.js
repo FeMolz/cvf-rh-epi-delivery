@@ -16,6 +16,36 @@ epiDeliveryReportRoutes.post(
 );
 
 epiDeliveryReportRoutes.get(
+    '/',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) => epiDeliveryReportController.list(requisicao, resposta, proximo)
+);
+
+epiDeliveryReportRoutes.get(
+    '/preview',
+    isAuthenticated,
+    authorize(PAPEIS_GESTAO_RH),
+    (requisicao, resposta, proximo) => epiDeliveryReportController.preview(requisicao, resposta, proximo)
+);
+
+epiDeliveryReportRoutes.get(
+    '/employees/eligible-for-emission',
+    isAuthenticated,
+    authorize(PAPEIS_GESTAO_RH),
+    (requisicao, resposta, proximo) =>
+        epiDeliveryReportController.listEmployeesEligibleForEmission(requisicao, resposta, proximo)
+);
+
+epiDeliveryReportRoutes.get(
+    '/employees/with-reports',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) =>
+        epiDeliveryReportController.listEmployeesWithReports(requisicao, resposta, proximo)
+);
+
+epiDeliveryReportRoutes.get(
     '/pending',
     isAuthenticated,
     authorize(PAPEIS_GESTAO_RH),

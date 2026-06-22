@@ -101,6 +101,15 @@
     white-space: nowrap;
 }
 
+.epis-pesquisa-nome__item--checkbox {
+    cursor: pointer;
+}
+
+.epis-pesquisa-nome__item--checkbox input {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
 @media (max-width: 720px) {
     .epis-formulario-ca__grade {
         grid-template-columns: 1fr;

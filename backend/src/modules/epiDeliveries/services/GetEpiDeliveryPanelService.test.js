@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 const epiDeliveryRepositoryMock = {
-    findFuncionariosAtivosComEpisNoCargo: jest.fn()
+    findFuncionariosAtivos: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/EpiDeliveryRepository.js', () => ({
@@ -20,7 +20,7 @@ describe('GetEpiDeliveryPanelService', () => {
         ontem.setDate(ontem.getDate() - 2);
         ontem.setHours(0, 0, 0, 0);
 
-        epiDeliveryRepositoryMock.findFuncionariosAtivosComEpisNoCargo.mockResolvedValue([
+        epiDeliveryRepositoryMock.findFuncionariosAtivos.mockResolvedValue([
             {
                 id: 'f1',
                 name: 'Ana',

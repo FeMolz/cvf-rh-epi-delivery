@@ -37,11 +37,7 @@ export function TabelaFuncionariosEpi({
     );
 
     if (!funcionarios.length) {
-        return (
-            <p className="estado-vazio">
-                Nenhum funcionário ativo com EPIs vinculados ao cargo.
-            </p>
-        );
+        return <p className="estado-vazio">Nenhum funcionário ativo encontrado.</p>;
     }
 
     return (

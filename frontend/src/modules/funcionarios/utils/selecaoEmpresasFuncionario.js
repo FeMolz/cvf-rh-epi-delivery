@@ -1,7 +1,4 @@
-import {
-    empresaEstaAtiva,
-    filtrarEmpresasPorSituacao
-} from '../../empresas/utils/listagemEmpresas.js';
+import { filtrarEmpresasPorSituacao } from '../../empresas/utils/listagemEmpresas.js';
 
 /**
  * @param {Array<Record<string, unknown>>} empresas

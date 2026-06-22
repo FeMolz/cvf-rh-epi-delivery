@@ -135,4 +135,18 @@ describe('EpiProvider', () => {
 
         expect(result).toEqual([{ caNumber: '11070', name: 'Capacete de Segurança' }]);
     });
+
+    it('should throw when search endpoint is missing on the CAEPI API', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
+                ok: false,
+                status: 404,
+                json: () => Promise.resolve({ detail: 'Not Found' })
+            })
+        );
+
+        await expect(epiProvider.buscarEpisPorNomeEquipamento('capacete')).rejects.toThrow(
+            'Busca por nome indisponível na API CAEPI'
+        );
+    });
 });

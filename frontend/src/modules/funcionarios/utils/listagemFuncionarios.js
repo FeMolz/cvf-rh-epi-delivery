@@ -28,6 +28,12 @@ export const OPCOES_STATUS_FUNCIONARIO = Object.entries(ROTULOS_STATUS_FUNCIONAR
 
 export const STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO = ['DESLIGADO', 'RESCINDIDO', 'APOSENTADO'];
 
+export const STATUS_FUNCIONARIO_COM_DATA_RETORNO_AFASTAMENTO = [
+    'FERIAS',
+    'LICENCA_MATERNIDADE',
+    'LICENCA_MED'
+];
+
 export const OPCOES_ESTADO_CIVIL = [
     { valor: 'SOLTEIRO', rotulo: 'Solteiro(a)' },
     { valor: 'CASADO', rotulo: 'Casado(a)' },

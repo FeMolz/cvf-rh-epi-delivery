@@ -20,30 +20,6 @@
 .layout__marca {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-}
-
-.layout__marca strong {
-    display: block;
-    font-size: 1rem;
-    color: #0f172a;
-}
-
-.layout__marca small {
-    color: #64748b;
-    font-size: 0.8rem;
-}
-
-.layout__logo {
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.75rem;
-    background: #1d4ed8;
-    color: #fff;
-    font-weight: 700;
-    letter-spacing: 0.04em;
 }
 
 .layout__usuario {

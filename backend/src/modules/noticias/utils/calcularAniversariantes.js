@@ -84,7 +84,7 @@ export function montarAniversariantesPessoais(funcionarios, referencia = new Dat
 
             return a.dia - b.dia;
         })
-        .map(({ dia, ehHoje, ...item }) => item);
+        .map(({ dia: _dia, ehHoje: _ehHoje, ...item }) => item);
 }
 
 /**
@@ -120,7 +120,7 @@ export function montarAniversariantesEmpresa(funcionarios, referencia = new Date
 
             return a.dia - b.dia;
         })
-        .map(({ dia, ehHoje, ...item }) => item);
+        .map(({ dia: _dia, ehHoje: _ehHoje, ...item }) => item);
 }
 
 /**

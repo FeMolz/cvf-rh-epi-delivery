@@ -1,3 +1,5 @@
+export const LIMITE_EPI_VENCIDOS_ALERTA = 3;
+
 /**
  * @param {{ totalEpis?: number, vencidos?: number, pendentes?: number, emDia?: number }} resumo
  */
@@ -10,7 +12,7 @@ export function obterMensagemResumoEpisFuncionario(resumo = {}) {
         return 'Tudo em dia';
     }
 
-    if (vencidos >= 3) {
+    if (vencidos >= LIMITE_EPI_VENCIDOS_ALERTA) {
         return `Muitos vencidos (${vencidos})`;
     }
 
@@ -36,15 +38,11 @@ export function obterClasseResumoEpisFuncionario(resumo = {}) {
     const vencidos = Number(resumo.vencidos) || 0;
     const pendentes = Number(resumo.pendentes) || 0;
 
-    if (vencidos >= 3) {
-        return 'status-badge status-badge--offline';
+    if (vencidos >= LIMITE_EPI_VENCIDOS_ALERTA) {
+        return 'status-badge status-badge--encerrado';
     }
 
-    if (vencidos > 0) {
-        return 'status-badge status-badge--offline';
-    }
-
-    if (pendentes > 0) {
+    if (vencidos > 0 || pendentes > 0) {
         return 'status-badge status-badge--afastado';
     }
 

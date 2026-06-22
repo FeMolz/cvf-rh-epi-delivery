@@ -55,15 +55,21 @@ src/modules/epiDeliveryReports/
 ├── services/
 │   ├── GenerateEpiDeliveryReportPdfService.js
 │   ├── GenerateEpiDeliveryReportPdfService.test.js
+│   ├── ListEpiDeliveryReportsService.js
+│   ├── ListEpiDeliveryReportsService.test.js
 │   ├── ListEmployeeEpiDeliveryReportArchiveService.js
 │   ├── ListEmployeeEpiDeliveryReportArchiveService.test.js
 │   ├── ListPendingEpiDeliveryReportsService.js
 │   ├── ListPendingEpiDeliveryReportsService.test.js
+│   ├── PreviewEpiDeliveryReportService.js
+│   ├── PreviewEpiDeliveryReportService.test.js
 │   ├── ResolveEpiDeliveryReportPdfFileService.js
 │   ├── ResolveEpiDeliveryReportPdfFileService.test.js
 │   ├── UpdateEpiDeliveryReportFlagsService.js
 │   └── UpdateEpiDeliveryReportFlagsService.test.js
 └── utils/
+    ├── montarEntregasTabelaRelatorio.js
+    ├── montarEntregasTabelaRelatorio.test.js
     ├── periodoRelatorioEntregaEpi.js
     └── periodoRelatorioEntregaEpi.test.js
 
@@ -103,6 +109,18 @@ src/shared/providers/EpiDeliveryReportPdfProvider/
 
 - Retorna relatórios com `foiAssinado === false`, ordenados por `createdAt` descendente, com dados de funcionário e usuário gerador.
 
+### `ListEpiDeliveryReportsService`
+
+- Listagem global paginada para a interface web (últimas emissões e filtros).
+- Query params opcionais: `employeeId`, `foiAssinado` (`true`/`false`), `emissaoInicio` e `emissaoFim` (`AAAA-MM-DD`, ambos obrigatórios quando um for informado), `pagina` (padrão 1), `limite` (padrão 20, máximo 100).
+- Resposta: `{ itens, pagina, limite, totalItens, totalPaginas }`, ordenação `createdAt desc`.
+
+### `PreviewEpiDeliveryReportService`
+
+- Pré-visualização JSON das entregas que entrariam no PDF, sem persistir relatório.
+- Query: `employeeId`, `periodoInicio`, `periodoFim` (`AAAA-MM-DD`, obrigatórios).
+- Resposta: `{ employee, textoPeriodoReferencia, entregas: [{ dataEntrega, nomeEquipamento, numeroCa }] }`.
+
 ### `ListEmployeeEpiDeliveryReportArchiveService`
 
 - Exige `employeeId`; devolve todos os relatórios do funcionário, do mais recente ao mais antigo.
@@ -138,6 +156,10 @@ Prefixo base: `/api/v1/epi-delivery-reports`
 | Método | Endpoint | Permissões exigidas | Descrição |
 |--------|----------|---------------------|-----------|
 | `POST` | `/` | `ADMIN`, `ADMINISTRATIVO` | Emite relatório: corpo com `employeeId`, `periodoInicio`, `periodoFim` (`AAAA-MM-DD`). Resposta `201` com registro criado (inclui relacionamentos). |
+| `GET` | `/` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Lista relatórios com filtros e paginação. Query: `employeeId`, `foiAssinado`, `emissaoInicio`, `emissaoFim`, `ultimosDias`, `pagina`, `limite`. |
+| `GET` | `/preview` | `ADMIN`, `ADMINISTRATIVO` | Prévia das entregas no período. Query: `employeeId`, `periodoInicio`, `periodoFim`. |
+| `GET` | `/employees/eligible-for-emission` | `ADMIN`, `ADMINISTRATIVO` | Funcionários com entregas ainda não cobertas por nenhum relatório emitido. |
+| `GET` | `/employees/with-reports` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Funcionários que possuem ao menos uma emissão de relatório (com contagem). |
 | `GET` | `/pending` | `ADMIN`, `ADMINISTRATIVO` | Lista relatórios ainda não assinados (`foiAssinado` falso). |
 | `GET` | `/employee/:employeeId/archive` | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` | Arquivo/histórico de relatórios do funcionário. |
 | `PATCH` | `/:id/flags` | `ADMIN`, `ADMINISTRATIVO` | Atualiza flags `foiImpresso`, `foiEncaminhado` e/ou `foiAssinado`. |
@@ -151,6 +173,7 @@ Os testes usam mocks com `jest.unstable_mockModule` onde necessário, sem banco 
 
 - **`EpiDeliveryReportRepository.test.js`**: chamadas ao Prisma para busca de contexto, criação, listagens, `findById` e atualização de flags.
 - **`GenerateEpiDeliveryReportPdfService.test.js`**: validações, integração mockada com repositório de entregas, provider PDF e persistência do binário em `pdfConteudo`.
+- **`ListEpiDeliveryReportsService.test.js`**: filtros, paginação e validação de intervalo de emissão.
 - **`ListPendingEpiDeliveryReportsService.test.js`** e **`ListEmployeeEpiDeliveryReportArchiveService.test.js`**: repasse ao repositório e validação de parâmetro obrigatório no arquivo.
 - **`UpdateEpiDeliveryReportFlagsService.test.js`**: relatório inexistente, ausência de flags e atualização parcial.
 - **`ResolveEpiDeliveryReportPdfFileService.test.js`**: binário vazio, nome sugerido e buffer para download.
@@ -174,6 +197,12 @@ Os testes usam mocks com `jest.unstable_mockModule` onde necessário, sem banco 
   "periodoFim": "2026-01-31"
 }
 ```
+
+### Listar relatórios (com filtros)
+
+- **Método:** `GET`
+- **URL:** `http://localhost:3000/api/v1/epi-delivery-reports?pagina=1&limite=20&foiAssinado=false`
+- **Query opcional:** `employeeId`, `foiAssinado`, `emissaoInicio`, `emissaoFim` (par de datas `AAAA-MM-DD` sobre `createdAt`)
 
 ### Listar pendentes de assinatura
 

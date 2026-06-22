@@ -7,7 +7,10 @@ import {
 
 class GetEpiDeliveryPanelService {
     async execute() {
-        const funcionarios = await epiDeliveryRepository.findFuncionariosAtivosComEpisNoCargo();
+        const funcionarios = await epiDeliveryRepository.findFuncionariosAtivos();
+        const funcionariosComEpisNoCargo = funcionarios.filter(
+            (funcionario) => (funcionario.role?.roleEpis || []).length > 0
+        );
 
         return {
             funcionariosElegiveis: funcionarios.map((funcionario) => {
@@ -21,7 +24,7 @@ class GetEpiDeliveryPanelService {
                     resumoEpis: montarResumoContagemEpis(epis)
                 };
             }),
-            episVencidos: montarEpisVencidosPorFuncionarios(funcionarios)
+            episVencidos: montarEpisVencidosPorFuncionarios(funcionariosComEpisNoCargo)
         };
     }
 }

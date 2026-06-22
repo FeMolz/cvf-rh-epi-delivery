@@ -1,4 +1,4 @@
-import dotenv from 'dotenv/config';
+import 'dotenv/config';
 
 import {
     DIAS_VALIDADE_TOKEN_CADASTRO_PADRAO,

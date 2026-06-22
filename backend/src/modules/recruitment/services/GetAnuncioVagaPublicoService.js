@@ -19,7 +19,9 @@ class GetAnuncioVagaPublicoService {
             lancarErroRecrutamento(MENSAGEM_ANUNCIO_NAO_ATIVO);
         }
 
-        const { criadoPor, criadoPorUserId, ...anuncioPublico } = anuncio;
+        const anuncioPublico = { ...anuncio };
+        delete anuncioPublico.criadoPor;
+        delete anuncioPublico.criadoPorUserId;
         return anuncioPublico;
     }
 }

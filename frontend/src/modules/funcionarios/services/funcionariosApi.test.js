@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
     atualizarFuncionario,
+    baixarFichaFuncionario,
     baixarRelatorioFuncionarios,
     buscarFuncionarioPorId,
     criarFuncionario,
@@ -88,16 +89,26 @@ describe('funcionariosApi', () => {
         baixarArquivoApi.mockResolvedValue(undefined);
 
         await baixarRelatorioFuncionarios('jwt', {
-            filtro: 'todos',
             ids: ['func-1', 'func-2']
         });
 
         expect(baixarArquivoApi).toHaveBeenCalledWith(
-            '/employees/export/lista?filtro=todos&ids=func-1%2Cfunc-2',
+            '/employees/export/lista?ids=func-1%2Cfunc-2',
             {
                 token: 'jwt',
                 nomeArquivoPadrao: 'funcionarios.xlsx'
             }
         );
+    });
+
+    it('deve baixar ficha individual do funcionario', async () => {
+        baixarArquivoApi.mockResolvedValue(undefined);
+
+        await baixarFichaFuncionario('func-1', 'jwt');
+
+        expect(baixarArquivoApi).toHaveBeenCalledWith('/employees/func-1/export', {
+            token: 'jwt',
+            nomeArquivoPadrao: 'funcionario.xlsx'
+        });
     });
 });

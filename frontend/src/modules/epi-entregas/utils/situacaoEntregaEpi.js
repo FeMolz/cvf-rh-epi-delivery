@@ -25,7 +25,7 @@ export function obterRotuloSituacaoEpi(situacao) {
 export function obterClasseSituacaoEpi(situacao) {
     switch (situacao) {
         case SITUACAO_EPI_ENTREGA.VENCIDO:
-            return 'status-badge status-badge--offline';
+            return 'status-badge status-badge--afastado';
         case SITUACAO_EPI_ENTREGA.PENDENTE:
             return 'status-badge status-badge--afastado';
         case SITUACAO_EPI_ENTREGA.EM_DIA:

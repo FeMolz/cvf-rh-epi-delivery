@@ -7,10 +7,19 @@ import { buscarEpisPorNome } from '../services/episApi.js';
  * @param {{
  *   token: string,
  *   desabilitado?: boolean,
- *   onSelecionarCa: (caNumber: string) => void
+ *   onSelecionarCa?: (caNumber: string) => void,
+ *   episSelecionados?: string[],
+ *   onAlternarEpi?: (caNumber: string) => void
  * }} props
  */
-export function PesquisaEpiPorNome({ token, desabilitado = false, onSelecionarCa }) {
+export function PesquisaEpiPorNome({
+    token,
+    desabilitado = false,
+    onSelecionarCa,
+    episSelecionados = [],
+    onAlternarEpi
+}) {
+    const modoMultiplo = typeof onAlternarEpi === 'function';
     const [termo, setTermo] = useState('');
     const [resultados, setResultados] = useState([]);
     const [buscando, setBuscando] = useState(false);
@@ -48,8 +57,14 @@ export function PesquisaEpiPorNome({ token, desabilitado = false, onSelecionarCa
 
     function selecionarResultado(item) {
         const ca = String(item.caNumber || '');
+
+        if (modoMultiplo) {
+            onAlternarEpi(ca);
+            return;
+        }
+
         setCaSelecionado(ca);
-        onSelecionarCa(ca);
+        onSelecionarCa?.(ca);
     }
 
     return (
@@ -87,7 +102,30 @@ export function PesquisaEpiPorNome({ token, desabilitado = false, onSelecionarCa
                 <ul className="epis-pesquisa-nome__resultados">
                     {resultados.map((item) => {
                         const ca = String(item.caNumber);
-                        const ativo = caSelecionado === ca;
+                        const ativo = modoMultiplo
+                            ? episSelecionados.includes(ca)
+                            : caSelecionado === ca;
+
+                        if (modoMultiplo) {
+                            return (
+                                <li key={ca}>
+                                    <label
+                                        className={`epis-pesquisa-nome__item epis-pesquisa-nome__item--checkbox${
+                                            ativo ? ' epis-pesquisa-nome__item--ativo' : ''
+                                        }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={ativo}
+                                            disabled={desabilitado}
+                                            onChange={() => selecionarResultado(item)}
+                                        />
+                                        <span className="epis-pesquisa-nome__nome">{item.name}</span>
+                                        <span className="epis-pesquisa-nome__ca">CA {ca}</span>
+                                    </label>
+                                </li>
+                            );
+                        }
 
                         return (
                             <li key={ca}>

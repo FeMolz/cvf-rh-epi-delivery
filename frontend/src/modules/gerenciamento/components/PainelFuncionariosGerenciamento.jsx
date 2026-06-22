@@ -14,6 +14,7 @@ import { criarFuncionario } from '../../funcionarios/services/funcionariosApi.js
 import { listarSetores } from '../../funcionarios/services/setoresApi.js';
 import { montarPayloadFuncionario } from '../../funcionarios/utils/montarPayloadFuncionario.js';
 import { filtrarEmpresasAtivasParaFuncionario } from '../../funcionarios/utils/selecaoEmpresasFuncionario.js';
+import { filtrarSetoresAtivosParaFuncionario } from '../../funcionarios/utils/selecaoSetoresFuncionario.js';
 import { IconeAbaGerenciamento } from './IconeAbaGerenciamento.jsx';
 
 export function PainelFuncionariosGerenciamento() {
@@ -46,7 +47,7 @@ export function PainelFuncionariosGerenciamento() {
                 if (ativo) {
                     setCargos(listaCargos);
                     setEmpresas(filtrarEmpresasAtivasParaFuncionario(listaEmpresas));
-                    setSetores(listaSetores);
+                    setSetores(filtrarSetoresAtivosParaFuncionario(listaSetores));
                 }
             } catch (erroCapturado) {
                 if (ativo) {

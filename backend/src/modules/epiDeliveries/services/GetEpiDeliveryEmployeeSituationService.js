@@ -12,7 +12,7 @@ class GetEpiDeliveryEmployeeSituationService {
         }
 
         const funcionario =
-            await epiDeliveryRepository.findFuncionarioAtivoComEpisNoCargoPorId(identificador);
+            await epiDeliveryRepository.findFuncionarioAtivoPorId(identificador);
 
         if (!funcionario) {
             throw criarErroHttp(MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO, 404);

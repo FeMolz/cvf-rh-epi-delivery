@@ -1,7 +1,10 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
-import { PAPEL_ADMIN, PAPEL_ADMINISTRATIVO } from '../../../shared/constants/papeis.js';
+import {
+    PAPEL_ALMOXARIFADO,
+    PAPEIS_GESTAO_SISTEMA
+} from '../../../shared/constants/papeis.js';
 import { LayoutAplicacao } from '../components/LayoutAplicacao.jsx';
 import { FormularioLogin } from '../components/FormularioLogin.jsx';
 
@@ -16,12 +19,12 @@ export function LoginPage() {
     async function aoEntrar({ email, password }) {
         const usuario = await login(email, password);
 
-        if (usuario.role === PAPEL_ADMIN) {
-            navegar('/admin/dashboard');
+        if (usuario.role === PAPEL_ALMOXARIFADO) {
+            navegar('/admin/epis/entregas');
             return;
         }
 
-        if (usuario.role === PAPEL_ADMINISTRATIVO) {
+        if (PAPEIS_GESTAO_SISTEMA.includes(usuario.role)) {
             navegar('/admin/gerenciamento');
             return;
         }
@@ -32,7 +35,7 @@ export function LoginPage() {
     return (
         <LayoutAplicacao
             titulo="Acesso ao sistema"
-            subtitulo="Entre com suas credenciais para gerenciar usuários e demais módulos do RH-System."
+            subtitulo="Entre com suas credenciais para acessar os módulos do CVF Gerenciamento."
         >
             <FormularioLogin onSubmit={aoEntrar} carregando={carregando} />
             <p className="formulario__rodape">

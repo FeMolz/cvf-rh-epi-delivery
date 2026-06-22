@@ -4,8 +4,16 @@ const listarAniversariantesNoticiasServiceMock = {
     execute: jest.fn()
 };
 
+const listarAfastamentosNoticiasServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/ListarAniversariantesNoticiasService.js', () => ({
     default: listarAniversariantesNoticiasServiceMock
+}));
+
+jest.unstable_mockModule('../services/ListarAfastamentosNoticiasService.js', () => ({
+    default: listarAfastamentosNoticiasServiceMock
 }));
 
 const noticiasController = (await import('./NoticiasController.js')).default;
@@ -37,6 +45,22 @@ describe('NoticiasController', () => {
         await noticiasController.listarAniversariantes(mockRequest, mockResponse, next);
 
         expect(listarAniversariantesNoticiasServiceMock.execute).toHaveBeenCalled();
+        expect(mockResponse.status).toHaveBeenCalledWith(200);
+        expect(mockResponse.json).toHaveBeenCalledWith(payload);
+    });
+
+    it('deve retornar afastamentos com status 200', async () => {
+        const payload = {
+            mesReferencia: 'junho de 2025',
+            saindo: [],
+            voltando: []
+        };
+
+        listarAfastamentosNoticiasServiceMock.execute.mockResolvedValue(payload);
+
+        await noticiasController.listarAfastamentos(mockRequest, mockResponse, next);
+
+        expect(listarAfastamentosNoticiasServiceMock.execute).toHaveBeenCalled();
         expect(mockResponse.status).toHaveBeenCalledWith(200);
         expect(mockResponse.json).toHaveBeenCalledWith(payload);
     });

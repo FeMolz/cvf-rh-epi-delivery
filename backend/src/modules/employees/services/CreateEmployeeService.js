@@ -1,6 +1,7 @@
 import employeeRepository from '../repositories/EmployeeRepository.js';
 import validarEmpresaAtivaParaVinculoService from '../../companies/services/ValidarEmpresaAtivaParaVinculoService.js';
 import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
+import validarSetorAtivoParaVinculoService from '../../setores/services/ValidarSetorAtivoParaVinculoService.js';
 import {
     MENSAGEM_CAMPOS_OBRIGATORIOS_FUNCIONARIO,
     MENSAGEM_CPF_DUPLICADO,
@@ -8,6 +9,7 @@ import {
     MENSAGEM_EMAIL_DUPLICADO
 } from '../constants/funcionarioConstantes.js';
 import { montarDadosFuncionario } from '../utils/montarDadosFuncionario.js';
+import { resolverDataRetornoAfastamento } from '../utils/resolverDataRetornoAfastamento.js';
 import { lancarErroFuncionario } from '../utils/lancarErroFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
@@ -61,9 +63,18 @@ class CreateEmployeeService {
 
         await validarEmpresaAtivaParaVinculoService.execute(String(companyId));
         await validarCargoAtivoParaVinculoService.execute(String(roleId));
+        await validarSetorAtivoParaVinculoService.execute(String(setorId));
+
+        const statusInformado = String(entrada.status || 'ATIVO');
+        const dadosRetorno = resolverDataRetornoAfastamento({
+            statusAnterior: 'ATIVO',
+            statusNovo: statusInformado,
+            leaveReturnDate: entrada.leaveReturnDate
+        });
 
         const dadosFuncionario = montarDadosFuncionario({
             ...entrada,
+            ...dadosRetorno,
             cpf: cpfValidado,
             email: emailValidado,
             telefone: telefoneValidado,

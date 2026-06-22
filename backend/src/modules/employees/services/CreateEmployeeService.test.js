@@ -26,6 +26,14 @@ jest.unstable_mockModule('../../companies/services/ValidarEmpresaAtivaParaVincul
     default: validarEmpresaAtivaParaVinculoServiceMock
 }));
 
+const validarSetorAtivoParaVinculoServiceMock = {
+    execute: jest.fn()
+};
+
+jest.unstable_mockModule('../../setores/services/ValidarSetorAtivoParaVinculoService.js', () => ({
+    default: validarSetorAtivoParaVinculoServiceMock
+}));
+
 const createEmployeeService = (await import('./CreateEmployeeService.js')).default;
 
 const CPF_VALIDO = '529.982.247-25';
@@ -39,6 +47,7 @@ describe('CreateEmployeeService', () => {
     beforeEach(() => {
         validarEmpresaAtivaParaVinculoServiceMock.execute.mockResolvedValue(undefined);
         validarCargoAtivoParaVinculoServiceMock.execute.mockResolvedValue(undefined);
+        validarSetorAtivoParaVinculoServiceMock.execute.mockResolvedValue(undefined);
     });
 
     it('should create employee when data is valid', async () => {

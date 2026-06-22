@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
+import { LogoSistema, NOME_SISTEMA } from '../components/LogoSistema.jsx';
 import { IconeModulo } from '../components/IconeModulo.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { listarModulosVisiveis } from '../constants/modulosSistema.js';
@@ -12,6 +14,10 @@ export function LayoutAdmin() {
     const navegar = useNavigate();
     const modulos = listarModulosVisiveis(user?.role);
 
+    useEffect(() => {
+        document.title = NOME_SISTEMA;
+    }, []);
+
     async function aoSair() {
         await logout();
         navegar('/login');
@@ -21,10 +27,7 @@ export function LayoutAdmin() {
         <div className="admin-shell">
             <aside className="admin-sidebar" aria-label="Navegação principal">
                 <div className="admin-sidebar__marca">
-                    <span className="admin-sidebar__logo">RH</span>
-                    <div>
-                        <strong>RH-System</strong>
-                    </div>
+                    <LogoSistema className="logo-sistema--sidebar" />
                 </div>
 
                 <nav className="admin-sidebar__nav">

@@ -14,4 +14,11 @@ noticiasRoutes.get(
     (request, response, next) => noticiasController.listarAniversariantes(request, response, next)
 );
 
+noticiasRoutes.get(
+    '/afastamentos',
+    isAuthenticated,
+    authorize(PAPEIS_GESTAO_RH),
+    (request, response, next) => noticiasController.listarAfastamentos(request, response, next)
+);
+
 export default noticiasRoutes;

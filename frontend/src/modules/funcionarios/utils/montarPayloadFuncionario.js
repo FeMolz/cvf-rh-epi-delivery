@@ -77,5 +77,13 @@ export function montarPayloadFuncionario(dados) {
         payload.resignationDate = dados.resignationDate;
     }
 
+    if (
+        dados.leaveReturnDate !== undefined &&
+        dados.leaveReturnDate !== null &&
+        String(dados.leaveReturnDate).trim() !== ''
+    ) {
+        payload.leaveReturnDate = dados.leaveReturnDate;
+    }
+
     return payload;
 }

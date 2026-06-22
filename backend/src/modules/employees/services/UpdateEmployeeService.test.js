@@ -34,6 +34,14 @@ jest.unstable_mockModule('../../companies/services/ValidarEmpresaAtivaParaVincul
     default: validarEmpresaAtivaParaVinculoServiceMock
 }));
 
+const validarSetorAtivoParaVinculoServiceMock = {
+    execute: jest.fn()
+};
+
+jest.unstable_mockModule('../../setores/services/ValidarSetorAtivoParaVinculoService.js', () => ({
+    default: validarSetorAtivoParaVinculoServiceMock
+}));
+
 const updateEmployeeService = (await import('./UpdateEmployeeService.js')).default;
 
 const CPF_VALIDO = '529.982.247-25';
@@ -47,6 +55,7 @@ describe('UpdateEmployeeService', () => {
     beforeEach(() => {
         validarEmpresaAtivaParaVinculoServiceMock.execute.mockResolvedValue(undefined);
         validarCargoAtivoParaVinculoServiceMock.execute.mockResolvedValue(undefined);
+        validarSetorAtivoParaVinculoServiceMock.execute.mockResolvedValue(undefined);
     });
 
     it('deve atualizar funcionário com dados válidos', async () => {
@@ -147,6 +156,22 @@ describe('UpdateEmployeeService', () => {
         expect(validarEmpresaAtivaParaVinculoServiceMock.execute).toHaveBeenCalledWith('empresa-2');
     });
 
+    it('deve validar setor ativo ao alterar setorId', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1',
+            setorId: 'setor-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', setorId: 'setor-2' });
+
+        await updateEmployeeService.execute('1', { setorId: 'setor-2' });
+
+        expect(validarSetorAtivoParaVinculoServiceMock.execute).toHaveBeenCalledWith('setor-2');
+    });
+
     it('deve converter datas string antes de atualizar', async () => {
         employeeRepositoryMock.findById.mockResolvedValue({
             id: '1',
@@ -160,7 +185,8 @@ describe('UpdateEmployeeService', () => {
         await updateEmployeeService.execute('1', {
             birthDate: '1995-08-12',
             admissionDate: '2026-05-10',
-            status: 'FERIAS'
+            status: 'FERIAS',
+            leaveReturnDate: '2099-12-31'
         });
 
         expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
@@ -168,7 +194,8 @@ describe('UpdateEmployeeService', () => {
             expect.objectContaining({
                 birthDate: expect.any(Date),
                 admissionDate: expect.any(Date),
-                status: 'FERIAS'
+                status: 'FERIAS',
+                leaveReturnDate: expect.any(Date)
             })
         );
     });

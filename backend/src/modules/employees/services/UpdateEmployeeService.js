@@ -3,6 +3,7 @@ import { statusFuncionarioEncerraVinculo } from '../../../shared/constants/funci
 import gerenciarPeriodicidadeEpiFuncionarioService from '../../epiDeliveries/services/GerenciarPeriodicidadeEpiFuncionarioService.js';
 import validarEmpresaAtivaParaVinculoService from '../../companies/services/ValidarEmpresaAtivaParaVinculoService.js';
 import validarCargoAtivoParaVinculoService from '../../roles/services/ValidarCargoAtivoParaVinculoService.js';
+import validarSetorAtivoParaVinculoService from '../../setores/services/ValidarSetorAtivoParaVinculoService.js';
 import {
     MENSAGEM_CPF_DUPLICADO,
     MENSAGEM_EMAIL_DUPLICADO,
@@ -10,6 +11,8 @@ import {
 } from '../constants/funcionarioConstantes.js';
 import employeeRepository from '../repositories/EmployeeRepository.js';
 import { normalizarDatasAtualizacaoFuncionario } from '../utils/montarDadosFuncionario.js';
+import { resolverDataRetornoAfastamento } from '../utils/resolverDataRetornoAfastamento.js';
+import { statusFuncionarioExigeDataRetornoAfastamento } from '../utils/afastamentoTemporarioFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
 import { validarTelefone } from '../utils/validarTelefone.js';
@@ -42,6 +45,22 @@ class UpdateEmployeeService {
             }
         }
 
+        const deveResolverRetornoAfastamento =
+            dadosAtualizacao.status !== undefined ||
+            dadosAtualizacao.leaveReturnDate !== undefined ||
+            statusFuncionarioExigeDataRetornoAfastamento(statusNovo);
+
+        if (deveResolverRetornoAfastamento) {
+            const dadosRetornoAfastamento = resolverDataRetornoAfastamento({
+                statusAnterior,
+                statusNovo,
+                leaveReturnDate: dadosAtualizacao.leaveReturnDate,
+                leaveReturnDateAnterior: funcionarioExistente.leaveReturnDate
+            });
+
+            Object.assign(dadosAtualizacao, dadosRetornoAfastamento);
+        }
+
         const roleIdEfetivo =
             dadosAtualizacao.roleId !== undefined
                 ? dadosAtualizacao.roleId
@@ -53,6 +72,10 @@ class UpdateEmployeeService {
 
         if (dadosAtualizacao.roleId !== undefined || !statusFuncionarioEncerraVinculo(statusNovo)) {
             await validarCargoAtivoParaVinculoService.execute(String(roleIdEfetivo));
+        }
+
+        if (dadosAtualizacao.setorId !== undefined) {
+            await validarSetorAtivoParaVinculoService.execute(String(dadosAtualizacao.setorId));
         }
 
         if (entrada.cpf !== undefined) {

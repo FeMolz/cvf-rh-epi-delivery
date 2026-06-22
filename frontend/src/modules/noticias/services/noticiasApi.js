@@ -6,3 +6,10 @@ import { requisicaoApi } from '../../../shared/api/clienteHttp.js';
 export function listarAniversariantesNoticias(token) {
     return requisicaoApi('/noticias/aniversariantes', { token });
 }
+
+/**
+ * @param {string} token
+ */
+export function listarAfastamentosNoticias(token) {
+    return requisicaoApi('/noticias/afastamentos', { token });
+}

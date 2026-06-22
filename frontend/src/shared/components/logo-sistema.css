@@ -1,0 +1,16 @@
+.logo-sistema {
+    display: block;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.logo-sistema--sidebar {
+    width: 100%;
+    max-width: 9.5rem;
+}
+
+.logo-sistema--cabecalho {
+    max-width: 10.5rem;
+    max-height: 3.25rem;
+}

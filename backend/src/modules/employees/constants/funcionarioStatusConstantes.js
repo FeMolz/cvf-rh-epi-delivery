@@ -36,6 +36,11 @@ export const STATUS_FUNCIONARIO_AFASTADOS = [
     'LICENCA_MED'
 ];
 
+/** Afastamentos com retorno programado (férias e licenças). */
+export const STATUS_FUNCIONARIO_AFASTAMENTO_TEMPORARIO = [
+    ...STATUS_FUNCIONARIO_AFASTADOS
+];
+
 export const STATUS_FUNCIONARIO_INATIVOS = [
     'INATIVO',
     'DESLIGADO',

@@ -17,33 +17,20 @@
 }
 
 .admin-sidebar__marca {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.25rem 0.5rem 0.75rem;
+    justify-content: center;
+    padding: 0.35rem 0 0.85rem;
+}
+
+.admin-sidebar__marca::after {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    right: -1rem;
+    bottom: 0;
     border-bottom: 1px solid #334155;
-}
-
-.admin-sidebar__marca strong {
-    display: block;
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-.admin-sidebar__marca small {
-    color: #94a3b8;
-    font-size: 0.75rem;
-}
-
-.admin-sidebar__logo {
-    display: grid;
-    place-items: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.65rem;
-    background: #2563eb;
-    color: #fff;
-    font-weight: 700;
 }
 
 .admin-sidebar__nav {

@@ -1,6 +1,10 @@
 import generateEpiDeliveryReportPdfService from '../services/GenerateEpiDeliveryReportPdfService.js';
+import listEmployeesEligibleForReportEmissionService from '../services/ListEmployeesEligibleForReportEmissionService.js';
+import listEmployeesWithReportHistoryService from '../services/ListEmployeesWithReportHistoryService.js';
 import listEmployeeEpiDeliveryReportArchiveService from '../services/ListEmployeeEpiDeliveryReportArchiveService.js';
+import listEpiDeliveryReportsService from '../services/ListEpiDeliveryReportsService.js';
 import listPendingEpiDeliveryReportsService from '../services/ListPendingEpiDeliveryReportsService.js';
+import previewEpiDeliveryReportService from '../services/PreviewEpiDeliveryReportService.js';
 import resolveEpiDeliveryReportPdfFileService from '../services/ResolveEpiDeliveryReportPdfFileService.js';
 import updateEpiDeliveryReportFlagsService from '../services/UpdateEpiDeliveryReportFlagsService.js';
 import {
@@ -45,6 +49,53 @@ class EpiDeliveryReportController {
             if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
                 return res.status(400).json({ error: erro.message });
             }
+            return next(erro);
+        }
+    }
+
+    async list(req, res, next) {
+        try {
+            const resultado = await listEpiDeliveryReportsService.execute(req.query);
+            return res.status(200).json(resultado);
+        } catch (erro) {
+            if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
+                return res.status(400).json({ error: erro.message });
+            }
+            return next(erro);
+        }
+    }
+
+    async preview(req, res, next) {
+        try {
+            const { employeeId, periodoInicio, periodoFim } = req.query;
+            const previewRelatorio = await previewEpiDeliveryReportService.execute({
+                employeeId,
+                periodoInicio,
+                periodoFim
+            });
+            return res.status(200).json(previewRelatorio);
+        } catch (erro) {
+            if (CONJUNTO_MENSAGENS_RESPOSTA_400.has(erro.message)) {
+                return res.status(400).json({ error: erro.message });
+            }
+            return next(erro);
+        }
+    }
+
+    async listEmployeesEligibleForEmission(req, res, next) {
+        try {
+            const funcionarios = await listEmployeesEligibleForReportEmissionService.execute();
+            return res.status(200).json(funcionarios);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async listEmployeesWithReports(req, res, next) {
+        try {
+            const funcionarios = await listEmployeesWithReportHistoryService.execute();
+            return res.status(200).json(funcionarios);
+        } catch (erro) {
             return next(erro);
         }
     }

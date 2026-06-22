@@ -76,6 +76,30 @@
     margin: 0.35rem 0 0;
 }
 
+.entregas-epi__selecao-sem-cargo {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.entregas-epi__selecao-sem-cargo-aviso {
+    margin: 0;
+}
+
+.entregas-epi__cache-epis {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.entregas-epi__cache-formulario {
+    margin-bottom: 0;
+}
+
+.entregas-epi__cache-epis .entregas-epi__lista-epis,
+.entregas-epi__cache-epis .entregas-epi__selecao-vazia {
+    margin-top: 0.85rem;
+}
+
 .entregas-epi__linha--ativa {
     background: color-mix(in srgb, var(--cor-primaria) 8%, transparent);
 }

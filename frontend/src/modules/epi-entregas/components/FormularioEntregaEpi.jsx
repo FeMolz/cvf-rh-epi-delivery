@@ -1,11 +1,14 @@
 import { useMemo } from 'react';
 
 import { obterDataIsoHoje } from '../utils/dataEntregaEpi.js';
+import { SelecaoEpisSemVinculoCargo } from './SelecaoEpisSemVinculoCargo.jsx';
 
 /**
  * @param {{
+ *   token?: string,
  *   funcionarios: Array<{ id: string, name: string, roleName?: string }>,
  *   epis: Array<Record<string, unknown>>,
+ *   episCache?: Array<Record<string, unknown>>,
  *   funcionarioSelecionadoId: string,
  *   episSelecionados: string[],
  *   dataEntrega: string,
@@ -17,8 +20,10 @@ import { obterDataIsoHoje } from '../utils/dataEntregaEpi.js';
  * }} props
  */
 export function FormularioEntregaEpi({
+    token = '',
     funcionarios,
     epis,
+    episCache = [],
     funcionarioSelecionadoId,
     episSelecionados,
     dataEntrega,
@@ -89,9 +94,13 @@ export function FormularioEntregaEpi({
                     </legend>
 
                     {!epis.length ? (
-                        <p className="estado-vazio entregas-epi__selecao-vazia">
-                            Nenhum EPI vinculado ao cargo deste funcionário.
-                        </p>
+                        <SelecaoEpisSemVinculoCargo
+                            token={token}
+                            episCache={episCache}
+                            episSelecionados={episSelecionados}
+                            desabilitado={carregando}
+                            onAlternarEpi={onAlternarEpi}
+                        />
                     ) : (
                         <ul className="entregas-epi__lista-epis">
                             {epis.map((epi) => {

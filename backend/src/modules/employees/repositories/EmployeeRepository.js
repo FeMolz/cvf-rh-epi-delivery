@@ -1,6 +1,7 @@
 import prisma from '../../../config/database.js';
 import { criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import { CAMPOS_SELECAO_FUNCIONARIO } from '../constants/funcionarioConstantes.js';
+import { STATUS_FUNCIONARIO_AFASTAMENTO_TEMPORARIO } from '../constants/funcionarioStatusConstantes.js';
 
 const SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS = {
     name: true,
@@ -91,6 +92,26 @@ class EmployeeRepository {
             },
             select: SELECAO_EXPORTACAO_FICHA_FUNCIONARIO,
             orderBy: [{ name: 'asc' }]
+        });
+    }
+
+    /**
+     * @param {Date} dataReferencia início do dia de referência
+     */
+    async findManyComAfastamentoTemporarioExpirado(dataReferencia) {
+        return prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                status: { in: STATUS_FUNCIONARIO_AFASTAMENTO_TEMPORARIO },
+                leaveReturnDate: {
+                    not: null,
+                    lte: dataReferencia
+                }
+            },
+            select: {
+                id: true,
+                status: true
+            }
         });
     }
 

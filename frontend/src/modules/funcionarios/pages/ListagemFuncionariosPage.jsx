@@ -162,10 +162,16 @@ export function ListagemFuncionariosPage() {
         setBaixandoRelatorio(true);
         setErro('');
 
-        const opcoesRelatorio = { filtro: 'todos' };
+        const idsSelecionadosLista = [...idsSelecionados];
+        const opcoesRelatorio =
+            idsSelecionadosLista.length > 0
+                ? { ids: idsSelecionadosLista }
+                : { filtro: 'todos', companyId: empresaAtivaId };
 
-        if (empresaAtivaId) {
-            opcoesRelatorio.companyId = empresaAtivaId;
+        if (!idsSelecionadosLista.length && !empresaAtivaId) {
+            setErro('Selecione uma empresa ou marque ao menos um funcionário para exportar.');
+            setBaixandoRelatorio(false);
+            return;
         }
 
         try {
@@ -176,6 +182,30 @@ export function ListagemFuncionariosPage() {
             setBaixandoRelatorio(false);
         }
     }
+
+    const rotuloBotaoDownload = useMemo(() => {
+        if (baixandoRelatorio) {
+            if (idsSelecionados.size === 1) {
+                return 'Baixando ficha…';
+            }
+
+            if (idsSelecionados.size > 1) {
+                return 'Baixando fichas…';
+            }
+
+            return 'Baixando…';
+        }
+
+        if (idsSelecionados.size === 1) {
+            return 'Download ficha';
+        }
+
+        if (idsSelecionados.size > 1) {
+            return `Download fichas (${idsSelecionados.size})`;
+        }
+
+        return 'Download relatório da empresa';
+    }, [baixandoRelatorio, idsSelecionados.size]);
 
     return (
         <section className="admin-pagina">
@@ -223,7 +253,7 @@ export function ListagemFuncionariosPage() {
                             disabled={baixandoRelatorio || carregando}
                             onClick={aoBaixarRelatorio}
                         >
-                            {baixandoRelatorio ? 'Baixando…' : 'Download relatório'}
+                            {rotuloBotaoDownload}
                         </button>
                     }
                 />

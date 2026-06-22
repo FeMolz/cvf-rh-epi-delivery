@@ -11,12 +11,14 @@ import { IndicadorEtapasCadastro } from '../components/IndicadorEtapasCadastro.j
 import { listarEmpresas } from '../services/empresasApi.js';
 import {
     atualizarFuncionario,
+    baixarFichaFuncionario,
     buscarFuncionarioPorId
 } from '../services/funcionariosApi.js';
 import { listarSetores } from '../services/setoresApi.js';
 import { mapearFuncionarioParaFormulario } from '../utils/mapearFuncionarioParaFormulario.js';
 import { montarPayloadFuncionario } from '../utils/montarPayloadFuncionario.js';
 import { montarEmpresasParaFormularioFuncionario } from '../utils/selecaoEmpresasFuncionario.js';
+import { montarSetoresParaFormularioFuncionario } from '../utils/selecaoSetoresFuncionario.js';
 
 export function EdicaoFuncionarioPage() {
     const { id } = useParams();
@@ -31,6 +33,7 @@ export function EdicaoFuncionarioPage() {
     const [setores, setSetores] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
+    const [baixandoFicha, setBaixandoFicha] = useState(false);
     const [erro, setErro] = useState('');
 
     useEffect(() => {
@@ -73,7 +76,13 @@ export function EdicaoFuncionarioPage() {
                             funcionario.company
                         )
                     );
-                    setSetores(listaSetores);
+                    setSetores(
+                        montarSetoresParaFormularioFuncionario(
+                            listaSetores,
+                            funcionario.setorId,
+                            funcionario.setor
+                        )
+                    );
                 }
             } catch (erroCapturado) {
                 if (ativo) {
@@ -132,6 +141,19 @@ export function EdicaoFuncionarioPage() {
         salvarAlteracoes({ ...dados, ...dadosEtapa });
     }
 
+    async function aoBaixarFicha() {
+        setBaixandoFicha(true);
+        setErro('');
+
+        try {
+            await baixarFichaFuncionario(id, token);
+        } catch (erroCapturado) {
+            setErro(erroCapturado.message || 'Não foi possível baixar a ficha do funcionário.');
+        } finally {
+            setBaixandoFicha(false);
+        }
+    }
+
     if (carregando) {
         return <p className="estado-carregando">Carregando funcionário…</p>;
     }
@@ -151,9 +173,19 @@ export function EdicaoFuncionarioPage() {
         <section className="admin-pagina admin-pagina--formulario-completo">
             <header className="admin-pagina__cabecalho admin-pagina__cabecalho--com-acoes">
                 <h1>{nomeFuncionario || 'Editar funcionário'}</h1>
-                <Link className="botao botao--secundario" to="/admin/funcionarios">
-                    Voltar
-                </Link>
+                <div className="admin-pagina__acoes">
+                    <button
+                        className="botao botao--secundario"
+                        type="button"
+                        disabled={baixandoFicha || salvando}
+                        onClick={aoBaixarFicha}
+                    >
+                        {baixandoFicha ? 'Baixando…' : 'Download ficha'}
+                    </button>
+                    <Link className="botao botao--secundario" to="/admin/funcionarios">
+                        Voltar
+                    </Link>
+                </div>
             </header>
 
             <div className="cadastro-funcionario">

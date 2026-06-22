@@ -11,7 +11,9 @@ export function formatarRespostaUsuario(usuario, papelVisualizador) {
         return usuario;
     }
 
-    const { passwordHash: _senha, isActive, lastLogin, ...dadosSemSenha } = usuario;
+    const { isActive, lastLogin, ...rest } = usuario;
+    const dadosSemSenha = { ...rest };
+    delete dadosSemSenha.passwordHash;
 
     if (papelVisualizador === PAPEL_ADMIN) {
         return { ...dadosSemSenha, isActive, lastLogin };

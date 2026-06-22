@@ -12,3 +12,11 @@ export const NUMERO_CA_PROBE_DISPONIBILIDADE_CAEPI = '11070';
 export const IMAGEM_DOCKER_CAEPI_API = 'joaoaugustomv/api_base_ca_epi:2.0';
 
 export const PORTA_HOST_CAEPI_API = 8080;
+
+export const ROTA_BUSCA_CAEPI_POR_NOME = '/pesquisarPorNomeEquipamento';
+
+export const MENSAGEM_CAEPI_INDISPONIVEL =
+    'API CAEPI indisponível. Execute npm run docker:apoio:up -w backend e confira CAEPI_API_URL.';
+
+export const MENSAGEM_CAEPI_BUSCA_POR_NOME_INDISPONIVEL =
+    'Busca por nome indisponível na API CAEPI em execução. A imagem padrão não possui esse endpoint — execute npm run docker:apoio:up -w backend para subir a imagem customizada.';

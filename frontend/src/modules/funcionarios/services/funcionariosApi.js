@@ -57,16 +57,16 @@ export function atualizarFuncionario(id, dados, token) {
 export function baixarRelatorioFuncionarios(token, opcoes = {}) {
     const parametros = new URLSearchParams();
 
-    if (opcoes.filtro) {
-        parametros.set('filtro', opcoes.filtro);
-    }
-
-    if (opcoes.companyId) {
-        parametros.set('companyId', opcoes.companyId);
-    }
-
     if (opcoes.ids?.length) {
         parametros.set('ids', opcoes.ids.join(','));
+    } else {
+        if (opcoes.filtro) {
+            parametros.set('filtro', opcoes.filtro);
+        }
+
+        if (opcoes.companyId) {
+            parametros.set('companyId', opcoes.companyId);
+        }
     }
 
     const consulta = parametros.toString();
@@ -76,6 +76,17 @@ export function baixarRelatorioFuncionarios(token, opcoes = {}) {
 
     return baixarArquivoApi(caminho, {
         token,
-        nomeArquivoPadrao: 'funcionarios.xlsx'
+        nomeArquivoPadrao: opcoes.ids?.length === 1 ? 'funcionario.xlsx' : 'funcionarios.xlsx'
+    });
+}
+
+/**
+ * @param {string} id
+ * @param {string} token
+ */
+export function baixarFichaFuncionario(id, token) {
+    return baixarArquivoApi(`/employees/${id}/export`, {
+        token,
+        nomeArquivoPadrao: 'funcionario.xlsx'
     });
 }

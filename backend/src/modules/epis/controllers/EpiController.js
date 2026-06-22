@@ -41,7 +41,7 @@ class EpiController {
         try {
             const epis = await listCachedEpisService.execute();
             return resposta.status(200).json(epis);
-        } catch (erro) {
+        } catch {
             return proximo(criarErroHttp('Erro ao buscar EPIs.', 500));
         }
     }

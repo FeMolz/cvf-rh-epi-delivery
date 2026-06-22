@@ -2,6 +2,7 @@ import './carregarAmbienteRaiz.js';
 
 import prisma from '../../src/config/database.js';
 import linkEpiToRoleService from '../../src/modules/chaining/epiToRole/services/LinkEpiToRoleService.js';
+import { CAS_REAIS_EPIS_SEED } from './dados/casReaisEpiSeedConstantes.js';
 
 async function main() {
     console.log('Iniciando seed de EPIs aleatórios da API CAEPI...');
@@ -16,22 +17,8 @@ async function main() {
 
     console.log(`▶ Cargo selecionado: ${role.name} (ID: ${role.id})`);
 
-    // Uma lista de CAs válidos e comuns no Brasil (Capacetes, Luvas, Botinas, Óculos, etc)
-    const commonCAs = [
-        '11070', 
-        '4280',  
-        '10346', 
-        '14781', 
-        '27721', 
-        '25687', 
-        '9722',  
-        '32143', 
-        '18149',
-        '27384'
-    ];
-
-    // Embaralha a lista e pega 5
-    const selectedCAs = commonCAs.sort(() => 0.5 - Math.random()).slice(0, 5);
+    // CAs reais da base pública CAEPI (capacetes, luvas, botinas, óculos, etc.)
+    const selectedCAs = [...CAS_REAIS_EPIS_SEED].sort(() => 0.5 - Math.random()).slice(0, 5);
 
     console.log(`▶ CAs aleatórios sorteados para vinculação: ${selectedCAs.join(', ')}`);
     console.log(`-------------------------------------------`);

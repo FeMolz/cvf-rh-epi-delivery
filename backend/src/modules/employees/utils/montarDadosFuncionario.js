@@ -13,6 +13,7 @@ export function montarDadosFuncionario(entrada) {
         status,
         admissionDate,
         resignationDate,
+        leaveReturnDate,
         companyId,
         roleId,
         setorId,
@@ -47,6 +48,7 @@ export function montarDadosFuncionario(entrada) {
         status: status || 'ATIVO',
         admissionDate: admissionDate ? new Date(admissionDate) : new Date(),
         resignationDate: resignationDate ? new Date(resignationDate) : null,
+        leaveReturnDate: leaveReturnDate ? new Date(leaveReturnDate) : null,
         companyId,
         roleId,
         setorId
@@ -94,7 +96,7 @@ export function montarDadosFuncionario(entrada) {
     return dados;
 }
 
-const CAMPOS_DATA_FUNCIONARIO = ['birthDate', 'admissionDate', 'resignationDate'];
+const CAMPOS_DATA_FUNCIONARIO = ['birthDate', 'admissionDate', 'resignationDate', 'leaveReturnDate'];
 
 /**
  * Converte strings de data (YYYY-MM-DD) em Date para persistência no Prisma.

@@ -37,21 +37,21 @@ userRoutes.delete(
 userRoutes.get(
     '/',
     isAuthenticated,
-    authorize([PAPEL_ADMIN]),
+    authorize(PAPEIS_CADASTRO_USUARIO),
     (requisicao, resposta, proximo) => userController.findAll(requisicao, resposta, proximo)
 );
 
 userRoutes.get(
     '/findByEmail/:email',
     isAuthenticated,
-    authorize([PAPEL_ADMIN]),
+    authorize(PAPEIS_CADASTRO_USUARIO),
     (requisicao, resposta, proximo) => userController.findByEmail(requisicao, resposta, proximo)
 );
 
 userRoutes.get(
     '/:id',
     isAuthenticated,
-    authorize([PAPEL_ADMIN]),
+    authorize(PAPEIS_CADASTRO_USUARIO),
     (requisicao, resposta, proximo) => userController.findById(requisicao, resposta, proximo)
 );
 
