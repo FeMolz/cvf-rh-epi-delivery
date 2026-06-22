@@ -38,17 +38,19 @@ describe('mensagemErroEpi', () => {
         expect(result.current.mensagem).toBe('');
     });
 
-    it('deve manter mensagem permanente sem timeout', () => {
+    it('deve ocultar qualquer mensagem apos 2 segundos por padrao', () => {
         const { result } = renderHook(() => useMensagemTemporaria());
 
         act(() => {
             result.current.definirMensagem('Erro de carregamento');
         });
 
+        expect(result.current.mensagem).toBe('Erro de carregamento');
+
         act(() => {
             vi.advanceTimersByTime(DURACAO_MENSAGEM_ERRO_EPI_MS);
         });
 
-        expect(result.current.mensagem).toBe('Erro de carregamento');
+        expect(result.current.mensagem).toBe('');
     });
 });

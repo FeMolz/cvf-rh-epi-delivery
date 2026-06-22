@@ -34,6 +34,7 @@ export function LayoutAdmin() {
                                 {modulo.rota && !modulo.emBreve ? (
                                     <NavLink
                                         to={modulo.rota}
+                                        end={modulo.rotaExata === true}
                                         className={({ isActive }) =>
                                             `admin-sidebar__link${isActive ? ' admin-sidebar__link--ativo' : ''}`
                                         }

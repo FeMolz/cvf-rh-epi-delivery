@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { TabelaAniversariantes } from '../components/TabelaAniversariantes.jsx';
 import { listarAniversariantesNoticias } from '../services/noticiasApi.js';
 import './noticias.css';
@@ -56,7 +57,9 @@ export function NoticiasPage() {
             </header>
 
             {carregando && <p className="estado-carregando">Carregando aniversariantes…</p>}
-            {erro && <p className="estado-erro">{erro}</p>}
+            {erro ? (
+                <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
+            ) : null}
 
             {!carregando && !erro && (
                 <div className="noticias-grade">

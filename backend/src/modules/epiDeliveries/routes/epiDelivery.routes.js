@@ -16,6 +16,21 @@ epiDeliveryRoutes.post(
 );
 
 epiDeliveryRoutes.get(
+    '/painel',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) => epiDeliveryController.getPanel(requisicao, resposta, proximo)
+);
+
+epiDeliveryRoutes.get(
+    '/painel/funcionario/:employeeId',
+    isAuthenticated,
+    authorize(PAPEIS_OPERACAO_EPI),
+    (requisicao, resposta, proximo) =>
+        epiDeliveryController.getEmployeeSituation(requisicao, resposta, proximo)
+);
+
+epiDeliveryRoutes.get(
     '/employee/:employeeId',
     isAuthenticated,
     authorize(PAPEIS_OPERACAO_EPI),

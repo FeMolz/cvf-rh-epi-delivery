@@ -108,6 +108,34 @@ describe('CreateEpiDeliveryService', () => {
         expect(epiDeliveryRepositoryMock.createBatch).not.toHaveBeenCalled();
     });
 
+    it('deve processar entrega com data informada para calcular proximo vencimento', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            roleId: 'role1',
+            status: 'ATIVO',
+            deletedAt: null
+        });
+        epiDeliveryRepositoryMock.findRoleEpisByRoleId.mockResolvedValue([
+            { epiId: 'epi1', periodicityDays: 30 }
+        ]);
+        fetchEpiFromApiServiceMock.execute.mockResolvedValue({ id: 'epi1' });
+        epiDeliveryRepositoryMock.createBatch.mockResolvedValue({ count: 1 });
+
+        await createEpiDeliveryService.execute({
+            employeeId: '1',
+            caNumbers: ['11070'],
+            deliveredById: '2',
+            deliveryDate: '2025-01-10'
+        });
+
+        const entrega = epiDeliveryRepositoryMock.createBatch.mock.calls[0][0][0];
+        expect(entrega.deliveryDate.getUTCFullYear()).toBe(2025);
+        expect(entrega.deliveryDate.getUTCMonth()).toBe(0);
+        expect(entrega.deliveryDate.getUTCDate()).toBe(10);
+        expect(entrega.nextDueDate.getUTCDate()).toBe(9);
+        expect(entrega.nextDueDate.getUTCMonth()).toBe(1);
+    });
+
     it('deve falhar quando createMany não persistir todas as entregas', async () => {
         employeeRepositoryMock.findById.mockResolvedValue({
             id: '1',

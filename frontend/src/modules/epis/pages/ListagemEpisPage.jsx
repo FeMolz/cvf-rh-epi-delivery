@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { AbasModulo } from '../../../shared/components/AbasModulo.jsx';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
@@ -182,9 +183,7 @@ export function ListagemEpisPage() {
                     {carregando || carregandoCargo ? (
                         <p className="estado-carregando">Carregando EPIs…</p>
                     ) : erro ? (
-                        <p className="estado-erro" role="alert">
-                            {erro}
-                        </p>
+                        <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
                     ) : visualizandoPorCargo ? (
                         <>
                             <TabelaEpisCargo vinculos={itensPaginados.itens} />

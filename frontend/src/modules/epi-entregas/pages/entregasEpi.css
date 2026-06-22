@@ -1,0 +1,109 @@
+.entregas-epi__formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.entregas-epi__formulario-linha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.entregas-epi__campo-funcionario {
+    flex: 1 1 16rem;
+    min-width: 12rem;
+}
+
+.entregas-epi__campo-data {
+    flex: 0 0 auto;
+    width: 11rem;
+}
+
+.entregas-epi__campo-data input[type='date'] {
+    width: 100%;
+}
+
+.entregas-epi__formulario-linha .entregas-epi__campo-funcionario select,
+.entregas-epi__formulario-linha .entregas-epi__campo-data input[type='date'],
+.entregas-epi__formulario-linha .entregas-epi__botao-entregar {
+    height: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 0.85rem;
+    box-sizing: border-box;
+    line-height: 1.25;
+    border-radius: 0.6rem;
+}
+
+.entregas-epi__botao-entregar {
+    min-width: 8.5rem;
+    margin-left: auto;
+    flex: 0 0 auto;
+}
+
+.entregas-epi__selecao-epis {
+    border: 1px solid var(--cor-borda);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin: 0;
+}
+
+.entregas-epi__selecao-epis legend {
+    padding: 0 0.35rem;
+    color: var(--cor-label-tabela);
+    font-size: 0.92rem;
+}
+
+.entregas-epi__lista-epis {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.entregas-epi__opcao-epi {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+}
+
+.entregas-epi__selecao-vazia,
+.entregas-epi__ajuda {
+    margin: 0.35rem 0 0;
+}
+
+.entregas-epi__linha--ativa {
+    background: color-mix(in srgb, var(--cor-primaria) 8%, transparent);
+}
+
+.entregas-epi__botao-linha {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.entregas-epi__botao-linha:hover {
+    color: var(--cor-primaria);
+}
+
+.entregas-epi__acao-rapida {
+    width: 3.5rem;
+    text-align: center;
+}
+
+.entregas-epi__botao-mais {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+}

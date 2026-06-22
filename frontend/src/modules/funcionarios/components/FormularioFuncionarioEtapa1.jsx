@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import { CampoDataBr } from '../../../shared/components/CampoDataBr.jsx';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import {
     aplicarMascaraCpf,
     aplicarMascaraTelefone,
@@ -143,11 +144,7 @@ export function FormularioFuncionarioEtapa1({
 
     return (
         <form className="formulario" onSubmit={aoEnviar}>
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
             <fieldset className="formulario__grupo">
                 <legend>Dados obrigatórios</legend>

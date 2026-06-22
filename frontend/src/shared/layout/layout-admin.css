@@ -150,6 +150,10 @@
     margin: 0 auto;
 }
 
+.admin-pagina > .gerenciamento-painel + .gerenciamento-painel {
+    margin-top: 1.25rem;
+}
+
 .admin-pagina__cabecalho {
     margin-bottom: 1.25rem;
 }

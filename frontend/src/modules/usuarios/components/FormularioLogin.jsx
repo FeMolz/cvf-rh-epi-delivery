@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+
 /**
  * @param {{ onSubmit: (dados: { email: string, password: string }) => Promise<void>, carregando?: boolean }} props
  */
@@ -21,11 +23,7 @@ export function FormularioLogin({ onSubmit, carregando = false }) {
 
     return (
         <form className="formulario" onSubmit={aoEnviar}>
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
             <div className="campo">
                 <label htmlFor="email-login">E-mail corporativo</label>

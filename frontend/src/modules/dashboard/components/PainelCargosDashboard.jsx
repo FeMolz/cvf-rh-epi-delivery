@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { filtrarCargos } from '../../cargos/utils/listagemCargos.js';
@@ -75,9 +76,7 @@ export function PainelCargosDashboard({ termoBusca = '' }) {
                 {carregando ? (
                     <p className="estado-carregando">Carregando cargos…</p>
                 ) : erro ? (
-                    <p className="estado-erro" role="alert">
-                        {erro}
-                    </p>
+                    <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
                 ) : (
                     <>
                         <TabelaCargosDashboard cargos={paginacao.itens} />

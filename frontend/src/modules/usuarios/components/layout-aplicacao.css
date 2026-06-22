@@ -199,6 +199,22 @@
     line-height: 1.4;
 }
 
+.feedback-mensagens {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+}
+
+.formulario > .feedback-mensagens,
+.listagem-painel__conteudo > .feedback-mensagens,
+.detalhe-usuario > .feedback-mensagens,
+.painel > .feedback-mensagens,
+.cadastro-funcionario > .feedback-mensagens,
+.epis-pesquisa-nome .feedback-mensagens,
+.epis-vinculo-por-ca .feedback-mensagens {
+    margin: 0;
+}
+
 .mensagem--erro {
     background: #fef2f2;
     color: #b91c1c;

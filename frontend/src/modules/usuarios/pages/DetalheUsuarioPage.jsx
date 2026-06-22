@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { PAPEL_ADMIN, ROTULOS_PAPEIS } from '../../../shared/constants/papeis.js';
 import { listarPapeisAtribuiveis } from '../../../shared/utils/hierarquiaPapeis.js';
 import { formatarDataHora } from '../../../shared/utils/listagemUsuarios.js';
@@ -149,16 +150,12 @@ export function DetalheUsuarioPage() {
                     </div>
 
                     <form className="formulario" onSubmit={aoSalvar}>
-                        {erro ? (
-                            <p className="mensagem mensagem--erro" role="alert">
-                                {erro}
-                            </p>
-                        ) : null}
-                        {sucesso ? (
-                            <p className="mensagem mensagem--sucesso" role="status">
-                                {sucesso}
-                            </p>
-                        ) : null}
+                        <AreaMensagensFeedback
+                            erro={erro}
+                            sucesso={sucesso}
+                            onLimparErro={() => setErro('')}
+                            onLimparSucesso={() => setSucesso('')}
+                        />
 
                         <div className="campo">
                             <label htmlFor="nome-edicao">Nome completo</label>

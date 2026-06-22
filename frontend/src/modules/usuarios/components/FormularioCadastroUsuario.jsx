@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { ROTULOS_PAPEIS, PAPEL_COLABORADOR } from '../../../shared/constants/papeis.js';
 import { derivarNomeDoEmail } from '../utils/derivarNomeDoEmail.js';
 
@@ -60,17 +61,12 @@ export function FormularioCadastroUsuario({
             className={`formulario${modoAcesso ? ' formulario--criar-acesso' : ''}`}
             onSubmit={aoEnviar}
         >
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
-
-            {sucesso ? (
-                <p className="mensagem mensagem--sucesso" role="status">
-                    {sucesso}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback
+                erro={erro}
+                sucesso={sucesso}
+                onLimparErro={() => setErro('')}
+                onLimparSucesso={() => setSucesso('')}
+            />
 
             {modoAcesso ? (
                 <div className="formulario__grade formulario__grade--criar-acesso">

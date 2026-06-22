@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { listarPapeisAtribuiveis } from '../../../shared/utils/hierarquiaPapeis.js';
 import { listarEmpresas } from '../../funcionarios/services/empresasApi.js';
@@ -69,11 +70,7 @@ export function PainelUsuariosGerenciamento() {
             />
 
             <div className="listagem-painel__conteudo">
-                {erro ? (
-                    <p className="mensagem mensagem--erro" role="alert">
-                        {erro}
-                    </p>
-                ) : null}
+                <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
                 <div className="gerenciamento-secao">
                     <header className="gerenciamento-secao__cabecalho">

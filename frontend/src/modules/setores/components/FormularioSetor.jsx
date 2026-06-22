@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 
 /**
  * @param {{
@@ -26,30 +28,6 @@ export function FormularioSetor({
     const [erro, setErro] = useState('');
     const [sucesso, setSucesso] = useState('');
 
-    useEffect(() => {
-        if (!sucesso) {
-            return undefined;
-        }
-
-        const temporizador = setTimeout(() => {
-            setSucesso('');
-        }, 2000);
-
-        return () => clearTimeout(temporizador);
-    }, [sucesso]);
-
-    useEffect(() => {
-        if (!erro) {
-            return undefined;
-        }
-
-        const temporizador = setTimeout(() => {
-            setErro('');
-        }, 2000);
-
-        return () => clearTimeout(temporizador);
-    }, [erro]);
-
     async function aoEnviar(evento) {
         evento.preventDefault();
 
@@ -74,17 +52,12 @@ export function FormularioSetor({
 
     return (
         <form className="formulario" onSubmit={aoEnviar}>
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
-
-            {sucesso ? (
-                <p className="mensagem mensagem--sucesso" role="status">
-                    {sucesso}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback
+                erro={erro}
+                sucesso={sucesso}
+                onLimparErro={() => setErro('')}
+                onLimparSucesso={() => setSucesso('')}
+            />
 
             <div className="campo">
                 <label htmlFor="nome-setor">Nome do setor</label>

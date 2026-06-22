@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { PesquisaEpiPorNome } from './PesquisaEpiPorNome.jsx';
 
 /**
@@ -177,11 +178,7 @@ export function FormularioVinculoEpiPorCa({ token, carregando = false, onConsult
                     </div>
                 </div>
 
-                {erro ? (
-                    <p className="mensagem mensagem--erro" role="alert">
-                        {erro}
-                    </p>
-                ) : null}
+                <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
                 <button className="botao botao--primario" type="submit" disabled={carregando}>
                     {carregando ? 'Consultando e vinculando…' : 'Vincular por CA'}

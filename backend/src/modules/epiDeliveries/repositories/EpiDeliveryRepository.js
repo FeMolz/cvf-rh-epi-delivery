@@ -104,6 +104,110 @@ class EpiDeliveryRepository {
             orderBy: { deliveryDate: 'asc' }
         });
     }
+
+    async findFuncionariosAtivosComEpisNoCargo() {
+        return prisma.employee.findMany({
+            where: {
+                deletedAt: null,
+                status: 'ATIVO',
+                role: {
+                    roleEpis: {
+                        some: {}
+                    }
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                roleId: true,
+                role: {
+                    select: {
+                        name: true,
+                        roleEpis: {
+                            include: {
+                                epi: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        caNumber: true,
+                                        caExpirationDate: true,
+                                        isActive: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                epiDeliveries: {
+                    orderBy: { deliveryDate: 'desc' },
+                    select: {
+                        id: true,
+                        epiId: true,
+                        deliveryDate: true,
+                        nextDueDate: true,
+                        vencimentoSuspenso: true,
+                        periodicidadePausadaEm: true,
+                        epi: {
+                            select: { id: true }
+                        }
+                    }
+                }
+            },
+            orderBy: [{ name: 'asc' }]
+        });
+    }
+
+    async findFuncionarioAtivoComEpisNoCargoPorId(employeeId) {
+        return prisma.employee.findFirst({
+            where: {
+                id: employeeId,
+                deletedAt: null,
+                status: 'ATIVO',
+                role: {
+                    roleEpis: {
+                        some: {}
+                    }
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                roleId: true,
+                role: {
+                    select: {
+                        name: true,
+                        roleEpis: {
+                            include: {
+                                epi: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        caNumber: true,
+                                        caExpirationDate: true,
+                                        isActive: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                epiDeliveries: {
+                    orderBy: { deliveryDate: 'desc' },
+                    select: {
+                        id: true,
+                        epiId: true,
+                        deliveryDate: true,
+                        nextDueDate: true,
+                        vencimentoSuspenso: true,
+                        periodicidadePausadaEm: true,
+                        epi: {
+                            select: { id: true }
+                        }
+                    }
+                }
+            }
+        });
+    }
 }
 
 export default new EpiDeliveryRepository();

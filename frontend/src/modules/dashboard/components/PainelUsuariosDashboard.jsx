@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { listarUsuarios } from '../../usuarios/services/usuariosApi.js';
 import { filtrarUsuarios, paginarLista } from '../../../shared/utils/listagemUsuarios.js';
@@ -74,9 +75,7 @@ export function PainelUsuariosDashboard({ termoBusca = '' }) {
                 {carregando ? (
                     <p className="estado-carregando">Carregando usuários…</p>
                 ) : erro ? (
-                    <p className="estado-erro" role="alert">
-                        {erro}
-                    </p>
+                    <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
                 ) : (
                     <>
                         <TabelaUsuariosDashboard usuarios={paginacao.itens} />

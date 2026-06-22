@@ -21,6 +21,8 @@ import { EdicaoFuncionarioPage } from './modules/funcionarios/pages/EdicaoFuncio
 import { ListagemFuncionariosPage } from './modules/funcionarios/pages/ListagemFuncionariosPage.jsx';
 import { ListagemEpisPage } from './modules/epis/pages/ListagemEpisPage.jsx';
 import { VinculoEpisCargoPage } from './modules/epis/pages/VinculoEpisCargoPage.jsx';
+import { RegistroEntregaEpiPage } from './modules/epi-entregas/pages/RegistroEntregaEpiPage.jsx';
+import { EntregaImediataEpiPage } from './modules/epi-entregas/pages/EntregaImediataEpiPage.jsx';
 import { InicioPage } from './modules/usuarios/pages/InicioPage.jsx';
 import { LoginPage } from './modules/usuarios/pages/LoginPage.jsx';
 
@@ -50,6 +52,8 @@ export default function App() {
                             <Route path="noticias" element={<NoticiasPage />} />
                             <Route path="epis" element={<ListagemEpisPage />} />
                             <Route path="epis/vinculos" element={<VinculoEpisCargoPage />} />
+                            <Route path="epis/entregas" element={<RegistroEntregaEpiPage />} />
+                            <Route path="epis/entregas/imediata" element={<EntregaImediataEpiPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={[PAPEL_ADMIN]} />}>
                                 <Route path="dashboard" element={<DashboardAdminPage />} />

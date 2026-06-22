@@ -8,12 +8,28 @@ const listEpiDeliveriesByEmployeeServiceMock = {
     execute: jest.fn()
 };
 
+const getEpiDeliveryPanelServiceMock = {
+    execute: jest.fn()
+};
+
+const getEpiDeliveryEmployeeSituationServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/CreateEpiDeliveryService.js', () => ({
     default: createEpiDeliveryServiceMock
 }));
 
 jest.unstable_mockModule('../services/ListEpiDeliveriesByEmployeeService.js', () => ({
     default: listEpiDeliveriesByEmployeeServiceMock
+}));
+
+jest.unstable_mockModule('../services/GetEpiDeliveryPanelService.js', () => ({
+    default: getEpiDeliveryPanelServiceMock
+}));
+
+jest.unstable_mockModule('../services/GetEpiDeliveryEmployeeSituationService.js', () => ({
+    default: getEpiDeliveryEmployeeSituationServiceMock
 }));
 
 const epiDeliveryController = (await import('./EpiDeliveryController.js')).default;
@@ -86,5 +102,39 @@ describe('EpiDeliveryController', () => {
         await epiDeliveryController.create(requisicao, resposta, proximo);
 
         expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('getPanel deve retornar 200 com painel', async () => {
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        getEpiDeliveryPanelServiceMock.execute.mockResolvedValue({
+            funcionariosElegiveis: [],
+            episVencidos: []
+        });
+
+        await epiDeliveryController.getPanel({}, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith({
+            funcionariosElegiveis: [],
+            episVencidos: []
+        });
+    });
+
+    it('getEmployeeSituation deve retornar 200 com epis do funcionario', async () => {
+        const requisicao = { params: { employeeId: 'f1' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        getEpiDeliveryEmployeeSituationServiceMock.execute.mockResolvedValue({
+            employee: { id: 'f1' },
+            epis: []
+        });
+
+        await epiDeliveryController.getEmployeeSituation(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(getEpiDeliveryEmployeeSituationServiceMock.execute).toHaveBeenCalledWith('f1');
     });
 });

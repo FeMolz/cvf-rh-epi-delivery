@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { FormularioFuncionarioEtapa1 } from '../components/FormularioFuncionarioEtapa1.jsx';
 import { FormularioFuncionarioEtapa2 } from '../components/FormularioFuncionarioEtapa2.jsx';
@@ -158,11 +159,7 @@ export function EdicaoFuncionarioPage() {
             <div className="cadastro-funcionario">
                 <IndicadorEtapasCadastro etapaAtual={etapaAtual} />
 
-                {erro ? (
-                    <p className="mensagem mensagem--erro" role="alert">
-                        {erro}
-                    </p>
-                ) : null}
+                <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
                 <div className="cadastro-funcionario__corpo">
                     {etapaAtual === 1 ? (

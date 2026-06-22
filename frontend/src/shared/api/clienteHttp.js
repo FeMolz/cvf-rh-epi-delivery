@@ -30,7 +30,9 @@ export async function requisicaoApi(caminho, opcoes = {}) {
                 ? dados.error
                 : typeof dados.message === 'string'
                   ? dados.message
-                  : 'Não foi possível concluir a operação.';
+                  : resposta.status === 404
+                    ? 'Recurso não encontrado na API. Reinicie o backend se o sistema foi atualizado recentemente.'
+                    : 'Não foi possível concluir a operação.';
 
         const erro = new Error(mensagem);
         erro.statusCode = resposta.status;

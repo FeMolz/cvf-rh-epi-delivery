@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { DialogoConfirmacao } from '../../../shared/components/DialogoConfirmacao.jsx';
 import { PAPEIS_CADASTRO_USUARIO } from '../../../shared/constants/papeis.js';
 import { FormularioEmpresa } from '../components/FormularioEmpresa.jsx';
@@ -144,17 +145,13 @@ export function DetalheEmpresaPage() {
                         </p>
                     ) : null}
 
-                    {erro ? (
-                        <p className="mensagem mensagem--erro" role="alert">
-                            {erro}
-                        </p>
-                    ) : null}
-
-                    {aviso ? (
-                        <p className="mensagem mensagem--aviso" role="status">
-                            {aviso}
-                        </p>
-                    ) : null}
+                    <AreaMensagensFeedback
+                        erro={erro}
+                        aviso={aviso}
+                        avisoTemporario
+                        onLimparErro={() => setErro('')}
+                        onLimparAviso={() => setAviso('')}
+                    />
 
                     <FormularioEmpresa
                         key={empresa.id}

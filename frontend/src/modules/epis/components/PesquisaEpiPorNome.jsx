@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { buscarEpisPorNome } from '../services/episApi.js';
 
 /**
@@ -80,11 +81,7 @@ export function PesquisaEpiPorNome({ token, desabilitado = false, onSelecionarCa
                 </button>
             </form>
 
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
             {resultados.length > 0 ? (
                 <ul className="epis-pesquisa-nome__resultados">

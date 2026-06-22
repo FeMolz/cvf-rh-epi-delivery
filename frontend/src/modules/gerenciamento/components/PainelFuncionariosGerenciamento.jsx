@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { FormularioFuncionarioEtapa1 } from '../../funcionarios/components/FormularioFuncionarioEtapa1.jsx';
@@ -119,11 +120,7 @@ export function PainelFuncionariosGerenciamento() {
                 <div className="cadastro-funcionario cadastro-funcionario--gerenciamento">
                     <IndicadorEtapasCadastro etapaAtual={etapaAtual} />
 
-                    {erro ? (
-                        <p className="mensagem mensagem--erro" role="alert">
-                            {erro}
-                        </p>
-                    ) : null}
+                    <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
                     {carregandoOpcoes ? (
                         <p className="estado-carregando">Carregando opções do formulário…</p>

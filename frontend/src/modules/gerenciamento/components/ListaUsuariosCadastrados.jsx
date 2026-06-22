@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { DialogoConfirmacao } from '../../../shared/components/DialogoConfirmacao.jsx';
 import { ROTULOS_PAPEIS } from '../../../shared/constants/papeis.js';
 import { excluirUsuario } from '../../usuarios/services/usuariosApi.js';
@@ -68,11 +69,7 @@ export function ListaUsuariosCadastrados({
                 </div>
             </header>
 
-            {erro ? (
-                <p className="mensagem mensagem--erro" role="alert">
-                    {erro}
-                </p>
-            ) : null}
+            <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
             {usuarios.length === 0 ? (
                 <p className="lista-usuarios-cadastrados__vazio">Nenhum usuário cadastrado ainda.</p>

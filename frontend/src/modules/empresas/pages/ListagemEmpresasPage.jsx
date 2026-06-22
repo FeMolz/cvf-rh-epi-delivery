@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { AbasModulo } from '../../../shared/components/AbasModulo.jsx';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
@@ -111,9 +112,7 @@ export function ListagemEmpresasPage() {
                     {carregando ? (
                         <p className="estado-carregando">Carregando empresas…</p>
                     ) : erro ? (
-                        <p className="estado-erro" role="alert">
-                            {erro}
-                        </p>
+                        <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
                     ) : (
                         <>
                             <TabelaEmpresas empresas={paginacao.itens} />

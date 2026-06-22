@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { DialogoConfirmacao } from '../../../shared/components/DialogoConfirmacao.jsx';
 import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { cargoEstaAtivo } from '../../cargos/utils/listagemCargos.js';
@@ -20,7 +21,6 @@ import {
     vincularEpiAoCargo
 } from '../services/rolesEpisApi.js';
 import { filtrarEpis, filtrarEpisCacheDisponiveisParaVinculo } from '../utils/listagemEpis.js';
-import { erroEpiDeveSerTemporario, useMensagemTemporaria } from '../utils/mensagemErroEpi.js';
 import './epis.css';
 
 export function VinculoEpisCargoPage() {
@@ -33,15 +33,14 @@ export function VinculoEpisCargoPage() {
     const [carregandoVinculos, setCarregandoVinculos] = useState(false);
     const [processandoCa, setProcessandoCa] = useState(false);
     const [processandoCaNumber, setProcessandoCaNumber] = useState('');
-    const { mensagem: erro, definirMensagem: definirErro, limparMensagem: limparErro } =
-        useMensagemTemporaria();
+    const [erro, setErro] = useState('');
     const [epiParaDesvincular, setEpiParaDesvincular] = useState('');
     const [desvinculando, setDesvinculando] = useState(false);
     const [termoBuscaCache, setTermoBuscaCache] = useState('');
 
     const carregarDadosIniciais = useCallback(async () => {
         setCarregando(true);
-        limparErro();
+        setErro('');
 
         try {
             const [listaCargos, listaEpis] = await Promise.all([
@@ -52,7 +51,7 @@ export function VinculoEpisCargoPage() {
             setCargos(listaCargos.filter((cargo) => cargoEstaAtivo(cargo)));
             setEpisCache(listaEpis);
         } catch (erroCapturado) {
-            definirErro(erroCapturado.message || 'Não foi possível carregar os dados do módulo.');
+            setErro(erroCapturado.message || 'Não foi possível carregar os dados do módulo.');
         } finally {
             setCarregando(false);
         }
@@ -65,13 +64,13 @@ export function VinculoEpisCargoPage() {
         }
 
         setCarregandoVinculos(true);
-        limparErro();
+        setErro('');
 
         try {
             const lista = await listarEpisPorCargo(cargoSelecionadoId, token);
             setVinculosCargo(lista);
         } catch (erroCapturado) {
-            definirErro(erroCapturado.message || 'Não foi possível carregar os vínculos do cargo.');
+            setErro(erroCapturado.message || 'Não foi possível carregar os vínculos do cargo.');
         } finally {
             setCarregandoVinculos(false);
         }
@@ -106,13 +105,13 @@ export function VinculoEpisCargoPage() {
 
     async function aoVincularPorCa(caNumber, periodicityDays) {
         if (!cargoSelecionadoId) {
-            definirErro('Selecione um cargo antes de vincular EPIs.');
+            setErro('Selecione um cargo antes de vincular EPIs.');
             return;
         }
 
         setProcessandoCa(true);
         setProcessandoCaNumber(caNumber);
-        limparErro();
+        setErro('');
 
         try {
             await vincularEpiAoCargo(
@@ -129,7 +128,7 @@ export function VinculoEpisCargoPage() {
             await carregarVinculos();
         } catch (erroCapturado) {
             const mensagem = erroCapturado.message || 'Não foi possível vincular o EPI ao cargo.';
-            definirErro(mensagem, { temporario: erroEpiDeveSerTemporario(mensagem) });
+            setErro(mensagem);
         } finally {
             setProcessandoCa(false);
             setProcessandoCaNumber('');
@@ -142,14 +141,14 @@ export function VinculoEpisCargoPage() {
         }
 
         setDesvinculando(true);
-        limparErro();
+        setErro('');
 
         try {
             await desvincularEpiDoCargo(cargoSelecionadoId, epiParaDesvincular, token);
             setEpiParaDesvincular('');
             await carregarVinculos();
         } catch (erroCapturado) {
-            definirErro(erroCapturado.message || 'Não foi possível desvincular o EPI.');
+            setErro(erroCapturado.message || 'Não foi possível desvincular o EPI.');
         } finally {
             setDesvinculando(false);
         }
@@ -180,11 +179,7 @@ export function VinculoEpisCargoPage() {
                 <p className="estado-vazio">Selecione um cargo para gerenciar os vínculos de EPI.</p>
             ) : (
                 <>
-                    {erro ? (
-                        <p className="estado-erro" role="alert">
-                            {erro}
-                        </p>
-                    ) : null}
+                    <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
 
                     <section className="gerenciamento-painel listagem-painel">
                         <CabecalhoListagemPainel

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { AbasModulo } from '../../../shared/components/AbasModulo.jsx';
+import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
@@ -237,9 +238,7 @@ export function ListagemFuncionariosPage() {
                     {carregando ? (
                         <p className="estado-carregando">Carregando funcionários…</p>
                     ) : erro ? (
-                        <p className="estado-erro" role="alert">
-                            {erro}
-                        </p>
+                        <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
                     ) : empresas.length === 0 ? (
                         <p className="estado-vazio">Nenhuma empresa cadastrada.</p>
                     ) : (

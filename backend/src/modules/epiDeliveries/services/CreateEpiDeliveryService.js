@@ -8,9 +8,13 @@ import {
     MENSAGEM_FUNCIONARIO_INELEGIVEL_ENTREGA_EPI,
     MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
 } from '../constants/entregaEpiConstantes.js';
+import {
+    resolverDataEntrega,
+    validarDataEntregaNaoFutura
+} from '../utils/normalizarDataEntrega.js';
 
 class CreateEpiDeliveryService {
-    async execute({ employeeId, caNumbers, deliveredById }) {
+    async execute({ employeeId, caNumbers, deliveredById, deliveryDate }) {
         if (!employeeId || !caNumbers || !Array.isArray(caNumbers) || caNumbers.length === 0 || !deliveredById) {
             throw criarErroHttp('employeeId, caNumbers (array) e deliveredById são obrigatórios.');
         }
@@ -34,7 +38,8 @@ class CreateEpiDeliveryService {
         const roleEpis = await epiDeliveryRepository.findRoleEpisByRoleId(funcionario.roleId);
 
         const deliveriesData = [];
-        const currentDate = new Date();
+        const dataEntrega = resolverDataEntrega(deliveryDate);
+        validarDataEntregaNaoFutura(dataEntrega);
 
         // 3. Processar cada CA do array
         for (const caNumber of caNumbers) {
@@ -46,7 +51,7 @@ class CreateEpiDeliveryService {
 
             let nextDueDate = null;
             if (roleEpiMatch && roleEpiMatch.periodicityDays > 0) {
-                const dueDate = new Date(currentDate);
+                const dueDate = new Date(dataEntrega);
                 dueDate.setDate(dueDate.getDate() + roleEpiMatch.periodicityDays);
                 nextDueDate = dueDate;
             }
@@ -55,7 +60,7 @@ class CreateEpiDeliveryService {
                 employeeId: funcionario.id,
                 epiId: epi.id,
                 deliveredById: deliveredById,
-                deliveryDate: currentDate,
+                deliveryDate: dataEntrega,
                 nextDueDate: nextDueDate
             });
         }

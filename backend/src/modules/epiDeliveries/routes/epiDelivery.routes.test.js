@@ -4,7 +4,9 @@ import express from 'express';
 
 const epiDeliveryControllerMock = {
     create: jest.fn((req, res) => res.status(201).json({ count: 2 })),
-    listByEmployee: jest.fn((req, res) => res.status(200).json([{ id: 'del1' }]))
+    listByEmployee: jest.fn((req, res) => res.status(200).json([{ id: 'del1' }])),
+    getPanel: jest.fn((req, res) => res.status(200).json({ funcionariosElegiveis: [], episVencidos: [] })),
+    getEmployeeSituation: jest.fn((req, res) => res.status(200).json({ employee: {}, epis: [] }))
 };
 
 const authMiddlewareMock = {
@@ -55,5 +57,19 @@ describe('EpiDelivery Routes', () => {
         
         expect(res.statusCode).toBe(200);
         expect(epiDeliveryControllerMock.listByEmployee).toHaveBeenCalled();
+    });
+
+    it('GET /epi-deliveries/painel deve chamar getPanel', async () => {
+        const res = await request(app).get('/epi-deliveries/painel');
+
+        expect(res.statusCode).toBe(200);
+        expect(epiDeliveryControllerMock.getPanel).toHaveBeenCalled();
+    });
+
+    it('GET /epi-deliveries/painel/funcionario/:employeeId deve chamar getEmployeeSituation', async () => {
+        const res = await request(app).get('/epi-deliveries/painel/funcionario/1');
+
+        expect(res.statusCode).toBe(200);
+        expect(epiDeliveryControllerMock.getEmployeeSituation).toHaveBeenCalled();
     });
 });
