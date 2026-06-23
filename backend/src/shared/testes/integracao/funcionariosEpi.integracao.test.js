@@ -4,7 +4,8 @@ import prisma from '../../../config/database.js';
 import {
     criarDadosIntegracaoFuncionariosEpi,
     integracaoHabilitada,
-    limparDadosIntegracaoFuncionariosEpi
+    limparDadosIntegracaoFuncionariosEpi,
+    verificarConexaoBancoIntegracao
 } from './utilitariosBancoIntegracao.js';
 
 const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
@@ -14,6 +15,7 @@ describeIntegracao('Integração — filtros de funcionários e pausa de EPI', (
     let dadosTeste;
 
     beforeAll(async () => {
+        await verificarConexaoBancoIntegracao();
         const sufixo = `${Date.now()}`;
         dadosTeste = await criarDadosIntegracaoFuncionariosEpi(sufixo);
     });

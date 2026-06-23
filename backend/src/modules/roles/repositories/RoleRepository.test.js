@@ -196,13 +196,37 @@ describe('RoleRepository', () => {
         expect(result).toBe(3);
     });
 
+    it('should find active role by name ignoring case', async () => {
+        const role = { id: 1, name: 'Eng de Minas' };
+        prismaMock.role.findFirst.mockResolvedValue(role);
+
+        const result = await roleRepository.findActiveByNameIgnoringCase('Eng De Minas');
+
+        expect(prismaMock.role.findFirst).toHaveBeenCalledWith({
+            where: {
+                name: {
+                    equals: 'Eng De Minas',
+                    mode: 'insensitive'
+                },
+                deletedAt: null
+            }
+        });
+        expect(result).toEqual(role);
+    });
+
     it('should check if name is unique among active roles', async () => {
         prismaMock.role.count.mockResolvedValue(0);
 
         const result = await roleRepository.isNameUnique('ADMIN');
 
         expect(prismaMock.role.count).toHaveBeenCalledWith({
-            where: { name: 'ADMIN', deletedAt: null }
+            where: {
+                name: {
+                    equals: 'ADMIN',
+                    mode: 'insensitive'
+                },
+                deletedAt: null
+            }
         });
         expect(result).toBe(true);
     });
@@ -214,7 +238,10 @@ describe('RoleRepository', () => {
 
         expect(prismaMock.role.count).toHaveBeenCalledWith({
             where: {
-                name: 'ADMIN',
+                name: {
+                    equals: 'ADMIN',
+                    mode: 'insensitive'
+                },
                 deletedAt: null,
                 id: { not: 1 }
             }

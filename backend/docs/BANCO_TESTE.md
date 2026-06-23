@@ -177,9 +177,10 @@ Os testes Jest unitários (`npm test`) usam mocks. Para validar filtros de funci
 ```bash
 docker compose -f docker-compose.test.yml up -d
 npm run db:test:push
-set RUN_INTEGRATION_TESTS=true
 npm run test:integracao
 ```
+
+O script `test:integracao` carrega `.env.test` automaticamente (`DATABASE_URL` na porta **5433**). Se o container estiver parado, os testes falham com mensagem orientando a subir o Postgres e rodar `db:test:push`.
 
 No CI (GitHub Actions), os testes de integração rodam automaticamente com PostgreSQL após `prisma db push`.
 

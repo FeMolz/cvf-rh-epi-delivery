@@ -39,9 +39,6 @@ export function LoginPage() {
         >
             <FormularioLogin onSubmit={aoEntrar} carregando={carregando} />
             <p className="formulario__rodape">
-                Primeiro acesso? O administrador inicial é criado via seed no backend.
-            </p>
-            <p className="formulario__rodape">
                 <Link to="/">Voltar ao início</Link>
             </p>
         </LayoutAplicacao>

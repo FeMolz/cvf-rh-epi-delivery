@@ -11,10 +11,9 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--cor-borda);
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(8px);
-    box-shadow: var(--sombra-suave);
+    border-bottom: 1px solid #334155;
+    background: #0f172a;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
 }
 
 .layout__marca {
@@ -38,15 +37,15 @@
 
 .layout__usuario-info span {
     font-weight: 600;
-    color: #0f172a;
+    color: #e2e8f0;
 }
 
 .layout__usuario-info small {
-    color: #64748b;
+    color: #94a3b8;
 }
 
 .layout__link {
-    color: #1d4ed8;
+    color: #93c5fd;
     text-decoration: none;
     font-weight: 500;
     font-size: 0.9rem;
