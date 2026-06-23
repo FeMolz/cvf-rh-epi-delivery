@@ -44,7 +44,8 @@
     "start:com-apoio": "node scripts/iniciar-servidor-com-apoio.mjs",
     "start:prod:com-apoio": "node scripts/iniciar-producao-com-apoio.mjs",
     "dev:com-apoio": "node scripts/iniciar-apoio-docker.mjs && nodemon src/server.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "puppeteer:install": "puppeteer browsers install chrome"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

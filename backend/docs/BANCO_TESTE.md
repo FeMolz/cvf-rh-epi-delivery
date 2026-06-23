@@ -152,7 +152,39 @@ Para desenvolvimento normal (banco `.env`, porta 3000): `npm run dev:backend` + 
 
 ---
 
-## 6. Resetar o banco de teste (começar do zero)
+## 6. Relatórios de EPI (PDF) no ambiente de teste
+
+A emissão de relatório usa **Puppeteer** (Chrome headless). No Docker de produção o Chromium já vem na imagem; **no Windows/local** é preciso instalar o navegador uma vez:
+
+```bash
+npm run puppeteer:install -w backend
+```
+
+Sem isso, `POST /api/v1/epi-delivery-reports` retorna **500** com mensagem `Could not find Chrome`.
+
+### Quem pode emitir
+
+| Ação | Papéis |
+|------|--------|
+| Emitir relatório | `ADMIN`, `ADMINISTRATIVO` |
+| Ver / baixar PDF | `ADMIN`, `ADMINISTRATIVO`, `ALMOXARIFADO` |
+
+Use `admin@rhsystem.com` ou `administrativo@rhsystem.com` para testar a emissão.
+
+### Período das entregas no seed
+
+As entregas do `seed_sistema_completo` ficam em **2024**. Na tela **Emitir relatório**, use por exemplo:
+
+- **Início:** `2024-01-01`
+- **Fim:** `2024-12-31`
+
+Se o período for 2025/2026, a prévia fica vazia (não há entregas nessas datas no banco de teste).
+
+A primeira emissão após subir a API pode levar **20–30 segundos** (Puppeteer inicializando o Chrome).
+
+---
+
+## 7. Resetar o banco de teste (começar do zero)
 
 ```bash
 npm run db:test:reset
@@ -162,7 +194,7 @@ Apaga o volume Docker (se usar compose de teste), recria schema e roda seeds bá
 
 ---
 
-## 7. Desenvolvimento vs teste vs produção
+## 8. Desenvolvimento vs teste vs produção
 
 
 | Ambiente     | Arquivo env | Banco             | Uso                    |
@@ -186,12 +218,13 @@ No CI (GitHub Actions), os testes de integração rodam automaticamente com Post
 
 ---
 
-## 8. Checklist rápido
+## 9. Checklist rápido
 
 1. `docker compose -f docker-compose.test.yml up -d`
 2. `copy .env.test.example .env.test`
-3. `npm run db:test:push`
-4. `npm run db:test:seed`
-5. `npm run dev:test` (API + frontend) ou `npm run dev:test:backend` + `npm run dev:test:frontend`
-6. Navegador → `http://localhost:5173` ou Postman → `http://127.0.0.1:3001`
+3. `npm run puppeteer:install -w backend` (uma vez — PDF de relatórios EPI)
+4. `npm run db:test:push`
+5. `npm run db:test:seed`
+6. `npm run dev:test` (API + frontend) ou `npm run dev:test:backend` + `npm run dev:test:frontend`
+7. Navegador → `http://localhost:5173` ou Postman → `http://127.0.0.1:3001`
 
