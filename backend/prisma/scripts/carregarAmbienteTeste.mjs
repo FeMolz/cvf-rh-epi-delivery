@@ -6,24 +6,37 @@ import dotenv from 'dotenv';
 
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const arquivoEnvTeste = path.join(diretorioRaiz, '.env.test');
+const arquivoEnvTesteExemplo = path.join(diretorioRaiz, '.env.test.example');
 
-export function carregarAmbienteTeste() {
-    if (!fs.existsSync(arquivoEnvTeste)) {
-        console.error(
-            'Arquivo .env.test não encontrado. Copie .env.test.example para .env.test e ajuste DATABASE_URL.'
-        );
-        process.exit(1);
-    }
-
-    const resultado = dotenv.config({ path: arquivoEnvTeste, override: true });
+/**
+ * @param {string} caminhoArquivo
+ * @param {boolean} sobrescreverVariaveisExistentes
+ */
+function carregarArquivoEnv(caminhoArquivo, sobrescreverVariaveisExistentes) {
+    const resultado = dotenv.config({
+        path: caminhoArquivo,
+        override: sobrescreverVariaveisExistentes
+    });
 
     if (resultado.error) {
-        console.error('Falha ao ler .env.test:', resultado.error.message);
+        console.error(`Falha ao ler ${path.basename(caminhoArquivo)}:`, resultado.error.message);
         process.exit(1);
+    }
+}
+
+export function carregarAmbienteTeste() {
+    if (fs.existsSync(arquivoEnvTeste)) {
+        carregarArquivoEnv(arquivoEnvTeste, true);
+    } else if (fs.existsSync(arquivoEnvTesteExemplo)) {
+        // CI e clones novos: defaults do exemplo sem sobrescrever DATABASE_URL/JWT do workflow.
+        carregarArquivoEnv(arquivoEnvTesteExemplo, false);
     }
 
     if (!process.env.DATABASE_URL) {
-        console.error('DATABASE_URL ausente em .env.test');
+        console.error(
+            'DATABASE_URL ausente. Copie .env.test.example para .env.test (local) ' +
+                'ou defina DATABASE_URL no ambiente (CI).'
+        );
         process.exit(1);
     }
 

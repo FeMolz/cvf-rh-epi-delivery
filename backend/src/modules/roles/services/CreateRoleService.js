@@ -1,17 +1,26 @@
-import roleRepository from "../repositories/RoleRepository.js";
+import roleRepository from '../repositories/RoleRepository.js';
+import {
+    MENSAGEM_NOME_CARGO_DUPLICADO,
+    MENSAGEM_NOME_CARGO_OBRIGATORIO
+} from '../constants/roleConstantes.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
+import { formatarNomeCargo } from '../utils/formatarNomeCargo.js';
 
 class CreateRoleService {
     async execute({ name, description }) {
+        const nomeFormatado = formatarNomeCargo(name);
 
-        const roleExists = await roleRepository.findByName(name);
-
-        if (roleExists) {
-            throw new Error("Role already exists.");
+        if (!nomeFormatado) {
+            throw criarErroHttp(MENSAGEM_NOME_CARGO_OBRIGATORIO);
         }
 
-        const role = await roleRepository.create(name, description);
+        const cargoExistente = await roleRepository.findActiveByNameIgnoringCase(nomeFormatado);
 
-        return role;
+        if (cargoExistente) {
+            throw criarErroHttp(MENSAGEM_NOME_CARGO_DUPLICADO);
+        }
+
+        return roleRepository.create(nomeFormatado, description);
     }
 }
 

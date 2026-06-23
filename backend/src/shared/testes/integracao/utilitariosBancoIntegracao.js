@@ -1,6 +1,25 @@
 import prisma from '../../../config/database.js';
 
 /**
+ * Garante que o Postgres de teste está acessível antes de criar fixtures.
+ */
+export async function verificarConexaoBancoIntegracao() {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+    } catch (erro) {
+        const urlMascarada =
+            process.env.DATABASE_URL?.replace(/:([^:@/]+)@/, ':***@') ?? '(não definida)';
+
+        throw new Error(
+            `Banco de integração indisponível em ${urlMascarada}. ` +
+                'Suba o Postgres de teste e aplique o schema: ' +
+                'docker compose -f docker-compose.test.yml up -d && npm run db:test:push. ' +
+                `Detalhe: ${erro.message}`
+        );
+    }
+}
+
+/**
  * @param {string} sufixo
  */
 export async function criarDadosIntegracaoFuncionariosEpi(sufixo) {

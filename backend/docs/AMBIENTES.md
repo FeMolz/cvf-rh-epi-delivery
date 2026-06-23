@@ -8,11 +8,11 @@ Guia único para subir o **RH-System** (API + frontend) nos três ambientes supo
 
 O monorepo usa **npm workspaces** (`backend/` + `frontend/`). Cada ambiente é definido pelo **arquivo `.env`** carregado e pela **porta** em que a API responde:
 
-| Ambiente | Arquivo de config | Banco típico | API | Frontend |
-|----------|-------------------|--------------|-----|----------|
-| **Desenvolvimento** | `backend/.env` | PostgreSQL local (5432) | `http://localhost:3000` | `http://localhost:5173` |
-| **Teste / homologação** | `backend/.env.test` | PostgreSQL Docker (5433) | `http://localhost:3001` | `http://localhost:5173` |
-| **Produção** | `backend/.env.production.local` | Supabase (nuvem) | conforme deploy (ex.: 3000) | domínio do cliente |
+| Ambiente                | Arquivo de config               | Banco típico             | API                         | Frontend                |
+| ----------------------- | ------------------------------- | ------------------------ | --------------------------- | ----------------------- |
+| **Desenvolvimento**     | `backend/.env`                  | PostgreSQL local (5432)  | `http://localhost:3000`     | `http://localhost:5173` |
+| **Teste / homologação** | `backend/.env.test`             | PostgreSQL Docker (5433) | `http://localhost:3001`     | `http://localhost:5173` |
+| **Produção**            | `backend/.env.production.local` | Supabase (nuvem)         | conforme deploy (ex.: 3000) | domínio do cliente      |
 
 **Regra de ouro:** nunca aponte `.env` de desenvolvimento para o banco de produção. Use sempre o ambiente correto para cada tarefa.
 
@@ -108,17 +108,17 @@ npm run dev
 
 ### 3.5 Acessar
 
-| Serviço | URL |
-|---------|-----|
-| API | `http://localhost:3000` |
+| Serviço      | URL                            |
+| ------------ | ------------------------------ |
+| API          | `http://localhost:3000`        |
 | Health check | `http://localhost:3000/health` |
-| Frontend | `http://localhost:5173` |
-| Login | `http://localhost:5173/login` |
+| Frontend     | `http://localhost:5173`        |
+| Login        | `http://localhost:5173/login`  |
 
 ### 3.6 Credenciais padrão (seed)
 
-| E-mail | Senha |
-|--------|-------|
+| E-mail               | Senha              |
+| -------------------- | ------------------ |
 | `admin@rhsystem.com` | `AlterarSenha123!` |
 
 (Senha usada quando `ADMIN_SEED_PASSWORD` não está definida no `.env`.)
@@ -230,20 +230,20 @@ npm run dev:test:frontend
 
 ### 4.6 Acessar
 
-| Serviço | URL |
-|---------|-----|
-| API de teste | `http://localhost:3001` |
-| Frontend | `http://localhost:5173` |
+| Serviço            | URL                            |
+| ------------------ | ------------------------------ |
+| API de teste       | `http://localhost:3001`        |
+| Frontend           | `http://localhost:5173`        |
 | Postman (base URL) | `http://localhost:3001/api/v1` |
 
 ### 4.7 Credenciais padrão (seed de teste)
 
-| E-mail | Papel | Senha |
-|--------|-------|-------|
-| `admin@rhsystem.com` | ADMIN | `AlterarSenha123!` |
+| E-mail                        | Papel          | Senha              |
+| ----------------------------- | -------------- | ------------------ |
+| `admin@rhsystem.com`          | ADMIN          | `AlterarSenha123!` |
 | `administrativo@rhsystem.com` | ADMINISTRATIVO | `AlterarSenha123!` |
-| `almoxarifado@rhsystem.com` | ALMOXARIFADO | `AlterarSenha123!` |
-| `colaborador@rhsystem.com` | COLABORADOR | `AlterarSenha123!` |
+| `almoxarifado@rhsystem.com`   | ALMOXARIFADO   | `AlterarSenha123!` |
+| `colaborador@rhsystem.com`    | COLABORADOR    | `AlterarSenha123!` |
 
 ### 4.8 Resetar banco de teste do zero
 
@@ -253,11 +253,11 @@ npm run db:test:reset -w backend
 
 ### 4.9 Problemas comuns
 
-| Sintoma | Solução |
-|---------|---------|
+| Sintoma                                         | Solução                                                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `Can't reach database server at localhost:5433` | Suba o Docker: `docker compose -f docker-compose.test.yml up -d` ou `docker start rh-system-postgres-teste` |
-| Frontend chama API na 3000 em vez de 3001 | Use `npm run dev:test:frontend` e confira `frontend/.env.test` com `RH_API_PORT=3001` |
-| Conflito de nome de container Docker | `docker start rh-system-postgres-teste` em vez de `up -d` |
+| Frontend chama API na 3000 em vez de 3001       | Use `npm run dev:test:frontend` e confira `frontend/.env.test` com `RH_API_PORT=3001`                       |
+| Conflito de nome de container Docker            | `docker start rh-system-postgres-teste` em vez de `up -d`                                                   |
 
 Mais detalhes: [BANCO_TESTE.md](./BANCO_TESTE.md).
 
@@ -327,11 +327,11 @@ Login: `POST /api/v1/users/login` com credenciais definidas no seed de produçã
 
 ### 5.6 Operação contínua
 
-| Tarefa | Comando |
-|--------|---------|
+| Tarefa             | Comando                               |
+| ------------------ | ------------------------------------- |
 | Parar stack Docker | `npm run docker:prod:down -w backend` |
-| Backup do banco | `npm run backup:prod -w backend` |
-| Nova migration | `npm run db:prod:migrate -w backend` |
+| Backup do banco    | `npm run backup:prod -w backend`      |
+| Nova migration     | `npm run db:prod:migrate -w backend`  |
 
 Guia completo: [DEPLOY.md](./DEPLOY.md).
 
@@ -339,27 +339,27 @@ Guia completo: [DEPLOY.md](./DEPLOY.md).
 
 ## 6. Resumo de comandos (raiz do monorepo)
 
-| Objetivo | Comando |
-|----------|---------|
-| Dev — API | `npm run dev` ou `npm run dev:backend` |
-| Dev — frontend | `npm run dev:frontend` |
-| Teste — API + frontend | `npm run dev:test` |
-| Teste — só API | `npm run dev:test:backend` |
-| Teste — só frontend | `npm run dev:test:frontend` |
-| Teste — popular banco | `npm run db:test:seed -w backend` |
-| Produção — Docker | `npm run docker:prod:up -w backend` |
-| Produção — deploy VPS | `npm run deploy:prod -w backend` |
-| Testes unitários | `npm run test:all` |
+| Objetivo               | Comando                                |
+| ---------------------- | -------------------------------------- |
+| Dev — API              | `npm run dev` ou `npm run dev:backend` |
+| Dev — frontend         | `npm run dev:frontend`                 |
+| Teste — API + frontend | `npm run dev:test`                     |
+| Teste — só API         | `npm run dev:test:backend`             |
+| Teste — só frontend    | `npm run dev:test:frontend`            |
+| Teste — popular banco  | `npm run db:test:seed -w backend`      |
+| Produção — Docker      | `npm run docker:prod:up -w backend`    |
+| Produção — deploy VPS  | `npm run deploy:prod -w backend`       |
+| Testes unitários       | `npm run test:all`                     |
 
 ---
 
 ## 7. Documentação relacionada
 
-| Documento | Conteúdo |
-|-----------|----------|
-| [BANCO_TESTE.md](./BANCO_TESTE.md) | Docker de teste, seeds e Postman |
-| [DEPLOY.md](./DEPLOY.md) | Dockerfile, CI/CD, backup, rollback |
-| [SEGURANCA.md](./SEGURANCA.md) | JWT, CORS, rate limit, checklist |
-| [SUPABASE.md](./SUPABASE.md) | URLs do pooler e migrations |
-| [backend/README.md](../README.md) | Módulos da API e seeds individuais |
-| [frontend/README.md](../../frontend/README.md) | Estrutura React e rotas |
+| Documento                                      | Conteúdo                            |
+| ---------------------------------------------- | ----------------------------------- |
+| [BANCO_TESTE.md](./BANCO_TESTE.md)             | Docker de teste, seeds e Postman    |
+| [DEPLOY.md](./DEPLOY.md)                       | Dockerfile, CI/CD, backup, rollback |
+| [SEGURANCA.md](./SEGURANCA.md)                 | JWT, CORS, rate limit, checklist    |
+| [SUPABASE.md](./SUPABASE.md)                   | URLs do pooler e migrations         |
+| [backend/README.md](../README.md)              | Módulos da API e seeds individuais  |
+| [frontend/README.md](../../frontend/README.md) | Estrutura React e rotas             |

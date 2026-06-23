@@ -2,11 +2,11 @@ import { jest } from '@jest/globals';
 
 const roleRepositoryMock = {
     create: jest.fn(),
-    findByName: jest.fn()
+    findActiveByNameIgnoringCase: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/RoleRepository.js', () => ({
-    default: roleRepositoryMock,
+    default: roleRepositoryMock
 }));
 
 const createRoleService = (await import('./CreateRoleService.js')).default;
@@ -16,28 +16,53 @@ describe('CreateRoleService', () => {
         jest.clearAllMocks();
     });
 
-    it('should create a new role successfully', async () => {
-        const roleData = { name: 'ADMIN', description: 'Admin role' };
-        const createdRole = { id: 1, ...roleData };
+    it('deve criar cargo quando o nome nao existe', async () => {
+        const roleData = { name: 'Eng De Minas', description: 'Engenharia de minas' };
+        const createdRole = { id: 1, name: 'Eng De Minas', description: 'Engenharia de minas' };
 
-        roleRepositoryMock.findByName.mockResolvedValue(null);
+        roleRepositoryMock.findActiveByNameIgnoringCase.mockResolvedValue(null);
         roleRepositoryMock.create.mockResolvedValue(createdRole);
 
         const result = await createRoleService.execute(roleData);
 
-        expect(roleRepositoryMock.findByName).toHaveBeenCalledWith('ADMIN');
-        expect(roleRepositoryMock.create).toHaveBeenCalledWith('ADMIN', 'Admin role');
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('Eng De Minas');
+        expect(roleRepositoryMock.create).toHaveBeenCalledWith('Eng De Minas', 'Engenharia de minas');
         expect(result).toEqual(createdRole);
     });
 
-    it('should throw an error if role already exists', async () => {
-        const roleData = { name: 'ADMIN', description: 'Admin role' };
-        const existingRole = { id: 1, ...roleData };
+    it('deve normalizar espacos extras no nome antes de salvar', async () => {
+        roleRepositoryMock.findActiveByNameIgnoringCase.mockResolvedValue(null);
+        roleRepositoryMock.create.mockResolvedValue({ id: '1' });
 
-        roleRepositoryMock.findByName.mockResolvedValue(existingRole);
-        
-        await expect(createRoleService.execute(roleData)).rejects.toThrow('Role already exists.');
-        
+        await createRoleService.execute({ name: '  Eng   de   Minas  ', description: 'Desc' });
+
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('Eng de Minas');
+        expect(roleRepositoryMock.create).toHaveBeenCalledWith('Eng de Minas', 'Desc');
+    });
+
+    it('deve rejeitar cargo com nome duplicado ignorando maiusculas', async () => {
+        roleRepositoryMock.findActiveByNameIgnoringCase.mockResolvedValue({
+            id: '1',
+            name: 'Eng de Minas'
+        });
+
+        await expect(
+            createRoleService.execute({ name: 'Eng De Minas', description: 'Desc' })
+        ).rejects.toMatchObject({
+            message: 'Já existe um cargo ativo com este nome. Verifique a grafia e tente novamente.',
+            statusCode: 400
+        });
+
+        expect(roleRepositoryMock.create).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar cargo sem nome', async () => {
+        await expect(createRoleService.execute({ name: '   ', description: 'Desc' })).rejects.toMatchObject({
+            message: 'O nome do cargo é obrigatório.',
+            statusCode: 400
+        });
+
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).not.toHaveBeenCalled();
         expect(roleRepositoryMock.create).not.toHaveBeenCalled();
     });
 });

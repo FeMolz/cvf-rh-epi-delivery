@@ -9,6 +9,11 @@ export const MENSAGEM_CARGO_INATIVO_PARA_VINCULO =
 
 export const MENSAGEM_CARGO_NAO_ENCONTRADO = 'Cargo não encontrado.';
 
+export const MENSAGEM_NOME_CARGO_DUPLICADO =
+    'Já existe um cargo ativo com este nome. Verifique a grafia e tente novamente.';
+
+export const MENSAGEM_NOME_CARGO_OBRIGATORIO = 'O nome do cargo é obrigatório.';
+
 export const ROTULOS_COLUNAS_LISTA_CARGOS = {
     nome: 'Cargo',
     descricao: 'Descrição',

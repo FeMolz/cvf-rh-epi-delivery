@@ -20,13 +20,13 @@ Guia para colocar a API RH-System na nuvem, trabalhar com o ambiente ativo e man
                                            └──────────────────┘
 ```
 
-| Componente | Onde roda | Variável |
-|------------|-----------|----------|
-| API | VPS / PaaS / `docker-compose.producao.yml` | — |
-| Banco | Supabase | `DATABASE_URL`, `DIRECT_URL` |
-| Redis | Redis Cloud (já configurado) | `REDIS_URL` |
-| CAEPI | Container na mesma VPS (`docker-compose.producao.yml`) | `CAEPI_API_URL` |
-| Secullum | Externo (por cliente) | `SECULLUM_*` |
+| Componente | Onde roda                                              | Variável                     |
+| ---------- | ------------------------------------------------------ | ---------------------------- |
+| API        | VPS / PaaS / `docker-compose.producao.yml`             | —                            |
+| Banco      | Supabase                                               | `DATABASE_URL`, `DIRECT_URL` |
+| Redis      | Redis Cloud (já configurado)                           | `REDIS_URL`                  |
+| CAEPI      | Container na mesma VPS (`docker-compose.producao.yml`) | `CAEPI_API_URL`              |
+| Secullum   | Externo (por cliente)                                  | `SECULLUM_*`                 |
 
 ---
 
@@ -97,10 +97,10 @@ docker run --env-file backend/.env.production.local -p 3000:3000 rh-system-api
 
 ### Web Service (Render, Railway, etc.)
 
-| Campo | Valor |
-|-------|-------|
-| **Root Directory** | *(vazio — raiz do repositório)* |
-| **Dockerfile Path** | `backend/Dockerfile` |
+| Campo               | Valor                           |
+| ------------------- | ------------------------------- |
+| **Root Directory**  | _(vazio — raiz do repositório)_ |
+| **Dockerfile Path** | `backend/Dockerfile`            |
 
 Não use `backend/` como Root Directory: o build falha com `package-lock.json: not found`.
 
@@ -112,10 +112,10 @@ A imagem inclui **Chromium** para geração de PDF (Puppeteer). Variável `PUPPE
 
 Sobe **dois** serviços:
 
-| Serviço | Imagem | Porta host |
-|---------|--------|------------|
-| `caepi-api` | `joaoaugustomv/api_base_ca_epi:2.0` | 8080 |
-| `api` | build do `Dockerfile` | 3000 |
+| Serviço     | Imagem                              | Porta host |
+| ----------- | ----------------------------------- | ---------- |
+| `caepi-api` | `joaoaugustomv/api_base_ca_epi:2.0` | 8080       |
+| `api`       | build do `Dockerfile`               | 3000       |
 
 O compose define `CAEPI_API_URL=http://caepi-api` na rede interna. **Redis não sobe localmente** — use Redis Cloud via `REDIS_URL` no `.env.production.local`.
 
@@ -131,11 +131,11 @@ docker compose -f docker-compose.producao.yml logs -f api
 
 ### Desenvolvimento local (dia a dia)
 
-| Ação | Comando | Banco |
-|------|---------|-------|
-| Codar | `npm run dev` | `.env` local |
-| Testar manualmente | `npm run dev:test` | `.env.test` + seeds falsos |
-| Testes automatizados | `npm test` | mocks (sem banco) |
+| Ação                 | Comando            | Banco                      |
+| -------------------- | ------------------ | -------------------------- |
+| Codar                | `npm run dev`      | `.env` local               |
+| Testar manualmente   | `npm run dev:test` | `.env.test` + seeds falsos |
+| Testes automatizados | `npm test`         | mocks (sem banco)          |
 
 **Nunca** aponte `.env` de desenvolvimento para o Supabase de produção.
 
@@ -151,10 +151,10 @@ Use a API autenticada (ADMIN). **Não** rode seeds de desenvolvimento em produç
 
 ### Schema / migrations
 
-| Situação | Comando |
-|----------|---------|
-| Nova migration no repositório | `npm run db:prod:migrate` |
-| Banco vazio / prototipagem | `npm run db:prod:push` (evitar em produção estável) |
+| Situação                      | Comando                                             |
+| ----------------------------- | --------------------------------------------------- |
+| Nova migration no repositório | `npm run db:prod:migrate`                           |
+| Banco vazio / prototipagem    | `npm run db:prod:push` (evitar em produção estável) |
 
 ### Monitoramento
 
@@ -213,12 +213,12 @@ Teste primeiro em banco de homologação.
 
 O pipeline `.github/workflows/ci.yml` executa em **todo push e PR**:
 
-| Etapa | Comando |
-|-------|---------|
-| Lint | `npm run lint` |
-| Unitários | `npm test` |
-| Smoke rotas | `npm run test:routes` |
-| Integração | Postgres 16 + `npm run test:integracao` |
+| Etapa       | Comando                                 |
+| ----------- | --------------------------------------- |
+| Lint        | `npm run lint`                          |
+| Unitários   | `npm test`                              |
+| Smoke rotas | `npm run test:routes`                   |
+| Integração  | Postgres 16 + `npm run test:integracao` |
 
 Para **impedir merge** com código quebrado, configure branch protection no GitHub — passo a passo em [BRANCH_PROTECTION.md](./BRANCH_PROTECTION.md).
 
@@ -247,12 +247,12 @@ O script `scripts/deploy-producao.mjs` no servidor executa:
 
 ### Pré-requisitos no servidor (uma vez)
 
-| Requisito | Versão sugerida |
-|-----------|-----------------|
-| Linux (VPS) | Ubuntu 22.04+ |
-| Git | clone do repositório |
-| Node.js | 20+ |
-| Docker + Compose | plugin v2 |
+| Requisito               | Versão sugerida              |
+| ----------------------- | ---------------------------- |
+| Linux (VPS)             | Ubuntu 22.04+                |
+| Git                     | clone do repositório         |
+| Node.js                 | 20+                          |
+| Docker + Compose        | plugin v2                    |
 | `.env.production.local` | em `backend/` (nunca no Git) |
 
 ```bash
@@ -269,13 +269,13 @@ npm run seed:admin:prod    # só primeira vez
 
 ### Secrets no GitHub (Settings → Secrets and variables → Actions)
 
-| Secret | Exemplo | Obrigatório |
-|--------|---------|--------------|
-| `DEPLOY_HOST` | `203.0.113.10` ou `api.suaempresa.com` | Sim |
-| `DEPLOY_USER` | `ubuntu` | Sim |
-| `DEPLOY_SSH_PRIVATE_KEY` | conteúdo da chave privada SSH (PEM) | Sim |
-| `DEPLOY_PATH` | `/home/ubuntu/CVF-System` | Sim |
-| `DEPLOY_PORT` | `22` | Não (padrão 22) |
+| Secret                   | Exemplo                                | Obrigatório     |
+| ------------------------ | -------------------------------------- | --------------- |
+| `DEPLOY_HOST`            | `203.0.113.10` ou `api.suaempresa.com` | Sim             |
+| `DEPLOY_USER`            | `ubuntu`                               | Sim             |
+| `DEPLOY_SSH_PRIVATE_KEY` | conteúdo da chave privada SSH (PEM)    | Sim             |
+| `DEPLOY_PATH`            | `/home/ubuntu/CVF-System`              | Sim             |
+| `DEPLOY_PORT`            | `22`                                   | Não (padrão 22) |
 
 ### Chave SSH para o deploy
 
@@ -322,14 +322,14 @@ Migrations já aplicadas **não** revertem automaticamente — planeje migration
 
 ## 8. Variáveis obrigatórias em produção
 
-| Variável | Notas |
-|----------|-------|
-| `NODE_ENV` | `production` |
-| `DATABASE_URL` | Supabase pooler 6543 + `?pgbouncer=true` |
-| `DIRECT_URL` | Supabase sessão 5432 |
-| `JWT_SECRET` | Mínimo 32 caracteres |
-| `CORS_ORIGINS` | Lista explícita (placeholder OK sem frontend) |
-| `REDIS_URL` | Redis Cloud |
+| Variável        | Notas                                         |
+| --------------- | --------------------------------------------- |
+| `NODE_ENV`      | `production`                                  |
+| `DATABASE_URL`  | Supabase pooler 6543 + `?pgbouncer=true`      |
+| `DIRECT_URL`    | Supabase sessão 5432                          |
+| `JWT_SECRET`    | Mínimo 32 caracteres                          |
+| `CORS_ORIGINS`  | Lista explícita (placeholder OK sem frontend) |
+| `REDIS_URL`     | Redis Cloud                                   |
 | `CAEPI_API_URL` | `http://caepi-api` no compose, ou URL pública |
 
 Detalhes: [SEGURANCA.md](./SEGURANCA.md), [SUPABASE.md](./SUPABASE.md).
@@ -338,11 +338,11 @@ Detalhes: [SEGURANCA.md](./SEGURANCA.md), [SUPABASE.md](./SUPABASE.md).
 
 ## 9. Referências rápidas
 
-| Comando | Uso |
-|---------|-----|
-| `npm run docker:prod:up` | API + CAEPI em produção |
-| `npm run deploy:prod` | Deploy completo no servidor (git + migrate + docker + health) |
-| `npm run db:prod:migrate` | Aplicar migrations no Supabase |
-| `npm run seed:admin:prod` | Primeiro admin |
-| `npm run backup:prod` | Backup local se banco mudou |
-| `npm run dev:prod` | API apontando para Supabase (debug) |
+| Comando                   | Uso                                                           |
+| ------------------------- | ------------------------------------------------------------- |
+| `npm run docker:prod:up`  | API + CAEPI em produção                                       |
+| `npm run deploy:prod`     | Deploy completo no servidor (git + migrate + docker + health) |
+| `npm run db:prod:migrate` | Aplicar migrations no Supabase                                |
+| `npm run seed:admin:prod` | Primeiro admin                                                |
+| `npm run backup:prod`     | Backup local se banco mudou                                   |
+| `npm run dev:prod`        | API apontando para Supabase (debug)                           |

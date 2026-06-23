@@ -61,6 +61,27 @@ class RoleRepository {
         });
     }
 
+    /**
+     * @param {string} name
+     * @param {string} [excludeId]
+     */
+    async findActiveByNameIgnoringCase(name, excludeId = null) {
+        /** @type {import('@prisma/client').Prisma.RoleWhereInput} */
+        const where = {
+            name: {
+                equals: name,
+                mode: 'insensitive'
+            },
+            deletedAt: null
+        };
+
+        if (excludeId) {
+            where.id = { not: excludeId };
+        }
+
+        return prisma.role.findFirst({ where });
+    }
+
     async update(id, name, description) {
         return prisma.role.update({
             where: {
@@ -127,8 +148,12 @@ class RoleRepository {
     }
 
     async isNameUnique(name, id = null) {
+        /** @type {import('@prisma/client').Prisma.RoleWhereInput} */
         const filtros = {
-            name,
+            name: {
+                equals: name,
+                mode: 'insensitive'
+            },
             deletedAt: null
         };
 
