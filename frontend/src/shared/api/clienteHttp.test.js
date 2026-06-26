@@ -2,17 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { requisicaoApi } from './clienteHttp.js';
 
-const notificarSessaoExpiradaMock = vi.fn();
+const notificarSessaoExpiradaMock = vi.hoisted(() => vi.fn());
 
 vi.mock('../auth/sessaoExpirada.js', () => ({
-    deveEncerrarSessaoPorResposta: (status, token) => status === 401 && Boolean(token),
-    notificarSessaoExpirada: (...argumentos) => notificarSessaoExpiradaMock(...argumentos)
+    notificarSessaoExpirada: notificarSessaoExpiradaMock
 }));
 
 describe('requisicaoApi', () => {
     beforeEach(() => {
         vi.restoreAllMocks();
-        notificarSessaoExpiradaMock.mockClear();
+        notificarSessaoExpiradaMock.mockReset();
     });
 
     it('deve enviar Authorization quando token informado', async () => {
@@ -47,11 +46,9 @@ describe('requisicaoApi', () => {
         await expect(
             requisicaoApi('/users/login', { method: 'POST', body: { email: 'a', password: 'b' } })
         ).rejects.toThrow('Credenciais inválidas.');
-
-        expect(notificarSessaoExpiradaMock).not.toHaveBeenCalled();
     });
 
-    it('deve encerrar sessão quando API retornar 401 com token', async () => {
+    it('deve notificar sessão expirada em 401 com token', async () => {
         vi.stubGlobal(
             'fetch',
             vi.fn().mockResolvedValue({
@@ -66,5 +63,22 @@ describe('requisicaoApi', () => {
         );
 
         expect(notificarSessaoExpiradaMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('não deve notificar sessão expirada em 401 sem token', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: false,
+                status: 401,
+                json: async () => ({ error: 'Credenciais inválidas.' })
+            })
+        );
+
+        await expect(
+            requisicaoApi('/users/login', { method: 'POST', body: { email: 'a', password: 'b' } })
+        ).rejects.toThrow('Credenciais inválidas.');
+
+        expect(notificarSessaoExpiradaMock).not.toHaveBeenCalled();
     });
 });

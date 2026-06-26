@@ -1,40 +1,35 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    deveEncerrarSessaoPorResposta,
     notificarSessaoExpirada,
-    registrarCallbackSessaoExpirada
+    registrarAoSessaoExpirada,
+    reiniciarNotificacaoSessaoExpirada
 } from './sessaoExpirada.js';
 
 describe('sessaoExpirada', () => {
-    afterEach(() => {
-        registrarCallbackSessaoExpirada(() => {})();
+    beforeEach(() => {
+        reiniciarNotificacaoSessaoExpirada();
+        registrarAoSessaoExpirada(() => undefined);
     });
 
-    it('deveEncerrarSessaoPorResposta retorna true apenas para 401 com token', () => {
-        expect(deveEncerrarSessaoPorResposta(401, 'jwt')).toBe(true);
-        expect(deveEncerrarSessaoPorResposta(401, undefined)).toBe(false);
-        expect(deveEncerrarSessaoPorResposta(403, 'jwt')).toBe(false);
-    });
-
-    it('notificarSessaoExpirada deve chamar o callback registrado', () => {
+    it('deve notificar callback apenas uma vez', () => {
         const callback = vi.fn();
-        registrarCallbackSessaoExpirada(callback);
+        registrarAoSessaoExpirada(callback);
 
+        notificarSessaoExpirada();
         notificarSessaoExpirada();
 
         expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    it('notificarSessaoExpirada deve ignorar chamadas paralelas', async () => {
-        const callback = vi.fn(() => {
-            notificarSessaoExpirada();
-        });
+    it('deve permitir nova notificação após reiniciar', () => {
+        const callback = vi.fn();
+        registrarAoSessaoExpirada(callback);
 
-        registrarCallbackSessaoExpirada(callback);
         notificarSessaoExpirada();
-        await Promise.resolve();
+        reiniciarNotificacaoSessaoExpirada();
+        notificarSessaoExpirada();
 
-        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledTimes(2);
     });
 });

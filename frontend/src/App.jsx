@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { AuthProvider } from './shared/auth/AuthContext.jsx';
+import { MonitorSessao } from './shared/auth/MonitorSessao.jsx';
 import { RotasProtegidas } from './shared/auth/RotasProtegidas.jsx';
 import {
     PAPEIS_AREA_ADMIN,
@@ -37,6 +38,7 @@ export default function App() {
     return (
         <AuthProvider>
             <BrowserRouter>
+                <MonitorSessao />
                 <Routes>
                     <Route path="/" element={<InicioPage />} />
                     <Route path="/login" element={<LoginPage />} />

@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { PAPEIS_CADASTRO_USUARIO } from '../constants/papeis.js';
 import { autenticarUsuario, encerrarSessao } from '../../modules/usuarios/services/usuariosApi.js';
 import { AuthContext } from './authContextState.js';
-import { obterExpiracaoJwtEmMs, tokenJwtExpirado } from './obterExpiracaoJwt.js';
-import { registrarCallbackSessaoExpirada } from './sessaoExpirada.js';
+import { tokenJwtExpirado } from './jwtUtils.js';
+import { reiniciarNotificacaoSessaoExpirada } from './sessaoExpirada.js';
 
 const CHAVE_TOKEN = 'rh_system_token';
 const CHAVE_USUARIO = 'rh_system_user';
@@ -49,71 +49,25 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(sessaoInicial.user);
     const [carregando, setCarregando] = useState(false);
 
-    const encerrarSessaoLocal = useCallback(() => {
-        limparSessaoArmazenada();
-        setToken(null);
-        setUser(null);
-    }, []);
-
-    useEffect(() => registrarCallbackSessaoExpirada(encerrarSessaoLocal), [encerrarSessaoLocal]);
-
-    useEffect(() => {
-        if (!token) {
-            return undefined;
-        }
-
-        if (tokenJwtExpirado(token)) {
-            encerrarSessaoLocal();
-            return undefined;
-        }
-
-        const expiraEm = obterExpiracaoJwtEmMs(token);
-
-        if (!expiraEm) {
-            return undefined;
-        }
-
-        const restanteMs = expiraEm - Date.now();
-
-        if (restanteMs <= 0) {
-            encerrarSessaoLocal();
-            return undefined;
-        }
-
-        const timer = window.setTimeout(encerrarSessaoLocal, restanteMs);
-
-        function verificarAoRetornarParaAba() {
-            if (document.visibilityState !== 'visible') {
-                return;
-            }
-
-            if (tokenJwtExpirado(token)) {
-                encerrarSessaoLocal();
-            }
-        }
-
-        window.addEventListener('focus', verificarAoRetornarParaAba);
-        document.addEventListener('visibilitychange', verificarAoRetornarParaAba);
-
-        return () => {
-            window.clearTimeout(timer);
-            window.removeEventListener('focus', verificarAoRetornarParaAba);
-            document.removeEventListener('visibilitychange', verificarAoRetornarParaAba);
-        };
-    }, [token, encerrarSessaoLocal]);
-
     const login = useCallback(async (email, password) => {
         setCarregando(true);
 
         try {
             const resultado = await autenticarUsuario({ email, password });
             persistirSessao(resultado.token, resultado.user);
+            reiniciarNotificacaoSessaoExpirada();
             setToken(resultado.token);
             setUser(resultado.user);
             return resultado.user;
         } finally {
             setCarregando(false);
         }
+    }, []);
+
+    const encerrarSessaoLocal = useCallback(() => {
+        limparSessaoArmazenada();
+        setToken(null);
+        setUser(null);
     }, []);
 
     const logout = useCallback(async () => {
@@ -136,9 +90,10 @@ export function AuthProvider({ children }) {
             autenticado: Boolean(token && user),
             podeCadastrarUsuarios: user ? PAPEIS_CADASTRO_USUARIO.includes(user.role) : false,
             login,
-            logout
+            logout,
+            encerrarSessaoLocal
         }),
-        [user, token, carregando, login, logout]
+        [user, token, carregando, login, logout, encerrarSessaoLocal]
     );
 
     return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;

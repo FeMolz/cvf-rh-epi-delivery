@@ -1,9 +1,16 @@
-import {
-    deveEncerrarSessaoPorResposta,
-    notificarSessaoExpirada
-} from '../auth/sessaoExpirada.js';
+import { notificarSessaoExpirada } from '../auth/sessaoExpirada.js';
 
 const URL_BASE_API = import.meta.env.VITE_API_URL || '/api/v1';
+
+/**
+ * @param {Response} resposta
+ * @param {string | undefined} token
+ */
+function tratarRespostaNaoAutorizada(resposta, token) {
+    if (resposta.status === 401 && token) {
+        notificarSessaoExpirada();
+    }
+}
 
 /**
  * @param {string} caminho
@@ -30,20 +37,16 @@ export async function requisicaoApi(caminho, opcoes = {}) {
     const dados = await resposta.json().catch(() => ({}));
 
     if (!resposta.ok) {
-        if (deveEncerrarSessaoPorResposta(resposta.status, token)) {
-            notificarSessaoExpirada();
-        }
+        tratarRespostaNaoAutorizada(resposta, token);
 
         const mensagem =
             typeof dados.error === 'string'
                 ? dados.error
                 : typeof dados.message === 'string'
                   ? dados.message
-                  : resposta.status === 401
-                    ? 'Sua sessão expirou. Faça login novamente.'
-                    : resposta.status === 404
-                      ? 'Recurso não encontrado na API. Reinicie o backend se o sistema foi atualizado recentemente.'
-                      : 'Não foi possível concluir a operação.';
+                  : resposta.status === 404
+                    ? 'Recurso não encontrado na API. Reinicie o backend se o sistema foi atualizado recentemente.'
+                    : 'Não foi possível concluir a operação.';
 
         const erro = new Error(mensagem);
         erro.statusCode = resposta.status;
@@ -72,9 +75,7 @@ export async function baixarArquivoApi(caminho, opcoes = {}) {
     });
 
     if (!resposta.ok) {
-        if (deveEncerrarSessaoPorResposta(resposta.status, token)) {
-            notificarSessaoExpirada();
-        }
+        tratarRespostaNaoAutorizada(resposta, token);
 
         const dados = await resposta.json().catch(() => ({}));
         const mensagem =
@@ -82,13 +83,9 @@ export async function baixarArquivoApi(caminho, opcoes = {}) {
                 ? dados.error
                 : typeof dados.message === 'string'
                   ? dados.message
-                  : resposta.status === 401
-                    ? 'Sua sessão expirou. Faça login novamente.'
-                    : 'Não foi possível baixar o arquivo.';
+                  : 'Não foi possível baixar o arquivo.';
 
-        const erro = new Error(mensagem);
-        erro.statusCode = resposta.status;
-        throw erro;
+        throw new Error(mensagem);
     }
 
     const blob = await resposta.blob();
