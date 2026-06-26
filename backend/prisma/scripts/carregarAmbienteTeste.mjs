@@ -30,6 +30,12 @@ export function carregarAmbienteTeste() {
     } else if (fs.existsSync(arquivoEnvTesteExemplo)) {
         // CI e clones novos: defaults do exemplo sem sobrescrever DATABASE_URL/JWT do workflow.
         carregarArquivoEnv(arquivoEnvTesteExemplo, false);
+    } else if (!process.env.DATABASE_URL) {
+        console.error(
+            'Arquivo .env.test não encontrado. Copie .env.test.example para .env.test e ajuste DATABASE_URL, ' +
+                'ou defina DATABASE_URL no ambiente.'
+        );
+        process.exit(1);
     }
 
     if (!process.env.DATABASE_URL) {
