@@ -3,6 +3,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { PAPEIS_CADASTRO_USUARIO } from '../constants/papeis.js';
 import { autenticarUsuario, encerrarSessao } from '../../modules/usuarios/services/usuariosApi.js';
 import { AuthContext } from './authContextState.js';
+import { tokenJwtExpirado } from './jwtUtils.js';
+import { reiniciarNotificacaoSessaoExpirada } from './sessaoExpirada.js';
 
 const CHAVE_TOKEN = 'rh_system_token';
 const CHAVE_USUARIO = 'rh_system_user';
@@ -13,6 +15,12 @@ function lerSessaoArmazenada() {
         const usuarioSerializado = localStorage.getItem(CHAVE_USUARIO);
 
         if (!token || !usuarioSerializado) {
+            return { token: null, user: null };
+        }
+
+        if (tokenJwtExpirado(token)) {
+            localStorage.removeItem(CHAVE_TOKEN);
+            localStorage.removeItem(CHAVE_USUARIO);
             return { token: null, user: null };
         }
 
@@ -47,12 +55,19 @@ export function AuthProvider({ children }) {
         try {
             const resultado = await autenticarUsuario({ email, password });
             persistirSessao(resultado.token, resultado.user);
+            reiniciarNotificacaoSessaoExpirada();
             setToken(resultado.token);
             setUser(resultado.user);
             return resultado.user;
         } finally {
             setCarregando(false);
         }
+    }, []);
+
+    const encerrarSessaoLocal = useCallback(() => {
+        limparSessaoArmazenada();
+        setToken(null);
+        setUser(null);
     }, []);
 
     const logout = useCallback(async () => {
@@ -64,10 +79,8 @@ export function AuthProvider({ children }) {
             }
         }
 
-        limparSessaoArmazenada();
-        setToken(null);
-        setUser(null);
-    }, [token]);
+        encerrarSessaoLocal();
+    }, [token, encerrarSessaoLocal]);
 
     const valor = useMemo(
         () => ({
@@ -77,9 +90,10 @@ export function AuthProvider({ children }) {
             autenticado: Boolean(token && user),
             podeCadastrarUsuarios: user ? PAPEIS_CADASTRO_USUARIO.includes(user.role) : false,
             login,
-            logout
+            logout,
+            encerrarSessaoLocal
         }),
-        [user, token, carregando, login, logout]
+        [user, token, carregando, login, logout, encerrarSessaoLocal]
     );
 
     return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;

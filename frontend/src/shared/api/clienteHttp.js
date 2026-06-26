@@ -1,4 +1,16 @@
+import { notificarSessaoExpirada } from '../auth/sessaoExpirada.js';
+
 const URL_BASE_API = import.meta.env.VITE_API_URL || '/api/v1';
+
+/**
+ * @param {Response} resposta
+ * @param {string | undefined} token
+ */
+function tratarRespostaNaoAutorizada(resposta, token) {
+    if (resposta.status === 401 && token) {
+        notificarSessaoExpirada();
+    }
+}
 
 /**
  * @param {string} caminho
@@ -25,6 +37,8 @@ export async function requisicaoApi(caminho, opcoes = {}) {
     const dados = await resposta.json().catch(() => ({}));
 
     if (!resposta.ok) {
+        tratarRespostaNaoAutorizada(resposta, token);
+
         const mensagem =
             typeof dados.error === 'string'
                 ? dados.error
@@ -61,6 +75,8 @@ export async function baixarArquivoApi(caminho, opcoes = {}) {
     });
 
     if (!resposta.ok) {
+        tratarRespostaNaoAutorizada(resposta, token);
+
         const dados = await resposta.json().catch(() => ({}));
         const mensagem =
             typeof dados.error === 'string'
