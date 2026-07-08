@@ -13,7 +13,7 @@ class ExportarFuncionarioCompletoPlanilhaService {
             identificadorFuncionario
         );
 
-        if (!funcionario || funcionario.deletedAt) {
+        if (!funcionario) {
             throw criarErroNaoEncontrado('Funcionário não encontrado');
         }
 

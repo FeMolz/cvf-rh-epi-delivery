@@ -65,4 +65,33 @@ describe('ExportarFuncionarioCompletoPlanilhaService', () => {
             { statusCode: 404 }
         );
     });
+
+    it('deve exportar ficha de funcionário desligado', async () => {
+        employeeRepositoryMock.findByIdParaExportacaoFicha.mockResolvedValue({
+            id: '2',
+            name: 'João Desligado',
+            cpf: '529.982.247-25',
+            email: 'joao@empresa.com',
+            telefone: '(11) 98888-7777',
+            birthDate: new Date('1990-01-01'),
+            status: 'DESLIGADO',
+            admissionDate: new Date('2020-01-01'),
+            resignationDate: new Date('2024-06-01'),
+            deletedAt: new Date('2024-06-01'),
+            role: { name: 'Analista' },
+            company: { name: 'Empresa 01' },
+            setor: { nome: 'TI' },
+            valeTransporte: false,
+            valeAlimentacao: false,
+            planoSaude: false
+        });
+        planilhaFuncionarioProviderMock.gerarPlanilhaFichaFuncionario.mockResolvedValue(
+            Buffer.from('xlsx')
+        );
+
+        const resultado = await exportarFuncionarioCompletoPlanilhaService.execute('2');
+
+        expect(planilhaFuncionarioProviderMock.gerarPlanilhaFichaFuncionario).toHaveBeenCalled();
+        expect(resultado.nomeArquivo).toBe('funcionario-maria-silva.xlsx');
+    });
 });

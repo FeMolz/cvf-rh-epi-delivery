@@ -82,5 +82,35 @@ describe('EmployeeRepository', () => {
     prismaMock.employee.findUnique.mockResolvedValue(null);
     await expect(repo.delete(99)).rejects.toMatchObject({ statusCode: 404 });
   });
+
+  it('should export active employees list by default', async () => {
+    prismaMock.employee.findMany.mockResolvedValue([]);
+    await repo.findManyParaExportacaoLista({ status: { in: ['ATIVO'] } });
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where: { status: { in: ['ATIVO'] }, deletedAt: null },
+      select: expect.any(Object),
+      orderBy: [{ name: 'asc' }]
+    });
+  });
+
+  it('should include dismissed employees when incluirDesligados is true', async () => {
+    prismaMock.employee.findMany.mockResolvedValue([]);
+    await repo.findManyParaExportacaoLista({ companyId: 'empresa-1' }, { incluirDesligados: true });
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where: { companyId: 'empresa-1' },
+      select: expect.any(Object),
+      orderBy: [{ name: 'asc' }]
+    });
+  });
+
+  it('should export fichas by ids regardless of deletedAt', async () => {
+    prismaMock.employee.findMany.mockResolvedValue([]);
+    await repo.findManyParaExportacaoFicha(['func-1', 'func-2']);
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where: { id: { in: ['func-1', 'func-2'] } },
+      select: expect.any(Object),
+      orderBy: [{ name: 'asc' }]
+    });
+  });
 });
 
