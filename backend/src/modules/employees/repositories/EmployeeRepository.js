@@ -61,14 +61,18 @@ class EmployeeRepository {
     }
 
     /**
-     * @param {{ status?: { in: string[] } }} filtroStatus
+     * @param {Record<string, unknown>} filtroConsulta
+     * @param {{ incluirDesligados?: boolean }} [opcoes]
      */
-    async findManyParaExportacaoLista(filtroConsulta) {
+    async findManyParaExportacaoLista(filtroConsulta, opcoes = {}) {
+        const where = { ...filtroConsulta };
+
+        if (!opcoes.incluirDesligados) {
+            where.deletedAt = null;
+        }
+
         return prisma.employee.findMany({
-            where: {
-                deletedAt: null,
-                ...filtroConsulta
-            },
+            where,
             select: SELECAO_EXPORTACAO_LISTA_FUNCIONARIOS,
             orderBy: [{ name: 'asc' }]
         });
@@ -87,7 +91,6 @@ class EmployeeRepository {
     async findManyParaExportacaoFicha(identificadores) {
         return prisma.employee.findMany({
             where: {
-                deletedAt: null,
                 id: { in: identificadores }
             },
             select: SELECAO_EXPORTACAO_FICHA_FUNCIONARIO,

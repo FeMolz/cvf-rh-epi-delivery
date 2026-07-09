@@ -49,7 +49,7 @@ describe('ExportarListaFuncionariosPlanilhaService', () => {
 
         expect(employeeRepositoryMock.findManyParaExportacaoLista).toHaveBeenCalledWith({
             status: { in: ['ATIVO'] }
-        });
+        }, { incluirDesligados: false });
         expect(resultado.buffer).toBeInstanceOf(Buffer);
         expect(resultado.nomeArquivo).toMatch(/^funcionarios-ativos-/);
     });
@@ -67,7 +67,65 @@ describe('ExportarListaFuncionariosPlanilhaService', () => {
 
         expect(employeeRepositoryMock.findManyParaExportacaoLista).toHaveBeenCalledWith({
             companyId: 'empresa-1'
+        }, { incluirDesligados: true });
+    });
+
+    it('deve exportar funcionários desligados quando filtro for todos', async () => {
+        employeeRepositoryMock.findManyParaExportacaoLista.mockResolvedValue([
+            {
+                name: 'João',
+                status: 'DESLIGADO',
+                resignationDate: new Date('2024-06-01'),
+                role: { name: 'Analista' },
+                setor: { nome: 'TI' }
+            }
+        ]);
+        planilhaFuncionarioProviderMock.gerarPlanilhaListaFuncionarios.mockResolvedValue(
+            Buffer.from('xlsx')
+        );
+
+        await exportarListaFuncionariosPlanilhaService.execute({ filtro: 'todos' });
+
+        expect(employeeRepositoryMock.findManyParaExportacaoLista).toHaveBeenCalledWith(
+            {},
+            { incluirDesligados: true }
+        );
+    });
+
+    it('deve exportar ficha de funcionário desligado quando selecionado por id', async () => {
+        employeeRepositoryMock.findManyParaExportacaoFicha.mockResolvedValue([
+            {
+                id: 'func-desligado',
+                name: 'Carlos Demitido',
+                cpf: '529.982.247-25',
+                email: 'carlos@empresa.com',
+                telefone: '(11) 98888-7777',
+                birthDate: new Date('1990-01-01'),
+                status: 'DESLIGADO',
+                admissionDate: new Date('2020-01-01'),
+                resignationDate: new Date('2024-06-01'),
+                deletedAt: new Date('2024-06-01'),
+                role: { name: 'Analista' },
+                company: { name: 'Empresa 01' },
+                setor: { nome: 'TI' },
+                valeTransporte: true,
+                valeAlimentacao: false,
+                planoSaude: true
+            }
+        ]);
+        planilhaFuncionarioProviderMock.gerarPlanilhaFichasFuncionarios.mockResolvedValue(
+            Buffer.from('xlsx')
+        );
+
+        const resultado = await exportarListaFuncionariosPlanilhaService.execute({
+            ids: ['func-desligado']
         });
+
+        expect(employeeRepositoryMock.findManyParaExportacaoFicha).toHaveBeenCalledWith([
+            'func-desligado'
+        ]);
+        expect(planilhaFuncionarioProviderMock.gerarPlanilhaFichasFuncionarios).toHaveBeenCalled();
+        expect(resultado.nomeArquivo).toBe('funcionario-maria-silva.xlsx');
     });
 
     it('deve exportar ficha completa dos funcionários selecionados', async () => {

@@ -1,6 +1,9 @@
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
 import planilhaFuncionarioProvider from '../../../shared/providers/PlanilhaFuncionarioProvider/PlanilhaFuncionarioProvider.js';
-import { FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS } from '../constants/funcionarioStatusConstantes.js';
+import {
+    FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS,
+    FILTRO_LISTAGEM_FUNCIONARIOS_TODOS
+} from '../constants/funcionarioStatusConstantes.js';
 import { FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS } from '../constants/funcionarioExportacaoConstantes.js';
 import employeeRepository from '../repositories/EmployeeRepository.js';
 import { montarFiltroConsultaFuncionarios } from '../utils/montarFiltroConsultaFuncionarios.js';
@@ -91,12 +94,19 @@ class ExportarListaFuncionariosPlanilhaService {
             filtroConsulta.companyId = companyId;
         }
 
-        const funcionarios = await employeeRepository.findManyParaExportacaoLista(filtroConsulta);
+        const incluirDesligados = filtroNormalizado === FILTRO_LISTAGEM_FUNCIONARIOS_TODOS;
+        const funcionarios = await employeeRepository.findManyParaExportacaoLista(filtroConsulta, {
+            incluirDesligados
+        });
         const linhas = montarLinhasExportacaoListaFuncionarios(funcionarios);
         const buffer = await planilhaFuncionarioProvider.gerarPlanilhaListaFuncionarios(linhas);
 
         const dataAtual = new Date().toISOString().slice(0, 10);
-        const sufixoArquivo = companyId ? `empresa-${companyId}` : filtroNormalizado;
+        const sufixoArquivo = companyId
+            ? `empresa-${companyId}`
+            : incluirDesligados
+              ? 'empresa-completa'
+              : filtroNormalizado;
         const nomeArquivo = `funcionarios-${sufixoArquivo}-${dataAtual}.xlsx`;
 
         return { buffer, nomeArquivo };
