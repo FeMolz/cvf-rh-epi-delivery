@@ -72,4 +72,30 @@ describe('montarPayloadFuncionario', () => {
             resignationDate: '2026-01-10'
         });
     });
+
+    it('deve incluir admissionDate, leaveReturnDate e numeroDependentes', () => {
+        const payload = montarPayloadFuncionario({
+            name: 'Maria',
+            cpf: '529.982.247-25',
+            email: 'maria@empresa.com',
+            telefone: '(11) 98888-7777',
+            birthDate: '1995-08-12',
+            companyId: 'empresa-1',
+            roleId: 'cargo-1',
+            setorId: 'setor-1',
+            admissionDate: '2020-01-01',
+            leaveReturnDate: '2026-03-01',
+            numeroDependentes: '2',
+            nacionalidade: '   ',
+            cidade: 'São Paulo'
+        });
+
+        expect(payload).toMatchObject({
+            admissionDate: '2020-01-01',
+            leaveReturnDate: '2026-03-01',
+            numeroDependentes: 2,
+            cidade: 'São Paulo'
+        });
+        expect(payload.nacionalidade).toBeUndefined();
+    });
 });

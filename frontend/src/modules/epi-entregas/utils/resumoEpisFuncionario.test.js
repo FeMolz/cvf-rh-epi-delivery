@@ -37,4 +37,20 @@ describe('resumoEpisFuncionario', () => {
             'ativo'
         );
     });
+
+    it('deve detalhar vencidos e pendentes', () => {
+        expect(obterMensagemResumoEpisFuncionario({ totalEpis: 4, vencidos: 2, pendentes: 1 })).toBe(
+            '2 vencido(s), 1 pendente(s)'
+        );
+        expect(obterMensagemResumoEpisFuncionario({ totalEpis: 2, vencidos: 1 })).toBe('1 EPI vencido');
+        expect(obterMensagemResumoEpisFuncionario({ totalEpis: 3, vencidos: 2 })).toBe(
+            '2 EPIs vencidos'
+        );
+        expect(obterMensagemResumoEpisFuncionario({ totalEpis: 2, pendentes: 1 })).toBe(
+            '1 entrega pendente'
+        );
+        expect(obterMensagemResumoEpisFuncionario({ totalEpis: 3, pendentes: 2 })).toBe(
+            '2 entregas pendentes'
+        );
+    });
 });

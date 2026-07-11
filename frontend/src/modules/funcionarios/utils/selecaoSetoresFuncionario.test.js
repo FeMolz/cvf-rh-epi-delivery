@@ -24,8 +24,33 @@ describe('selecaoSetoresFuncionario', () => {
         ]);
     });
 
+    it('deve retornar apenas ativos sem setor atual informado', () => {
+        expect(montarSetoresParaFormularioFuncionario(setores)).toEqual([
+            { id: '1', nome: 'TI', isActive: true }
+        ]);
+    });
+
     it('deve retornar apenas ativos quando nao ha setor atual inativo', () => {
         expect(montarSetoresParaFormularioFuncionario(setores, '1')).toEqual([
+            { id: '1', nome: 'TI', isActive: true }
+        ]);
+    });
+
+    it('deve usar setor atual informado quando nao estiver na lista', () => {
+        expect(
+            montarSetoresParaFormularioFuncionario(setores, '99', {
+                id: '99',
+                nome: 'Legado',
+                isActive: false
+            })
+        ).toEqual([
+            { id: '99', nome: 'Legado (inativo)', isActive: false },
+            { id: '1', nome: 'TI', isActive: true }
+        ]);
+    });
+
+    it('deve retornar apenas ativos quando setor atual nao for encontrado', () => {
+        expect(montarSetoresParaFormularioFuncionario(setores, '99')).toEqual([
             { id: '1', nome: 'TI', isActive: true }
         ]);
     });

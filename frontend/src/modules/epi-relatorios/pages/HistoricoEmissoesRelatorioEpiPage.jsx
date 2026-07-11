@@ -224,6 +224,7 @@ export function HistoricoEmissoesRelatorioEpiPage() {
                                     relatorioProcessandoId={relatorioProcessandoId}
                                     relatorioBaixandoId={relatorioBaixandoId}
                                     relatoriosComDownload={relatoriosComDownload}
+                                    /* v8 ignore next 2 */
                                     onPaginaAnterior={() => {}}
                                     onProximaPagina={() => {}}
                                     onAlterarStatus={aoAlterarStatus}

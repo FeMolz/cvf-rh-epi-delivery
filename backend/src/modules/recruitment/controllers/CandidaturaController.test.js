@@ -139,6 +139,18 @@ describe('CandidaturaController', () => {
         );
     });
 
+    it('getById deve retornar 200 quando candidatura existe', async () => {
+        const candidatura = { id: 'c1', nomeCompleto: 'Maria' };
+        getCandidaturaServiceMock.execute.mockResolvedValue(candidatura);
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.getById({ params: { id: 'c1' } }, resposta, jest.fn());
+
+        expect(getCandidaturaServiceMock.execute).toHaveBeenCalledWith('c1');
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(candidatura);
+    });
+
     it('getById deve encaminhar 404 ao next quando candidatura nao existe', async () => {
         getCandidaturaServiceMock.execute.mockRejectedValue(
             criarErroHttpTeste(MENSAGEM_CANDIDATURA_NAO_ENCONTRADA, 404)

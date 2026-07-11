@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { statusFuncionarioEncerraVinculo } from '../../../shared/constants/funcionarioVinculoConstantes.js';
 
 const employeeRepositoryMock = {
     findById: jest.fn(),
@@ -198,5 +199,260 @@ describe('UpdateEmployeeService', () => {
                 leaveReturnDate: expect.any(Date)
             })
         );
+    });
+
+    it('deve rejeitar CPF duplicado na atualização', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([
+            { id: '1', cpf: CPF_VALIDO, email: 'a@b.com' },
+            { id: '2', cpf: '390.533.447-05', email: 'outro@b.com' }
+        ]);
+
+        await expect(
+            updateEmployeeService.execute('1', { cpf: '390.533.447-05' })
+        ).rejects.toMatchObject({ statusCode: 400, message: 'CPF já cadastrado no sistema' });
+    });
+
+    it('deve rejeitar e-mail duplicado na atualização', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([
+            { id: '1', cpf: CPF_VALIDO, email: 'a@b.com' },
+            { id: '2', cpf: '390.533.447-05', email: 'outro@b.com' }
+        ]);
+
+        await expect(
+            updateEmployeeService.execute('1', { email: 'outro@b.com' })
+        ).rejects.toMatchObject({ statusCode: 400, message: 'E-mail já cadastrado no sistema' });
+    });
+
+    it('deve atualizar e-mail e telefone válidos', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({
+            id: '1',
+            email: 'novo@b.com',
+            telefone: TELEFONE_VALIDO
+        });
+
+        await updateEmployeeService.execute('1', {
+            email: 'novo@b.com',
+            telefone: TELEFONE_VALIDO
+        });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({
+                email: 'novo@b.com',
+                telefone: TELEFONE_VALIDO
+            })
+        );
+    });
+
+    it('deve rejeitar data de nascimento inválida na atualização', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+
+        await expect(
+            updateEmployeeService.execute('1', { birthDate: 'data-invalida' })
+        ).rejects.toMatchObject({ statusCode: 400, message: 'Data de nascimento inválida.' });
+    });
+
+    it('deve sincronizar periodicidade de EPI ao alterar status', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'FERIAS' });
+
+        await updateEmployeeService.execute('1', {
+            status: 'FERIAS',
+            leaveReturnDate: '2099-12-31'
+        });
+
+        expect(gerenciarPeriodicidadeEpiFuncionarioServiceMock.sincronizarPorMudancaStatus).toHaveBeenCalledWith(
+            'ATIVO',
+            'FERIAS',
+            '1'
+        );
+    });
+
+    it('não deve validar cargo quando funcionário permanece desligado sem alterar cargo', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: new Date(),
+            status: 'DESLIGADO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', telefone: TELEFONE_VALIDO });
+
+        await updateEmployeeService.execute('1', { telefone: TELEFONE_VALIDO });
+
+        expect(validarCargoAtivoParaVinculoServiceMock.execute).not.toHaveBeenCalled();
+    });
+
+    it('deve resolver data de retorno ao alterar apenas leaveReturnDate', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'FERIAS',
+            roleId: 'role-1',
+            leaveReturnDate: new Date('2099-06-01')
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({
+            id: '1',
+            status: 'FERIAS',
+            leaveReturnDate: new Date('2099-12-31')
+        });
+
+        await updateEmployeeService.execute('1', { leaveReturnDate: '2099-12-31' });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({ leaveReturnDate: expect.any(Date) })
+        );
+    });
+
+    it('deve resolver afastamento existente sem alterar status nem data', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'FERIAS',
+            roleId: 'role-1',
+            leaveReturnDate: new Date('2099-06-01')
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'FERIAS' });
+
+        await updateEmployeeService.execute('1', { name: 'Atualizado' });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({
+                name: 'Atualizado',
+                leaveReturnDate: expect.any(Date)
+            })
+        );
+        expect(gerenciarPeriodicidadeEpiFuncionarioServiceMock.sincronizarPorMudancaStatus).not.toHaveBeenCalled();
+    });
+
+    it('deve validar cargo ao atualizar funcionário ativo sem alterar roleId', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', name: 'Novo' });
+
+        await updateEmployeeService.execute('1', { name: 'Novo' });
+
+        expect(validarCargoAtivoParaVinculoServiceMock.execute).toHaveBeenCalledWith('role-1');
+    });
+
+    it('deve validar cargo ao alterar roleId de funcionário desligado', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: new Date(),
+            status: 'DESLIGADO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', roleId: 'role-2' });
+
+        await updateEmployeeService.execute('1', { roleId: 'role-2' });
+
+        expect(validarCargoAtivoParaVinculoServiceMock.execute).toHaveBeenCalledWith('role-2');
+    });
+
+    it('deve atualizar CPF sem conflito com outros funcionários', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1',
+            cpf: CPF_VALIDO
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', cpf: '390.533.447-05' });
+
+        await updateEmployeeService.execute('1', { cpf: '390.533.447-05' });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.objectContaining({ cpf: '390.533.447-05' })
+        );
+    });
+
+    it('deve usar status vazio quando funcionário não possuir status definido', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: null,
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', name: 'Sem Status' });
+
+        await updateEmployeeService.execute('1', { name: 'Sem Status' });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'Sem Status' });
+    });
+
+    it('não deve alterar deletedAt ao trocar entre status de vínculo encerrado', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: new Date('2024-01-01'),
+            status: 'DESLIGADO',
+            roleId: 'role-1'
+        });
+        employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
+        employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'RESCINDIDO' });
+
+        await updateEmployeeService.execute('1', { status: 'RESCINDIDO' });
+
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
+            '1',
+            expect.not.objectContaining({ deletedAt: expect.any(Date) })
+        );
+    });
+});
+
+describe('statusFuncionarioEncerraVinculo', () => {
+    it('deve identificar status que encerram vínculo', () => {
+        expect(statusFuncionarioEncerraVinculo('DESLIGADO')).toBe(true);
+        expect(statusFuncionarioEncerraVinculo('RESCINDIDO')).toBe(true);
+        expect(statusFuncionarioEncerraVinculo('APOSENTADO')).toBe(true);
+    });
+
+    it('deve retornar falso para status ativo ou ausente', () => {
+        expect(statusFuncionarioEncerraVinculo('ATIVO')).toBe(false);
+        expect(statusFuncionarioEncerraVinculo(null)).toBe(false);
+        expect(statusFuncionarioEncerraVinculo(undefined)).toBe(false);
     });
 });

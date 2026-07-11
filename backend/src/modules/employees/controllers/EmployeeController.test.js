@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { TIPO_MIME_PLANILHA_XLSX } from '../constants/funcionarioExportacaoConstantes.js';
 
 const createEmployeeServiceMock = {
     execute: jest.fn()
@@ -20,6 +21,14 @@ const deleteEmployeeServiceMock = {
     execute: jest.fn()
 };
 
+const exportarListaFuncionariosPlanilhaServiceMock = {
+    execute: jest.fn()
+};
+
+const exportarFuncionarioCompletoPlanilhaServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/CreateEmployeeService.js', () => ({
     default: createEmployeeServiceMock
 }));
@@ -38,6 +47,14 @@ jest.unstable_mockModule('../services/FindEmployeeByIdService.js', () => ({
 
 jest.unstable_mockModule('../services/DeleteEmployeeService.js', () => ({
     default: deleteEmployeeServiceMock
+}));
+
+jest.unstable_mockModule('../services/ExportarListaFuncionariosPlanilhaService.js', () => ({
+    default: exportarListaFuncionariosPlanilhaServiceMock
+}));
+
+jest.unstable_mockModule('../services/ExportarFuncionarioCompletoPlanilhaService.js', () => ({
+    default: exportarFuncionarioCompletoPlanilhaServiceMock
 }));
 
 const employeeController = (await import('./EmployeeController.js')).default;
@@ -180,6 +197,110 @@ describe('EmployeeController', () => {
 
         deleteEmployeeServiceMock.execute.mockRejectedValue(erro);
         await employeeController.delete(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve exportar lista de funcionarios em planilha', async () => {
+        const request = { query: { filtro: 'ATIVO', companyId: 'c1', ids: '1,2' } };
+        const response = {
+            setHeader: jest.fn().mockReturnThis(),
+            send: jest.fn()
+        };
+        const next = jest.fn();
+        const resultado = { nomeArquivo: 'funcionarios.xlsx', buffer: Buffer.from('xlsx') };
+
+        exportarListaFuncionariosPlanilhaServiceMock.execute.mockResolvedValue(resultado);
+        await employeeController.exportarLista(request, response, next);
+
+        expect(exportarListaFuncionariosPlanilhaServiceMock.execute).toHaveBeenCalledWith({
+            filtro: 'ATIVO',
+            companyId: 'c1',
+            ids: '1,2'
+        });
+        expect(response.setHeader).toHaveBeenCalledWith('Content-Type', TIPO_MIME_PLANILHA_XLSX);
+        expect(response.send).toHaveBeenCalledWith(resultado.buffer);
+    });
+
+    it('deve exportar lista quando query estiver ausente', async () => {
+        const response = {
+            setHeader: jest.fn().mockReturnThis(),
+            send: jest.fn()
+        };
+
+        exportarListaFuncionariosPlanilhaServiceMock.execute.mockResolvedValue({
+            nomeArquivo: 'lista.xlsx',
+            buffer: Buffer.from('xlsx')
+        });
+
+        await employeeController.exportarLista({}, response, jest.fn());
+
+        expect(exportarListaFuncionariosPlanilhaServiceMock.execute).toHaveBeenCalledWith({
+            filtro: undefined,
+            companyId: undefined,
+            ids: undefined
+        });
+    });
+
+    it('deve encaminhar erro na exportacao de lista', async () => {
+        const request = { query: {} };
+        const response = { setHeader: jest.fn(), send: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('falha exportacao');
+
+        exportarListaFuncionariosPlanilhaServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.exportarLista(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve exportar ficha completa do funcionario', async () => {
+        const request = { params: { id: '1' } };
+        const response = {
+            setHeader: jest.fn().mockReturnThis(),
+            send: jest.fn()
+        };
+        const next = jest.fn();
+        const resultado = { nomeArquivo: 'ficha.xlsx', buffer: Buffer.from('xlsx') };
+
+        exportarFuncionarioCompletoPlanilhaServiceMock.execute.mockResolvedValue(resultado);
+        await employeeController.exportarFuncionarioCompleto(request, response, next);
+
+        expect(exportarFuncionarioCompletoPlanilhaServiceMock.execute).toHaveBeenCalledWith('1');
+        expect(response.send).toHaveBeenCalledWith(resultado.buffer);
+    });
+
+    it('deve encaminhar erro na exportacao de ficha', async () => {
+        const request = { params: { id: '99' } };
+        const response = { setHeader: jest.fn(), send: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('nao encontrado');
+
+        exportarFuncionarioCompletoPlanilhaServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.exportarFuncionarioCompleto(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve repassar filtro na listagem', async () => {
+        const request = { query: { filtro: 'ATIVO' } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+
+        listEmployeesServiceMock.execute.mockResolvedValue([]);
+        await employeeController.findAll(request, response, next);
+
+        expect(listEmployeesServiceMock.execute).toHaveBeenCalledWith('ATIVO');
+    });
+
+    it('deve encaminhar erro na listagem', async () => {
+        const request = { query: {} };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('falha listagem');
+
+        listEmployeesServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.findAll(request, response, next);
 
         expect(next).toHaveBeenCalledWith(erro);
     });

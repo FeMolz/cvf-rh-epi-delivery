@@ -34,4 +34,26 @@ describe('ListCadastrosContratacaoService', () => {
         expect(cadastroContratacaoRepositoryMock.findMany).not.toHaveBeenCalled();
         expect(resultado).toEqual([]);
     });
+
+    it('deve listar sem filtro de status', async () => {
+        const lista = [{ id: 'cad1' }, { id: 'cad2' }];
+        cadastroContratacaoRepositoryMock.findMany.mockResolvedValue(lista);
+
+        const resultado = await listCadastrosContratacaoService.execute();
+
+        expect(cadastroContratacaoRepositoryMock.findMany).toHaveBeenCalledWith({ status: undefined });
+        expect(resultado).toEqual(lista);
+    });
+
+    it('deve ignorar status vazio ou nao-string', async () => {
+        cadastroContratacaoRepositoryMock.findMany.mockResolvedValue([]);
+
+        await listCadastrosContratacaoService.execute({ status: '   ' });
+        expect(cadastroContratacaoRepositoryMock.findMany).toHaveBeenCalledWith({ status: undefined });
+
+        await listCadastrosContratacaoService.execute({ status: 123 });
+        expect(cadastroContratacaoRepositoryMock.findMany).toHaveBeenLastCalledWith({
+            status: undefined
+        });
+    });
 });

@@ -61,4 +61,17 @@ describe('ExportarListaCargosPlanilhaService', () => {
         });
         expect(resultado.nomeArquivo).toMatch(/^cargos-inativos-/);
     });
+
+    it('deve exportar cargos ativos quando execute é chamado sem opções', async () => {
+        roleRepositoryMock.findAll.mockResolvedValue([]);
+        planilhaCargoProviderMock.gerarPlanilhaListaCargos.mockResolvedValue(Buffer.from('xlsx'));
+
+        const resultado = await exportarListaCargosPlanilhaService.execute();
+
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            apenasInativos: false,
+            incluirInativos: false
+        });
+        expect(resultado.nomeArquivo).toMatch(/^cargos-ativos-/);
+    });
 });

@@ -96,4 +96,41 @@ describe('isAuthenticated Middleware', () => {
         expect(resposta.status).toHaveBeenCalledWith(401);
         expect(mockNext).not.toHaveBeenCalled();
     });
+
+    it('deve retornar 401 quando Bearer não tiver token', async () => {
+        const requisicao = { headers: { authorization: 'Bearer ' } };
+        const resposta = mockResponse();
+
+        await isAuthenticated(requisicao, resposta, mockNext);
+
+        expect(resposta.status).toHaveBeenCalledWith(401);
+        expect(resposta.json).toHaveBeenCalledWith({
+            status: 'error',
+            message: 'Token de autenticação não fornecido.'
+        });
+    });
+
+    it('deve retornar 401 quando token não contiver identificador de usuário', async () => {
+        const tokenSemId = jwt.sign({ role: 'ADMIN' }, 'segredo-teste-local-16');
+        const requisicao = { headers: { authorization: `Bearer ${tokenSemId}` } };
+        const resposta = mockResponse();
+
+        await isAuthenticated(requisicao, resposta, mockNext);
+
+        expect(resposta.status).toHaveBeenCalledWith(401);
+        expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar 401 quando sessão do usuário não existir', async () => {
+        const tokenValido = jwt.sign({ id: 'uuid-inexistente' }, 'segredo-teste-local-16');
+        const requisicao = { headers: { authorization: `Bearer ${tokenValido}` } };
+        const resposta = mockResponse();
+
+        userRepositoryMock.findSessaoPorId.mockResolvedValue(null);
+
+        await isAuthenticated(requisicao, resposta, mockNext);
+
+        expect(resposta.status).toHaveBeenCalledWith(401);
+        expect(mockNext).not.toHaveBeenCalled();
+    });
 });

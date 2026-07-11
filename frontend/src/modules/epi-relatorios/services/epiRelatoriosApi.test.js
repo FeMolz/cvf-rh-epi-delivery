@@ -19,6 +19,14 @@ vi.mock('../../../shared/api/clienteHttp.js', () => ({
 const { requisicaoApi, baixarArquivoApi } = await import('../../../shared/api/clienteHttp.js');
 
 describe('epiRelatoriosApi', () => {
+    it('deve listar relatorios sem filtros', async () => {
+        requisicaoApi.mockResolvedValue({ itens: [], pagina: 1, totalItens: 0 });
+
+        await listarRelatoriosEntregaEpi('token');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/epi-delivery-reports', { token: 'token' });
+    });
+
     it('deve listar relatorios com filtros', async () => {
         requisicaoApi.mockResolvedValue({ itens: [], pagina: 1, totalItens: 0 });
 

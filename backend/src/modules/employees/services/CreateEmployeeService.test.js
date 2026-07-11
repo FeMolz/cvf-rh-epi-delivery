@@ -192,4 +192,100 @@ describe('CreateEmployeeService', () => {
             })
         ).rejects.toThrow('Data de nascimento inválida.');
     });
+
+    it('should throw error when birthDate is empty string', async () => {
+        await expect(
+            createEmployeeService.execute({
+                name: 'John',
+                cpf: CPF_VALIDO,
+                email: 'john@empresa.com',
+                telefone: TELEFONE_VALIDO,
+                companyId: 1,
+                roleId: 2,
+                setorId: '10101010-1010-1010-1010-101010101010',
+                birthDate: '   '
+            })
+        ).rejects.toThrow('Campos obrigatórios ausentes');
+    });
+
+    it('should accept birthDate as Date instance', async () => {
+        const birthDate = new Date('1990-06-15');
+        employeeRepositoryMock.findAll.mockResolvedValue([]);
+        employeeRepositoryMock.create.mockResolvedValue({ id: 1 });
+
+        await createEmployeeService.execute({
+            name: 'John',
+            cpf: CPF_VALIDO,
+            email: 'john@empresa.com',
+            telefone: TELEFONE_VALIDO,
+            companyId: 1,
+            roleId: 2,
+            setorId: '10101010-1010-1010-1010-101010101010',
+            birthDate
+        });
+
+        expect(employeeRepositoryMock.create).toHaveBeenCalledWith(
+            expect.objectContaining({ birthDate })
+        );
+    });
+
+    it('should create employee with temporary leave status and return date', async () => {
+        employeeRepositoryMock.findAll.mockResolvedValue([]);
+        employeeRepositoryMock.create.mockResolvedValue({ id: 1, status: 'FERIAS' });
+
+        await createEmployeeService.execute({
+            name: 'John',
+            cpf: CPF_VALIDO,
+            email: 'john@empresa.com',
+            telefone: TELEFONE_VALIDO,
+            companyId: 1,
+            roleId: 2,
+            setorId: '10101010-1010-1010-1010-101010101010',
+            birthDate: '1990-06-15',
+            status: 'FERIAS',
+            leaveReturnDate: '2099-12-31'
+        });
+
+        expect(employeeRepositoryMock.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                status: 'FERIAS',
+                leaveReturnDate: expect.any(Date)
+            })
+        );
+    });
+
+    it('should throw error when birthDate is null', async () => {
+        await expect(
+            createEmployeeService.execute({
+                name: 'John',
+                cpf: CPF_VALIDO,
+                email: 'john@empresa.com',
+                telefone: TELEFONE_VALIDO,
+                companyId: 1,
+                roleId: 2,
+                setorId: '10101010-1010-1010-1010-101010101010',
+                birthDate: null
+            })
+        ).rejects.toThrow('Campos obrigatórios ausentes');
+    });
+
+    it('should accept numeric birthDate', async () => {
+        employeeRepositoryMock.findAll.mockResolvedValue([]);
+        employeeRepositoryMock.create.mockResolvedValue({ id: 1 });
+
+        await createEmployeeService.execute({
+            name: 'John',
+            cpf: CPF_VALIDO,
+            email: 'john@empresa.com',
+            telefone: TELEFONE_VALIDO,
+            companyId: 1,
+            roleId: 2,
+            setorId: '10101010-1010-1010-1010-101010101010',
+            birthDate: Date.parse('1990-06-15')
+        });
+
+        expect(employeeRepositoryMock.create).toHaveBeenCalledWith(
+            expect.objectContaining({ birthDate: expect.any(Date) })
+        );
+    });
 });

@@ -124,6 +124,38 @@ describe('CandidaturaRepository', () => {
         });
     });
 
+    it('deve listar candidaturas com filtro apenas de data inicio', async () => {
+        const dataInicio = new Date('2026-01-01');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findManyByAnuncio('v1', { dataInicio });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                anuncioVagaId: 'v1',
+                createdAt: { gte: dataInicio }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'asc' }
+        });
+    });
+
+    it('deve listar candidaturas com filtro apenas de data fim', async () => {
+        const dataFim = new Date('2026-12-31');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findManyByAnuncio('v1', { dataFim });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                anuncioVagaId: 'v1',
+                createdAt: { lte: dataFim }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'asc' }
+        });
+    });
+
     it('deve contar candidaturas por anuncio', async () => {
         prismaMock.candidatura.count.mockResolvedValue(5);
 

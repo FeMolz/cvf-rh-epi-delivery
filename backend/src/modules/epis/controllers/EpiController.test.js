@@ -64,4 +64,89 @@ describe('EpiController', () => {
         expect(searchEpisByNameExternoServiceMock.execute).toHaveBeenCalledWith('capacete');
         expect(resposta.status).toHaveBeenCalledWith(200);
     });
+
+    it('deve alterar periodicidade e retornar 200', async () => {
+        const requisicao = {
+            body: { roleId: 'r1', epiId: 'e1', newPeriodicityDays: 180 }
+        };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        changeEpiPeriodicityServiceMock.execute.mockResolvedValue({ id: 're1', periodicityDays: 180 });
+        await epiController.changePeriodicity(requisicao, resposta, proximo);
+
+        expect(changeEpiPeriodicityServiceMock.execute).toHaveBeenCalledWith({
+            roleId: 'r1',
+            epiId: 'e1',
+            newPeriodicityDays: 180
+        });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(proximo).not.toHaveBeenCalled();
+    });
+
+    it('deve encaminhar erro ao alterar periodicidade', async () => {
+        const requisicao = { body: {} };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        changeEpiPeriodicityServiceMock.execute.mockRejectedValue(new Error('vinculo invalido'));
+        await epiController.changePeriodicity(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'vinculo invalido' })
+        );
+    });
+
+    it('deve retornar 200 ao listar epis locais', async () => {
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        listCachedEpisServiceMock.execute.mockResolvedValue([{ id: 1 }]);
+        await epiController.findAllLocal({}, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith([{ id: 1 }]);
+    });
+
+    it('deve encaminhar 500 ao falhar listagem local', async () => {
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+
+        listCachedEpisServiceMock.execute.mockRejectedValue(new Error('db down'));
+        await epiController.findAllLocal({}, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'Erro ao buscar EPIs.', statusCode: 500 })
+        );
+    });
+
+    it('deve encaminhar erro com statusCode customizado na busca por nome', async () => {
+        const requisicao = { query: { nome: 'x' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+        const erro = Object.assign(new Error('nome invalido'), { statusCode: 422 });
+
+        searchEpisByNameExternoServiceMock.execute.mockRejectedValue(erro);
+        await epiController.searchByName(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'nome invalido', statusCode: 422 })
+        );
+    });
+
+    it('deve usar statusCode 400 padrao na busca por nome', async () => {
+        const requisicao = { query: { nome: 'x' } };
+        const proximo = jest.fn();
+
+        searchEpisByNameExternoServiceMock.execute.mockRejectedValue(new Error('nome obrigatorio'));
+        await epiController.searchByName(
+            requisicao,
+            { status: jest.fn().mockReturnThis(), json: jest.fn() },
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'nome obrigatorio', statusCode: 400 })
+        );
+    });
 });

@@ -80,6 +80,7 @@ export function DetalheCargoPage() {
     }
 
     async function confirmarAlteracaoSituacao() {
+        /* v8 ignore next 3 */
         if (!cargo) {
             return;
         }

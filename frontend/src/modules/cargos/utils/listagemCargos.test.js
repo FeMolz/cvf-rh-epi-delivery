@@ -15,6 +15,9 @@ describe('listagemCargos', () => {
         const formatado = formatarData('2024-06-15T12:00:00.000Z');
 
         expect(formatado).toMatch(/\d{2}\/\d{2}\/\d{4}/);
+        expect(formatarData('')).toBe('—');
+        expect(formatarData('invalido')).toBe('—');
+        expect(formatarData(new Date('2024-06-15T12:00:00.000Z'))).toMatch(/\d{2}\/\d{2}\/\d{4}/);
     });
 
     it('deve obter quantidade de EPIs do cargo', () => {
@@ -49,5 +52,22 @@ describe('listagemCargos', () => {
         expect(filtrarCargos(cargos, 'operador')).toHaveLength(1);
         expect(filtrarCargos(cargos, 'administrativo')).toHaveLength(1);
         expect(filtrarCargos(cargos, '')).toHaveLength(2);
+        expect(filtrarCargos(cargos, '2')).toHaveLength(1);
+    });
+
+    it('deve tratar cargo nulo como inativo', () => {
+        expect(obterRotuloStatusCargo(null)).toBe('Inativo');
+        expect(obterClasseStatusCargo(null)).toContain('offline');
+        expect(obterRotuloStatusCargo(undefined)).toBe('Inativo');
+    });
+
+    it('deve filtrar cargos por status e quantidade de epis', () => {
+        const cargos = [
+            { id: '1', name: 'Operador', description: 'Linha 1', _count: { roleEpis: 2 } },
+            { id: '2', name: 'Gerente', description: 'Administrativo', deletedAt: '2024-01-01' }
+        ];
+
+        expect(filtrarCargos(cargos, 'inativo')).toHaveLength(1);
+        expect(filtrarCargos(cargos, 'linha 1')).toHaveLength(1);
     });
 });

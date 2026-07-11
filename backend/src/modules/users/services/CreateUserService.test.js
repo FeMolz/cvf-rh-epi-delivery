@@ -17,11 +17,18 @@ jest.unstable_mockModule('bcryptjs', () => ({
     default: bcryptMock
 }));
 
+const validarPoliticaSenhaMock = jest.fn();
+
+jest.unstable_mockModule('../../../shared/utils/validarSenha.js', () => ({
+    validarPoliticaSenha: validarPoliticaSenhaMock
+}));
+
 const createUserService = (await import('./CreateUserService.js')).default;
 
 describe('CreateUserService', () => {
     afterEach(() => {
         jest.clearAllMocks();
+        validarPoliticaSenhaMock.mockImplementation(() => {});
     });
 
     it('deve impedir cadastro sem papel de gestão RH', async () => {
@@ -34,6 +41,21 @@ describe('CreateUserService', () => {
             })
         ).rejects.toMatchObject({
             message: 'Você não tem permissão para cadastrar usuários.',
+            statusCode: 403
+        });
+    });
+
+    it('deve impedir criação com papel superior ao do solicitante', async () => {
+        await expect(
+            createUserService.execute({
+                name: 'Gestor',
+                email: 'gestor@teste.com',
+                password: 'senha123',
+                role: 'PAPEL_INEXISTENTE',
+                papelSolicitante: 'ADMINISTRATIVO'
+            })
+        ).rejects.toMatchObject({
+            message: 'Não é permitido definir um papel superior ao seu.',
             statusCode: 403
         });
     });
@@ -140,6 +162,28 @@ describe('CreateUserService', () => {
 
     it('deve rejeitar senha fraca', async () => {
         userRepositoryMock.findByEmail.mockResolvedValue(null);
+        validarPoliticaSenhaMock.mockImplementation(() => {
+            throw new Error('A senha deve ter no mínimo 8 caracteres, incluindo letras e números.');
+        });
+
+        await expect(
+            createUserService.execute({
+                name: 'Teste',
+                email: 'teste@teste.com',
+                password: '123',
+                papelSolicitante: 'ADMIN'
+            })
+        ).rejects.toMatchObject({
+            message: 'A senha deve ter no mínimo 8 caracteres, incluindo letras e números.',
+            statusCode: 400
+        });
+    });
+
+    it('deve usar mensagem padrão quando validação de senha não informar texto', async () => {
+        userRepositoryMock.findByEmail.mockResolvedValue(null);
+        validarPoliticaSenhaMock.mockImplementation(() => {
+            throw new Error('');
+        });
 
         await expect(
             createUserService.execute({

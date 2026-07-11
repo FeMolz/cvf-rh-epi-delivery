@@ -44,6 +44,18 @@ describe('montarHtmlRelatorioEntregaEpi', () => {
         expect(html).toContain('&lt;b onclick');
     });
 
+    it('deve tratar entregasTabela ausente como lista vazia', () => {
+        const html = montarHtmlRelatorioEntregaEpi({
+            nomeFuncionario: 'Ana',
+            nomeEmpresa: 'Empresa',
+            nomeCargo: 'Cargo',
+            nomeSetor: 'Setor',
+            textoPeriodoReferencia: '01/02/2026 a 02/02/2026'
+        });
+
+        expect(html).toContain('Nenhuma entrega registrada neste intervalo.');
+    });
+
     it('deve exibir mensagem quando não houver entregas', () => {
         const html = montarHtmlRelatorioEntregaEpi({
             nomeFuncionario: 'Ana',

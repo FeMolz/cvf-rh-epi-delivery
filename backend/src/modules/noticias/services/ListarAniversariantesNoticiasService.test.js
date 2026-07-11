@@ -15,6 +15,17 @@ describe('ListarAniversariantesNoticiasService', () => {
         jest.clearAllMocks();
     });
 
+    it('deve usar data atual como referencia padrao', async () => {
+        noticiasRepositoryMock.findFuncionariosElegiveisAniversarios.mockResolvedValue([]);
+
+        const resultado = await listarAniversariantesNoticiasService.execute();
+
+        expect(noticiasRepositoryMock.findFuncionariosElegiveisAniversarios).toHaveBeenCalled();
+        expect(resultado.mesReferencia).toBeTruthy();
+        expect(resultado.aniversariantesPessoais).toEqual([]);
+        expect(resultado.aniversariantesEmpresa).toEqual([]);
+    });
+
     it('deve montar listas de aniversariantes pessoais e de empresa', async () => {
         const referencia = new Date('2025-06-21T12:00:00.000Z');
 

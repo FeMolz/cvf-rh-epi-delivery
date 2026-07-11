@@ -12,4 +12,16 @@ describe('codificarCorpoFormulario', () => {
         expect(resultado).toContain('username=usuario%40email.com');
         expect(resultado).toContain('password=senha%26especial');
     });
+
+    it('deve tratar valores nulos e indefinidos como string vazia', () => {
+        const resultado = codificarCorpoFormulario({
+            campoNulo: null,
+            campoIndefinido: undefined,
+            campoTexto: 'valor'
+        });
+
+        expect(resultado).toContain('campoNulo=');
+        expect(resultado).toContain('campoIndefinido=');
+        expect(resultado).toContain('campoTexto=valor');
+    });
 });

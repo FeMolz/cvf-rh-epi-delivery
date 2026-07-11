@@ -104,4 +104,43 @@ describe('SetorController', () => {
 
         expect(next).toHaveBeenCalledWith(erro);
     });
+
+    it('deve encaminhar erro ao criar setor', async () => {
+        const erro = new Error('falha create');
+        createSetorServiceMock.execute.mockRejectedValue(erro);
+
+        await setorController.create(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao buscar setor por id', async () => {
+        const erro = new Error('falha find');
+        findSetorByIdServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await setorController.findById(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao atualizar setor', async () => {
+        const erro = new Error('falha update');
+        updateSetorServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await setorController.update(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao excluir setor', async () => {
+        const erro = new Error('falha delete');
+        deleteSetorServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await setorController.delete(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
 });

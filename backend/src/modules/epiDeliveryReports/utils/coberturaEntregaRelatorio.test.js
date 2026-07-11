@@ -6,10 +6,41 @@ import {
 } from './coberturaEntregaRelatorio.js';
 
 describe('coberturaEntregaRelatorio', () => {
+    it('deve retornar false quando nao houver entregas nem relatorios', () => {
+        expect(possuiEntregaPendenteEmissao()).toBe(false);
+        expect(possuiEntregaPendenteEmissao([], [])).toBe(false);
+    });
+
+    it('deve considerar entrega anterior ao inicio do periodo como pendente', () => {
+        expect(
+            entregaCobertaPorRelatorio(
+                '2025-12-31T23:59:59.999Z',
+                '2026-01-01T00:00:00.000Z',
+                '2026-01-31T23:59:59.999Z'
+            )
+        ).toBe(false);
+    });
+
     it('deve identificar entrega coberta pelo periodo do relatorio', () => {
         expect(
             entregaCobertaPorRelatorio(
                 '2026-01-10T00:00:00.000Z',
+                '2026-01-01T00:00:00.000Z',
+                '2026-01-31T23:59:59.999Z'
+            )
+        ).toBe(true);
+
+        expect(
+            entregaCobertaPorRelatorio(
+                '2026-01-01T00:00:00.000Z',
+                '2026-01-01T00:00:00.000Z',
+                '2026-01-31T23:59:59.999Z'
+            )
+        ).toBe(true);
+
+        expect(
+            entregaCobertaPorRelatorio(
+                '2026-01-31T23:59:59.999Z',
                 '2026-01-01T00:00:00.000Z',
                 '2026-01-31T23:59:59.999Z'
             )

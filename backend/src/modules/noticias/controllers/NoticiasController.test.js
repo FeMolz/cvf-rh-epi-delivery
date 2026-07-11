@@ -73,4 +73,13 @@ describe('NoticiasController', () => {
 
         expect(next).toHaveBeenCalledWith(erro);
     });
+
+    it('deve repassar erro de afastamentos para o middleware global', async () => {
+        const erro = new Error('Falha afastamentos');
+        listarAfastamentosNoticiasServiceMock.execute.mockRejectedValue(erro);
+
+        await noticiasController.listarAfastamentos(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
 });

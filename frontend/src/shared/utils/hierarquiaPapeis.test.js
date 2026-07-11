@@ -20,4 +20,12 @@ describe('hierarquiaPapeis', () => {
             'COLABORADOR'
         ]);
     });
+
+    it('deve rejeitar papeis desconhecidos ou indefinidos', () => {
+        expect(podeAtribuirPapelUsuario(undefined, 'ADMIN')).toBe(false);
+        expect(podeAtribuirPapelUsuario('ADMIN', 'PAPEL_INEXISTENTE')).toBe(false);
+        expect(listarPapeisAtribuiveis(undefined)).toEqual([]);
+        expect(podeAtribuirPapelUsuario('COLABORADOR', 'ADMIN')).toBe(false);
+        expect(listarPapeisAtribuiveis('COLABORADOR')).toEqual(['COLABORADOR']);
+    });
 });

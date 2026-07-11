@@ -1,5 +1,10 @@
 import { jest } from '@jest/globals';
-import { STATUS_CADASTRO_CONTRATACAO } from '../constants/recrutamentoConstantes.js';
+import {
+    MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
+    MENSAGEM_CADASTRO_JA_ENVIADO,
+    MENSAGEM_TOKEN_CADASTRO_INVALIDO,
+    STATUS_CADASTRO_CONTRATACAO
+} from '../constants/recrutamentoConstantes.js';
 
 const cadastroContratacaoRepositoryMock = {
     findByToken: jest.fn(),
@@ -46,5 +51,59 @@ describe('SubmeterCadastroContratacaoService', () => {
             expect.objectContaining({ status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH })
         );
         expect(resultado.status).toBe(STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH);
+    });
+
+    it('deve rejeitar token vazio ou ausente', async () => {
+        await expect(submeterCadastroContratacaoService.execute('  ', {})).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+        await expect(submeterCadastroContratacaoService.execute(null, {})).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+        expect(cadastroContratacaoRepositoryMock.findByToken).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar cadastro inexistente', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue(null);
+
+        await expect(submeterCadastroContratacaoService.execute('token-x', {})).rejects.toThrow(
+            MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO
+        );
+    });
+
+    it('deve rejeitar token expirado', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            id: 'cad1',
+            createdAt: new Date('2020-01-01'),
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO
+        });
+
+        await expect(submeterCadastroContratacaoService.execute('token-exp', {})).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+    });
+
+    it('deve rejeitar cadastro ja enviado para analise do RH', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            id: 'cad1',
+            createdAt: new Date(),
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH
+        });
+
+        await expect(submeterCadastroContratacaoService.execute('token-1', {})).rejects.toThrow(
+            MENSAGEM_CADASTRO_JA_ENVIADO
+        );
+    });
+
+    it('deve rejeitar cadastro com status diferente de aguardando preenchimento', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            id: 'cad1',
+            createdAt: new Date(),
+            status: STATUS_CADASTRO_CONTRATACAO.CONTRATADO
+        });
+
+        await expect(submeterCadastroContratacaoService.execute('token-1', {})).rejects.toThrow(
+            MENSAGEM_CADASTRO_JA_ENVIADO
+        );
     });
 });

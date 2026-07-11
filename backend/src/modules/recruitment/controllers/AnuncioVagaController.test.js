@@ -158,6 +158,21 @@ describe('AnuncioVagaController', () => {
         expect(resposta.status).toHaveBeenCalledWith(200);
     });
 
+    it('update deve tratar body null como objeto vazio', async () => {
+        updateAnuncioVagaServiceMock.execute.mockRejectedValue(
+            criarErroHttpTeste(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS, 400)
+        );
+        const proximo = jest.fn();
+
+        await anuncioVagaController.update(
+            { params: { id: 'v1' }, body: null },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(updateAnuncioVagaServiceMock.execute).toHaveBeenCalledWith('v1', {});
+    });
+
     it('update deve encaminhar 400 ao next quando campos de atualizacao estao vazios', async () => {
         updateAnuncioVagaServiceMock.execute.mockRejectedValue(
             criarErroHttpTeste(MENSAGEM_CAMPOS_ATUALIZACAO_ANUNCIO_VAZIOS, 400)
@@ -190,5 +205,43 @@ describe('AnuncioVagaController', () => {
         expect(proximo).toHaveBeenCalledWith(
             expect.objectContaining({ message: MENSAGEM_STATUS_ANUNCIO_INVALIDO, statusCode: 400 })
         );
+    });
+
+    it('list deve encaminhar erro ao next', async () => {
+        listAnunciosVagaServiceMock.execute.mockRejectedValue(new Error('falha listagem'));
+        const proximo = jest.fn();
+
+        await anuncioVagaController.list({ query: {} }, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('getPublico deve retornar 200 quando anuncio esta ativo', async () => {
+        const anuncio = { id: 'v1', tituloVaga: 'Dev' };
+        getAnuncioVagaPublicoServiceMock.execute.mockResolvedValue(anuncio);
+        const resposta = criarMocksResposta();
+
+        await anuncioVagaController.getPublico({ params: { id: 'v1' } }, resposta, jest.fn());
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(anuncio);
+    });
+
+    it('updateStatus deve retornar 200 quando status e atualizado', async () => {
+        const atualizado = { id: 'v1', status: 'ATIVA' };
+        updateStatusAnuncioVagaServiceMock.execute.mockResolvedValue(atualizado);
+        const resposta = criarMocksResposta();
+
+        await anuncioVagaController.updateStatus(
+            { params: { id: 'v1' }, body: { status: 'ATIVA' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(updateStatusAnuncioVagaServiceMock.execute).toHaveBeenCalledWith('v1', {
+            status: 'ATIVA'
+        });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(atualizado);
     });
 });

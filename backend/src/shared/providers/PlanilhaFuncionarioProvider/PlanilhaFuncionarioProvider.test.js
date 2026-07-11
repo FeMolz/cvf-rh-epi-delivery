@@ -64,4 +64,49 @@ describe('PlanilhaFuncionarioProvider', () => {
             'joao-silva'
         );
     });
+
+    it('deve montar título único de aba quando houver colisão', () => {
+        const titulosUsados = new Set(['Ana Silva']);
+
+        const titulo = planilhaFuncionarioProvider.montarTituloAbaPlanilha('Ana Silva', titulosUsados);
+
+        expect(titulo).toBe('Ana Silva-2');
+        expect(titulosUsados.has(titulo)).toBe(true);
+    });
+
+    it('deve sanitizar caracteres inválidos no título da aba', () => {
+        const titulosUsados = new Set();
+
+        const titulo = planilhaFuncionarioProvider.montarTituloAbaPlanilha('Ana:Silva', titulosUsados);
+
+        expect(titulo).toBe('Ana-Silva');
+    });
+
+    it('deve usar título padrão quando base estiver vazia', () => {
+        const titulosUsados = new Set();
+
+        const titulo = planilhaFuncionarioProvider.montarTituloAbaPlanilha('   ', titulosUsados);
+
+        expect(titulo).toBe('Funcionario');
+    });
+
+    it('deve usar título padrão quando base for null', () => {
+        const titulosUsados = new Set();
+
+        const titulo = planilhaFuncionarioProvider.montarTituloAbaPlanilha(null, titulosUsados);
+
+        expect(titulo).toBe('Funcionario');
+    });
+
+    it('deve gerar planilha com múltiplas fichas de funcionários', async () => {
+        const fichas = [
+            { tituloBase: 'Ana', paresCampoValor: [{ campo: 'Nome', valor: 'Ana' }] },
+            { tituloBase: 'Bruno', paresCampoValor: [{ campo: 'Nome', valor: 'Bruno' }] }
+        ];
+
+        const buffer = await planilhaFuncionarioProvider.gerarPlanilhaFichasFuncionarios(fichas);
+
+        expect(workbookMock.addWorksheet).toHaveBeenCalledTimes(2);
+        expect(Buffer.isBuffer(buffer)).toBe(true);
+    });
 });

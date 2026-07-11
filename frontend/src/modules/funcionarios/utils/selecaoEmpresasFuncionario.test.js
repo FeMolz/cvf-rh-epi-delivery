@@ -24,8 +24,33 @@ describe('selecaoEmpresasFuncionario', () => {
         ]);
     });
 
+    it('deve retornar apenas ativas sem empresa atual informada', () => {
+        expect(montarEmpresasParaFormularioFuncionario(empresas)).toEqual([
+            { id: '1', name: 'Empresa Ativa', isActive: true }
+        ]);
+    });
+
     it('deve retornar apenas ativas quando nao ha empresa atual inativa', () => {
         expect(montarEmpresasParaFormularioFuncionario(empresas, '1')).toEqual([
+            { id: '1', name: 'Empresa Ativa', isActive: true }
+        ]);
+    });
+
+    it('deve usar empresa atual informada quando nao estiver na lista', () => {
+        expect(
+            montarEmpresasParaFormularioFuncionario(empresas, '99', {
+                id: '99',
+                name: 'Empresa Legada',
+                isActive: false
+            })
+        ).toEqual([
+            { id: '99', name: 'Empresa Legada (inativa)', isActive: false },
+            { id: '1', name: 'Empresa Ativa', isActive: true }
+        ]);
+    });
+
+    it('deve retornar apenas ativas quando empresa atual nao for encontrada', () => {
+        expect(montarEmpresasParaFormularioFuncionario(empresas, '99')).toEqual([
             { id: '1', name: 'Empresa Ativa', isActive: true }
         ]);
     });

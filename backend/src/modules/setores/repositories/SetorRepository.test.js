@@ -64,6 +64,18 @@ describe('SetorRepository', () => {
         });
     });
 
+    it('deve criar setor com isActive padrao true', async () => {
+        const dados = { nome: 'TI' };
+        prismaMock.setor.create.mockResolvedValue({ id: '1', ...dados, isActive: true });
+
+        await setorRepository.create(dados);
+
+        expect(prismaMock.setor.create).toHaveBeenCalledWith({
+            data: { nome: 'TI', isActive: true },
+            select: SELECAO_PADRAO
+        });
+    });
+
     it('deve desativar setor', async () => {
         await setorRepository.deactivate('1');
 
@@ -83,5 +95,42 @@ describe('SetorRepository', () => {
             where: { setorId: '1', deletedAt: null }
         });
         expect(resultado).toBe(2);
+    });
+
+    it('deve buscar setor por nome', async () => {
+        const setor = { id: '1', nome: 'TI' };
+        prismaMock.setor.findFirst.mockResolvedValue(setor);
+
+        const resultado = await setorRepository.findByNome('TI');
+
+        expect(prismaMock.setor.findFirst).toHaveBeenCalledWith({
+            where: { nome: 'TI' },
+            select: SELECAO_PADRAO
+        });
+        expect(resultado).toEqual(setor);
+    });
+
+    it('deve buscar setor por nome excluindo id informado', async () => {
+        prismaMock.setor.findFirst.mockResolvedValue(null);
+
+        await setorRepository.findByNome('TI', '2');
+
+        expect(prismaMock.setor.findFirst).toHaveBeenCalledWith({
+            where: { nome: 'TI', id: { not: '2' } },
+            select: SELECAO_PADRAO
+        });
+    });
+
+    it('deve atualizar setor', async () => {
+        const dados = { nome: 'RH', isActive: false };
+        prismaMock.setor.update.mockResolvedValue({ id: '1', ...dados });
+
+        await setorRepository.update('1', dados);
+
+        expect(prismaMock.setor.update).toHaveBeenCalledWith({
+            where: { id: '1' },
+            data: dados,
+            select: SELECAO_PADRAO
+        });
     });
 });

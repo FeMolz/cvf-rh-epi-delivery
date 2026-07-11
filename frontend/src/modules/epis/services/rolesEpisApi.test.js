@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { listarEpisPorCargo, vincularEpiAoCargo } from './rolesEpisApi.js';
+import { desvincularEpiDoCargo, listarEpisPorCargo, vincularEpiAoCargo } from './rolesEpisApi.js';
 
 vi.mock('../../../shared/api/clienteHttp.js', () => ({
     requisicaoApi: vi.fn()
@@ -28,6 +28,17 @@ describe('rolesEpisApi', () => {
         expect(requisicaoApi).toHaveBeenCalledWith('/roles-epis', {
             method: 'POST',
             body: { roleId: 'cargo-1', caNumber: '11070', periodicityDays: 180 },
+            token: 'jwt'
+        });
+    });
+
+    it('deve desvincular epi do cargo', async () => {
+        requisicaoApi.mockResolvedValue(undefined);
+
+        await desvincularEpiDoCargo('cargo-1', 'epi-1', 'jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/roles-epis/cargo-1/epi-1', {
+            method: 'DELETE',
             token: 'jwt'
         });
     });

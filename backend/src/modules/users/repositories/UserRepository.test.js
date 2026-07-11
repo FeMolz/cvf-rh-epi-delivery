@@ -74,4 +74,94 @@ describe('UserRepository', () => {
             select: SELECAO_USUARIO_CONSULTA
         });
     });
+
+    it('deve lançar erro ao excluir usuário inexistente', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(null);
+
+        await expect(userRepository.delete('99')).rejects.toMatchObject({
+            message: 'Usuário não encontrado',
+            code: 'NOT_FOUND'
+        });
+        expect(prismaMock.user.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve buscar usuário por email', async () => {
+        const usuario = { id: '1', email: 'teste@teste.com' };
+        prismaMock.user.findUnique.mockResolvedValue(usuario);
+
+        const resultado = await userRepository.findByEmail('teste@teste.com');
+
+        expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+            where: { email: 'teste@teste.com' }
+        });
+        expect(resultado).toEqual(usuario);
+    });
+
+    it('deve buscar usuário por id com seleção de consulta', async () => {
+        const usuario = { id: '1', name: 'Teste' };
+        prismaMock.user.findUnique.mockResolvedValue(usuario);
+
+        const resultado = await userRepository.findById('1');
+
+        expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+            where: { id: '1' },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+        expect(resultado).toEqual(usuario);
+    });
+
+    it('deve buscar sessão por id', async () => {
+        const sessao = { id: '1', email: 'a@b.com', role: 'ADMIN' };
+        prismaMock.user.findUnique.mockResolvedValue(sessao);
+
+        const resultado = await userRepository.findSessaoPorId('1');
+
+        expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+            where: { id: '1' },
+            select: { id: true, email: true, role: true }
+        });
+        expect(resultado).toEqual(sessao);
+    });
+
+    it('deve marcar usuário online', async () => {
+        const usuario = { id: '1', isActive: true };
+        prismaMock.user.update.mockResolvedValue(usuario);
+
+        const resultado = await userRepository.marcarUsuarioOnline('1');
+
+        expect(prismaMock.user.update).toHaveBeenCalledWith({
+            where: { id: '1' },
+            data: { isActive: true, lastLogin: expect.any(Date) },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+        expect(resultado).toEqual(usuario);
+    });
+
+    it('deve marcar usuário offline', async () => {
+        const usuario = { id: '1', isActive: false };
+        prismaMock.user.update.mockResolvedValue(usuario);
+
+        const resultado = await userRepository.marcarUsuarioOffline('1');
+
+        expect(prismaMock.user.update).toHaveBeenCalledWith({
+            where: { id: '1' },
+            data: { isActive: false },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+        expect(resultado).toEqual(usuario);
+    });
+
+    it('deve alterar senha do usuário', async () => {
+        const usuario = { id: '1', name: 'Teste' };
+        prismaMock.user.update.mockResolvedValue(usuario);
+
+        const resultado = await userRepository.changePassword('1', 'novo-hash');
+
+        expect(prismaMock.user.update).toHaveBeenCalledWith({
+            where: { id: '1' },
+            data: { passwordHash: 'novo-hash' },
+            select: SELECAO_USUARIO_CONSULTA
+        });
+        expect(resultado).toEqual(usuario);
+    });
 });

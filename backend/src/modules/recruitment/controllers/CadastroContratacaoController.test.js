@@ -73,6 +73,16 @@ describe('CadastroContratacaoController', () => {
         );
     });
 
+    it('getById deve retornar 200', async () => {
+        getByIdMock.execute.mockResolvedValue({ id: 'cad1' });
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.getById({ params: { id: 'cad1' } }, resposta, jest.fn());
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith({ id: 'cad1' });
+    });
+
     it('getById deve encaminhar 404 ao next quando nao encontrado', async () => {
         getByIdMock.execute.mockRejectedValue(
             criarErroHttpTeste(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO, 404)
@@ -103,5 +113,105 @@ describe('CadastroContratacaoController', () => {
             status: 'CONTRATADO',
             analisadoPorUserId: 'u1'
         });
+    });
+
+    it('getPublico deve retornar 200', async () => {
+        getPublicoMock.execute.mockResolvedValue({ id: 'cad1' });
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.getPublico({ params: { token: 'tok' } }, resposta, jest.fn());
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+    });
+
+    it('getPublico deve encaminhar erro ao next', async () => {
+        const erro = criarErroHttpTeste('token invalido', 404);
+        getPublicoMock.execute.mockRejectedValue(erro);
+        const proximo = jest.fn();
+
+        await cadastroContratacaoController.getPublico(
+            { params: { token: 'x' } },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('submeterPublico deve retornar 200', async () => {
+        submeterPublicoMock.execute.mockResolvedValue({ id: 'cad1' });
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.submeterPublico(
+            { params: { token: 'tok' }, body: { name: 'Joao' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(submeterPublicoMock.execute).toHaveBeenCalledWith('tok', { name: 'Joao' });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+    });
+
+    it('submeterPublico deve encaminhar erro ao next', async () => {
+        const erro = criarErroHttpTeste('dados invalidos', 400);
+        submeterPublicoMock.execute.mockRejectedValue(erro);
+        const proximo = jest.fn();
+
+        await cadastroContratacaoController.submeterPublico(
+            { params: { token: 'tok' }, body: {} },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('list deve retornar 200', async () => {
+        listMock.execute.mockResolvedValue([]);
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.list({ query: { status: 'PENDENTE' } }, resposta, jest.fn());
+
+        expect(listMock.execute).toHaveBeenCalledWith({ status: 'PENDENTE' });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+    });
+
+    it('list deve encaminhar erro ao next', async () => {
+        const erro = new Error('falha listagem');
+        listMock.execute.mockRejectedValue(erro);
+        const proximo = jest.fn();
+
+        await cadastroContratacaoController.list({ query: {} }, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('atualizarStatus deve usar corpo vazio quando body invalido', async () => {
+        atualizarStatusMock.execute.mockResolvedValue({ id: 'cad1' });
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.atualizarStatus(
+            { params: { id: 'cad1' }, body: null, user: { id: 'u1' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(atualizarStatusMock.execute).toHaveBeenCalledWith('cad1', {
+            analisadoPorUserId: 'u1'
+        });
+    });
+
+    it('atualizarStatus deve encaminhar erro ao next', async () => {
+        const erro = criarErroHttpTeste('status invalido', 400);
+        atualizarStatusMock.execute.mockRejectedValue(erro);
+        const proximo = jest.fn();
+
+        await cadastroContratacaoController.atualizarStatus(
+            { params: { id: 'cad1' }, body: {}, user: { id: 'u1' } },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(erro);
     });
 });

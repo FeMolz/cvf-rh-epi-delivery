@@ -40,5 +40,10 @@ describe('hierarquiaPapeisUsuario', () => {
             expect(podeAtribuirPapelUsuario('ALMOXARIFADO', 'ADMINISTRATIVO')).toBe(false);
             expect(podeAtribuirPapelUsuario('COLABORADOR', 'ALMOXARIFADO')).toBe(false);
         });
+
+        it('deve negar atribuição quando papel for desconhecido', () => {
+            expect(podeAtribuirPapelUsuario('ADMIN', 'INVALIDO')).toBe(false);
+            expect(podeAtribuirPapelUsuario(undefined, 'COLABORADOR')).toBe(false);
+        });
     });
 });

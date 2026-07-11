@@ -26,4 +26,10 @@ describe('validarCpf', () => {
     it('deve extrair apenas os dígitos do CPF', () => {
         expect(extrairDigitosCpf('529.982.247-25')).toBe('52998224725');
     });
+
+    it('deve validar CPF com resto de verificação igual a dez', () => {
+        expect(validarCpf('111.444.777-35')).toBe('111.444.777-35');
+        expect(validarCpf('000.000.006-04')).toBe('000.000.006-04');
+        expect(validarCpf('077.777.777-00')).toBe('077.777.777-00');
+    });
 });

@@ -76,9 +76,208 @@ describe('ListEpiDeliveryReportsService', () => {
         );
     });
 
+    it('deve ignorar ultimosDias nulo e usar consulta padrao', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({ ultimosDias: null });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ ultimosDias: undefined })
+        );
+    });
+
+    it('deve listar com consulta padrao vazia', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute();
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalled();
+    });
+
+    it('deve repassar employeeId informado na consulta', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({ employeeId: 'emp-99' });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ employeeId: 'emp-99' })
+        );
+    });
+
+    it('deve ignorar foiAssinado vazio na consulta', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({ foiAssinado: '' });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ foiAssinado: undefined })
+        );
+    });
+
+    it('deve ignorar foiAssinado nulo e employeeId ausente na consulta', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({ foiAssinado: null });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ foiAssinado: undefined, employeeId: undefined })
+        );
+    });
+
+    it('deve interpretar true literal e ultimosDias invalido com padrao', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({
+            foiAssinado: 'true',
+            ultimosDias: 'invalido'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({
+                foiAssinado: true,
+                ultimosDias: 15
+            })
+        );
+    });
+
+    it('deve repassar filtro ultimosDias e booleanos true/1', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 2,
+            limite: 50,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({
+            foiAssinado: '1',
+            ultimosDias: '10',
+            pagina: '2',
+            limite: '50'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({
+                foiAssinado: true,
+                ultimosDias: 10,
+                pagina: 2,
+                limite: 50
+            })
+        );
+    });
+
+    it('deve interpretar false/0 e ignorar booleano invalido', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({
+            foiAssinado: 'false'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ foiAssinado: false })
+        );
+
+        await listEpiDeliveryReportsService.execute({
+            foiAssinado: '0'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ foiAssinado: false })
+        );
+
+        await listEpiDeliveryReportsService.execute({
+            foiAssinado: 'talvez'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenLastCalledWith(
+            expect.objectContaining({ foiAssinado: undefined })
+        );
+    });
+
+    it('deve usar pagina e limite padrao para valores invalidos e limitar ao maximo', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 100,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({
+            pagina: 'abc',
+            limite: '999'
+        });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ pagina: 1, limite: 100 })
+        );
+    });
+
+    it('deve ignorar employeeId vazio apos trim', async () => {
+        epiDeliveryReportRepositoryMock.findManyComFiltros.mockResolvedValue({
+            itens: [],
+            pagina: 1,
+            limite: 20,
+            totalItens: 0,
+            totalPaginas: 1
+        });
+
+        await listEpiDeliveryReportsService.execute({ employeeId: '   ' });
+
+        expect(epiDeliveryReportRepositoryMock.findManyComFiltros).toHaveBeenCalledWith(
+            expect.objectContaining({ employeeId: undefined })
+        );
+    });
+
     it('deve exigir emissaoInicio e emissaoFim juntos', async () => {
         await expect(
             listEpiDeliveryReportsService.execute({ emissaoInicio: '2026-01-01' })
+        ).rejects.toThrow('periodoInicio e periodoFim devem estar no formato AAAA-MM-DD.');
+
+        await expect(
+            listEpiDeliveryReportsService.execute({ emissaoFim: '2026-01-31' })
         ).rejects.toThrow('periodoInicio e periodoFim devem estar no formato AAAA-MM-DD.');
     });
 });

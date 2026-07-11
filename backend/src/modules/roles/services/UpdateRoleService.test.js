@@ -63,4 +63,17 @@ describe('UpdateRoleService', () => {
 
         expect(roleRepositoryMock.update).not.toHaveBeenCalled();
     });
+
+    it('deve rejeitar atualizacao com nome vazio apos formatacao', async () => {
+        roleRepositoryMock.exists.mockResolvedValue(true);
+
+        await expect(
+            updateRoleService.execute('1', { name: '   ', description: 'Desc' })
+        ).rejects.toMatchObject({
+            message: 'O nome do cargo é obrigatório.',
+            statusCode: 400
+        });
+
+        expect(roleRepositoryMock.update).not.toHaveBeenCalled();
+    });
 });

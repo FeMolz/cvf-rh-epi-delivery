@@ -17,4 +17,10 @@ describe('validarPoliticaSenha', () => {
     it('deve rejeitar senha sem letras', () => {
         expect(() => validarPoliticaSenha('12345678')).toThrow(MENSAGEM_SENHA_FRACA);
     });
+
+    it('deve rejeitar entrada que não é string', () => {
+        expect(() => validarPoliticaSenha(null)).toThrow(MENSAGEM_SENHA_FRACA);
+        expect(() => validarPoliticaSenha(undefined)).toThrow(MENSAGEM_SENHA_FRACA);
+        expect(() => validarPoliticaSenha(12345678)).toThrow(MENSAGEM_SENHA_FRACA);
+    });
 });

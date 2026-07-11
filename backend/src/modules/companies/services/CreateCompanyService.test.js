@@ -56,4 +56,32 @@ describe('CreateCompanyService', () => {
         ).rejects.toThrow('Já existe uma empresa cadastrada com este CNPJ.');
         expect(companyRepositoryMock.create).not.toHaveBeenCalled();
     });
+
+    it('deve criar empresa inativa quando isActive for false', async () => {
+        companyRepositoryMock.findByCnpj.mockResolvedValue(null);
+        companyRepositoryMock.create.mockResolvedValue({
+            id: '1',
+            name: 'Empresa',
+            cnpj: '11.111.111/0001-11',
+            isActive: false
+        });
+
+        await createCompanyService.execute({
+            name: 'Empresa',
+            cnpj: '11.111.111/0001-11',
+            isActive: false
+        });
+
+        expect(companyRepositoryMock.create).toHaveBeenCalledWith({
+            name: 'Empresa',
+            cnpj: '11.111.111/0001-11',
+            isActive: false
+        });
+    });
+
+    it('deve rejeitar nome e cnpj não string', async () => {
+        await expect(createCompanyService.execute({ name: 123, cnpj: 456 })).rejects.toThrow(
+            'O nome da empresa é obrigatório.'
+        );
+    });
 });

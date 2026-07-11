@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { buscarEpiPorCa, buscarEpisPorNome, listarEpis } from './episApi.js';
+import {
+    alterarPeriodicidadeEpi,
+    buscarEpiPorCa,
+    buscarEpisPorNome,
+    listarEpis
+} from './episApi.js';
 
 vi.mock('../../../shared/api/clienteHttp.js', () => ({
     requisicaoApi: vi.fn()
@@ -33,5 +38,38 @@ describe('episApi', () => {
         expect(requisicaoApi).toHaveBeenCalledWith('/epis/buscar-por-nome?nome=capacete', {
             token: 'jwt'
         });
+    });
+
+    it('deve alterar periodicidade do epi vinculado ao cargo', async () => {
+        requisicaoApi.mockResolvedValue({ id: 'vinculo-1' });
+
+        await alterarPeriodicidadeEpi(
+            { roleId: 'cargo-1', epiId: 'epi-1', newPeriodicityDays: 180 },
+            'jwt'
+        );
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/epis/periodicity', {
+            method: 'PUT',
+            body: { roleId: 'cargo-1', epiId: 'epi-1', newPeriodicityDays: 180 },
+            token: 'jwt'
+        });
+    });
+
+    it('deve buscar epis por nome com trim', async () => {
+        requisicaoApi.mockResolvedValue([]);
+
+        await buscarEpisPorNome('  capacete  ', 'jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/epis/buscar-por-nome?nome=capacete', {
+            token: 'jwt'
+        });
+    });
+
+    it('deve codificar ca na url', async () => {
+        requisicaoApi.mockResolvedValue({});
+
+        await buscarEpiPorCa('11/070', 'jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/epis/11%2F070', { token: 'jwt' });
     });
 });

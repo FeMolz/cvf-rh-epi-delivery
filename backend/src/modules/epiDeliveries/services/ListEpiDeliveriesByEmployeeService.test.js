@@ -23,6 +23,18 @@ describe('ListEpiDeliveriesByEmployeeService', () => {
         jest.clearAllMocks();
     });
 
+    it('deve rejeitar identificador nulo', async () => {
+        await expect(listEpiDeliveriesByEmployeeService.execute(null)).rejects.toMatchObject({
+            statusCode: 400
+        });
+    });
+
+    it('deve rejeitar identificador vazio', async () => {
+        await expect(listEpiDeliveriesByEmployeeService.execute('   ')).rejects.toMatchObject({
+            statusCode: 400
+        });
+    });
+
     it('deve retornar entregas do funcionário ativo', async () => {
         employeeRepositoryMock.findById.mockResolvedValue({ id: 'emp1', roleId: 'r1', deletedAt: null });
         epiDeliveryRepositoryMock.findByEmployeeId.mockResolvedValue([{ id: 'd1' }, { id: 'd2' }]);

@@ -106,4 +106,43 @@ describe('CompanyController', () => {
 
         expect(next).toHaveBeenCalledWith(erro);
     });
+
+    it('deve encaminhar erro ao criar empresa', async () => {
+        const erro = new Error('falha create');
+        createCompanyServiceMock.execute.mockRejectedValue(erro);
+
+        await companyController.create(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao buscar empresa por id', async () => {
+        const erro = new Error('falha find');
+        findCompanyByIdServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await companyController.findById(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao atualizar empresa', async () => {
+        const erro = new Error('falha update');
+        updateCompanyServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await companyController.update(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao excluir empresa', async () => {
+        const erro = new Error('falha delete');
+        deleteCompanyServiceMock.execute.mockRejectedValue(erro);
+        mockRequest.params = { id: '1' };
+
+        await companyController.delete(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
 });
