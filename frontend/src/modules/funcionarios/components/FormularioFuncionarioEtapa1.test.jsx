@@ -242,6 +242,28 @@ describe('FormularioFuncionarioEtapa1', () => {
 
         await enviarFormulario();
         expect(screen.getByRole('alert')).toHaveTextContent(/data prevista de retorno/i);
+        expect(onContinuar).not.toHaveBeenCalled();
+    });
+
+    it('deve exigir data de desligamento para status encerrado', async () => {
+        const onSalvar = vi.fn();
+
+        render(
+            <FormularioFuncionarioEtapa1
+                valoresIniciais={{ ...valoresCompletos, status: 'DESLIGADO' }}
+                empresas={empresas}
+                cargos={cargos}
+                setores={setores}
+                exibirStatus
+                onContinuar={vi.fn()}
+                onSalvar={onSalvar}
+            />
+        );
+
+        await userEvent.click(screen.getByRole('button', { name: /salvar alterações/i }));
+
+        expect(screen.getByRole('alert')).toHaveTextContent(/data de desligamento/i);
+        expect(onSalvar).not.toHaveBeenCalled();
     });
 
     it('deve atualizar campos opcionais', async () => {

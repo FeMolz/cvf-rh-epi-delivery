@@ -89,7 +89,8 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: null,
             status: 'DESLIGADO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: new Date('2024-06-01')
         });
 
         await expect(updateEmployeeService.execute('1', { cpf: '123' })).rejects.toThrow(
@@ -102,20 +103,40 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: null,
             status: 'ATIVO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: null
         });
         employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
         employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'DESLIGADO' });
 
-        await updateEmployeeService.execute('1', { status: 'DESLIGADO' });
+        await updateEmployeeService.execute('1', {
+            status: 'DESLIGADO',
+            resignationDate: '2024-06-01'
+        });
 
         expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
             '1',
             expect.objectContaining({
                 status: 'DESLIGADO',
+                resignationDate: expect.any(Date),
                 deletedAt: expect.any(Date)
             })
         );
+    });
+
+    it('deve rejeitar desligamento sem data de desligamento', async () => {
+        employeeRepositoryMock.findById.mockResolvedValue({
+            id: '1',
+            deletedAt: null,
+            status: 'ATIVO',
+            roleId: 'role-1',
+            resignationDate: null
+        });
+
+        await expect(updateEmployeeService.execute('1', { status: 'DESLIGADO' })).rejects.toMatchObject({
+            statusCode: 400,
+            message: 'Informe a data de desligamento para demissão, rescisão ou aposentadoria.'
+        });
     });
 
     it('deve limpar deletedAt e validar cargo ao readmitir funcionário', async () => {
@@ -123,7 +144,8 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: new Date(),
             status: 'DESLIGADO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: new Date('2024-06-01')
         });
         employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
         employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'ATIVO', deletedAt: null });
@@ -304,7 +326,8 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: new Date(),
             status: 'DESLIGADO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: new Date('2024-06-01')
         });
         employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
         employeeRepositoryMock.update.mockResolvedValue({ id: '1', telefone: TELEFONE_VALIDO });
@@ -380,7 +403,8 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: new Date(),
             status: 'DESLIGADO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: new Date('2024-06-01')
         });
         employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
         employeeRepositoryMock.update.mockResolvedValue({ id: '1', roleId: 'role-2' });
@@ -429,7 +453,8 @@ describe('UpdateEmployeeService', () => {
             id: '1',
             deletedAt: new Date('2024-01-01'),
             status: 'DESLIGADO',
-            roleId: 'role-1'
+            roleId: 'role-1',
+            resignationDate: new Date('2024-06-01')
         });
         employeeRepositoryMock.findAll.mockResolvedValue([{ id: '1', cpf: CPF_VALIDO, email: 'a@b.com' }]);
         employeeRepositoryMock.update.mockResolvedValue({ id: '1', status: 'RESCINDIDO' });

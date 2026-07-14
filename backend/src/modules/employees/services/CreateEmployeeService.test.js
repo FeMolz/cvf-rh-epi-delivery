@@ -254,6 +254,22 @@ describe('CreateEmployeeService', () => {
         );
     });
 
+    it('should reject terminated employee without resignation date', async () => {
+        await expect(
+            createEmployeeService.execute({
+                name: 'John',
+                cpf: CPF_VALIDO,
+                email: 'john@empresa.com',
+                telefone: TELEFONE_VALIDO,
+                companyId: 1,
+                roleId: 2,
+                setorId: '10101010-1010-1010-1010-101010101010',
+                birthDate: '1990-06-15',
+                status: 'DESLIGADO'
+            })
+        ).rejects.toThrow('Informe a data de desligamento para demissão, rescisão ou aposentadoria.');
+    });
+
     it('should throw error when birthDate is null', async () => {
         await expect(
             createEmployeeService.execute({
