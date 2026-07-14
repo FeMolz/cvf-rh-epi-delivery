@@ -111,4 +111,34 @@ describe('funcionariosApi', () => {
             nomeArquivoPadrao: 'funcionario.xlsx'
         });
     });
+
+    it('deve listar funcionarios sem filtro', async () => {
+        requisicaoApi.mockResolvedValue([]);
+
+        await listarFuncionarios('jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/employees', { token: 'jwt' });
+    });
+
+    it('deve baixar relatorio sem parametros', async () => {
+        baixarArquivoApi.mockResolvedValue(undefined);
+
+        await baixarRelatorioFuncionarios('jwt');
+
+        expect(baixarArquivoApi).toHaveBeenCalledWith('/employees/export/lista', {
+            token: 'jwt',
+            nomeArquivoPadrao: 'funcionarios.xlsx'
+        });
+    });
+
+    it('deve usar nome singular ao exportar um unico funcionario', async () => {
+        baixarArquivoApi.mockResolvedValue(undefined);
+
+        await baixarRelatorioFuncionarios('jwt', { ids: ['func-1'] });
+
+        expect(baixarArquivoApi).toHaveBeenCalledWith('/employees/export/lista?ids=func-1', {
+            token: 'jwt',
+            nomeArquivoPadrao: 'funcionario.xlsx'
+        });
+    });
 });

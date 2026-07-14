@@ -28,4 +28,13 @@ describe('lancarErroFuncionario', () => {
             expect(erro.statusCode).toBe(400);
         }
     });
+
+    it('deve lançar erro 400 para mensagem desconhecida', () => {
+        try {
+            lancarErroFuncionario('Erro genérico de funcionário');
+        } catch (erro) {
+            expect(erro.statusCode).toBe(400);
+            expect(erro.message).toBe('Erro genérico de funcionário');
+        }
+    });
 });

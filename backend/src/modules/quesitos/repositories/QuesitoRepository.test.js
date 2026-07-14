@@ -5,7 +5,8 @@ const prismaMock = {
         create: jest.fn(),
         findUnique: jest.fn(),
         findMany: jest.fn(),
-        update: jest.fn()
+        update: jest.fn(),
+        delete: jest.fn()
     }
 };
 
@@ -92,5 +93,29 @@ describe('QuesitoRepository', () => {
             data: dados
         });
         expect(resultado).toEqual(atualizado);
+    });
+
+    it('deve buscar quesitos por lista de ids', async () => {
+        const lista = [{ id: '1' }, { id: '2' }];
+        prismaMock.quesito.findMany.mockResolvedValue(lista);
+
+        const resultado = await quesitoRepository.findManyByIds(['1', '2']);
+
+        expect(prismaMock.quesito.findMany).toHaveBeenCalledWith({
+            where: { id: { in: ['1', '2'] } }
+        });
+        expect(resultado).toEqual(lista);
+    });
+
+    it('deve excluir quesito', async () => {
+        const excluido = { id: 'abc' };
+        prismaMock.quesito.delete.mockResolvedValue(excluido);
+
+        const resultado = await quesitoRepository.delete('abc');
+
+        expect(prismaMock.quesito.delete).toHaveBeenCalledWith({
+            where: { id: 'abc' }
+        });
+        expect(resultado).toEqual(excluido);
     });
 });

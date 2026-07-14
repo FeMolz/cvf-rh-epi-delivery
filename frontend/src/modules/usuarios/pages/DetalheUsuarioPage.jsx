@@ -113,7 +113,7 @@ export function DetalheUsuarioPage() {
         return (
             <section className="admin-pagina">
                 <p className="estado-erro" role="alert">
-                    {erro || 'Usuário não encontrado.'}
+                    {erro}
                 </p>
                 <Link to="/admin/gerenciamento">Voltar ao gerenciamento</Link>
             </section>

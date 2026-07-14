@@ -39,4 +39,21 @@ describe('jwtUtils', () => {
         expect(obterExpiracaoJwt('token-invalido')).toBeNull();
         expect(obterTempoRestanteJwt('token-invalido')).toBeNull();
     });
+
+    it('deve ignorar token sem parte de payload ou exp numerico', () => {
+        expect(obterExpiracaoJwt('apenas-cabecalho')).toBeNull();
+
+        const cabecalho = btoa(JSON.stringify({ alg: 'HS256' }));
+        const payloadSemExp = btoa(JSON.stringify({ id: '1' }));
+        const tokenSemExp = `${cabecalho}.${payloadSemExp}.assinatura`;
+
+        expect(obterExpiracaoJwt(tokenSemExp)).toBeNull();
+        expect(tokenJwtExpirado(tokenSemExp)).toBe(false);
+    });
+
+    it('deve retornar null quando payload nao puder ser decodificado', () => {
+        const cabecalho = btoa(JSON.stringify({ alg: 'HS256' }));
+
+        expect(obterExpiracaoJwt(`${cabecalho}.%%%payload-invalido%%%.assinatura`)).toBeNull();
+    });
 });

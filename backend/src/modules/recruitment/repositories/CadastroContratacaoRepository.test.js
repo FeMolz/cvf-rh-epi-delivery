@@ -63,4 +63,47 @@ describe('CadastroContratacaoRepository', () => {
             where: { id: 'cad1' }
         });
     });
+
+    it('deve buscar por id', async () => {
+        prismaMock.cadastroContratacao.findUnique.mockResolvedValue({ id: 'cad1' });
+
+        const resultado = await cadastroContratacaoRepository.findById('cad1');
+
+        expect(prismaMock.cadastroContratacao.findUnique).toHaveBeenCalledWith(
+            expect.objectContaining({ where: { id: 'cad1' } })
+        );
+        expect(resultado).toEqual({ id: 'cad1' });
+    });
+
+    it('deve buscar por candidaturaId', async () => {
+        prismaMock.cadastroContratacao.findUnique.mockResolvedValue({ id: 'cad1' });
+
+        await cadastroContratacaoRepository.findByCandidaturaId('c1');
+
+        expect(prismaMock.cadastroContratacao.findUnique).toHaveBeenCalledWith(
+            expect.objectContaining({ where: { candidaturaId: 'c1' } })
+        );
+    });
+
+    it('deve listar sem filtro de status', async () => {
+        prismaMock.cadastroContratacao.findMany.mockResolvedValue([]);
+
+        await cadastroContratacaoRepository.findMany();
+
+        expect(prismaMock.cadastroContratacao.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({ where: {} })
+        );
+    });
+
+    it('deve atualizar cadastro', async () => {
+        const dados = { status: 'CONTRATADO' };
+        prismaMock.cadastroContratacao.update.mockResolvedValue({ id: 'cad1', ...dados });
+
+        const resultado = await cadastroContratacaoRepository.update('cad1', dados);
+
+        expect(prismaMock.cadastroContratacao.update).toHaveBeenCalledWith(
+            expect.objectContaining({ where: { id: 'cad1' }, data: dados })
+        );
+        expect(resultado.status).toBe('CONTRATADO');
+    });
 });

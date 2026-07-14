@@ -1,6 +1,9 @@
 import { jest } from '@jest/globals';
 import {
+    MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
     MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE,
+    MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO,
+    MENSAGEM_STATUS_CADASTRO_INVALIDO,
     STATUS_CADASTRO_CONTRATACAO
 } from '../constants/recrutamentoConstantes.js';
 
@@ -96,5 +99,47 @@ describe('AtualizarStatusCadastroContratacaoService', () => {
                 analisadoPorUserId: 'u1'
             })
         ).rejects.toThrow(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
+    });
+
+    it('deve rejeitar status invalido', async () => {
+        await expect(
+            atualizarStatusCadastroContratacaoService.execute('cad1', {
+                status: 'PENDENTE',
+                analisadoPorUserId: 'u1'
+            })
+        ).rejects.toThrow(MENSAGEM_STATUS_CADASTRO_INVALIDO);
+
+        await expect(
+            atualizarStatusCadastroContratacaoService.execute('cad1', {
+                status: 123,
+                analisadoPorUserId: 'u1'
+            })
+        ).rejects.toThrow(MENSAGEM_STATUS_CADASTRO_INVALIDO);
+    });
+
+    it('deve rejeitar cadastro inexistente', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue(null);
+
+        await expect(
+            atualizarStatusCadastroContratacaoService.execute('cad-x', {
+                status: 'CONTRATADO',
+                analisadoPorUserId: 'u1'
+            })
+        ).rejects.toThrow(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
+    });
+
+    it('deve rejeitar contratacao quando campos obrigatorios do funcionario estao ausentes', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            ...cadastroCompleto,
+            name: null
+        });
+
+        await expect(
+            atualizarStatusCadastroContratacaoService.execute('cad1', {
+                status: 'CONTRATADO',
+                analisadoPorUserId: 'u1',
+                admissionDate: '2026-06-01'
+            })
+        ).rejects.toThrow(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
     });
 });

@@ -84,6 +84,19 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         );
     });
 
+    it('deve rejeitar quando funcionario nao for encontrado', async () => {
+        epiDeliveryReportRepositoryMock.findEmployeeContextForReport.mockResolvedValue(null);
+
+        await expect(
+            generateEpiDeliveryReportPdfService.execute({
+                employeeId: 'inexistente',
+                periodoInicio: '2026-02-01',
+                periodoFim: '2026-02-15',
+                generatedByUserId: 'u1'
+            })
+        ).rejects.toThrow('Funcionario nao encontrado ou indisponivel para emissao.');
+    });
+
     it('deve rejeitar campos obrigatorios ausentes', async () => {
         await expect(
             generateEpiDeliveryReportPdfService.execute({

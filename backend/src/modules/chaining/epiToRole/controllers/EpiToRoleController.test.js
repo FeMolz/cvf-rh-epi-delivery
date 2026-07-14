@@ -69,4 +69,40 @@ describe('EpiToRoleController', () => {
         expect(mockResponse.json).toHaveBeenCalledWith([{ id: 1 }]);
         expect(next).not.toHaveBeenCalled();
     });
+
+    it('link deve encaminhar erro ao next', async () => {
+        const mockRequest = { body: { roleId: '1', caNumber: '11070' } };
+        const mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('vinculo invalido');
+
+        linkEpiToRoleServiceMock.execute.mockRejectedValue(erro);
+        await epiToRoleController.link(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('unlink deve encaminhar erro ao next', async () => {
+        const mockRequest = { params: { roleId: '1', epiId: '2' } };
+        const mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('vinculo inexistente');
+
+        unlinkEpiFromRoleServiceMock.execute.mockRejectedValue(erro);
+        await epiToRoleController.unlink(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('listByRole deve encaminhar erro ao next', async () => {
+        const mockRequest = { params: { roleId: '1' } };
+        const mockResponse = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('cargo nao encontrado');
+
+        listEpisByRoleServiceMock.execute.mockRejectedValue(erro);
+        await epiToRoleController.listByRole(mockRequest, mockResponse, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
 });

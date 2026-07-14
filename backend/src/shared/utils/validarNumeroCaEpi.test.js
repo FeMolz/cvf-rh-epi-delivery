@@ -13,4 +13,13 @@ describe('validarNumeroCaEpi', () => {
     it('deve rejeitar string vazia', () => {
         expect(() => validarNumeroCaEpi('')).toThrow(MENSAGEM_NUMERO_CA_INVALIDO);
     });
+
+    it('deve rejeitar valor nulo ou indefinido', () => {
+        expect(() => validarNumeroCaEpi(null)).toThrow(MENSAGEM_NUMERO_CA_INVALIDO);
+        expect(() => validarNumeroCaEpi(undefined)).toThrow(MENSAGEM_NUMERO_CA_INVALIDO);
+    });
+
+    it('deve aceitar número CA informado como número', () => {
+        expect(validarNumeroCaEpi(11070)).toBe('11070');
+    });
 });

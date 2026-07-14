@@ -17,6 +17,22 @@ describe('FuncionarioPontoRepository', () => {
         jest.clearAllMocks();
     });
 
+    it('deve listar funcionários ativos sem filtros', async () => {
+        prismaMock.employee.findMany.mockResolvedValue([{ id: '1' }]);
+
+        const resultado = await funcionarioPontoRepository.listarAtivos();
+
+        expect(resultado).toEqual([{ id: '1' }]);
+        expect(prismaMock.employee.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    deletedAt: null,
+                    status: 'ATIVO'
+                }
+            })
+        );
+    });
+
     it('deve listar funcionários ativos com filtros opcionais', async () => {
         prismaMock.employee.findMany.mockResolvedValue([]);
 

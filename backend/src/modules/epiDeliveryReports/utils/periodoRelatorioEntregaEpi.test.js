@@ -11,6 +11,15 @@ describe('periodoRelatorioEntregaEpi', () => {
         expect(limiteFinalEntrega.toISOString()).toBe('2026-02-15T23:59:59.999Z');
     });
 
+    it('deve rejeitar quando periodos nao forem string', () => {
+        expect(() => construirIntervaloEntregaUtc(2026, '2026-02-15')).toThrow(MENSAGEM_ERRO_FORMATO_DATA);
+        expect(() => construirIntervaloEntregaUtc('2026-02-01', null)).toThrow(MENSAGEM_ERRO_FORMATO_DATA);
+    });
+
+    it('deve rejeitar formato invalido no fim do periodo', () => {
+        expect(() => construirIntervaloEntregaUtc('2026-02-01', '15-02-2026')).toThrow(MENSAGEM_ERRO_FORMATO_DATA);
+    });
+
     it('deve rejeitar periodo com inicio posterior ao fim', () => {
         expect(() => construirIntervaloEntregaUtc('2026-03-01', '2026-02-01')).toThrow(MENSAGEM_ERRO_PERIODO_INVALIDO);
     });

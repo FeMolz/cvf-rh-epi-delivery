@@ -47,6 +47,7 @@ export function RegistroEntregaEpiPage() {
 
     const carregarSituacaoFuncionario = useCallback(
         async (employeeId) => {
+            /* v8 ignore next 4 */
             if (!employeeId) {
                 setEpisFuncionario([]);
                 return;

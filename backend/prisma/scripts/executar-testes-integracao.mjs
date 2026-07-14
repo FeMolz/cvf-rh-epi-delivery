@@ -13,6 +13,8 @@ const resultado = spawnSync(
         '../node_modules/jest/bin/jest.js',
         '--testPathPatterns',
         'integracao.test',
+        '--testPathIgnorePatterns',
+        '/node_modules/',
         '--runInBand',
         '--forceExit'
     ],

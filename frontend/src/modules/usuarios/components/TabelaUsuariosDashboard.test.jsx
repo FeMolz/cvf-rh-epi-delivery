@@ -34,4 +34,57 @@ describe('TabelaUsuariosDashboard', () => {
         expect(screen.getByText(/Offline ·/)).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /Ana/i })).toHaveAttribute('href', '/admin/usuarios/1');
     });
+
+    it('deve exibir estado vazio', () => {
+        render(
+            <MemoryRouter>
+                <TabelaUsuariosDashboard usuarios={[]} />
+            </MemoryRouter>
+        );
+
+        expect(
+            screen.getByText('Nenhum usuário encontrado para os filtros aplicados.')
+        ).toBeInTheDocument();
+    });
+
+    it('deve gerar iniciais a partir do nome completo', () => {
+        render(
+            <MemoryRouter>
+                <TabelaUsuariosDashboard
+                    usuarios={[
+                        {
+                            id: '4',
+                            name: 'Ana Paula Costa',
+                            email: 'ana@b.com',
+                            role: 'ADMIN',
+                            isActive: true
+                        }
+                    ]}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('AP')).toBeInTheDocument();
+    });
+
+    it('deve usar iniciais padrao e papel desconhecido', () => {
+        render(
+            <MemoryRouter>
+                <TabelaUsuariosDashboard
+                    usuarios={[
+                        {
+                            id: '3',
+                            name: '',
+                            email: 'x@y.com',
+                            role: 'PAPEL_X',
+                            isActive: true
+                        }
+                    ]}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('?')).toBeInTheDocument();
+        expect(screen.getByText('PAPEL_X')).toBeInTheDocument();
+    });
 });

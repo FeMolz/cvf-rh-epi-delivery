@@ -63,4 +63,53 @@ describe('QuesitoToRoleController', () => {
         expect(mockRes.status).toHaveBeenCalledWith(200);
         expect(mockNext).not.toHaveBeenCalled();
     });
+
+    it('link deve encaminhar erro com statusCode ao next', async () => {
+        const erro = Object.assign(new Error('ja vinculado'), { statusCode: 409 });
+        const mockNext = jest.fn();
+
+        linkQuesitoToRoleServiceMock.execute.mockRejectedValue(erro);
+        await quesitoToRoleController.link({ body: {} }, { status: jest.fn(), json: jest.fn() }, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
+
+    it('link deve normalizar erro sem statusCode', async () => {
+        const mockNext = jest.fn();
+
+        linkQuesitoToRoleServiceMock.execute.mockRejectedValue(new Error('dados invalidos'));
+        await quesitoToRoleController.link({ body: {} }, { status: jest.fn(), json: jest.fn() }, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(
+            expect.objectContaining({ message: 'dados invalidos', statusCode: 400 })
+        );
+    });
+
+    it('unlink deve encaminhar erro ao next', async () => {
+        const erro = Object.assign(new Error('vinculo inexistente'), { statusCode: 404 });
+        const mockNext = jest.fn();
+
+        unlinkQuesitoFromRoleServiceMock.execute.mockRejectedValue(erro);
+        await quesitoToRoleController.unlink(
+            { params: { roleId: '1', quesitoId: '2' } },
+            { status: jest.fn(), json: jest.fn() },
+            mockNext
+        );
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
+
+    it('listByRole deve encaminhar erro ao next', async () => {
+        const erro = new Error('cargo nao encontrado');
+        const mockNext = jest.fn();
+
+        listQuesitosVinculadosAoCargoServiceMock.execute.mockRejectedValue(erro);
+        await quesitoToRoleController.listByRole(
+            { params: { roleId: '1' } },
+            { status: jest.fn().mockReturnThis(), json: jest.fn() },
+            mockNext
+        );
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
 });

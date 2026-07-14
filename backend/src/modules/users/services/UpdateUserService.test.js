@@ -94,4 +94,15 @@ describe('UpdateUserService', () => {
 
         expect(resultado.role).toBe('ALMOXARIFADO');
     });
+
+    it('deve impedir ADMINISTRATIVO de promover usuário para papel superior não permitido', async () => {
+        userRepositoryMock.findById.mockResolvedValue({ id: '1', role: 'COLABORADOR' });
+
+        await expect(
+            updateUserService.execute('1', { role: 'ADMINISTRATIVO' }, 'COLABORADOR')
+        ).rejects.toMatchObject({
+            message: 'Não é permitido definir um papel superior ao seu.',
+            statusCode: 403
+        });
+    });
 });

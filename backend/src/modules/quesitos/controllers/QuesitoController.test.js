@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 import {
+    MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS,
+    MENSAGEM_FILTROS_NOME_E_BLOCO_EXCLUSIVOS,
     MENSAGEM_NOME_QUESITO_OBRIGATORIO,
     MENSAGEM_QUESITO_NAO_ENCONTRADO
 } from '../constants/quesitoConstantes.js';
@@ -20,6 +22,10 @@ const updateQuesitoServiceMock = {
     execute: jest.fn()
 };
 
+const deleteQuesitoServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/CreateQuesitoService.js', () => ({
     default: createQuesitoServiceMock
 }));
@@ -34,6 +40,10 @@ jest.unstable_mockModule('../services/ListQuesitosService.js', () => ({
 
 jest.unstable_mockModule('../services/UpdateQuesitoService.js', () => ({
     default: updateQuesitoServiceMock
+}));
+
+jest.unstable_mockModule('../services/DeleteQuesitoService.js', () => ({
+    default: deleteQuesitoServiceMock
 }));
 
 const quesitoController = (await import('./QuesitoController.js')).default;
@@ -143,5 +153,112 @@ describe('QuesitoController', () => {
         await quesitoController.list(mockReq, mockRes, mockNext);
 
         expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
+
+    it('listAll deve encaminhar erro ao next', async () => {
+        const erro = new Error('falha listagem');
+        listAllQuesitosServiceMock.execute.mockRejectedValue(erro);
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const mockNext = jest.fn();
+
+        await quesitoController.listAll({}, mockRes, mockNext);
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
+
+    it('update deve retornar 400 para erro de validacao', async () => {
+        updateQuesitoServiceMock.execute.mockRejectedValue(
+            new Error(MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS)
+        );
+        const mockReq = { params: { id: '1' }, body: {} };
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const mockNext = jest.fn();
+
+        await quesitoController.update(mockReq, mockRes, mockNext);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('update deve usar corpo vazio quando body invalido', async () => {
+        updateQuesitoServiceMock.execute.mockResolvedValue({ id: '1' });
+        const mockReq = { params: { id: '1' }, body: null };
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+        await quesitoController.update(mockReq, mockRes, jest.fn());
+
+        expect(updateQuesitoServiceMock.execute).toHaveBeenCalledWith('1', {});
+    });
+
+    it('update deve encaminhar erro desconhecido ao next', async () => {
+        const erro = new Error('falha update');
+        updateQuesitoServiceMock.execute.mockRejectedValue(erro);
+        const mockNext = jest.fn();
+
+        await quesitoController.update(
+            { params: { id: '1' }, body: { nome: 'x' } },
+            { status: jest.fn().mockReturnThis(), json: jest.fn() },
+            mockNext
+        );
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
+
+    it('delete deve retornar 200 quando servico exclui', async () => {
+        deleteQuesitoServiceMock.execute.mockResolvedValue({ id: '1' });
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+        await quesitoController.delete({ params: { id: '1' } }, mockRes, jest.fn());
+
+        expect(mockRes.status).toHaveBeenCalledWith(200);
+        expect(mockRes.json).toHaveBeenCalledWith({ id: '1' });
+    });
+
+    it('delete deve retornar 404 quando quesito nao existe', async () => {
+        const erro = Object.assign(new Error(MENSAGEM_QUESITO_NAO_ENCONTRADO), { statusCode: 404 });
+        deleteQuesitoServiceMock.execute.mockRejectedValue(erro);
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+        await quesitoController.delete({ params: { id: '99' } }, mockRes, jest.fn());
+
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+    });
+
+    it('delete deve encaminhar erro desconhecido ao next', async () => {
+        const erro = new Error('falha delete');
+        deleteQuesitoServiceMock.execute.mockRejectedValue(erro);
+        const mockNext = jest.fn();
+
+        await quesitoController.delete(
+            { params: { id: '1' } },
+            { status: jest.fn().mockReturnThis(), json: jest.fn() },
+            mockNext
+        );
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
+    });
+
+    it('list deve retornar 400 para filtro invalido', async () => {
+        listQuesitosServiceMock.execute.mockRejectedValue(
+            new Error(MENSAGEM_FILTROS_NOME_E_BLOCO_EXCLUSIVOS)
+        );
+        const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+        await quesitoController.list({ query: { nome: 'x', bloco: 'y' } }, mockRes, jest.fn());
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    it('list deve encaminhar erro desconhecido ao next', async () => {
+        const erro = new Error('falha list');
+        listQuesitosServiceMock.execute.mockRejectedValue(erro);
+        const mockNext = jest.fn();
+
+        await quesitoController.list(
+            { query: {} },
+            { status: jest.fn().mockReturnThis(), json: jest.fn() },
+            mockNext
+        );
+
+        expect(mockNext).toHaveBeenCalledWith(erro);
     });
 });

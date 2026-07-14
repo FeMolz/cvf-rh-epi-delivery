@@ -42,6 +42,38 @@ describe('GerenciarPeriodicidadeEpiFuncionarioService', () => {
         );
     });
 
+    it('nao deve chamar repositorio quando status nao mudou', async () => {
+        await gerenciarPeriodicidadeEpiFuncionarioService.sincronizarPorMudancaStatus(
+            'ATIVO',
+            'ATIVO',
+            'func-1'
+        );
+
+        expect(epiDeliveryRepositoryMock.pausarPeriodicidadePorFuncionario).not.toHaveBeenCalled();
+        expect(epiDeliveryRepositoryMock.retomarPeriodicidadePorFuncionario).not.toHaveBeenCalled();
+    });
+
+    it('nao deve chamar repositorio sem identificador do funcionario', async () => {
+        await gerenciarPeriodicidadeEpiFuncionarioService.sincronizarPorMudancaStatus(
+            'ATIVO',
+            'FERIAS',
+            ''
+        );
+
+        expect(epiDeliveryRepositoryMock.pausarPeriodicidadePorFuncionario).not.toHaveBeenCalled();
+    });
+
+    it('nao deve pausar nem retomar quando mudanca nao envolve status ATIVO', async () => {
+        await gerenciarPeriodicidadeEpiFuncionarioService.sincronizarPorMudancaStatus(
+            'FERIAS',
+            'LICENCA_MED',
+            'func-1'
+        );
+
+        expect(epiDeliveryRepositoryMock.pausarPeriodicidadePorFuncionario).not.toHaveBeenCalled();
+        expect(epiDeliveryRepositoryMock.retomarPeriodicidadePorFuncionario).not.toHaveBeenCalled();
+    });
+
     it('deve indicar periodicidade ativa somente para status ATIVO', () => {
         expect(
             gerenciarPeriodicidadeEpiFuncionarioService.funcionarioPossuiPeriodicidadeEpiAtiva('ATIVO')

@@ -39,4 +39,35 @@ describe('renderizarHtmlParaPdf', () => {
         expect(bufferPdf.toString()).toBe('%PDF-renderizado');
         expect(navegadorMock.close).toHaveBeenCalled();
     });
+
+    it('deve usar executablePath quando PUPPETEER_EXECUTABLE_PATH estiver definido', async () => {
+        const caminhoOriginal = process.env.PUPPETEER_EXECUTABLE_PATH;
+        process.env.PUPPETEER_EXECUTABLE_PATH = 'C:\\chrome\\chrome.exe';
+
+        jest.resetModules();
+
+        const puppeteerMock = {
+            launch: jest.fn(() => Promise.resolve(navegadorMock))
+        };
+
+        jest.unstable_mockModule('puppeteer', () => ({
+            default: puppeteerMock
+        }));
+
+        const { renderizarHtmlParaPdf: renderizarComCaminho } = await import('./renderizarHtmlParaPdf.js');
+
+        await renderizarComCaminho('<html></html>');
+
+        expect(puppeteerMock.launch).toHaveBeenCalledWith(
+            expect.objectContaining({
+                executablePath: 'C:\\chrome\\chrome.exe'
+            })
+        );
+
+        if (caminhoOriginal === undefined) {
+            delete process.env.PUPPETEER_EXECUTABLE_PATH;
+        } else {
+            process.env.PUPPETEER_EXECUTABLE_PATH = caminhoOriginal;
+        }
+    });
 });

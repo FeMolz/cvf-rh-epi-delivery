@@ -1,14 +1,35 @@
 import { jest } from '@jest/globals';
 import {
     afastamentoTemporarioExpirado,
+    inicioDoDia,
     statusFuncionarioExigeDataRetornoAfastamento
 } from './afastamentoTemporarioFuncionario.js';
-import { resolverDataRetornoAfastamento } from './resolverDataRetornoAfastamento.js';
+import {
+    obterStatusAposExpiracaoAfastamento,
+    resolverDataRetornoAfastamento
+} from './resolverDataRetornoAfastamento.js';
 
 describe('afastamentoTemporarioFuncionario', () => {
     it('deve identificar status com data de retorno obrigatória', () => {
         expect(statusFuncionarioExigeDataRetornoAfastamento('FERIAS')).toBe(true);
         expect(statusFuncionarioExigeDataRetornoAfastamento('ATIVO')).toBe(false);
+        expect(statusFuncionarioExigeDataRetornoAfastamento(null)).toBe(false);
+        expect(statusFuncionarioExigeDataRetornoAfastamento(undefined)).toBe(false);
+    });
+
+    it('deve normalizar inicio do dia para valores válidos e inválidos', () => {
+        expect(inicioDoDia(null)).toBeNull();
+        expect(inicioDoDia(undefined)).toBeNull();
+        expect(inicioDoDia('')).toBeNull();
+        expect(inicioDoDia('data-invalida')).toBeNull();
+
+        const dataString = inicioDoDia('2026-06-20');
+        expect(dataString).toBeInstanceOf(Date);
+        expect(dataString?.getHours()).toBe(0);
+
+        const dataObjeto = inicioDoDia(new Date('2026-06-20T15:30:00Z'));
+        expect(dataObjeto).toBeInstanceOf(Date);
+        expect(dataObjeto?.getHours()).toBe(0);
     });
 
     it('deve considerar afastamento expirado na data de retorno', () => {
@@ -18,6 +39,8 @@ describe('afastamentoTemporarioFuncionario', () => {
         expect(afastamentoTemporarioExpirado(new Date('2026-06-25'), new Date('2026-06-22'))).toBe(
             false
         );
+        expect(afastamentoTemporarioExpirado(null, new Date('2026-06-22'))).toBe(false);
+        expect(afastamentoTemporarioExpirado(new Date('2026-06-20'), 'invalido')).toBe(false);
     });
 });
 
@@ -49,5 +72,69 @@ describe('resolverDataRetornoAfastamento', () => {
         });
 
         expect(resultado.leaveReturnDate).toBeNull();
+    });
+
+    it('deve limpar data ao sair de afastamento mesmo informando leaveReturnDate', () => {
+        const resultado = resolverDataRetornoAfastamento({
+            statusAnterior: 'FERIAS',
+            statusNovo: 'ATIVO',
+            leaveReturnDate: '2099-12-31'
+        });
+
+        expect(resultado.leaveReturnDate).toBeNull();
+    });
+
+    it('deve rejeitar data de retorno inválida', () => {
+        expect(() =>
+            resolverDataRetornoAfastamento({
+                statusAnterior: 'ATIVO',
+                statusNovo: 'FERIAS',
+                leaveReturnDate: 'data-invalida'
+            })
+        ).toThrow(/data prevista de retorno/i);
+
+        expect(() =>
+            resolverDataRetornoAfastamento({
+                statusAnterior: 'FERIAS',
+                statusNovo: 'FERIAS',
+                leaveReturnDateAnterior: new Date('data-invalida')
+            })
+        ).toThrow(/data prevista de retorno inválida/i);
+    });
+
+    it('deve rejeitar data de retorno passada ao entrar em afastamento', () => {
+        expect(() =>
+            resolverDataRetornoAfastamento({
+                statusAnterior: 'ATIVO',
+                statusNovo: 'FERIAS',
+                leaveReturnDate: '2020-01-01'
+            })
+        ).toThrow(/data prevista de retorno deve ser hoje ou uma data futura/i);
+    });
+
+    it('deve rejeitar alteração para data passada em afastamento existente', () => {
+        expect(() =>
+            resolverDataRetornoAfastamento({
+                statusAnterior: 'FERIAS',
+                statusNovo: 'FERIAS',
+                leaveReturnDate: '2020-01-01',
+                leaveReturnDateAnterior: new Date('2099-12-31')
+            })
+        ).toThrow(/data prevista de retorno deve ser hoje ou uma data futura/i);
+    });
+
+    it('deve manter data anterior quando afastamento continua sem nova data', () => {
+        const dataAnterior = new Date('2099-12-31');
+        const resultado = resolverDataRetornoAfastamento({
+            statusAnterior: 'FERIAS',
+            statusNovo: 'FERIAS',
+            leaveReturnDateAnterior: dataAnterior
+        });
+
+        expect(resultado.leaveReturnDate).toEqual(inicioDoDia(dataAnterior));
+    });
+
+    it('deve retornar status ATIVO após expiração de afastamento', () => {
+        expect(obterStatusAposExpiracaoAfastamento('FERIAS')).toBe('ATIVO');
     });
 });

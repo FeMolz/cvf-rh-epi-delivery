@@ -9,6 +9,7 @@ const updateUserServiceMock = { execute: jest.fn() };
 const deleteUserServiceMock = { execute: jest.fn() };
 const deleteMeServiceMock = { execute: jest.fn() };
 const changePasswordServiceMock = { execute: jest.fn() };
+const logoutUserServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/CreateUserService.js', () => ({
     default: createUserServiceMock
@@ -36,6 +37,9 @@ jest.unstable_mockModule('../services/DeleteMeService.js', () => ({
 }));
 jest.unstable_mockModule('../services/ChangePasswordService.js', () => ({
     default: changePasswordServiceMock
+}));
+jest.unstable_mockModule('../services/LogoutUserService.js', () => ({
+    default: logoutUserServiceMock
 }));
 
 const userController = (await import('./UserController.js')).default;
@@ -197,5 +201,244 @@ describe('UserController', () => {
                 statusCode: 400
             })
         );
+    });
+
+    it('deve realizar logout e formatar resposta do usuário', async () => {
+        const requisicao = { user: { id: '1', role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        logoutUserServiceMock.execute.mockResolvedValue({
+            id: '1',
+            name: 'Teste',
+            isActive: false,
+            lastLogin: null,
+            passwordHash: 'hash'
+        });
+
+        await userController.logout(requisicao, resposta, proximo);
+
+        expect(logoutUserServiceMock.execute).toHaveBeenCalledWith('1');
+        expect(resposta.json).toHaveBeenCalledWith(
+            expect.objectContaining({ id: '1', isActive: false })
+        );
+        expect(proximo).not.toHaveBeenCalled();
+    });
+
+    it('deve encaminhar erro de logout ao middleware', async () => {
+        const requisicao = { user: { id: '1', role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha logout');
+
+        logoutUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.logout(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve retornar 403 na criação quando service negar permissão', async () => {
+        const requisicao = {
+            body: { name: 'Teste', email: 'teste@teste.com', password: '12345678' },
+            user: { role: 'COLABORADOR' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        createUserServiceMock.execute.mockRejectedValue(
+            Object.assign(new Error('Sem permissão'), { statusCode: 403 })
+        );
+
+        await userController.create(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(403);
+        expect(proximo).not.toHaveBeenCalled();
+    });
+
+    it('deve encaminhar erro inesperado na criação', async () => {
+        const requisicao = {
+            body: { name: 'Teste', email: 'teste@teste.com', password: '12345678' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha interna');
+
+        createUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.create(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro de autenticação no login', async () => {
+        const requisicao = { body: { email: 'teste@teste.com', password: '123' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = Object.assign(new Error('Credenciais inválidas'), { statusCode: 401 });
+
+        authenticateUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.login(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 401 }));
+    });
+
+    it('deve assumir status 401 no login quando erro não informar código', async () => {
+        const requisicao = { body: { email: 'teste@teste.com', password: '123' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('Credenciais inválidas');
+
+        authenticateUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.login(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 401 }));
+    });
+
+    it('deve retornar 400 na criação quando service rejeitar validação', async () => {
+        const requisicao = {
+            body: { name: 'Teste', email: 'teste@teste.com', password: '12345678' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        createUserServiceMock.execute.mockRejectedValue(
+            Object.assign(new Error('Dados inválidos'), { statusCode: 400 })
+        );
+
+        await userController.create(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(400);
+    });
+
+    it('deve encaminhar erro ao listar usuários', async () => {
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha listagem');
+
+        listUsersServiceMock.execute.mockRejectedValue(erro);
+        await userController.findAll({ user: { role: 'ADMIN' } }, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao buscar usuário por id', async () => {
+        const requisicao = { params: { id: '1' }, user: { role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha busca');
+
+        findUserByIdServiceMock.execute.mockRejectedValue(erro);
+        await userController.findById(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao buscar usuário por e-mail', async () => {
+        const requisicao = { params: { email: 'teste@teste.com' }, user: { role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha busca email');
+
+        findUserByEmailServiceMock.execute.mockRejectedValue(erro);
+        await userController.findByEmail(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve retornar status conhecido ao atualizar usuário', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { role: 'ADMIN' },
+            user: { role: 'ADMINISTRATIVO' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        updateUserServiceMock.execute.mockRejectedValue(
+            Object.assign(new Error('Não permitido'), { statusCode: 403 })
+        );
+
+        await userController.update(requisicao, resposta, proximo);
+
+        expect(resposta.status).toHaveBeenCalledWith(403);
+    });
+
+    it('deve retornar 400 e 404 conhecidos ao atualizar usuário', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { name: 'Novo' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+
+        updateUserServiceMock.execute.mockRejectedValueOnce(
+            Object.assign(new Error('Campo inválido'), { statusCode: 400 })
+        );
+        await userController.update(requisicao, resposta, proximo);
+        expect(resposta.status).toHaveBeenCalledWith(400);
+
+        updateUserServiceMock.execute.mockRejectedValueOnce(
+            Object.assign(new Error('Não encontrado'), { statusCode: 404 })
+        );
+        await userController.update(requisicao, resposta, proximo);
+        expect(resposta.status).toHaveBeenCalledWith(404);
+    });
+
+    it('deve encaminhar erro inesperado na atualização', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { name: 'Novo' },
+            user: { role: 'ADMIN' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha update');
+
+        updateUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.update(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao excluir usuário', async () => {
+        const requisicao = { params: { id: '1' }, user: { role: 'ADMIN' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha delete');
+
+        deleteUserServiceMock.execute.mockRejectedValue(erro);
+        await userController.delete(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao excluir própria conta', async () => {
+        const requisicao = { user: { id: '1' } };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha delete me');
+
+        deleteMeServiceMock.execute.mockRejectedValue(erro);
+        await userController.deleteMe(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve encaminhar erro ao alterar senha', async () => {
+        const requisicao = {
+            params: { id: '1' },
+            body: { password: 'nova1234' },
+            user: { id: '1', role: 'COLABORADOR' }
+        };
+        const resposta = criarRespostaMock();
+        const proximo = jest.fn();
+        const erro = new Error('falha senha');
+
+        changePasswordServiceMock.execute.mockRejectedValue(erro);
+        await userController.changePassword(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
     });
 });

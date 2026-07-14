@@ -63,4 +63,40 @@ describe('UpdateAnuncioVagaService', () => {
 
         expect(anuncioVagaRepositoryMock.update).toHaveBeenCalledWith('v1', { faixaSalarial: null });
     });
+
+    it('deve atualizar tipo de contratacao valido', async () => {
+        anuncioVagaRepositoryMock.findById.mockResolvedValue({ id: 'v1' });
+        anuncioVagaRepositoryMock.update.mockResolvedValue({ id: 'v1', tipoContratacao: 'CLT' });
+
+        const resultado = await updateAnuncioVagaService.execute('v1', { tipoContratacao: ' clt ' });
+
+        expect(anuncioVagaRepositoryMock.update).toHaveBeenCalledWith('v1', { tipoContratacao: 'CLT' });
+        expect(resultado.tipoContratacao).toBe('CLT');
+    });
+
+    it('deve atualizar faixa salarial informada', async () => {
+        anuncioVagaRepositoryMock.findById.mockResolvedValue({ id: 'v1' });
+        anuncioVagaRepositoryMock.update.mockResolvedValue({ id: 'v1', faixaSalarial: 'R$ 5.000' });
+
+        await updateAnuncioVagaService.execute('v1', { faixaSalarial: ' R$ 5.000 ' });
+
+        expect(anuncioVagaRepositoryMock.update).toHaveBeenCalledWith('v1', {
+            faixaSalarial: 'R$ 5.000'
+        });
+    });
+
+    it('deve normalizar faixa salarial nao-string e campos nao-string', async () => {
+        anuncioVagaRepositoryMock.findById.mockResolvedValue({ id: 'v1' });
+        anuncioVagaRepositoryMock.update.mockResolvedValue({ id: 'v1' });
+
+        await updateAnuncioVagaService.execute('v1', {
+            faixaSalarial: 5000,
+            tituloVaga: 123
+        });
+
+        expect(anuncioVagaRepositoryMock.update).toHaveBeenCalledWith('v1', {
+            faixaSalarial: null,
+            tituloVaga: ''
+        });
+    });
 });

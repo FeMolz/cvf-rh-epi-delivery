@@ -39,5 +39,30 @@ describe('formatadoresBrasil', () => {
         expect(cpfEstaCompleto('5299822472')).toBe(false);
         expect(telefoneEstaCompleto('(11) 98888-7777')).toBe(true);
         expect(telefoneEstaCompleto('(11) 3333-4444')).toBe(true);
+        expect(telefoneEstaCompleto('(11) 9888')).toBe(false);
+    });
+
+    it('deve cobrir etapas intermediarias das mascaras', () => {
+        expect(aplicarMascaraCnpj('11')).toBe('11');
+        expect(aplicarMascaraCnpj('11222')).toBe('11.222');
+        expect(aplicarMascaraCnpj('11222333')).toBe('11.222.333');
+        expect(aplicarMascaraCnpj('112223330001')).toBe('11.222.333/0001');
+
+        expect(aplicarMascaraCpf('529')).toBe('529');
+        expect(aplicarMascaraCpf('529982')).toBe('529.982');
+        expect(aplicarMascaraCpf('529982247')).toBe('529.982.247');
+
+        expect(aplicarMascaraTelefone('')).toBe('');
+        expect(aplicarMascaraTelefone('11')).toBe('(11');
+        expect(aplicarMascaraTelefone('119888')).toBe('(11) 9888');
+
+        expect(aplicarMascaraDataBr('10')).toBe('10');
+        expect(aplicarMascaraDataBr('1010')).toBe('10/10');
+
+        expect(dataBrParaIso('32/01/2020')).toBeNull();
+        expect(dataBrParaIso('10/10')).toBeNull();
+        expect(dataIsoParaBr('')).toBe('');
+        expect(dataIsoParaBr('invalido')).toBe('');
+        expect(cnpjEstaCompleto('11.222.333/0001-8')).toBe(false);
     });
 });

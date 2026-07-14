@@ -83,6 +83,46 @@ describe('EmployeeRepository', () => {
     await expect(repo.delete(99)).rejects.toMatchObject({ statusCode: 404 });
   });
 
+  it('should throw NOT_FOUND when deleting already soft-deleted employee', async () => {
+    prismaMock.employee.findUnique.mockResolvedValue({ id: 1, deletedAt: new Date() });
+    await expect(repo.delete(1)).rejects.toMatchObject({ statusCode: 404 });
+    expect(prismaMock.employee.update).not.toHaveBeenCalled();
+  });
+
+  it('should find many with custom filter', async () => {
+    prismaMock.employee.findMany.mockResolvedValue([]);
+    await repo.findManyComFiltro({ status: 'ATIVO' });
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where: { status: 'ATIVO' },
+      select: expect.any(Object),
+      orderBy: [{ name: 'asc' }]
+    });
+  });
+
+  it('should find employee by id for ficha export', async () => {
+    prismaMock.employee.findUnique.mockResolvedValue({ id: 'f1' });
+    const resultado = await repo.findByIdParaExportacaoFicha('f1');
+    expect(resultado).toEqual({ id: 'f1' });
+    expect(prismaMock.employee.findUnique).toHaveBeenCalledWith({
+      where: { id: 'f1' },
+      select: expect.any(Object)
+    });
+  });
+
+  it('should find employees with expired temporary leave', async () => {
+    const dataReferencia = new Date('2026-03-01');
+    prismaMock.employee.findMany.mockResolvedValue([{ id: 'f1', status: 'AFASTADO' }]);
+    const resultado = await repo.findManyComAfastamentoTemporarioExpirado(dataReferencia);
+    expect(resultado).toEqual([{ id: 'f1', status: 'AFASTADO' }]);
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          leaveReturnDate: { not: null, lte: dataReferencia }
+        })
+      })
+    );
+  });
+
   it('should export active employees list by default', async () => {
     prismaMock.employee.findMany.mockResolvedValue([]);
     await repo.findManyParaExportacaoLista({ status: { in: ['ATIVO'] } });

@@ -54,4 +54,11 @@ describe('ReverterAfastamentosExpiradosService', () => {
         expect(quantidade).toBe(0);
         expect(employeeRepositoryMock.update).not.toHaveBeenCalled();
     });
+
+    it('deve retornar zero quando data de referência for inválida', async () => {
+        const quantidade = await reverterAfastamentosExpiradosService.execute('data-invalida');
+
+        expect(quantidade).toBe(0);
+        expect(employeeRepositoryMock.findManyComAfastamentoTemporarioExpirado).not.toHaveBeenCalled();
+    });
 });

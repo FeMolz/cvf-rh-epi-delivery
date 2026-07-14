@@ -16,6 +16,12 @@ describe('UpdateEpiDeliveryReportFlagsService', () => {
         jest.clearAllMocks();
     });
 
+    it('deve rejeitar identificador ausente', async () => {
+        await expect(updateEpiDeliveryReportFlagsService.execute('', { foiImpresso: true })).rejects.toThrow(
+            'identificadorRelatorio e obrigatorio.'
+        );
+    });
+
     it('deve rejeitar quando relatorio nao existe', async () => {
         epiDeliveryReportRepositoryMock.findById.mockResolvedValue(null);
         await expect(updateEpiDeliveryReportFlagsService.execute('r1', { foiImpresso: true })).rejects.toThrow(
@@ -28,6 +34,25 @@ describe('UpdateEpiDeliveryReportFlagsService', () => {
         await expect(updateEpiDeliveryReportFlagsService.execute('r1', {})).rejects.toThrow(
             'Informe ao menos um dos campos: foiImpresso, foiEncaminhado ou foiAssinado.'
         );
+    });
+
+    it('deve atualizar foiImpresso e foiEncaminhado quando informados', async () => {
+        epiDeliveryReportRepositoryMock.findById.mockResolvedValue({ id: 'r1' });
+        epiDeliveryReportRepositoryMock.updateFlagsById.mockResolvedValue({
+            id: 'r1',
+            foiImpresso: true,
+            foiEncaminhado: false
+        });
+
+        await updateEpiDeliveryReportFlagsService.execute('r1', {
+            foiImpresso: true,
+            foiEncaminhado: false
+        });
+
+        expect(epiDeliveryReportRepositoryMock.updateFlagsById).toHaveBeenCalledWith('r1', {
+            foiImpresso: true,
+            foiEncaminhado: false
+        });
     });
 
     it('deve ignorar valores nao booleanos e ainda assim atualizar campos validos', async () => {

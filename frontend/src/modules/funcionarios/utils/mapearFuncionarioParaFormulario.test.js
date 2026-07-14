@@ -38,4 +38,29 @@ describe('mapearFuncionarioParaFormulario', () => {
             planoSaude: true
         });
     });
+
+    it('deve mapear campos opcionais vazios e dependentes nulos', () => {
+        const formulario = mapearFuncionarioParaFormulario({
+            numeroDependentes: null,
+            leaveReturnDate: '2026-02-01T00:00:00.000Z'
+        });
+
+        expect(formulario.numeroDependentes).toBe('');
+        expect(formulario.leaveReturnDate).toBe('2026-02-01');
+        expect(formulario.nacionalidade).toBe('');
+        expect(formulario.cep).toBe('');
+        expect(formulario.valeTransporte).toBe(false);
+    });
+
+    it('deve tratar numero de dependentes indefinido', () => {
+        const formulario = mapearFuncionarioParaFormulario({});
+
+        expect(formulario.numeroDependentes).toBe('');
+    });
+
+    it('deve converter numero de dependentes informado', () => {
+        const formulario = mapearFuncionarioParaFormulario({ numeroDependentes: 2 });
+
+        expect(formulario.numeroDependentes).toBe('2');
+    });
 });

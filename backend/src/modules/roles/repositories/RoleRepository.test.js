@@ -248,4 +248,47 @@ describe('RoleRepository', () => {
         });
         expect(result).toBe(true);
     });
+
+    it('should return false when name is not unique', async () => {
+        prismaMock.role.count.mockResolvedValue(1);
+
+        const result = await roleRepository.isNameUnique('ADMIN');
+
+        expect(result).toBe(false);
+    });
+
+    it('should reactivate a role', async () => {
+        const roleData = { id: 1, name: 'ADMIN', deletedAt: null, _count: { roleEpis: 0, employees: 0 } };
+        prismaMock.role.update.mockResolvedValue(roleData);
+
+        const result = await roleRepository.reactivate(1);
+
+        expect(prismaMock.role.update).toHaveBeenCalledWith({
+            where: { id: 1 },
+            data: { deletedAt: null },
+            include: {
+                _count: {
+                    select: {
+                        roleEpis: true,
+                        employees: true
+                    }
+                }
+            }
+        });
+        expect(result).toEqual(roleData);
+    });
+
+    it('should find active role by name ignoring case with excludeId', async () => {
+        prismaMock.role.findFirst.mockResolvedValue(null);
+
+        await roleRepository.findActiveByNameIgnoringCase('Admin', '2');
+
+        expect(prismaMock.role.findFirst).toHaveBeenCalledWith({
+            where: {
+                name: { equals: 'Admin', mode: 'insensitive' },
+                deletedAt: null,
+                id: { not: '2' }
+            }
+        });
+    });
 });

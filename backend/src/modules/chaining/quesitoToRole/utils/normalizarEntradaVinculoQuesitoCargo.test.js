@@ -32,5 +32,34 @@ describe('normalizarEntradaVinculoQuesitoCargo', () => {
         expect(() => normalizarEntradaVinculoQuesitoCargo({ roleId: 'cargo-1' })).toThrow(
             MENSAGEM_ROLE_ID_QUESITO_IDS_OBRIGATORIOS
         );
+        expect(() =>
+            normalizarEntradaVinculoQuesitoCargo({ roleId: 'cargo-1', quesitoIds: ['', 123] })
+        ).toThrow(MENSAGEM_ROLE_ID_QUESITO_IDS_OBRIGATORIOS);
+    });
+
+    it('deve rejeitar roleId ausente ou invalido', () => {
+        expect(() => normalizarEntradaVinculoQuesitoCargo({ quesitoId: 'q1' })).toThrow(
+            MENSAGEM_ROLE_ID_QUESITO_IDS_OBRIGATORIOS
+        );
+        expect(() =>
+            normalizarEntradaVinculoQuesitoCargo({ roleId: '   ', quesitoId: 'q1' })
+        ).toThrow(MENSAGEM_ROLE_ID_QUESITO_IDS_OBRIGATORIOS);
+        expect(() =>
+            normalizarEntradaVinculoQuesitoCargo({ roleId: 123, quesitoId: 'q1' })
+        ).toThrow(MENSAGEM_ROLE_ID_QUESITO_IDS_OBRIGATORIOS);
+    });
+
+    it('deve combinar quesitoId e quesitoIds sem duplicatas', () => {
+        const resultado = normalizarEntradaVinculoQuesitoCargo({
+            roleId: 'cargo-1',
+            quesitoId: 'q1',
+            quesitoIds: ['q2', 'q1']
+        });
+
+        expect(resultado).toEqual({
+            roleId: 'cargo-1',
+            quesitoIds: ['q2', 'q1'],
+            envioUnico: false
+        });
     });
 });

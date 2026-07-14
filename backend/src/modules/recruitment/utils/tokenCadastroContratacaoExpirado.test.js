@@ -20,4 +20,14 @@ describe('tokenCadastroContratacaoExpirado', () => {
 
         expect(tokenCadastroContratacaoExpirado(criadoEm, referencia)).toBe(true);
     });
+
+    it('deve considerar expirado quando criadoEm for ausente', () => {
+        expect(tokenCadastroContratacaoExpirado(null)).toBe(true);
+    });
+
+    it('deve aceitar criadoEm como string ISO', () => {
+        expect(
+            tokenCadastroContratacaoExpirado('2026-06-01T10:00:00Z', new Date('2026-06-05T10:00:00Z'))
+        ).toBe(false);
+    });
 });
