@@ -54,4 +54,14 @@ describe('resolverDataDesligamentoFuncionario', () => {
             })
         ).toThrow('Informe a data de desligamento para demissão, rescisão ou aposentadoria.');
     });
+
+    it('deve rejeitar data de desligamento inválida quando data anterior é inválida', () => {
+        expect(() =>
+            resolverDataDesligamentoFuncionario({
+                statusAnterior: 'DESLIGADO',
+                statusNovo: 'DESLIGADO',
+                resignationDateAnterior: new Date(NaN)
+            })
+        ).toThrow('Data de desligamento inválida.');
+    });
 });
