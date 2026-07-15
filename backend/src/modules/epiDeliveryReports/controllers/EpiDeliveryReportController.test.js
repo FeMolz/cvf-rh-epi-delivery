@@ -4,7 +4,8 @@ import {
     MENSAGEM_CAMPOS_OBRIGATORIOS_EMISSAO,
     MENSAGEM_FLAGS_OBRIGATORIAS,
     MENSAGEM_IDENTIFICADOR_FUNCIONARIO_OBRIGATORIO,
-    MENSAGEM_RELATORIO_NAO_ENCONTRADO
+    MENSAGEM_RELATORIO_NAO_ENCONTRADO,
+    MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO
 } from '../constants/relatorioEntregaEpiConstantes.js';
 
 const generateMock = { execute: jest.fn() };
@@ -85,6 +86,23 @@ describe('EpiDeliveryReportController', () => {
         await epiDeliveryReportController.create({ body: {}, user: { id: 'u1' } }, resposta, jest.fn());
 
         expect(resposta.status).toHaveBeenCalledWith(400);
+    });
+
+    it('create deve retornar 400 quando nao houver entregas no periodo', async () => {
+        generateMock.execute.mockRejectedValue(new Error(MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO));
+        const resposta = criarMocksResposta();
+
+        await epiDeliveryReportController.create(
+            {
+                body: { employeeId: 'e1', periodoInicio: '2026-01-01', periodoFim: '2026-01-31' },
+                user: { id: 'u1' }
+            },
+            resposta,
+            jest.fn()
+        );
+
+        expect(resposta.status).toHaveBeenCalledWith(400);
+        expect(resposta.json).toHaveBeenCalledWith({ error: MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO });
     });
 
     it('create deve encaminhar erro inesperado ao next', async () => {

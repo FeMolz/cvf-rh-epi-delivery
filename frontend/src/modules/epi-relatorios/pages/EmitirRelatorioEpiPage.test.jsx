@@ -126,6 +126,36 @@ describe('EmitirRelatorioEpiPage', () => {
         });
     });
 
+    it('deve bloquear emissao quando preview nao tiver entregas', async () => {
+        const usuario = userEvent.setup();
+        buscarPreviewRelatorioEntregaEpi.mockResolvedValue({
+            textoPeriodoReferencia: '01/01/2026 a 31/01/2026',
+            employee: { name: 'Ana Silva', roleName: 'Soldador' },
+            entregas: []
+        });
+        renderizarPagina();
+
+        await waitFor(() => {
+            expect(screen.getByLabelText(/funcionário/i)).toBeInTheDocument();
+        });
+
+        await usuario.selectOptions(screen.getByLabelText(/funcionário/i), 'f1');
+        await usuario.type(screen.getByLabelText(/período início/i), '2026-01-01');
+        await usuario.type(screen.getByLabelText(/período fim/i), '2026-01-31');
+        await vi.advanceTimersByTimeAsync(400);
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /gerar relatório/i })).toBeDisabled();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /forcar emitir/i }));
+
+        expect(
+            await screen.findByText(/não há entregas de epi no período selecionado/i)
+        ).toBeInTheDocument();
+        expect(emitirRelatorioEntregaEpi).not.toHaveBeenCalled();
+    });
+
     it('deve exibir erro ao falhar carregamento', async () => {
         listarFuncionariosElegiveisEmissaoRelatorio.mockRejectedValue(new Error('Falha na API'));
         renderizarPagina();

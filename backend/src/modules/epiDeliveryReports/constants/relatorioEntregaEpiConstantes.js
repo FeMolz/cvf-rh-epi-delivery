@@ -8,6 +8,8 @@ export const MENSAGEM_RELATORIO_NAO_ENCONTRADO = 'Relatorio nao encontrado.';
 export const MENSAGEM_ARQUIVO_PDF_AUSENTE = 'PDF do relatorio nao encontrado ou vazio na base de dados.';
 export const MENSAGEM_FLAGS_OBRIGATORIAS = 'Informe ao menos um dos campos: foiImpresso, foiEncaminhado ou foiAssinado.';
 export const MENSAGEM_CAMPOS_OBRIGATORIOS_EMISSAO = 'employeeId, periodoInicio e periodoFim sao obrigatorios.';
+export const MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO =
+    'Nao ha entregas de EPI no periodo informado para emitir o relatorio.';
 export const MENSAGEM_IDENTIFICADOR_FUNCIONARIO_OBRIGATORIO = 'identificadorFuncionario e obrigatorio.';
 export const MENSAGEM_IDENTIFICADOR_RELATORIO_OBRIGATORIO = 'identificadorRelatorio e obrigatorio.';
 

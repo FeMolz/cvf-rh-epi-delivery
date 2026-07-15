@@ -5,7 +5,8 @@ import epiDeliveryRepository from '../../epiDeliveries/repositories/EpiDeliveryR
 import epiDeliveryReportRepository from '../repositories/EpiDeliveryReportRepository.js';
 import {
     MENSAGEM_CAMPOS_OBRIGATORIOS_EMISSAO,
-    MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO
+    MENSAGEM_FUNCIONARIO_NAO_ENCONTRADO,
+    MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO
 } from '../constants/relatorioEntregaEpiConstantes.js';
 import { construirIntervaloEntregaUtc, formatarPeriodoParaPdf } from '../utils/periodoRelatorioEntregaEpi.js';
 import { montarEntregasTabelaRelatorio } from '../utils/montarEntregasTabelaRelatorio.js';
@@ -34,6 +35,10 @@ class GenerateEpiDeliveryReportPdfService {
             limiteInicialEntrega,
             limiteFinalEntrega
         );
+
+        if (!entregasNoPeriodo.length) {
+            throw new Error(MENSAGEM_SEM_ENTREGAS_PERIODO_EMISSAO);
+        }
 
         const entregasTabela = montarEntregasTabelaRelatorio(entregasNoPeriodo);
 
