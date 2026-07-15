@@ -9,6 +9,7 @@ import {
     MENSAGEM_EMAIL_DUPLICADO
 } from '../constants/funcionarioConstantes.js';
 import { montarDadosFuncionario } from '../utils/montarDadosFuncionario.js';
+import { resolverDataDesligamentoFuncionario } from '../utils/resolverDataDesligamentoFuncionario.js';
 import { resolverDataRetornoAfastamento } from '../utils/resolverDataRetornoAfastamento.js';
 import { lancarErroFuncionario } from '../utils/lancarErroFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
@@ -71,10 +72,16 @@ class CreateEmployeeService {
             statusNovo: statusInformado,
             leaveReturnDate: entrada.leaveReturnDate
         });
+        const dadosDesligamento = resolverDataDesligamentoFuncionario({
+            statusAnterior: 'ATIVO',
+            statusNovo: statusInformado,
+            resignationDate: entrada.resignationDate
+        });
 
         const dadosFuncionario = montarDadosFuncionario({
             ...entrada,
             ...dadosRetorno,
+            ...dadosDesligamento,
             cpf: cpfValidado,
             email: emailValidado,
             telefone: telefoneValidado,

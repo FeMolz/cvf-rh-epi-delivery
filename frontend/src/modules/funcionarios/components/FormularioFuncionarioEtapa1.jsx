@@ -133,6 +133,13 @@ export function FormularioFuncionarioEtapa1({
             return 'Informe a data prevista de retorno para férias ou licenças.';
         }
 
+        if (
+            STATUS_FUNCIONARIO_COM_DATA_DESLIGAMENTO.includes(dados.status) &&
+            !String(dados.resignationDate || '').trim()
+        ) {
+            return 'Informe a data de desligamento para demissão, rescisão ou aposentadoria.';
+        }
+
         return null;
     }
 
@@ -320,6 +327,7 @@ export function FormularioFuncionarioEtapa1({
                                 rotulo="Data de desligamento"
                                 value={dados.resignationDate}
                                 onChange={(valor) => atualizarCampo('resignationDate', valor)}
+                                required
                             />
                         ) : null}
 
