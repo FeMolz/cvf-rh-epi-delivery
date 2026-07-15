@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
     documentoLiberadoParaAlterarStatus,
+    obterClasseBaseStatusDocumento,
     obterClasseResumoStatusDocumento,
+    obterClasseSelectStatusDocumento,
     obterFlagsParaStatusDocumento,
     obterRotuloResumoStatusDocumento,
     obterStatusAtualDocumento
@@ -17,9 +19,19 @@ describe('statusDocumentoRelatorio', () => {
     });
 
     it('deve mapear flags para cada status', () => {
+        expect(obterFlagsParaStatusDocumento('recem_emitido')).toEqual({
+            foiImpresso: false,
+            foiEncaminhado: false,
+            foiAssinado: false
+        });
         expect(obterFlagsParaStatusDocumento('impresso')).toEqual({
             foiImpresso: true,
             foiEncaminhado: false,
+            foiAssinado: false
+        });
+        expect(obterFlagsParaStatusDocumento('encaminhado')).toEqual({
+            foiImpresso: true,
+            foiEncaminhado: true,
             foiAssinado: false
         });
         expect(obterFlagsParaStatusDocumento('assinado')).toEqual({
@@ -35,6 +47,16 @@ describe('statusDocumentoRelatorio', () => {
         expect(obterRotuloResumoStatusDocumento({ foiImpresso: true })).toBe('Impresso');
         expect(obterClasseResumoStatusDocumento({ foiImpresso: true })).toContain('impresso');
         expect(obterClasseResumoStatusDocumento({ foiEncaminhado: true })).toContain('afastado');
+        expect(obterClasseBaseStatusDocumento('recem_emitido')).toContain('recem');
+        expect(obterClasseSelectStatusDocumento('encaminhado')).toContain('encaminhado');
+    });
+
+    it('deve usar rotulo padrao quando opcao nao for encontrada', () => {
+        const findSpy = vi.spyOn(Array.prototype, 'find').mockReturnValueOnce(undefined);
+
+        expect(obterRotuloResumoStatusDocumento({})).toBe('Recém-emitido');
+
+        findSpy.mockRestore();
     });
 
     it('deve liberar alteracao apos download ou status avancado', () => {
@@ -45,5 +67,6 @@ describe('statusDocumentoRelatorio', () => {
         expect(documentoLiberadoParaAlterarStatus(relatorioNovo, new Set())).toBe(false);
         expect(documentoLiberadoParaAlterarStatus(relatorioNovo, downloads)).toBe(true);
         expect(documentoLiberadoParaAlterarStatus(relatorioImpresso, new Set())).toBe(true);
+        expect(documentoLiberadoParaAlterarStatus({}, new Set())).toBe(false);
     });
 });

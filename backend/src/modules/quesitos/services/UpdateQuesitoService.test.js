@@ -100,4 +100,64 @@ describe('UpdateQuesitoService', () => {
             MENSAGEM_BLOCO_QUESITO_OBRIGATORIO
         );
     });
+
+    it('deve atualizar sem verificar duplicidade quando nome não mudou', async () => {
+        const existente = { id: '1', nome: 'mesmo', descricao: 'desc', bloco: 'SST' };
+        quesitoRepositoryMock.findById.mockResolvedValue(existente);
+        quesitoRepositoryMock.update.mockResolvedValue({ ...existente, descricao: 'nova' });
+
+        await updateQuesitoService.execute('1', { nome: 'mesmo', descricao: 'nova' });
+
+        expect(quesitoRepositoryMock.findByNome).not.toHaveBeenCalled();
+        expect(quesitoRepositoryMock.update).toHaveBeenCalledWith('1', {
+            nome: 'mesmo',
+            descricao: 'nova'
+        });
+    });
+
+    it('deve rejeitar campos que não são string', async () => {
+        quesitoRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'antigo' });
+
+        await expect(updateQuesitoService.execute('1', { nome: 123 })).rejects.toThrow(
+            MENSAGEM_NOME_QUESITO_OBRIGATORIO
+        );
+        await expect(updateQuesitoService.execute('1', { descricao: false })).rejects.toThrow(
+            MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA
+        );
+        await expect(updateQuesitoService.execute('1', { bloco: 0 })).rejects.toThrow(
+            MENSAGEM_BLOCO_QUESITO_OBRIGATORIO
+        );
+    });
+
+    it('deve atualizar nome quando não há duplicidade', async () => {
+        const existente = { id: '1', nome: 'antigo', descricao: 'desc', bloco: 'SST' };
+        quesitoRepositoryMock.findById.mockResolvedValue(existente);
+        quesitoRepositoryMock.findByNome.mockResolvedValue(null);
+        quesitoRepositoryMock.update.mockResolvedValue({ ...existente, nome: 'novo' });
+
+        const resultado = await updateQuesitoService.execute('1', { nome: 'novo' });
+
+        expect(quesitoRepositoryMock.findByNome).toHaveBeenCalledWith('novo');
+        expect(quesitoRepositoryMock.update).toHaveBeenCalledWith('1', { nome: 'novo' });
+        expect(resultado.nome).toBe('novo');
+    });
+
+    it('deve atualizar bloco quando valor é válido', async () => {
+        const existente = { id: '1', nome: 'antigo', descricao: 'desc', bloco: 'SST' };
+        quesitoRepositoryMock.findById.mockResolvedValue(existente);
+        quesitoRepositoryMock.update.mockResolvedValue({ ...existente, bloco: 'RH' });
+
+        const resultado = await updateQuesitoService.execute('1', { bloco: ' RH ' });
+
+        expect(quesitoRepositoryMock.update).toHaveBeenCalledWith('1', { bloco: 'RH' });
+        expect(resultado.bloco).toBe('RH');
+    });
+
+    it('deve tratar entrada nula como objeto vazio', async () => {
+        quesitoRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'antigo' });
+
+        await expect(updateQuesitoService.execute('1', null)).rejects.toThrow(
+            MENSAGEM_CAMPOS_ATUALIZACAO_QUESITO_VAZIOS
+        );
+    });
 });

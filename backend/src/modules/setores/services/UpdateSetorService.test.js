@@ -53,4 +53,33 @@ describe('UpdateSetorService', () => {
             statusCode: 409
         });
     });
+
+    it('deve rejeitar nome vazio', async () => {
+        setorRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'TI', isActive: true });
+
+        await expect(updateSetorService.execute('1', { nome: '  ' })).rejects.toMatchObject({
+            statusCode: 400
+        });
+    });
+
+    it('deve manter isActive do setor quando não informado', async () => {
+        setorRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'TI', isActive: false });
+        setorRepositoryMock.findByNome.mockResolvedValue(null);
+        setorRepositoryMock.update.mockResolvedValue({ id: '1', nome: 'Tecnologia', isActive: false });
+
+        await updateSetorService.execute('1', { nome: 'Tecnologia' });
+
+        expect(setorRepositoryMock.update).toHaveBeenCalledWith('1', {
+            nome: 'Tecnologia',
+            isActive: false
+        });
+    });
+
+    it('deve rejeitar nome não string', async () => {
+        setorRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'TI', isActive: true });
+
+        await expect(updateSetorService.execute('1', { nome: 123 })).rejects.toMatchObject({
+            statusCode: 400
+        });
+    });
 });

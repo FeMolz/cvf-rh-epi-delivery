@@ -41,7 +41,7 @@ describe('EpiDeliveryController', () => {
 
     it('create should return 201 on success', async () => {
         const requisicao = {
-            body: { employeeId: '1', caNumbers: ['11070', '4280'] },
+            body: { employeeId: '1', caNumbers: ['11070', '4280'], deliveryDate: '2025-03-15' },
             user: { id: 'admin1' }
         };
         const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
@@ -56,7 +56,8 @@ describe('EpiDeliveryController', () => {
         expect(createEpiDeliveryServiceMock.execute).toHaveBeenCalledWith({
             employeeId: '1',
             caNumbers: ['11070', '4280'],
-            deliveredById: 'admin1'
+            deliveredById: 'admin1',
+            deliveryDate: '2025-03-15'
         });
     });
 
@@ -136,5 +137,30 @@ describe('EpiDeliveryController', () => {
 
         expect(resposta.status).toHaveBeenCalledWith(200);
         expect(getEpiDeliveryEmployeeSituationServiceMock.execute).toHaveBeenCalledWith('f1');
+    });
+
+    it('getPanel deve encaminhar erro ao next', async () => {
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+        const erro = new Error('falha painel');
+
+        getEpiDeliveryPanelServiceMock.execute.mockRejectedValue(erro);
+
+        await epiDeliveryController.getPanel({}, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
+    it('getEmployeeSituation deve encaminhar erro ao next', async () => {
+        const requisicao = { params: { employeeId: 'f1' } };
+        const resposta = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+        const proximo = jest.fn();
+        const erro = new Error('falha situacao');
+
+        getEpiDeliveryEmployeeSituationServiceMock.execute.mockRejectedValue(erro);
+
+        await epiDeliveryController.getEmployeeSituation(requisicao, resposta, proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erro);
     });
 });

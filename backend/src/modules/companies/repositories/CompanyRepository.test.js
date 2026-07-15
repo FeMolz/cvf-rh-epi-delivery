@@ -64,6 +64,18 @@ describe('CompanyRepository', () => {
         });
     });
 
+    it('deve criar empresa com isActive padrao true', async () => {
+        const dados = { name: 'Nova', cnpj: '2' };
+        prismaMock.company.create.mockResolvedValue({ id: '1', ...dados, isActive: true });
+
+        await companyRepository.create(dados);
+
+        expect(prismaMock.company.create).toHaveBeenCalledWith({
+            data: { name: 'Nova', cnpj: '2', isActive: true },
+            select: SELECAO_PADRAO
+        });
+    });
+
     it('deve desativar empresa', async () => {
         await companyRepository.deactivate('1');
 
@@ -83,5 +95,42 @@ describe('CompanyRepository', () => {
             where: { companyId: '1', deletedAt: null }
         });
         expect(resultado).toBe(3);
+    });
+
+    it('deve buscar empresa por cnpj', async () => {
+        const empresa = { id: '1', cnpj: '123' };
+        prismaMock.company.findFirst.mockResolvedValue(empresa);
+
+        const resultado = await companyRepository.findByCnpj('123');
+
+        expect(prismaMock.company.findFirst).toHaveBeenCalledWith({
+            where: { cnpj: '123' },
+            select: SELECAO_PADRAO
+        });
+        expect(resultado).toEqual(empresa);
+    });
+
+    it('deve buscar empresa por cnpj excluindo id informado', async () => {
+        prismaMock.company.findFirst.mockResolvedValue(null);
+
+        await companyRepository.findByCnpj('123', '2');
+
+        expect(prismaMock.company.findFirst).toHaveBeenCalledWith({
+            where: { cnpj: '123', id: { not: '2' } },
+            select: SELECAO_PADRAO
+        });
+    });
+
+    it('deve atualizar empresa', async () => {
+        const dados = { name: 'Atualizada', cnpj: '99', isActive: true };
+        prismaMock.company.update.mockResolvedValue({ id: '1', ...dados });
+
+        await companyRepository.update('1', dados);
+
+        expect(prismaMock.company.update).toHaveBeenCalledWith({
+            where: { id: '1' },
+            data: dados,
+            select: SELECAO_PADRAO
+        });
     });
 });

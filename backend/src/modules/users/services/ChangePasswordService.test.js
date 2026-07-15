@@ -22,11 +22,18 @@ jest.unstable_mockModule('../../../shared/utils/registrarEventoAuditoria.js', ()
     TIPOS_EVENTO_AUDITORIA: { ALTERACAO_SENHA: 'ALTERACAO_SENHA' }
 }));
 
+const validarPoliticaSenhaMock = jest.fn();
+
+jest.unstable_mockModule('../../../shared/utils/validarSenha.js', () => ({
+    validarPoliticaSenha: validarPoliticaSenhaMock
+}));
+
 const changePasswordService = (await import('./ChangePasswordService.js')).default;
 
 describe('ChangePasswordService', () => {
     afterEach(() => {
         jest.clearAllMocks();
+        validarPoliticaSenhaMock.mockImplementation(() => {});
     });
 
     it('deve permitir usuário alterar a própria senha', async () => {
@@ -70,6 +77,18 @@ describe('ChangePasswordService', () => {
             message: 'Nova senha não informada.',
             statusCode: 400
         });
+
+        await expect(
+            changePasswordService.execute({
+                identificadorUsuarioAlvo: '1',
+                novaSenha: '',
+                identificadorUsuarioAutenticado: '1',
+                papelUsuarioAutenticado: 'COLABORADOR'
+            })
+        ).rejects.toMatchObject({
+            message: 'Nova senha não informada.',
+            statusCode: 400
+        });
     });
 
     it('deve lançar 404 quando usuário alvo não existir', async () => {
@@ -100,5 +119,24 @@ describe('ChangePasswordService', () => {
         });
 
         expect(userRepositoryMock.changePassword).toHaveBeenCalled();
+    });
+
+    it('deve rejeitar senha fraca usando mensagem padrão quando validação não informar texto', async () => {
+        userRepositoryMock.findById.mockResolvedValue({ id: '1' });
+        validarPoliticaSenhaMock.mockImplementation(() => {
+            throw new Error('');
+        });
+
+        await expect(
+            changePasswordService.execute({
+                identificadorUsuarioAlvo: '1',
+                novaSenha: 'fraca',
+                identificadorUsuarioAutenticado: '1',
+                papelUsuarioAutenticado: 'COLABORADOR'
+            })
+        ).rejects.toMatchObject({
+            message: 'A senha deve ter no mínimo 8 caracteres, incluindo letras e números.',
+            statusCode: 400
+        });
     });
 });

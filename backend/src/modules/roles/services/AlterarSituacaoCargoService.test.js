@@ -60,4 +60,22 @@ describe('AlterarSituacaoCargoService', () => {
         expect(resultado).toEqual(cargo);
         expect(roleRepositoryMock.reactivate).not.toHaveBeenCalled();
     });
+
+    it('deve retornar cargo inativo quando já está desativado', async () => {
+        const cargo = { id: '1', deletedAt: new Date() };
+        roleRepositoryMock.findById.mockResolvedValue(cargo);
+
+        const resultado = await alterarSituacaoCargoService.execute('1', { ativo: false });
+
+        expect(resultado).toEqual(cargo);
+        expect(roleRepositoryMock.softDelete).not.toHaveBeenCalled();
+    });
+
+    it('deve lançar erro 404 quando cargo não existe', async () => {
+        roleRepositoryMock.findById.mockResolvedValue(null);
+
+        await expect(alterarSituacaoCargoService.execute('99', { ativo: true })).rejects.toMatchObject({
+            statusCode: 404
+        });
+    });
 });

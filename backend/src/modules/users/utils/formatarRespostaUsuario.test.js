@@ -31,4 +31,10 @@ describe('formatarRespostaUsuario', () => {
 
         expect(lista[0].isActive).toBe(false);
     });
+
+    it('deve retornar entrada inalterada quando usuário for inválido', () => {
+        expect(formatarRespostaUsuario(null, 'ADMIN')).toBeNull();
+        expect(formatarRespostaUsuario(undefined, 'ADMIN')).toBeUndefined();
+        expect(formatarRespostaUsuario('texto', 'ADMIN')).toBe('texto');
+    });
 });

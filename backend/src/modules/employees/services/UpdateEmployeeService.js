@@ -11,6 +11,7 @@ import {
 } from '../constants/funcionarioConstantes.js';
 import employeeRepository from '../repositories/EmployeeRepository.js';
 import { normalizarDatasAtualizacaoFuncionario } from '../utils/montarDadosFuncionario.js';
+import { resolverDataDesligamentoFuncionario } from '../utils/resolverDataDesligamentoFuncionario.js';
 import { resolverDataRetornoAfastamento } from '../utils/resolverDataRetornoAfastamento.js';
 import { statusFuncionarioExigeDataRetornoAfastamento } from '../utils/afastamentoTemporarioFuncionario.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
@@ -59,6 +60,22 @@ class UpdateEmployeeService {
             });
 
             Object.assign(dadosAtualizacao, dadosRetornoAfastamento);
+        }
+
+        const deveResolverDesligamento =
+            dadosAtualizacao.status !== undefined ||
+            dadosAtualizacao.resignationDate !== undefined ||
+            statusFuncionarioEncerraVinculo(statusNovo);
+
+        if (deveResolverDesligamento) {
+            const dadosDesligamento = resolverDataDesligamentoFuncionario({
+                statusAnterior,
+                statusNovo,
+                resignationDate: dadosAtualizacao.resignationDate,
+                resignationDateAnterior: funcionarioExistente.resignationDate
+            });
+
+            Object.assign(dadosAtualizacao, dadosDesligamento);
         }
 
         const roleIdEfetivo =

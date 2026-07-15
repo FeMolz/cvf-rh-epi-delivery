@@ -40,6 +40,63 @@ describe('GetCadastroContratacaoPublicoService', () => {
         expect(resultado.dadosPreenchidos).not.toHaveProperty('valeTransporte');
     });
 
+    it('deve priorizar dados do cadastro sobre sugestao da candidatura', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            tokenAcesso: 'token-2',
+            createdAt: new Date(),
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+            name: 'João Cadastro',
+            email: 'joao@cadastro.com',
+            telefone: '11988887777',
+            cpf: '529.982.247-25',
+            role: { id: 'r1' },
+            company: { id: 'c1' },
+            setor: { id: 's1' },
+            candidatura: {
+                nomeCompleto: 'Maria Candidata',
+                email: 'maria@candidatura.com',
+                telefone: '11999999999',
+                cpf: '111.111.111-11'
+            }
+        });
+
+        const resultado = await getCadastroContratacaoPublicoService.execute('token-2');
+
+        expect(resultado.sugestaoPreenchimento).toEqual({
+            name: 'João Cadastro',
+            email: 'joao@cadastro.com',
+            telefone: '11988887777',
+            cpf: '529.982.247-25'
+        });
+    });
+
+    it('deve retornar null na sugestao quando cadastro e candidatura nao possuem dados', async () => {
+        cadastroContratacaoRepositoryMock.findByToken.mockResolvedValue({
+            tokenAcesso: 'token-3',
+            createdAt: new Date(),
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+            role: { id: 'r1' },
+            company: { id: 'c1' },
+            setor: { id: 's1' },
+            candidatura: null
+        });
+
+        const resultado = await getCadastroContratacaoPublicoService.execute('token-3');
+
+        expect(resultado.sugestaoPreenchimento).toEqual({
+            name: null,
+            email: null,
+            telefone: null,
+            cpf: null
+        });
+    });
+
+    it('deve rejeitar token nao-string', async () => {
+        await expect(getCadastroContratacaoPublicoService.execute(null)).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+    });
+
     it('deve rejeitar token vazio', async () => {
         await expect(getCadastroContratacaoPublicoService.execute('  ')).rejects.toThrow(
             MENSAGEM_TOKEN_CADASTRO_INVALIDO

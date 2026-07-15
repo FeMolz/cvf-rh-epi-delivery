@@ -5,7 +5,8 @@ const prismaMock = {
         findUnique: jest.fn(),
         create: jest.fn(),
         delete: jest.fn(),
-        findMany: jest.fn()
+        findMany: jest.fn(),
+        createMany: jest.fn()
     }
 };
 
@@ -76,6 +77,35 @@ describe('RoleQuesitoRepository', () => {
         expect(prismaMock.roleQuesito.findMany).toHaveBeenCalledWith({
             where: { roleId: 'r' },
             include: { quesito: true },
+            orderBy: { createdAt: 'asc' }
+        });
+        expect(resultado).toEqual(lista);
+    });
+
+    it('deve criar vinculos em lote e retornar contagem', async () => {
+        prismaMock.roleQuesito.createMany.mockResolvedValue({ count: 2 });
+
+        const resultado = await roleQuesitoRepository.createManyLinks('r', ['q1', 'q2']);
+
+        expect(prismaMock.roleQuesito.createMany).toHaveBeenCalledWith({
+            data: [
+                { roleId: 'r', quesitoId: 'q1' },
+                { roleId: 'r', quesitoId: 'q2' }
+            ],
+            skipDuplicates: true
+        });
+        expect(resultado).toBe(2);
+    });
+
+    it('deve buscar vinculos por cargo e lista de quesitos', async () => {
+        const lista = [{ id: '1', quesito: {}, role: {} }];
+        prismaMock.roleQuesito.findMany.mockResolvedValue(lista);
+
+        const resultado = await roleQuesitoRepository.findManyByRoleIdAndQuesitoIds('r', ['q1', 'q2']);
+
+        expect(prismaMock.roleQuesito.findMany).toHaveBeenCalledWith({
+            where: { roleId: 'r', quesitoId: { in: ['q1', 'q2'] } },
+            include: { quesito: true, role: true },
             orderBy: { createdAt: 'asc' }
         });
         expect(resultado).toEqual(lista);

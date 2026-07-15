@@ -69,4 +69,18 @@ describe('CreateQuesitoService', () => {
 
         expect(quesitoRepositoryMock.create).not.toHaveBeenCalled();
     });
+
+    it('deve rejeitar campos que não são string', async () => {
+        await expect(
+            createQuesitoService.execute({ nome: 123, descricao: 'd', bloco: 'b' })
+        ).rejects.toThrow(MENSAGEM_NOME_QUESITO_OBRIGATORIO);
+
+        await expect(
+            createQuesitoService.execute({ nome: 'n', descricao: 456, bloco: 'b' })
+        ).rejects.toThrow(MENSAGEM_DESCRICAO_QUESITO_OBRIGATORIA);
+
+        await expect(
+            createQuesitoService.execute({ nome: 'n', descricao: 'd', bloco: null })
+        ).rejects.toThrow(MENSAGEM_BLOCO_QUESITO_OBRIGATORIO);
+    });
 });

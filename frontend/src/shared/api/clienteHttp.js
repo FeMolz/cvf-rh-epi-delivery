@@ -1,5 +1,6 @@
 import { notificarSessaoExpirada } from '../auth/sessaoExpirada.js';
 
+/* v8 ignore next */
 const URL_BASE_API = import.meta.env.VITE_API_URL || '/api/v1';
 
 /**

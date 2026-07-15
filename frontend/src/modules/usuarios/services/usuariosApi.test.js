@@ -5,6 +5,7 @@ import {
     atualizarUsuario,
     buscarUsuarioPorId,
     cadastrarUsuario,
+    encerrarSessao,
     excluirUsuario,
     listarUsuarios
 } from './usuariosApi.js';
@@ -24,6 +25,17 @@ describe('usuariosApi', () => {
         expect(requisicaoApi).toHaveBeenCalledWith('/users/login', {
             method: 'POST',
             body: { email: 'a@b.com', password: 'senha123' }
+        });
+    });
+
+    it('deve encerrar sessao com token', async () => {
+        requisicaoApi.mockResolvedValue(undefined);
+
+        await encerrarSessao('jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/users/logout', {
+            method: 'POST',
+            token: 'jwt'
         });
     });
 

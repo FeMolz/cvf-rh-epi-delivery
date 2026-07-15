@@ -94,4 +94,33 @@ describe('ExportarFuncionarioCompletoPlanilhaService', () => {
         expect(planilhaFuncionarioProviderMock.gerarPlanilhaFichaFuncionario).toHaveBeenCalled();
         expect(resultado.nomeArquivo).toBe('funcionario-maria-silva.xlsx');
     });
+
+    it('deve usar identificador quando nome sanitizado for vazio', async () => {
+        employeeRepositoryMock.findByIdParaExportacaoFicha.mockResolvedValue({
+            id: 'func-99',
+            name: '!!!',
+            cpf: '529.982.247-25',
+            email: 'maria@empresa.com',
+            telefone: '(11) 98888-7777',
+            birthDate: new Date('1990-01-01'),
+            status: 'ATIVO',
+            admissionDate: new Date('2020-01-01'),
+            resignationDate: null,
+            deletedAt: null,
+            role: { name: 'Analista' },
+            company: { name: 'Empresa 01' },
+            setor: { nome: 'TI' },
+            valeTransporte: true,
+            valeAlimentacao: false,
+            planoSaude: true
+        });
+        planilhaFuncionarioProviderMock.sanitizarNomeArquivo.mockReturnValueOnce('');
+        planilhaFuncionarioProviderMock.gerarPlanilhaFichaFuncionario.mockResolvedValue(
+            Buffer.from('xlsx')
+        );
+
+        const resultado = await exportarFuncionarioCompletoPlanilhaService.execute('func-99');
+
+        expect(resultado.nomeArquivo).toBe('funcionario-func-99.xlsx');
+    });
 });

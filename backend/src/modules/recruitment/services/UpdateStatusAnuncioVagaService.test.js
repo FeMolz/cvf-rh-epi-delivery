@@ -46,4 +46,10 @@ describe('UpdateStatusAnuncioVagaService', () => {
             updateStatusAnuncioVagaService.execute('x', { status: 'ATIVA' })
         ).rejects.toThrow(MENSAGEM_ANUNCIO_NAO_ENCONTRADO);
     });
+
+    it('deve rejeitar status nao-string', async () => {
+        await expect(updateStatusAnuncioVagaService.execute('v1', { status: 123 })).rejects.toThrow(
+            MENSAGEM_STATUS_ANUNCIO_INVALIDO
+        );
+    });
 });

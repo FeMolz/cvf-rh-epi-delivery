@@ -81,3 +81,8 @@ export const MENSAGEM_DATA_RETORNO_AFASTAMENTO_INVALIDA =
 
 export const MENSAGEM_DATA_RETORNO_AFASTAMENTO_PASSADA =
     'A data prevista de retorno deve ser hoje ou uma data futura.';
+
+export const MENSAGEM_DATA_DESLIGAMENTO_OBRIGATORIA =
+    'Informe a data de desligamento para demissão, rescisão ou aposentadoria.';
+
+export const MENSAGEM_DATA_DESLIGAMENTO_INVALIDA = 'Data de desligamento inválida.';

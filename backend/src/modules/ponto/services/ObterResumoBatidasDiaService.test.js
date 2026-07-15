@@ -32,6 +32,30 @@ describe('ObterResumoBatidasDiaService', () => {
         ).rejects.toThrow('Parâmetro data inválido');
     });
 
+    it('deve aceitar execute sem argumentos usando data atual', async () => {
+        funcionarioPontoRepositoryMock.listarAtivos.mockResolvedValue([]);
+        secullumBatidasProviderMock.listarBatidas.mockResolvedValue([]);
+
+        const resultado = await obterResumoBatidasDiaService.execute(undefined);
+
+        expect(resultado.totais.ativos).toBe(0);
+        expect(resultado.dataReferencia).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
+    it('deve usar data atual quando dataReferencia nao for informada', async () => {
+        funcionarioPontoRepositoryMock.listarAtivos.mockResolvedValue([]);
+        secullumBatidasProviderMock.listarBatidas.mockResolvedValue([]);
+
+        const hoje = new Date();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        const dataEsperada = `${hoje.getFullYear()}-${mes}-${dia}`;
+
+        const resultado = await obterResumoBatidasDiaService.execute({});
+
+        expect(resultado.dataReferencia).toBe(dataEsperada);
+    });
+
     it('deve retornar resumo com totais e listas', async () => {
         funcionarioPontoRepositoryMock.listarAtivos.mockResolvedValue([
             { id: '1', name: 'Ana', cpf: '123.456.789-09', pis: null },
@@ -61,6 +85,24 @@ describe('ObterResumoBatidasDiaService', () => {
         expect(secullumBatidasProviderMock.listarBatidas).toHaveBeenCalledWith({
             dataInicio: '2026-05-22',
             dataFim: '2026-05-22'
+        });
+    });
+
+    it('deve repassar filtros opcionais ao repositorio', async () => {
+        funcionarioPontoRepositoryMock.listarAtivos.mockResolvedValue([]);
+        secullumBatidasProviderMock.listarBatidas.mockResolvedValue([]);
+
+        await obterResumoBatidasDiaService.execute({
+            dataReferencia: '2026-05-22',
+            companyId: 'c1',
+            setorId: 's1',
+            roleId: 'r1'
+        });
+
+        expect(funcionarioPontoRepositoryMock.listarAtivos).toHaveBeenCalledWith({
+            companyId: 'c1',
+            setorId: 's1',
+            roleId: 'r1'
         });
     });
 });

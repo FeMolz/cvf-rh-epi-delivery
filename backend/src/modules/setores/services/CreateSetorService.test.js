@@ -42,4 +42,19 @@ describe('CreateSetorService', () => {
             'Já existe um setor cadastrado com este nome.'
         );
     });
+
+    it('deve criar setor inativo quando isActive for false', async () => {
+        setorRepositoryMock.findByNome.mockResolvedValue(null);
+        setorRepositoryMock.create.mockResolvedValue({ id: '1', nome: 'TI', isActive: false });
+
+        await createSetorService.execute({ nome: 'TI', isActive: false });
+
+        expect(setorRepositoryMock.create).toHaveBeenCalledWith({ nome: 'TI', isActive: false });
+    });
+
+    it('deve rejeitar nome não string', async () => {
+        await expect(createSetorService.execute({ nome: 123 })).rejects.toThrow(
+            'O nome do setor é obrigatório.'
+        );
+    });
 });

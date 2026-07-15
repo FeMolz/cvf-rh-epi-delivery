@@ -39,8 +39,8 @@ jobs:
       - name: ESLint
         run: npm run lint
 
-      - name: Executar testes unitários
-        run: npm test
+      - name: Executar testes unitários com coverage
+        run: npm run test:coverage -w backend
         env:
           JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
@@ -72,8 +72,8 @@ jobs:
       - name: ESLint frontend
         run: npm run lint -w frontend
 
-      - name: Testes Vitest frontend
-        run: npm test -w frontend
+      - name: Testes Vitest frontend com coverage
+        run: npm run test:coverage -w frontend
 
   testes-integracao:
     runs-on: ubuntu-latest

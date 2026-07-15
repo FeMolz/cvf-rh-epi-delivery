@@ -19,7 +19,20 @@ export default defineConfig(({ mode }) => {
         test: {
             environment: 'jsdom',
             setupFiles: './src/test/setup.js',
-            css: true
+            css: true,
+            coverage: {
+                provider: 'v8',
+                reporter: ['text', 'lcov', 'json-summary'],
+                include: ['src/**/*.{js,jsx}'],
+                exclude: ['src/test/**', '**/*.test.{js,jsx}'],
+                tempDirectory: './node_modules/.vitest-coverage',
+                thresholds: {
+                    lines: 100,
+                    functions: 100,
+                    branches: 100,
+                    statements: 100
+                }
+            }
         }
     };
 });

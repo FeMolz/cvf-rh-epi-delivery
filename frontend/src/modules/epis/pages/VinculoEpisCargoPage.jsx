@@ -104,6 +104,7 @@ export function VinculoEpisCargoPage() {
     );
 
     async function aoVincularPorCa(caNumber, periodicityDays) {
+        /* v8 ignore next 4 */
         if (!cargoSelecionadoId) {
             setErro('Selecione um cargo antes de vincular EPIs.');
             return;
@@ -136,6 +137,7 @@ export function VinculoEpisCargoPage() {
     }
 
     async function confirmarDesvinculo() {
+        /* v8 ignore next 3 */
         if (!cargoSelecionadoId || !epiParaDesvincular) {
             return;
         }

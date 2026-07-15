@@ -62,4 +62,28 @@ describe('GetEpiDeliveryPanelService', () => {
         expect(painel.episVencidos).toHaveLength(1);
         expect(painel.episVencidos[0].caNumber).toBe('11070');
     });
+
+    it('deve usar traco quando cargo nao existir e ignorar funcionarios sem epis no cargo', async () => {
+        epiDeliveryRepositoryMock.findFuncionariosAtivos.mockResolvedValue([
+            {
+                id: 'f2',
+                name: 'Carlos',
+                roleId: null,
+                role: null,
+                epiDeliveries: []
+            },
+            {
+                id: 'f3',
+                name: 'Diana',
+                roleId: 'r2',
+                role: { name: 'Auxiliar', roleEpis: [] },
+                epiDeliveries: []
+            }
+        ]);
+
+        const painel = await getEpiDeliveryPanelService.execute();
+
+        expect(painel.funcionariosElegiveis[0].roleName).toBe('—');
+        expect(painel.episVencidos).toEqual([]);
+    });
 });

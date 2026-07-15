@@ -71,4 +71,23 @@ describe('ListRolesService', () => {
             statusCode: 403
         });
     });
+
+    it('deve rejeitar listagem apenas inativos para perfil sem gestão', async () => {
+        await expect(
+            listRolesService.execute({ apenasInativos: true, papelUsuario: 'ALMOXARIFADO' })
+        ).rejects.toMatchObject({
+            statusCode: 403
+        });
+    });
+
+    it('deve listar cargos ativos quando execute é chamado sem opções', async () => {
+        roleRepositoryMock.findAll.mockResolvedValue([]);
+
+        await listRolesService.execute();
+
+        expect(roleRepositoryMock.findAll).toHaveBeenCalledWith({
+            incluirInativos: false,
+            apenasInativos: false
+        });
+    });
 });
