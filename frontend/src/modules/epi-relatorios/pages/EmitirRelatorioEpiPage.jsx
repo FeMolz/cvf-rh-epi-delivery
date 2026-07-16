@@ -44,6 +44,7 @@ export function EmitirRelatorioEpiPage() {
     );
 
     const previewPronto = Boolean(funcionarioEmissaoId && periodoInicio && periodoFim);
+    const podeGerarRelatorio = Boolean(preview?.entregas?.length) && !carregandoPreview;
 
     const carregarFuncionarios = useCallback(async () => {
         const lista = await listarFuncionariosElegiveisEmissaoRelatorio(token);
@@ -111,6 +112,11 @@ export function EmitirRelatorioEpiPage() {
             return;
         }
 
+        if (!preview?.entregas?.length) {
+            setErro('Não há entregas de EPI no período selecionado para gerar o relatório.');
+            return;
+        }
+
         setProcessandoEmissao(true);
         setErro('');
         setMensagemSucesso('');
@@ -170,6 +176,7 @@ export function EmitirRelatorioEpiPage() {
                         periodoFim={periodoFim}
                         processando={processandoEmissao}
                         podeEmitir={podeGerenciar}
+                        podeGerarRelatorio={podeGerarRelatorio}
                         onAlterarFuncionario={setFuncionarioEmissaoId}
                         onAlterarPeriodoInicio={setPeriodoInicio}
                         onAlterarPeriodoFim={setPeriodoFim}

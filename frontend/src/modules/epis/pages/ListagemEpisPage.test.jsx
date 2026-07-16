@@ -26,6 +26,18 @@ const { listarCargos } = await import('../../cargos/services/cargosApi.js');
 const { listarEpis } = await import('../services/episApi.js');
 const { listarEpisPorCargo } = await import('../services/rolesEpisApi.js');
 
+/**
+ * @param {string} valorCargo
+ */
+async function aguardarOpcaoCargoDisponivel(valorCargo) {
+    await waitFor(() => {
+        const select = screen.getByLabelText(/visualizar epis por cargo/i);
+        const opcao = select.querySelector(`option[value="${valorCargo}"]`);
+
+        expect(opcao).toBeInTheDocument();
+    });
+}
+
 describe('ListagemEpisPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -92,6 +104,7 @@ describe('ListagemEpisPage', () => {
             expect(screen.getByText('EPI 1')).toBeInTheDocument();
         });
 
+        await aguardarOpcaoCargoDisponivel('cargo-1');
         await usuario.selectOptions(
             screen.getByLabelText(/visualizar epis por cargo/i),
             'cargo-1'
@@ -143,6 +156,7 @@ describe('ListagemEpisPage', () => {
             expect(screen.getByText('EPI 11')).toBeInTheDocument();
         });
 
+        await aguardarOpcaoCargoDisponivel('cargo-1');
         await usuario.selectOptions(screen.getByLabelText(/visualizar epis por cargo/i), 'cargo-1');
 
         expect(await screen.findByText(/não foi possível carregar os epis do cargo/i)).toBeInTheDocument();
@@ -239,6 +253,7 @@ describe('ListagemEpisPage', () => {
 
         expect(screen.queryByRole('option', { name: /sem epis/i })).not.toBeInTheDocument();
 
+        await aguardarOpcaoCargoDisponivel('cargo-1');
         await usuario.selectOptions(screen.getByLabelText(/visualizar epis por cargo/i), 'cargo-1');
 
         await waitFor(() => {
@@ -283,6 +298,7 @@ describe('ListagemEpisPage', () => {
             expect(screen.getByLabelText(/visualizar epis por cargo/i)).toBeInTheDocument();
         });
 
+        await aguardarOpcaoCargoDisponivel('cargo-1');
         await usuario.selectOptions(screen.getByLabelText(/visualizar epis por cargo/i), 'cargo-1');
 
         await waitFor(() => {

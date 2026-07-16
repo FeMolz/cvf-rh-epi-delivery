@@ -63,5 +63,5 @@ Todos os scripts do backend também podem ser executados com `npm run <script> -
 ## Repositório
 
 - **GitHub:** [FeMolz/CVF-System](https://github.com/FeMolz/CVF-System)
-- **CI:** push/PR → testes no `backend`
-- **CD:** merge na `main` com CI verde → deploy na VPS (ver DEPLOY.md)
+- **CI:** push/PR → testes no `backend` e `frontend`
+- **CD (produção):** merge na `main` → deploy automático no **Render** (ver [DEPLOY.md](./backend/docs/DEPLOY.md))

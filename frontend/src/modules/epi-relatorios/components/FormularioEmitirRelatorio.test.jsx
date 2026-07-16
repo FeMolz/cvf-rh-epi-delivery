@@ -41,6 +41,7 @@ describe('FormularioEmitirRelatorio', () => {
                 funcionarioId="f1"
                 periodoInicio="2026-01-01"
                 periodoFim="2026-01-31"
+                podeGerarRelatorio
                 onAlterarFuncionario={onAlterarFuncionario}
                 onAlterarPeriodoInicio={onAlterarPeriodoInicio}
                 onAlterarPeriodoFim={onAlterarPeriodoFim}
@@ -68,6 +69,24 @@ describe('FormularioEmitirRelatorio', () => {
                 funcionarioId=""
                 periodoInicio=""
                 periodoFim=""
+                onAlterarFuncionario={vi.fn()}
+                onAlterarPeriodoInicio={vi.fn()}
+                onAlterarPeriodoFim={vi.fn()}
+                onEmitir={vi.fn()}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: /gerar relatório/i })).toBeDisabled();
+    });
+
+    it('deve desabilitar emitir sem entregas no periodo', () => {
+        render(
+            <FormularioEmitirRelatorio
+                funcionarios={funcionarios}
+                funcionarioId="f1"
+                periodoInicio="2026-01-01"
+                periodoFim="2026-01-31"
+                podeGerarRelatorio={false}
                 onAlterarFuncionario={vi.fn()}
                 onAlterarPeriodoInicio={vi.fn()}
                 onAlterarPeriodoFim={vi.fn()}

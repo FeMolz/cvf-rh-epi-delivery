@@ -8,6 +8,7 @@ import { PAPEIS_CADASTRO_USUARIO } from '../../../shared/constants/papeis.js';
  *   periodoFim: string,
  *   processando?: boolean,
  *   podeEmitir?: boolean,
+ *   podeGerarRelatorio?: boolean,
  *   onAlterarFuncionario: (id: string) => void,
  *   onAlterarPeriodoInicio: (valor: string) => void,
  *   onAlterarPeriodoFim: (valor: string) => void,
@@ -21,6 +22,7 @@ export function FormularioEmitirRelatorio({
     periodoFim,
     processando = false,
     podeEmitir = true,
+    podeGerarRelatorio = false,
     onAlterarFuncionario,
     onAlterarPeriodoInicio,
     onAlterarPeriodoFim,
@@ -76,7 +78,13 @@ export function FormularioEmitirRelatorio({
                 <button
                     className="botao botao--primario epi-relatorios__botao-emitir"
                     type="button"
-                    disabled={processando || !funcionarioId || !periodoInicio || !periodoFim}
+                    disabled={
+                        processando ||
+                        !funcionarioId ||
+                        !periodoInicio ||
+                        !periodoFim ||
+                        !podeGerarRelatorio
+                    }
                     onClick={onEmitir}
                 >
                     {processando ? 'Gerando…' : 'Gerar relatório'}

@@ -108,7 +108,7 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         ).rejects.toThrow('employeeId, periodoInicio e periodoFim sao obrigatorios.');
     });
 
-    it('deve propagar erro quando persistencia falhar', async () => {
+    it('deve rejeitar quando nao houver entregas no periodo', async () => {
         epiDeliveryReportRepositoryMock.findEmployeeContextForReport.mockResolvedValue({
             id: 'e1',
             name: 'Joao',
@@ -118,6 +118,35 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
             setor: { nome: 'Setor Z' }
         });
         epiDeliveryRepositoryMock.findDeliveriesByEmployeeIdAndDeliveryDateRange.mockResolvedValue([]);
+
+        await expect(
+            generateEpiDeliveryReportPdfService.execute({
+                employeeId: 'e1',
+                periodoInicio: '2026-02-01',
+                periodoFim: '2026-02-02',
+                generatedByUserId: 'u1'
+            })
+        ).rejects.toThrow('Nao ha entregas de EPI no periodo informado para emitir o relatorio.');
+
+        expect(pdfProviderMock.gerarBufferPdf).not.toHaveBeenCalled();
+        expect(epiDeliveryReportRepositoryMock.createReport).not.toHaveBeenCalled();
+    });
+
+    it('deve propagar erro quando persistencia falhar', async () => {
+        epiDeliveryReportRepositoryMock.findEmployeeContextForReport.mockResolvedValue({
+            id: 'e1',
+            name: 'Joao',
+            cpf: '123',
+            role: { name: 'Cargo X' },
+            company: { name: 'Empresa Y' },
+            setor: { nome: 'Setor Z' }
+        });
+        epiDeliveryRepositoryMock.findDeliveriesByEmployeeIdAndDeliveryDateRange.mockResolvedValue([
+            {
+                deliveryDate: new Date('2026-02-05T12:00:00.000Z'),
+                epi: { name: 'Capacete', caNumber: '1' }
+            }
+        ]);
         epiDeliveryReportRepositoryMock.createReport.mockRejectedValue(new Error('falha banco'));
 
         await expect(
