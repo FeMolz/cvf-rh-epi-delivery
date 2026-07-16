@@ -1,6 +1,6 @@
 # Execução por ambiente (desenvolvimento, teste e produção)
 
-Guia único para subir o **RH-System** (API + frontend) nos três ambientes suportados. Detalhes de banco de teste, deploy na VPS e segurança estão em documentos complementares linkados ao final.
+Guia único para subir o **RH-System** (API + frontend) nos três ambientes suportados. Detalhes de banco de teste, deploy no Render e segurança estão em documentos complementares linkados ao final.
 
 ---
 
@@ -311,11 +311,9 @@ npm run docker:prod:up -w backend
 npm run dev:prod -w backend
 ```
 
-**Deploy automatizado na VPS (após merge na `main`):**
+**Deploy automatizado no Render (após merge na `main`):**
 
-```bash
-npm run deploy:prod -w backend
-```
+O Render observa a branch `main` e faz build/deploy da API automaticamente. Configuração em [DEPLOY.md](./DEPLOY.md).
 
 ### 5.5 Validar
 
@@ -348,7 +346,7 @@ Guia completo: [DEPLOY.md](./DEPLOY.md).
 | Teste — só frontend    | `npm run dev:test:frontend`            |
 | Teste — popular banco  | `npm run db:test:seed -w backend`      |
 | Produção — Docker      | `npm run docker:prod:up -w backend`    |
-| Produção — deploy VPS  | `npm run deploy:prod -w backend`       |
+| Produção — migrations  | `npm run db:prod:migrate -w backend`   |
 | Testes unitários       | `npm run test:all`                     |
 
 ---
