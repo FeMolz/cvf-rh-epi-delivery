@@ -15,17 +15,17 @@ Guia para colocar a API RH-System na nuvem, trabalhar com o ambiente ativo e man
                              │
 ┌──────────────┐    ┌────────▼────────┐    ┌──────────────────┐
 │ baseCAEPI    │◄───│  RH-System API  │───►│ Supabase Postgres │
-│ (Docker/VPS) │    │  porta 3000     │    │ 6543 runtime      │
+│ (serviço ext)│    │  Render (PaaS)  │    │ 6543 runtime      │
 └──────────────┘    └─────────────────┘    │ 5432 migrations   │
                                            └──────────────────┘
 ```
 
 | Componente | Onde roda                                              | Variável                     |
 | ---------- | ------------------------------------------------------ | ---------------------------- |
-| API        | VPS / PaaS / `docker-compose.producao.yml`             | —                            |
+| API        | **Render** (Web Service Docker)                        | —                            |
 | Banco      | Supabase                                               | `DATABASE_URL`, `DIRECT_URL` |
 | Redis      | Redis Cloud (já configurado)                           | `REDIS_URL`                  |
-| CAEPI      | Container na mesma VPS (`docker-compose.producao.yml`) | `CAEPI_API_URL`              |
+| CAEPI      | Serviço externo (URL pública ou container separado)    | `CAEPI_API_URL`              |
 | Secullum   | Externo (por cliente)                                  | `SECULLUM_*`                 |
 
 ---
@@ -53,33 +53,37 @@ Atualize quando o domínio real estiver definido — sem alteração de código.
 
 ## 3. Primeiro deploy (checklist)
 
+### Produção no Render (recomendado)
+
+1. No [Render](https://render.com), crie um **Web Service** conectado ao repositório GitHub (`FeMolz/CVF-System`).
+2. Configure o build conforme a seção [Web Service (Render)](#web-service-render-railway-etc) abaixo.
+3. Defina as variáveis de ambiente no painel do Render (mesmas de `.env.production.example`: `JWT_SECRET`, Supabase, `REDIS_URL`, `CORS_ORIGINS`, etc.). **Não** defina `PORT` — o Render injeta automaticamente.
+4. Na sua máquina, com `backend/.env.production.local` preenchido, aplique o schema e o admin inicial:
+
 ```bash
-# 1. Variáveis de produção
-copy .env.production.example .env.production.local
-# Edite: JWT_SECRET (32+), Supabase, REDIS_URL, CORS_ORIGINS, ADMIN_SEED_*
-
-# 2. Schema no Supabase (preferir migrations em produção)
 npm run db:prod:migrate
-# Alternativa em banco vazio: npm run db:prod:push
-
-# 3. Admin inicial (apenas uma vez)
-npm run seed:admin:prod
-
-# 4a. Subir com Docker (API + CAEPI na nuvem)
-npm run docker:prod:up
-
-# 4b. Ou subir só Node (CAEPI em outro host)
-npm run dev:prod
+npm run seed:admin:prod    # apenas uma vez
 ```
+
+5. Faça merge na `main` — o Render faz build e sobe a API automaticamente.
 
 Validar:
 
 ```bash
-curl http://localhost:3000/health
-# Esperado: status OK, database OK, caepi OK
+curl https://<seu-servico>.onrender.com/health
 ```
 
-Login: `POST /api/v1/users/login` com credenciais do seed.
+### Stack Docker local (opcional — desenvolvimento ou homologação)
+
+Para subir API + CAEPI na mesma máquina com Docker Compose:
+
+```bash
+copy backend/.env.production.example backend/.env.production.local
+# Edite: JWT_SECRET (32+), Supabase, REDIS_URL, CORS_ORIGINS, ADMIN_SEED_*
+
+npm run docker:prod:up -w backend
+# Ou só Node: npm run dev:prod -w backend
+```
 
 ---
 
@@ -143,7 +147,7 @@ docker compose -f docker-compose.producao.yml logs -f api
 
 1. Desenvolver na branch `feature/...`.
 2. Abrir PR para `main` — o CI roda lint, testes unitários, smoke de rotas e integração.
-3. Após merge na `main`, o **CD** (`.github/workflows/deploy.yml`) faz deploy na VPS se o CI passou — ou rode `npm run deploy:prod` no servidor.
+3. Após merge na `main`, o **Render** faz deploy automático da API (build Docker + restart do serviço).
 
 ### Alteração só de dados
 
@@ -224,99 +228,51 @@ Para **impedir merge** com código quebrado, configure branch protection no GitH
 
 ---
 
-## 7.1 CD — deploy automático após CI (GitHub Actions)
+## 7.1 CD — deploy automático no Render
 
-O workflow `.github/workflows/deploy.yml` faz deploy na VPS **automaticamente** quando:
-
-1. O workflow **CI** termina com **success** em um push na `main`, ou
-2. Você dispara manualmente em **Actions → Deploy producao → Run workflow**.
+A produção usa **apenas o Render** como plataforma de deploy. Não há workflow de deploy via SSH/VPS no GitHub Actions.
 
 ### Fluxo
 
 ```text
-push/merge na main → CI (testes) verde → Deploy producao → SSH no servidor → cd monorepo && npm run deploy:prod
+push/merge na main → CI (testes) no GitHub Actions
+                  → Render (webhook) → build backend/Dockerfile → sobe Web Service
 ```
 
-O script `scripts/deploy-producao.mjs` no servidor executa:
+O GitHub Actions executa **somente testes** (`.github/workflows/ci.yml`). O deploy em si é responsabilidade do Render, conectado ao repositório.
 
-1. `git fetch` + `reset` para `origin/main`
-2. `npm ci --omit=dev` + `prisma generate`
-3. `npm run db:prod:migrate` (usa `.env.production.local` do servidor)
-4. `docker compose -f docker-compose.producao.yml up -d --build`
-5. Valida `GET http://127.0.0.1:3000/health`
+### Configuração no Render (uma vez)
 
-### Pré-requisitos no servidor (uma vez)
+| Campo               | Valor                           |
+| ------------------- | ------------------------------- |
+| **Tipo**            | Web Service                     |
+| **Repositório**     | `FeMolz/CVF-System`             |
+| **Branch**          | `main`                          |
+| **Root Directory**  | _(vazio — raiz do repositório)_ |
+| **Runtime**         | Docker                          |
+| **Dockerfile Path** | `backend/Dockerfile`            |
+| **Auto-Deploy**     | Sim (on push to `main`)         |
 
-| Requisito               | Versão sugerida              |
-| ----------------------- | ---------------------------- |
-| Linux (VPS)             | Ubuntu 22.04+                |
-| Git                     | clone do repositório         |
-| Node.js                 | 20+                          |
-| Docker + Compose        | plugin v2                    |
-| `.env.production.local` | em `backend/` (nunca no Git) |
+### Migrations antes do deploy
+
+O `Dockerfile` **não** executa `prisma migrate deploy` no startup. Quando houver nova migration no repositório, aplique no Supabase **antes** (ou logo após) o merge:
 
 ```bash
-# Exemplo de preparação inicial no servidor (monorepo)
-git clone https://github.com/FeMolz/CVF-System.git
-cd CVF-System
-npm install
-cp backend/.env.production.example backend/.env.production.local   # edite com credenciais reais
 npm run db:prod:migrate
-npm run seed:admin:prod    # só primeira vez
 ```
 
-`DEPLOY_PATH` no GitHub deve apontar para a **raiz do monorepo** (ex.: `/home/ubuntu/CVF-System`), não para `backend/`.
+Use `backend/.env.production.local` na sua máquina (com `DIRECT_URL` na porta 5432).
 
-### Secrets no GitHub (Settings → Secrets and variables → Actions)
+### Rollback no Render
 
-| Secret                   | Exemplo                                | Obrigatório     |
-| ------------------------ | -------------------------------------- | --------------- |
-| `DEPLOY_HOST`            | `203.0.113.10` ou `api.suaempresa.com` | Sim             |
-| `DEPLOY_USER`            | `ubuntu`                               | Sim             |
-| `DEPLOY_SSH_PRIVATE_KEY` | conteúdo da chave privada SSH (PEM)    | Sim             |
-| `DEPLOY_PATH`            | `/home/ubuntu/CVF-System`              | Sim             |
-| `DEPLOY_PORT`            | `22`                                   | Não (padrão 22) |
+1. No painel do Render: **Manual Deploy** → selecione um commit anterior da `main`, ou
+2. Reverta o commit no GitHub e faça merge — o Render redeploya automaticamente.
 
-### Chave SSH para o deploy
+**Cuidado com migrations:** Prisma não faz rollback automático — planeje migrations reversíveis.
 
-No **seu PC** (ou gere no servidor):
+### Environment `production` no GitHub (opcional)
 
-```bash
-ssh-keygen -t ed25519 -C "github-deploy-rh-system" -f deploy_rh_system -N ""
-```
-
-- Cole o conteúdo de `deploy_rh_system.pub` em `~/.ssh/authorized_keys` **no servidor**
-- Cole o conteúdo de `deploy_rh_system` (privada) no secret `DEPLOY_SSH_PRIVATE_KEY`
-
-### Environment `production` (opcional, recomendado)
-
-Em **Settings → Environments → New environment** → nome `production`:
-
-- Pode exigir aprovação manual antes de cada deploy
-- Pode restringir à branch `main`
-
-O workflow já referencia `environment: production`.
-
-### Deploy manual (sem esperar CI)
-
-GitHub → **Actions** → **Deploy producao** → **Run workflow**.
-
-Ou no servidor:
-
-```bash
-cd /caminho/do/projeto
-npm run deploy:prod
-```
-
-### Rollback rápido
-
-```bash
-cd $DEPLOY_PATH
-git reset --hard <commit-anterior>
-npm run deploy:prod
-```
-
-Migrations já aplicadas **não** revertem automaticamente — planeje migrations compatíveis.
+Se você criou o environment `production` no GitHub para o workflow de VPS antigo, pode removê-lo em **Settings → Environments** — ele não é mais usado.
 
 ---
 
@@ -340,8 +296,7 @@ Detalhes: [SEGURANCA.md](./SEGURANCA.md), [SUPABASE.md](./SUPABASE.md).
 
 | Comando                   | Uso                                                           |
 | ------------------------- | ------------------------------------------------------------- |
-| `npm run docker:prod:up`  | API + CAEPI em produção                                       |
-| `npm run deploy:prod`     | Deploy completo no servidor (git + migrate + docker + health) |
+| `npm run docker:prod:up`  | API + CAEPI local (Docker Compose — não é o deploy no Render) |
 | `npm run db:prod:migrate` | Aplicar migrations no Supabase                                |
 | `npm run seed:admin:prod` | Primeiro admin                                                |
 | `npm run backup:prod`     | Backup local se banco mudou                                   |
