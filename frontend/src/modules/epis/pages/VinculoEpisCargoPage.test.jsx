@@ -34,6 +34,21 @@ const {
     desvincularEpiDoCargo
 } = await import('../services/rolesEpisApi.js');
 
+/**
+ * @param {import('@testing-library/user-event').UserEvent} usuario
+ * @param {string} valorCargo
+ */
+async function selecionarCargoParaVinculo(usuario, valorCargo) {
+    await waitFor(() => {
+        const select = screen.getByLabelText(/cargo para vincular epis/i);
+        const opcao = select.querySelector(`option[value="${valorCargo}"]`);
+
+        expect(opcao).toBeInTheDocument();
+    });
+
+    await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), valorCargo);
+}
+
 describe('VinculoEpisCargoPage', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -87,7 +102,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByText('Capacete')).toBeInTheDocument();
@@ -110,7 +125,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByLabelText(/número do ca/i)).toBeInTheDocument();
@@ -151,7 +166,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByText('Luva')).toBeInTheDocument();
@@ -204,7 +219,7 @@ describe('VinculoEpisCargoPage', () => {
 
         listarEpisPorCargo.mockRejectedValueOnce(new Error('Falha nos vínculos.'));
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByRole('alert')).toHaveTextContent('Falha nos vínculos.');
@@ -224,7 +239,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: /desvincular/i })).toBeInTheDocument();
@@ -251,7 +266,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByLabelText(/número do ca/i)).toBeInTheDocument();
@@ -290,7 +305,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         expect(
             await screen.findByText(/nenhum epi ativo em cache disponível para vincular a este cargo/i)
@@ -331,7 +346,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByRole('option', { name: /operador/i })).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         expect(await screen.findByText(/carregando vínculos/i)).toBeInTheDocument();
 
@@ -354,7 +369,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: /desvincular/i })).toBeInTheDocument();
@@ -393,7 +408,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         expect(
             await screen.findByText(/não foi possível carregar os vínculos do cargo/i)
@@ -423,7 +438,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByLabelText(/número do ca/i)).toBeInTheDocument();
@@ -456,7 +471,7 @@ describe('VinculoEpisCargoPage', () => {
         });
 
         const usuario = userEvent.setup();
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-3');
+        await selecionarCargoParaVinculo(usuario, 'cargo-3');
 
         expect(await screen.findByText(/vincular epis ao cargo/i)).toBeInTheDocument();
     });
@@ -476,7 +491,7 @@ describe('VinculoEpisCargoPage', () => {
             expect(screen.getByLabelText(/cargo para vincular epis/i)).toBeInTheDocument();
         });
 
-        await usuario.selectOptions(screen.getByLabelText(/cargo para vincular epis/i), 'cargo-1');
+        await selecionarCargoParaVinculo(usuario, 'cargo-1');
 
         await waitFor(() => {
             expect(screen.getByLabelText(/número do ca/i)).toBeInTheDocument();
