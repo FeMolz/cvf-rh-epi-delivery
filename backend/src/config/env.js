@@ -1,4 +1,12 @@
-import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import dotenv from 'dotenv';
+
+const diretorioBackend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const nomeArquivoAmbiente = process.env.RH_ENV_ARQUIVO || '.env';
+
+dotenv.config({ path: path.join(diretorioBackend, nomeArquivoAmbiente) });
 
 import {
     DIAS_VALIDADE_TOKEN_CADASTRO_PADRAO,
@@ -8,8 +16,11 @@ import {
     validarCaepiProducao,
     validarOrigensCorsProducao,
     validarRedisProducao,
-    validarSegredoJwt
+    validarSegredoJwt,
+    validarSupabaseStorageProducao
 } from './validarConfiguracaoAmbiente.js';
+import { BUCKET_PADRAO_RELATORIOS_EPI } from '../shared/providers/SupabaseStorageProvider/constants/storageConstantes.js';
+import { resolverCaminhoExecutavelPuppeteer } from '../shared/providers/EpiDeliveryReportPdfProvider/utils/resolverCaminhoExecutavelPuppeteer.js';
 import { URL_PADRAO_CAEPI_API } from '../shared/constants/caepiConstantes.js';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -18,6 +29,11 @@ validarSegredoJwt(process.env.JWT_SECRET, NODE_ENV);
 validarOrigensCorsProducao(process.env.CORS_ORIGINS, NODE_ENV);
 validarRedisProducao(process.env.REDIS_URL, NODE_ENV);
 validarCaepiProducao(process.env.CAEPI_API_URL, NODE_ENV);
+validarSupabaseStorageProducao(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NODE_ENV
+);
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not defined in environment variables');
@@ -56,7 +72,12 @@ const env = {
     HEALTH_CHECK_TOKEN: process.env.HEALTH_CHECK_TOKEN || null,
     CAEPI_API_URL: process.env.CAEPI_API_URL || URL_PADRAO_CAEPI_API,
     CAEPI_AGUARDAR_INICIO: resolverAguardarInicioCaepi(),
-    CAEPI_USAR_SOMENTE_CACHE: process.env.CAEPI_USAR_SOMENTE_CACHE === 'true'
+    CAEPI_USAR_SOMENTE_CACHE: process.env.CAEPI_USAR_SOMENTE_CACHE === 'true',
+    SUPABASE_URL: process.env.SUPABASE_URL || null,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
+    SUPABASE_STORAGE_BUCKET_EPI_REPORTS:
+        process.env.SUPABASE_STORAGE_BUCKET_EPI_REPORTS || BUCKET_PADRAO_RELATORIOS_EPI,
+    PUPPETEER_EXECUTABLE_PATH: resolverCaminhoExecutavelPuppeteer() || null
 };
 
 export default env;

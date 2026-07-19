@@ -250,14 +250,15 @@ class EpiDeliveryReportRepository {
     /**
      * @param {string} identificadorRelatorio
      */
-    async findByIdComPdfBinarioParaDownload(identificadorRelatorio) {
+    async findByIdComPathPdfParaDownload(identificadorRelatorio) {
         return prisma.epiDeliveryReport.findUnique({
             where: { id: identificadorRelatorio },
             select: {
                 id: true,
                 createdAt: true,
                 updatedAt: true,
-                pdfConteudo: true,
+                pdfStoragePath: true,
+                pdfTamanhoBytes: true,
                 employee: { select: { name: true } }
             }
         });

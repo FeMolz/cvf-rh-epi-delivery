@@ -10,6 +10,12 @@ const navegadorMock = {
     close: jest.fn()
 };
 
+jest.unstable_mockModule('../../../config/env.js', () => ({
+    default: {
+        PUPPETEER_EXECUTABLE_PATH: null
+    }
+}));
+
 jest.unstable_mockModule('puppeteer', () => ({
     default: {
         launch: jest.fn(() => Promise.resolve(navegadorMock))
@@ -40,15 +46,18 @@ describe('renderizarHtmlParaPdf', () => {
         expect(navegadorMock.close).toHaveBeenCalled();
     });
 
-    it('deve usar executablePath quando PUPPETEER_EXECUTABLE_PATH estiver definido', async () => {
-        const caminhoOriginal = process.env.PUPPETEER_EXECUTABLE_PATH;
-        process.env.PUPPETEER_EXECUTABLE_PATH = 'C:\\chrome\\chrome.exe';
-
+    it('deve usar executablePath quando env.PUPPETEER_EXECUTABLE_PATH estiver definido', async () => {
         jest.resetModules();
 
         const puppeteerMock = {
             launch: jest.fn(() => Promise.resolve(navegadorMock))
         };
+
+        jest.unstable_mockModule('../../../config/env.js', () => ({
+            default: {
+                PUPPETEER_EXECUTABLE_PATH: 'C:\\chrome\\chrome.exe'
+            }
+        }));
 
         jest.unstable_mockModule('puppeteer', () => ({
             default: puppeteerMock
@@ -63,11 +72,5 @@ describe('renderizarHtmlParaPdf', () => {
                 executablePath: 'C:\\chrome\\chrome.exe'
             })
         );
-
-        if (caminhoOriginal === undefined) {
-            delete process.env.PUPPETEER_EXECUTABLE_PATH;
-        } else {
-            process.env.PUPPETEER_EXECUTABLE_PATH = caminhoOriginal;
-        }
     });
 });

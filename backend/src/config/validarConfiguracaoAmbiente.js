@@ -64,6 +64,20 @@ export function validarCaepiProducao(urlCaepi, nodeEnv) {
     }
 }
 
+/**
+ * @param {string | undefined} urlSupabase
+ * @param {string | undefined} chaveServiceRole
+ * @param {string} nodeEnv
+ */
+export function validarSupabaseStorageProducao(urlSupabase, chaveServiceRole, nodeEnv) {
+    if (nodeEnv !== 'production') {
+        return;
+    }
+
+    exigirVariavelDefinida('SUPABASE_URL', urlSupabase);
+    exigirVariavelDefinida('SUPABASE_SERVICE_ROLE_KEY', chaveServiceRole);
+}
+
 export function validarOrigensCorsProducao(origensCors, nodeEnv) {
     if (nodeEnv !== 'production') {
         return;

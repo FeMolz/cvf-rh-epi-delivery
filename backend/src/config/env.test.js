@@ -10,7 +10,8 @@ jest.unstable_mockModule('./validarConfiguracaoAmbiente.js', () => ({
     validarSegredoJwt: jest.fn(),
     validarOrigensCorsProducao: jest.fn(),
     validarRedisProducao: jest.fn(),
-    validarCaepiProducao: jest.fn()
+    validarCaepiProducao: jest.fn(),
+    validarSupabaseStorageProducao: jest.fn()
 }));
 
 describe('env', () => {
@@ -50,12 +51,15 @@ describe('env', () => {
 
     it('deve lançar erro quando DATABASE_URL não estiver definida', async () => {
         jest.resetModules();
-        jest.unstable_mockModule('dotenv/config', () => ({}));
+        jest.unstable_mockModule('dotenv', () => ({
+            default: { config: jest.fn() }
+        }));
         jest.unstable_mockModule('./validarConfiguracaoAmbiente.js', () => ({
             validarSegredoJwt: jest.fn(),
             validarOrigensCorsProducao: jest.fn(),
             validarRedisProducao: jest.fn(),
-            validarCaepiProducao: jest.fn()
+            validarCaepiProducao: jest.fn(),
+            validarSupabaseStorageProducao: jest.fn()
         }));
 
         process.env.NODE_ENV = 'test';
