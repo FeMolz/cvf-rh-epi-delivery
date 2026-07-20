@@ -3,7 +3,8 @@ import {
     validarCaepiProducao,
     validarOrigensCorsProducao,
     validarRedisProducao,
-    validarSegredoJwt
+    validarSegredoJwt,
+    validarSupabaseStorageProducao
 } from './validarConfiguracaoAmbiente.js';
 
 describe('validarConfiguracaoAmbiente', () => {
@@ -58,6 +59,19 @@ describe('validarConfiguracaoAmbiente', () => {
         expect(() => validarOrigensCorsProducao('*', 'development')).not.toThrow();
     });
 
+    it('deve exigir SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY em produção', () => {
+        expect(() => validarSupabaseStorageProducao(undefined, 'chave', 'production')).toThrow(
+            'SUPABASE_URL'
+        );
+        expect(() => validarSupabaseStorageProducao('https://projeto.supabase.co', '   ', 'production')).toThrow(
+            'SUPABASE_SERVICE_ROLE_KEY'
+        );
+    });
+
+    it('deve ignorar Supabase Storage fora de produção', () => {
+        expect(() => validarSupabaseStorageProducao(undefined, undefined, 'development')).not.toThrow();
+    });
+
     it('deve aceitar configuração válida', () => {
         expect(() => validarSegredoJwt('segredo-teste-local-16', 'test')).not.toThrow();
         expect(() =>
@@ -65,5 +79,8 @@ describe('validarConfiguracaoAmbiente', () => {
         ).not.toThrow();
         expect(() => validarRedisProducao('redis://localhost:6379', 'production')).not.toThrow();
         expect(() => validarCaepiProducao('http://localhost:8080', 'production')).not.toThrow();
+        expect(() =>
+            validarSupabaseStorageProducao('https://projeto.supabase.co', 'service-role-key', 'production')
+        ).not.toThrow();
     });
 });

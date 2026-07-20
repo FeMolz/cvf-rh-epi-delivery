@@ -204,7 +204,8 @@ model EpiDeliveryReport {
     periodStartDate DateTime
     periodEndDate   DateTime
 
-    pdfConteudo Bytes
+    pdfStoragePath  String
+    pdfTamanhoBytes Int
 
     foiImpresso    Boolean @default(false)
     foiEncaminhado Boolean @default(false)

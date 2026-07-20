@@ -4,7 +4,7 @@ Este documento descreve a arquitetura, as regras de negócio e os endpoints do m
 
 ## 1. Visão Geral
 
-O módulo complementa o de **Entregas de EPI** (`epiDeliveries`): lê os registros `EpiDelivery` no período informado, monta um documento PDF a partir de **template HTML/CSS** (renderizado com Puppeteer no provider compartilhado) e persiste o **binário do PDF** (`pdfConteudo`, `BYTEA` no PostgreSQL) na linha `EpiDeliveryReport`, junto com período UTC e flags operacionais. As listagens e respostas JSON **não** incluem o campo binário (apenas metadados). Depende do repositório `EpiDeliveryRepository` apenas para a consulta por intervalo de `deliveryDate`. O usuário que emite o relatório é registrado em `generatedByUserId` a partir do token JWT.
+O módulo complementa o de **Entregas de EPI** (`epiDeliveries`): lê os registros `EpiDelivery` no período informado, monta um documento PDF a partir de **template HTML/CSS** (renderizado com Puppeteer no provider compartilhado), envia o binário ao **Supabase Storage** (bucket privado `epi-reports`) e persiste em `EpiDeliveryReport` apenas o **path** (`pdfStoragePath`) e o tamanho (`pdfTamanhoBytes`), junto com período UTC e flags operacionais. As listagens e respostas JSON **não** incluem o arquivo (apenas metadados). Depende do repositório `EpiDeliveryRepository` apenas para a consulta por intervalo de `deliveryDate`. O usuário que emite o relatório é registrado em `generatedByUserId` a partir do token JWT.
 
 ## 2. Modelo de Dados
 
@@ -20,7 +20,8 @@ model EpiDeliveryReport {
     periodStartDate DateTime
     periodEndDate   DateTime
 
-    pdfConteudo Bytes
+    pdfStoragePath  String
+    pdfTamanhoBytes Int
 
     foiImpresso    Boolean @default(false)
     foiEncaminhado Boolean @default(false)
@@ -37,7 +38,17 @@ model EpiDeliveryReport {
 }
 ```
 
-> **Migração:** a alteração de caminho em disco para `pdfConteudo` remove linhas antigas de `EpiDeliveryReport` (não há importação automática dos arquivos da pasta `storage/`). Reemita relatórios se precisar do histórico.
+> **Migração:** relatórios antigos em `pdfConteudo` (BYTEA) devem ser migrados com `npm run migrate:epi-pdfs-storage:prod` entre as migrations `20260718183000` e `20260718183100`. Relatórios sem path após a etapa final são removidos.
+
+```text
+src/shared/providers/SupabaseStorageProvider/
+├── constants/
+│   └── storageConstantes.js
+├── montarPathRelatorioEpi.js
+├── obterClienteSupabase.js
+├── SupabaseStorageProvider.js
+└── SupabaseStorageProvider.test.js
+```
 
 ## 3. Estrutura de Diretórios
 
@@ -103,7 +114,8 @@ src/shared/providers/EpiDeliveryReportPdfProvider/
 - Busca funcionário ativo (`deletedAt` nulo) com cargo, empresa e setor para o cabeçalho do PDF.
 - Lista entregas com `EpiDeliveryRepository.findDeliveriesByEmployeeIdAndDeliveryDateRange` filtrando por `deliveryDate` no intervalo.
 - Gera o PDF com `EpiDeliveryReportPdfProvider`: identificação (funcionário, empresa, cargo, setor, período), **tabela** de EPIs entregues (data pt-BR UTC, equipamento, CA) e duas linhas de assinatura (funcionário e RH/SST).
-- Grava o binário em `EpiDeliveryReport.pdfConteudo` (PostgreSQL `BYTEA`) numa única transação de criação do registro, com flags `foiImpresso`, `foiEncaminhado` e `foiAssinado` em `false`.
+- Envia o buffer ao Supabase Storage (`SupabaseStorageProvider`) no path `{employeeId}/{reportId}.pdf`.
+- Persiste metadados em `EpiDeliveryReport` com `pdfStoragePath` e `pdfTamanhoBytes`. Se o insert falhar, remove o arquivo enviado (compensação).
 
 ### `ListPendingEpiDeliveryReportsService`
 
@@ -131,13 +143,13 @@ src/shared/providers/EpiDeliveryReportPdfProvider/
 
 ### `ResolveEpiDeliveryReportPdfFileService`
 
-- Carrega `pdfConteudo` via `findByIdComPdfBinarioParaDownload` (somente para download). Se o binário estiver ausente ou vazio, erro de domínio.
+- Carrega `pdfStoragePath` via `findByIdComPathPdfParaDownload` e baixa o binário do Supabase Storage. Se o path estiver ausente ou o arquivo vazio, erro de domínio.
 - Devolve `bufferPdf` e **nome sugerido** de download: `{nome_do_funcionario}_{AAAA-MM-DD}.pdf` (nome com espaços virando `_`, caracteres inválidos removidos, data de emissão em **UTC** conforme `createdAt` do relatório).
 
 ### `EpiDeliveryReportRepository`
 
 - Única camada do módulo que usa o Prisma Client para `EpiDeliveryReport` e contexto de `Employee` quando necessário.
-- Listagens e `create`/`findById`/`update` de metadados usam `select` **sem** `pdfConteudo`, para não inflar JSON nem memória; o download usa método dedicado que inclui o binário.
+- Listagens e `create`/`findById`/`update` de metadados usam `select` **sem** path do arquivo; o download usa método dedicado com `pdfStoragePath`.
 
 ### `EpiDeliveryReportPdfProvider` (compartilhado)
 
@@ -172,11 +184,11 @@ Todas as rotas exigem JWT (`isAuthenticated`) e perfil conforme `authorize`.
 Os testes usam mocks com `jest.unstable_mockModule` onde necessário, sem banco real:
 
 - **`EpiDeliveryReportRepository.test.js`**: chamadas ao Prisma para busca de contexto, criação, listagens, `findById` e atualização de flags.
-- **`GenerateEpiDeliveryReportPdfService.test.js`**: validações, integração mockada com repositório de entregas, provider PDF e persistência do binário em `pdfConteudo`.
+- **`GenerateEpiDeliveryReportPdfService.test.js`**: validações, integração mockada com repositório de entregas, providers PDF/Storage e persistência de metadados.
 - **`ListEpiDeliveryReportsService.test.js`**: filtros, paginação e validação de intervalo de emissão.
 - **`ListPendingEpiDeliveryReportsService.test.js`** e **`ListEmployeeEpiDeliveryReportArchiveService.test.js`**: repasse ao repositório e validação de parâmetro obrigatório no arquivo.
 - **`UpdateEpiDeliveryReportFlagsService.test.js`**: relatório inexistente, ausência de flags e atualização parcial.
-- **`ResolveEpiDeliveryReportPdfFileService.test.js`**: binário vazio, nome sugerido e buffer para download.
+- **`ResolveEpiDeliveryReportPdfFileService.test.js`**: path ausente, download do Storage, nome sugerido e buffer para download.
 - **`periodoRelatorioEntregaEpi.test.js`**: formato de data, ordem do período e formatação para o PDF.
 - **`EpiDeliveryReportPdfProvider.test.js`**: geração de buffer PDF com tabela preenchida e com lista de entregas vazia.
 

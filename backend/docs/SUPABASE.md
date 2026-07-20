@@ -23,7 +23,59 @@ copy .env.production.example .env.production.local
 
 2. No [painel Supabase](https://supabase.com/dashboard) → **Project Settings** → **Database**, copie a senha e substitua `[YOUR-PASSWORD]` nas duas URLs.
 
-3. Preencha também `JWT_SECRET` (32+ chars), `CORS_ORIGINS`, `REDIS_URL` e demais variáveis de [SEGURANCA.md](./SEGURANCA.md).
+3. Preencha também `JWT_SECRET` (32+ chars), `CORS_ORIGINS`, `REDIS_URL`, variáveis de **Supabase Storage** (abaixo) e demais variáveis de [SEGURANCA.md](./SEGURANCA.md).
+
+## Supabase Storage (PDFs de relatórios EPI)
+
+Os PDFs de relatórios de entrega de EPI ficam em um **bucket privado** no Storage do mesmo projeto Supabase.
+
+### Buckets por ambiente
+
+| Ambiente | Arquivo | `SUPABASE_STORAGE_BUCKET_EPI_REPORTS` |
+| -------- | ------- | ------------------------------------- |
+| Desenvolvimento | `backend/.env` | `epi-reports-dev-teste` |
+| Teste / homologação | `backend/.env.test` | `epi-reports-dev-teste` |
+| Produção | `backend/.env.production.local` / Render | `epi-reports` |
+
+Crie **dois buckets privados** no painel: um para produção e outro para dev/teste. O código usa somente a variável de ambiente — não há bucket fixo no código (o padrão `epi-reports` só vale se a variável estiver ausente).
+
+### Configuração manual no painel (obrigatória uma vez)
+
+1. Abra o [dashboard do projeto](https://supabase.com/dashboard) → **Storage** → **New bucket**.
+2. Crie `epi-reports` (produção) e `epi-reports-dev-teste` (dev/teste), ambos **privados**.
+3. Em **Project Settings** → **API**, copie:
+   - **Project URL** → `SUPABASE_URL`
+   - **Secret key** (`sb_secret_...`) → `SUPABASE_SERVICE_ROLE_KEY` — **somente no backend**, nunca no frontend.
+
+**Produção:**
+
+```env
+SUPABASE_STORAGE_BUCKET_EPI_REPORTS="epi-reports"
+```
+
+**Dev e teste:**
+
+```env
+SUPABASE_STORAGE_BUCKET_EPI_REPORTS="epi-reports-dev-teste"
+```
+
+O download continua pela API (`GET /api/v1/epi-delivery-reports/:id/pdf`) com JWT; o frontend não acessa o Storage diretamente.
+
+### Migrar PDFs antigos (BYTEA → Storage)
+
+Se produção ainda tiver `pdfConteudo` no Postgres:
+
+```bash
+npm run db:prod:migrate
+# Para na migration 20260718183000 (adiciona colunas novas)
+
+npm run migrate:epi-pdfs-storage:prod
+
+npm run db:prod:migrate
+# Aplica 20260718183100 (remove BYTEA e exige pdfStoragePath)
+```
+
+Em banco vazio ou sem relatórios legados, `db:prod:migrate` aplica as duas migrations em sequência.
 
 ## Aplicar schema no Supabase
 

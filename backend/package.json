@@ -34,6 +34,8 @@
     "db:test:reset:minimo": "docker compose -f docker-compose.test.yml down -v && docker compose -f docker-compose.test.yml up -d && node prisma/scripts/preparar-banco-teste.mjs --apenas-schema && npm run seed:admin:test && npm run seed:epis:cache:test",
     "db:prod:push": "node prisma/scripts/executar-com-ambiente-producao.mjs npx prisma db push",
     "db:prod:migrate": "node prisma/scripts/executar-com-ambiente-producao.mjs npx prisma migrate deploy",
+    "migrate:epi-pdfs-storage": "node prisma/scripts/migrar-pdfs-epi-para-supabase.mjs",
+    "migrate:epi-pdfs-storage:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node prisma/scripts/migrar-pdfs-epi-para-supabase.mjs",
     "backup:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node scripts/backup-postgres-se-mudou.mjs",
     "dev:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node src/server.js",
     "seed:admin:prod": "node prisma/scripts/executar-com-ambiente-producao.mjs node prisma/seeders/admin.js",

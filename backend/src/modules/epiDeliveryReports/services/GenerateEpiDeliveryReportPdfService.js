@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import epiDeliveryReportPdfProvider from '../../../shared/providers/EpiDeliveryReportPdfProvider/EpiDeliveryReportPdfProvider.js';
+import supabaseStorageProvider from '../../../shared/providers/SupabaseStorageProvider/SupabaseStorageProvider.js';
 import epiDeliveryRepository from '../../epiDeliveries/repositories/EpiDeliveryRepository.js';
 import epiDeliveryReportRepository from '../repositories/EpiDeliveryReportRepository.js';
 import {
@@ -54,18 +55,35 @@ class GenerateEpiDeliveryReportPdfService {
         });
 
         const identificadorRelatorio = randomUUID();
+        const bucketRelatorios = supabaseStorageProvider.obterBucketRelatoriosEpi();
+        const pathPdf = supabaseStorageProvider.montarPathRelatorioEpi(employeeId, identificadorRelatorio);
 
-        return epiDeliveryReportRepository.createReport({
-            id: identificadorRelatorio,
-            employeeId,
-            periodStartDate: limiteInicialEntrega,
-            periodEndDate: limiteFinalEntrega,
-            pdfConteudo: bufferPdf,
-            foiImpresso: false,
-            foiEncaminhado: false,
-            foiAssinado: false,
-            generatedByUserId
+        await supabaseStorageProvider.uploadArquivo({
+            bucket: bucketRelatorios,
+            path: pathPdf,
+            buffer: bufferPdf
         });
+
+        try {
+            return await epiDeliveryReportRepository.createReport({
+                id: identificadorRelatorio,
+                employeeId,
+                periodStartDate: limiteInicialEntrega,
+                periodEndDate: limiteFinalEntrega,
+                pdfStoragePath: pathPdf,
+                pdfTamanhoBytes: bufferPdf.length,
+                foiImpresso: false,
+                foiEncaminhado: false,
+                foiAssinado: false,
+                generatedByUserId
+            });
+        } catch (erroPersistencia) {
+            await supabaseStorageProvider.removerArquivo({
+                bucket: bucketRelatorios,
+                path: pathPdf
+            });
+            throw erroPersistencia;
+        }
     }
 }
 

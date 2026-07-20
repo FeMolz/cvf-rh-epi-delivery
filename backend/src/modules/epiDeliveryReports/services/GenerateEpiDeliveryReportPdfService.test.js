@@ -17,6 +17,13 @@ const pdfProviderMock = {
     gerarBufferPdf: jest.fn(() => Promise.resolve(Buffer.from('%PDF-test')))
 };
 
+const supabaseStorageProviderMock = {
+    obterBucketRelatoriosEpi: jest.fn(() => 'epi-reports'),
+    montarPathRelatorioEpi: jest.fn(() => 'e1/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf'),
+    uploadArquivo: jest.fn(() => Promise.resolve()),
+    removerArquivo: jest.fn(() => Promise.resolve())
+};
+
 jest.unstable_mockModule('../repositories/EpiDeliveryReportRepository.js', () => ({
     default: epiDeliveryReportRepositoryMock
 }));
@@ -29,6 +36,10 @@ jest.unstable_mockModule('../../../shared/providers/EpiDeliveryReportPdfProvider
     default: pdfProviderMock
 }));
 
+jest.unstable_mockModule('../../../shared/providers/SupabaseStorageProvider/SupabaseStorageProvider.js', () => ({
+    default: supabaseStorageProviderMock
+}));
+
 const generateEpiDeliveryReportPdfService = (await import('./GenerateEpiDeliveryReportPdfService.js')).default;
 
 describe('GenerateEpiDeliveryReportPdfService', () => {
@@ -36,7 +47,7 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve persistir PDF binario no banco com o relatorio', async () => {
+    it('deve enviar PDF ao storage e persistir metadados no banco', async () => {
         epiDeliveryReportRepositoryMock.findEmployeeContextForReport.mockResolvedValue({
             id: 'e1',
             name: 'Joao',
@@ -61,22 +72,18 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         });
 
         expect(resultado.id).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
-        expect(pdfProviderMock.gerarBufferPdf).toHaveBeenCalledWith(
+        expect(supabaseStorageProviderMock.uploadArquivo).toHaveBeenCalledWith(
             expect.objectContaining({
-                nomeFuncionario: 'Joao',
-                nomeSetor: 'Setor Z',
-                entregasTabela: [
-                    expect.objectContaining({
-                        nomeEquipamento: 'Capacete',
-                        numeroCa: '1'
-                    })
-                ]
+                bucket: 'epi-reports',
+                path: 'e1/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf',
+                buffer: expect.any(Buffer)
             })
         );
         expect(epiDeliveryReportRepositoryMock.createReport).toHaveBeenCalledWith(
             expect.objectContaining({
                 employeeId: 'e1',
-                pdfConteudo: expect.any(Buffer),
+                pdfStoragePath: 'e1/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf',
+                pdfTamanhoBytes: expect.any(Number),
                 foiAssinado: false,
                 foiImpresso: false,
                 foiEncaminhado: false
@@ -129,10 +136,11 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
         ).rejects.toThrow('Nao ha entregas de EPI no periodo informado para emitir o relatorio.');
 
         expect(pdfProviderMock.gerarBufferPdf).not.toHaveBeenCalled();
+        expect(supabaseStorageProviderMock.uploadArquivo).not.toHaveBeenCalled();
         expect(epiDeliveryReportRepositoryMock.createReport).not.toHaveBeenCalled();
     });
 
-    it('deve propagar erro quando persistencia falhar', async () => {
+    it('deve remover arquivo do storage quando persistencia falhar', async () => {
         epiDeliveryReportRepositoryMock.findEmployeeContextForReport.mockResolvedValue({
             id: 'e1',
             name: 'Joao',
@@ -157,5 +165,10 @@ describe('GenerateEpiDeliveryReportPdfService', () => {
                 generatedByUserId: 'u1'
             })
         ).rejects.toThrow('falha banco');
+
+        expect(supabaseStorageProviderMock.removerArquivo).toHaveBeenCalledWith({
+            bucket: 'epi-reports',
+            path: 'e1/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf'
+        });
     });
 });
