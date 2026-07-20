@@ -155,10 +155,24 @@ describe('ResolveEpiDeliveryReportPdfFileService', () => {
         expect(resultado.nomeArquivoSugerido).toBe('João_Teste_data-desconhecida.pdf');
     });
 
-    it('deve falhar quando PDF baixado estiver vazio', async () => {
+    it('deve falhar quando metadados do PDF estiverem ausentes', async () => {
         epiDeliveryReportRepositoryMock.findByIdComPathPdfParaDownload.mockResolvedValue({
             pdfStoragePath: 'e1/r1.pdf',
             pdfTamanhoBytes: 0,
+            createdAt: new Date('2026-01-01T00:00:00.000Z'),
+            employee: { name: 'X' }
+        });
+
+        await expect(resolveEpiDeliveryReportPdfFileService.execute('r1')).rejects.toThrow(
+            'PDF do relatorio nao encontrado ou vazio na base de dados.'
+        );
+        expect(supabaseStorageProviderMock.downloadArquivo).not.toHaveBeenCalled();
+    });
+
+    it('deve falhar quando PDF baixado estiver vazio', async () => {
+        epiDeliveryReportRepositoryMock.findByIdComPathPdfParaDownload.mockResolvedValue({
+            pdfStoragePath: 'e1/r1.pdf',
+            pdfTamanhoBytes: 100,
             createdAt: new Date('2026-01-01T00:00:00.000Z'),
             employee: { name: 'X' }
         });

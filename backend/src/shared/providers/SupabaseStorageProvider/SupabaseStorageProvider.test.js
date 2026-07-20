@@ -103,6 +103,46 @@ describe('SupabaseStorageProvider', () => {
         expect(removeMock).toHaveBeenCalledWith(['e1/r1.pdf']);
     });
 
+    it('deve propagar erro de remocao', async () => {
+        removeMock.mockResolvedValue({ error: { message: 'falha ao remover' } });
+
+        await expect(
+            supabaseStorageProvider.removerArquivo({
+                bucket: 'epi-reports',
+                path: 'e1/r1.pdf'
+            })
+        ).rejects.toThrow('Falha ao remover arquivo do Supabase Storage.');
+    });
+
+    it('deve usar bucket padrao quando env nao definir bucket', async () => {
+        jest.resetModules();
+        jest.unstable_mockModule('@supabase/supabase-js', () => ({
+            createClient: createClientMock
+        }));
+        jest.unstable_mockModule('../../../config/env.js', () => ({
+            default: {
+                SUPABASE_URL: 'https://projeto.supabase.co',
+                SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
+                SUPABASE_STORAGE_BUCKET_EPI_REPORTS: null
+            }
+        }));
+
+        const provider = (await import('./SupabaseStorageProvider.js')).default;
+
+        expect(provider.obterBucketRelatoriosEpi()).toBe('epi-reports');
+    });
+
+    it('deve propagar erro de download quando arquivo estiver ausente sem mensagem', async () => {
+        downloadMock.mockResolvedValue({ data: null, error: null });
+
+        await expect(
+            supabaseStorageProvider.downloadArquivo({
+                bucket: 'epi-reports',
+                path: 'e1/r1.pdf'
+            })
+        ).rejects.toThrow('Falha ao baixar arquivo do Supabase Storage. arquivo ausente');
+    });
+
     it('deve montar path padrao de relatorio epi', () => {
         expect(supabaseStorageProvider.montarPathRelatorioEpi('e1', 'r1')).toBe('e1/r1.pdf');
         expect(supabaseStorageProvider.obterBucketRelatoriosEpi()).toBe('epi-reports');
