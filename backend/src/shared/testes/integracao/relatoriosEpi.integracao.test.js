@@ -49,15 +49,13 @@ const resolveEpiDeliveryReportPdfFileService = (
 ).default;
 const {
     criarDadosIntegracaoFuncionariosEpi,
-    integracaoHabilitada,
+    exigirIntegracaoHabilitada,
     limparDadosIntegracaoFuncionariosEpi,
     verificarConexaoBancoIntegracao
 } = await import('./utilitariosBancoIntegracao.js');
 const { limparRelatoriosEpi } = await import('./utilitarios/limpeza.js');
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — relatórios de entrega de EPI', () => {
+describe('Integração — relatórios de entrega de EPI', () => {
     const sufixo = `${Date.now()}`;
     /** @type {Awaited<ReturnType<typeof criarDadosIntegracaoFuncionariosEpi>>} */
     let dadosTeste;
@@ -65,6 +63,7 @@ describeIntegracao('Integração — relatórios de entrega de EPI', () => {
     let relatorioId = null;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
         dadosTeste = await criarDadosIntegracaoFuncionariosEpi(sufixo);
     });

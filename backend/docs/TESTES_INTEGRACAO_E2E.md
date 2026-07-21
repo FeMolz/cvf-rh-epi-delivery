@@ -85,9 +85,13 @@ npm run test:deploy
 
 ## 6. CI (GitHub Actions)
 
+Os três jobs rodam **em paralelo** (integração e E2E não são cancelados quando os unitários falham):
+
 - `testes-unitarios` — coverage 100% backend + smoke de rotas + frontend.
 - `testes-integracao` — Postgres service + `npm run test:integracao`.
 - `testes-e2e` — Postgres + seeds + Puppeteer + Playwright Chromium.
+
+Os testes de integração **não usam `describe.skip`**: se executados sem `RUN_INTEGRATION_TESTS=true`, falham com mensagem explícita.
 
 Variáveis necessárias no job E2E: `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (secrets do repositório em **Settings → Secrets → Actions**).
 

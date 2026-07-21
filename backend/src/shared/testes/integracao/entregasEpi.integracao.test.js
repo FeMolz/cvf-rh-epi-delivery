@@ -5,15 +5,13 @@ import prisma from '../../../config/database.js';
 import { criarFuncionarioIntegracao } from './utilitarios/fabricaFuncionario.js';
 import {
     criarDadosIntegracaoFuncionariosEpi,
-    integracaoHabilitada,
+    exigirIntegracaoHabilitada,
     limparDadosIntegracaoFuncionariosEpi,
     verificarConexaoBancoIntegracao
 } from './utilitariosBancoIntegracao.js';
 import { limparFuncionarios } from './utilitarios/limpeza.js';
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — entregas de EPI', () => {
+describe('Integração — entregas de EPI', () => {
     const sufixo = `${Date.now()}`;
     /** @type {Awaited<ReturnType<typeof criarDadosIntegracaoFuncionariosEpi>>} */
     let dadosTeste;
@@ -21,6 +19,7 @@ describeIntegracao('Integração — entregas de EPI', () => {
     let funcionarioEntregaId = null;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
         dadosTeste = await criarDadosIntegracaoFuncionariosEpi(sufixo);
     });

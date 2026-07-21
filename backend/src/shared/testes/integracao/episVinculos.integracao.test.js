@@ -4,12 +4,10 @@ import listEpisByRoleService from '../../../modules/chaining/epiToRole/services/
 import unlinkEpiFromRoleService from '../../../modules/chaining/epiToRole/services/UnlinkEpiFromRoleService.js';
 import { criarCargoIntegracao } from './utilitarios/fabricaCargo.js';
 import { criarEpiIntegracao } from './utilitarios/fabricaEpi.js';
-import { integracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
+import { exigirIntegracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
 import { limparCargoComDependencias, limparEpi } from './utilitarios/limpeza.js';
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — vínculos de EPI com cargo', () => {
+describe('Integração — vínculos de EPI com cargo', () => {
     const sufixo = `${Date.now()}`;
     /** @type {string | null} */
     let cargoId = null;
@@ -17,6 +15,7 @@ describeIntegracao('Integração — vínculos de EPI com cargo', () => {
     let epiId = null;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
         const cargo = await criarCargoIntegracao(sufixo);
         const epi = await criarEpiIntegracao(sufixo);

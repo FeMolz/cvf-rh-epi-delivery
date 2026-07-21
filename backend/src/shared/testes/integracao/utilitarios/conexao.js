@@ -19,3 +19,12 @@ export async function verificarConexaoBancoIntegracao() {
 export function integracaoHabilitada() {
     return process.env.RUN_INTEGRATION_TESTS === 'true' && Boolean(process.env.DATABASE_URL);
 }
+
+export function exigirIntegracaoHabilitada() {
+    if (!integracaoHabilitada()) {
+        throw new Error(
+            'Testes de integração exigem RUN_INTEGRATION_TESTS=true e DATABASE_URL definida. ' +
+                'Execute com: npm run test:integracao'
+        );
+    }
+}

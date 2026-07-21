@@ -6,12 +6,10 @@ import validarEmpresaAtivaParaVinculoService from '../../../modules/companies/se
 import validarSetorAtivoParaVinculoService from '../../../modules/setores/services/ValidarSetorAtivoParaVinculoService.js';
 import { criarCargoIntegracao } from './utilitarios/fabricaCargo.js';
 import { criarFuncionarioIntegracao } from './utilitarios/fabricaFuncionario.js';
-import { integracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
+import { exigirIntegracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
 import { limparEmpresa, limparFuncionarios, limparSetor } from './utilitarios/limpeza.js';
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — empresas e setores', () => {
+describe('Integração — empresas e setores', () => {
     const sufixo = `${Date.now()}`;
     /** @type {string | null} */
     let empresaId = null;
@@ -23,6 +21,7 @@ describeIntegracao('Integração — empresas e setores', () => {
     let cargoBloqueioId = null;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
     });
 

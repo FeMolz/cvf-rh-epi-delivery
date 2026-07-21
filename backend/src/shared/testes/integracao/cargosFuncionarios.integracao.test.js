@@ -4,12 +4,10 @@ import createRoleService from '../../../modules/roles/services/CreateRoleService
 import deleteRoleService from '../../../modules/roles/services/DeleteRoleService.js';
 import { criarEmpresaIntegracao, criarSetorIntegracao } from './utilitarios/fabricaEmpresa.js';
 import { gerarCpfIntegracao } from './utilitarios/gerarCpfIntegracao.js';
-import { integracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
+import { exigirIntegracaoHabilitada, verificarConexaoBancoIntegracao } from './utilitariosBancoIntegracao.js';
 import { limparCargoComDependencias, limparEmpresa, limparFuncionarios, limparSetor } from './utilitarios/limpeza.js';
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — cargos e funcionários', () => {
+describe('Integração — cargos e funcionários', () => {
     const sufixo = `${Date.now()}`;
     /** @type {string | null} */
     let empresaId = null;
@@ -21,6 +19,7 @@ describeIntegracao('Integração — cargos e funcionários', () => {
     let funcionarioId = null;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
         const empresa = await criarEmpresaIntegracao(sufixo);
         const setor = await criarSetorIntegracao(sufixo);

@@ -77,7 +77,6 @@ jobs:
 
   testes-integracao:
     runs-on: ubuntu-latest
-    needs: testes-unitarios
 
     services:
       postgres:
@@ -133,7 +132,6 @@ jobs:
 
   testes-e2e:
     runs-on: ubuntu-latest
-    needs: testes-integracao
     timeout-minutes: 25
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

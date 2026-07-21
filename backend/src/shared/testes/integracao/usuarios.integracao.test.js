@@ -5,15 +5,13 @@ import authenticateUserService from '../../../modules/users/services/Authenticat
 import createUserService from '../../../modules/users/services/CreateUserService.js';
 import {
     criarDadosIntegracaoFuncionariosEpi,
-    integracaoHabilitada,
+    exigirIntegracaoHabilitada,
     limparDadosIntegracaoFuncionariosEpi,
     verificarConexaoBancoIntegracao
 } from './utilitariosBancoIntegracao.js';
 import { limparUsuario } from './utilitarios/limpeza.js';
 
-const describeIntegracao = integracaoHabilitada() ? describe : describe.skip;
-
-describeIntegracao('Integração — usuários', () => {
+describe('Integração — usuários', () => {
     const sufixo = `${Date.now()}`;
     const emailNovo = `novo-usuario-${sufixo}@integracao.test`;
     const senhaNova = 'SenhaIntegra123';
@@ -21,6 +19,7 @@ describeIntegracao('Integração — usuários', () => {
     const usuariosParaLimpar = [];
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
     });
 
@@ -89,11 +88,12 @@ describeIntegracao('Integração — usuários', () => {
     });
 });
 
-describeIntegracao('Integração — filtros de funcionários e pausa de EPI', () => {
+describe('Integração — filtros de funcionários e pausa de EPI', () => {
     /** @type {Awaited<ReturnType<typeof criarDadosIntegracaoFuncionariosEpi>>} */
     let dadosTeste;
 
     beforeAll(async () => {
+        exigirIntegracaoHabilitada();
         await verificarConexaoBancoIntegracao();
         dadosTeste = await criarDadosIntegracaoFuncionariosEpi(`${Date.now()}`);
     });

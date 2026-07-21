@@ -14,7 +14,7 @@ import {
     limparUsuario
 } from './utilitarios/limpeza.js';
 
-export { verificarConexaoBancoIntegracao, integracaoHabilitada } from './utilitarios/conexao.js';
+export { verificarConexaoBancoIntegracao, integracaoHabilitada, exigirIntegracaoHabilitada } from './utilitarios/conexao.js';
 
 /**
  * @param {string} sufixo
