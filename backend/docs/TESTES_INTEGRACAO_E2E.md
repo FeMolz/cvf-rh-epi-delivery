@@ -89,7 +89,9 @@ npm run test:deploy
 - `testes-integracao` — Postgres service + `npm run test:integracao`.
 - `testes-e2e` — Postgres + seeds + Puppeteer + Playwright Chromium.
 
-Variáveis necessárias no job E2E: `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (secrets do repositório).
+Variáveis necessárias no job E2E: `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (secrets do repositório em **Settings → Secrets → Actions**).
+
+O CI também define `RH_API_PORT=3001`, copia `frontend/.env.test.example` → `.env.test` e desativa Redis (`REDIS_URL` vazio) para usar o Postgres do service container (porta 5432).
 
 ---
 

@@ -21,6 +21,11 @@ function executar(comando, opcoes = {}) {
 }
 
 export async function garantirInfraestruturaTeste() {
+    if (process.env.CI) {
+        console.log('[e2e] CI detectado — usando Postgres do GitHub Actions (sem Docker local).');
+        return;
+    }
+
     console.log('[e2e] Verificando containers de teste (Postgres/Redis)...');
 
     try {

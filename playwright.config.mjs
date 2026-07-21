@@ -24,7 +24,7 @@ export default defineConfig({
         command: 'node scripts/servidor-e2e.mjs',
         url: 'http://localhost:5173',
         reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
+        timeout: process.env.CI ? 300_000 : 180_000,
         cwd: '.'
     },
     projects: [

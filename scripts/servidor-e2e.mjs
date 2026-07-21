@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { garantirInfraestruturaTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
+import { garantirInfraestruturaTeste, prepararBancoTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
 
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const processosFilhos = [];
@@ -118,15 +118,32 @@ async function verificarProxyLogin() {
     });
 }
 
-await garantirInfraestruturaTeste();
-await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
-await garantirServidor(['run', 'dev:test', '-w', 'frontend'], 'http://localhost:5173');
+/**
+ * @param {number} [timeoutMs]
+ */
+async function aguardarProxyLogin(timeoutMs = 120_000) {
+    const inicio = Date.now();
 
-if (!(await verificarProxyLogin())) {
+    while (Date.now() - inicio < timeoutMs) {
+        if (await verificarProxyLogin()) {
+            return;
+        }
+
+        await new Promise((resolver) => setTimeout(resolver, 1_000));
+    }
+
     throw new Error(
         'Frontend em localhost:5173 não alcança a API de teste (porta 3001). Use `npm run dev:test` no frontend.'
     );
 }
+
+await garantirInfraestruturaTeste();
+console.log('[e2e] Preparando schema e seeds antes de subir os servidores...');
+prepararBancoTeste();
+await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
+await garantirServidor(['run', 'dev:test', '-w', 'frontend'], 'http://localhost:5173');
+
+await aguardarProxyLogin();
 
 console.log('[e2e] Backend e frontend prontos para os testes.');
 
