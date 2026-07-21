@@ -3,6 +3,8 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { garantirInfraestruturaTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
+
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const processosFilhos = [];
 
@@ -116,6 +118,7 @@ async function verificarProxyLogin() {
     });
 }
 
+await garantirInfraestruturaTeste();
 await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
 await garantirServidor(['run', 'dev:test', '-w', 'frontend'], 'http://localhost:5173');
 

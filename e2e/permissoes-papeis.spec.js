@@ -29,6 +29,13 @@ test.describe('Permissoes por papel (almoxarifado)', () => {
         await page.goto('/admin/epis/relatorios');
         await expect(page).toHaveURL(/\/admin\/epis\/entregas/);
     });
+
+    test('almoxarifado nao acessa emissao de relatorios', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'almoxarifado');
+
+        await page.goto('/admin/epis/relatorios/emitir');
+        await expect(page).toHaveURL(/\/admin\/epis\/entregas/);
+    });
 });
 
 test.describe('Permissoes por papel (administrativo)', () => {
@@ -54,5 +61,32 @@ test.describe('Permissoes por papel (administrativo)', () => {
         await expect(page.getByRole('link', { name: 'Gerenciamento' })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Empresas' })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Setores' })).toBeVisible();
+    });
+
+    test('administrativo nao ve acao de excluir cargo permanentemente', async ({ page }) => {
+        await page.goto('/admin/cargos');
+        await page.getByRole('searchbox', { name: 'Pesquisar cargos' }).fill('Pedreiro');
+        await page.getByRole('link', { name: 'Pedreiro' }).click();
+
+        await expect(page.getByRole('button', { name: 'Desativar cargo' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Excluir cargo' })).toHaveCount(0);
+    });
+});
+
+test.describe('Permissoes por papel (admin)', () => {
+    test.use({ storageState: path.join(diretorioAuth, 'admin.json') });
+
+    test('admin acessa modulos de gestao e EPI', async ({ page }) => {
+        await irParaAreaDoPerfil(page, 'admin');
+
+        await expect(page.getByRole('link', { name: 'Gerenciamento' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Funcionários' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Relatórios de entrega' })).toBeVisible();
+
+        await page.goto('/admin/epis/vinculos');
+        await expect(page.getByRole('heading', { level: 1, name: 'EPIs' })).toBeVisible();
+
+        await page.goto('/admin/epis/relatorios/emitir');
+        await expect(page.locator('#relatorio-funcionario')).toBeVisible();
     });
 });

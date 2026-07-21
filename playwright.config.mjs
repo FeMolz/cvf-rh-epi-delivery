@@ -23,7 +23,7 @@ export default defineConfig({
     webServer: {
         command: 'node scripts/servidor-e2e.mjs',
         url: 'http://localhost:5173',
-        reuseExistingServer: true,
+        reuseExistingServer: !process.env.CI,
         timeout: 180_000,
         cwd: '.'
     },
