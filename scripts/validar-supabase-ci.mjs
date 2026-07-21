@@ -1,4 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+/**
+ * Valida secrets Supabase no CI sem @supabase/supabase-js (evita dependência de WebSocket no Node 20).
+ */
 
 /**
  * @param {string | undefined} nome
@@ -19,6 +21,33 @@ function obterVariavelNormalizada(nome) {
     return normalizado || null;
 }
 
+/**
+ * @param {string} supabaseUrl
+ * @param {string} serviceRoleKey
+ * @param {string} bucket
+ */
+async function validarBucketSupabase(supabaseUrl, serviceRoleKey, bucket) {
+    const baseUrl = supabaseUrl.replace(/\/$/, '');
+    const resposta = await fetch(`${baseUrl}/storage/v1/object/list/${bucket}`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${serviceRoleKey}`,
+            apikey: serviceRoleKey,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            prefix: '',
+            limit: 1,
+            offset: 0
+        })
+    });
+
+    if (!resposta.ok) {
+        const detalhe = await resposta.text();
+        throw new Error(`HTTP ${resposta.status}: ${detalhe || resposta.statusText}`);
+    }
+}
+
 const supabaseUrl = obterVariavelNormalizada('SUPABASE_URL');
 const supabaseServiceRoleKey = obterVariavelNormalizada('SUPABASE_SERVICE_ROLE_KEY');
 const bucket =
@@ -31,14 +60,11 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
     process.exit(1);
 }
 
-const cliente = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false }
-});
-
-const { error } = await cliente.storage.from(bucket).list('', { limit: 1 });
-
-if (error) {
-    console.error(`Falha ao acessar o bucket "${bucket}" no Supabase Storage: ${error.message}`);
+try {
+    await validarBucketSupabase(supabaseUrl, supabaseServiceRoleKey, bucket);
+} catch (erro) {
+    const mensagem = erro instanceof Error ? erro.message : String(erro);
+    console.error(`Falha ao acessar o bucket "${bucket}" no Supabase Storage: ${mensagem}`);
     process.exit(1);
 }
 
