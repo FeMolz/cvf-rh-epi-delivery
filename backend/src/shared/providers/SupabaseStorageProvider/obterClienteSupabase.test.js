@@ -70,8 +70,8 @@ describe('obterClienteSupabase', () => {
                     persistSession: false,
                     autoRefreshToken: false
                 },
-                global: {
-                    WebSocket: wsMock
+                realtime: {
+                    transport: wsMock
                 }
             }
         );

@@ -16,8 +16,8 @@ function montarOpcoesClienteSupabase() {
             persistSession: false,
             autoRefreshToken: false
         },
-        global: {
-            WebSocket: ws
+        realtime: {
+            transport: ws
         }
     };
 }
