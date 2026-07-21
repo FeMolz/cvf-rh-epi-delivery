@@ -13,18 +13,52 @@ const diretorioFrontend = path.join(diretorioRaiz, 'frontend');
  * @param {import('node:child_process').ExecSyncOptions} [opcoes]
  */
 function executar(comando, opcoes = {}) {
-    execSync(comando, {
-        cwd: diretorioRaiz,
-        stdio: 'inherit',
-        env: process.env,
-        shell: true,
-        ...opcoes
-    });
+    try {
+        execSync(comando, {
+            cwd: diretorioRaiz,
+            stdio: 'inherit',
+            env: process.env,
+            shell: true,
+            ...opcoes
+        });
+    } catch (erro) {
+        const mensagem = erro instanceof Error ? erro.message : String(erro);
+        throw new Error(`[e2e] Comando falhou (${comando}): ${mensagem}`);
+    }
+}
+
+export async function aguardarPostgresDisponivel() {
+    if (!process.env.CI || !process.env.DATABASE_URL) {
+        return;
+    }
+
+    const { default: pg } = await import('pg');
+    const connectionString = process.env.DATABASE_URL;
+    const timeoutMs = 60_000;
+    const inicio = Date.now();
+
+    while (Date.now() - inicio < timeoutMs) {
+        const cliente = new pg.Client({ connectionString });
+
+        try {
+            await cliente.connect();
+            await cliente.query('SELECT 1');
+            await cliente.end();
+            console.log('[e2e] Postgres do CI disponível.');
+            return;
+        } catch {
+            await cliente.end().catch(() => {});
+            await aguardar(2_000);
+        }
+    }
+
+    throw new Error('Postgres do CI não ficou disponível a tempo.');
 }
 
 export async function garantirInfraestruturaTeste() {
     if (process.env.CI) {
         console.log('[e2e] CI detectado — usando Postgres do GitHub Actions (sem Docker local).');
+        await aguardarPostgresDisponivel();
         return;
     }
 

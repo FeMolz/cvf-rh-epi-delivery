@@ -97,7 +97,7 @@ Variáveis necessárias no job E2E: `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`
 
 Ao copiar do `backend/.env.test`, cole **sem espaços ou quebras de linha** no final da key — o CI valida o acesso real ao bucket `epi-reports-dev-teste` antes dos testes.
 
-O CI também define `RH_API_PORT=3001`, copia `frontend/.env.test.example` → `.env.test` e desativa Redis (`REDIS_URL` vazio) para usar o Postgres do service container (porta 5432).
+O CI também define `RH_API_PORT=3001`, copia `frontend/.env.test.example` → `.env.test`, desativa Redis (`REDIS_URL` vazio) e exporta `PUPPETEER_EXECUTABLE_PATH` do Chrome instalado pelo Puppeteer (necessário para emitir PDF no Linux).
 
 ---
 

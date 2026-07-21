@@ -134,6 +134,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      CI: 'true'
+      NODE_ENV: test
+      PORT: '3001'
+      RH_API_PORT: '3001'
+      JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars
+      ADMIN_SEED_PASSWORD: AlterarSenha123!
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
+      REDIS_URL: ''
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       SUPABASE_STORAGE_BUCKET_EPI_REPORTS: epi-reports-dev-teste
@@ -177,6 +185,12 @@ jobs:
       - name: Instalar Chrome para Puppeteer
         run: npm run puppeteer:install -w backend
 
+      - name: Configurar Chrome do Puppeteer para o backend
+        run: |
+          CHROME_PATH=$(node -e "import puppeteer from 'puppeteer'; console.log(puppeteer.executablePath())")
+          echo "PUPPETEER_EXECUTABLE_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+        working-directory: backend
+
       - name: Instalar navegador Playwright
         run: npx playwright install --with-deps chromium
         working-directory: .
@@ -192,12 +206,3 @@ jobs:
       - name: Executar testes E2E
         run: npm run test:e2e
         working-directory: .
-        env:
-          CI: 'true'
-          NODE_ENV: test
-          PORT: '3001'
-          RH_API_PORT: '3001'
-          JWT_SECRET: jwt-secreto-apenas-ambiente-teste-com-16-chars
-          ADMIN_SEED_PASSWORD: AlterarSenha123!
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
-          REDIS_URL: ''

@@ -3,7 +3,11 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { garantirInfraestruturaTeste, prepararAmbienteFrontendTeste, prepararBancoTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
+import {
+    garantirInfraestruturaTeste,
+    prepararAmbienteFrontendTeste,
+    prepararBancoTeste
+} from '../e2e/helpers/infraestruturaTeste.mjs';
 
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const processosFilhos = [];
@@ -28,12 +32,19 @@ function verificarUrl(url) {
 
 /**
  * @param {string} url
+ * @param {import('node:child_process').ChildProcess | null} [processoMonitorado]
  * @param {number} [timeoutMs]
  */
-async function aguardarUrl(url, timeoutMs = 120_000) {
+async function aguardarUrl(url, processoMonitorado = null, timeoutMs = 120_000) {
     const inicio = Date.now();
 
     while (Date.now() - inicio < timeoutMs) {
+        if (processoMonitorado && processoMonitorado.exitCode !== null) {
+            throw new Error(
+                `Processo do servidor encerrou com código ${processoMonitorado.exitCode} antes de ${url} ficar disponível`
+            );
+        }
+
         if (await verificarUrl(url)) {
             return;
         }
@@ -51,7 +62,8 @@ function iniciarProcesso(argumentosNpm) {
     const processo = spawn('npm', argumentosNpm, {
         cwd: diretorioRaiz,
         stdio: 'inherit',
-        shell: true
+        shell: true,
+        env: process.env
     });
 
     processosFilhos.push(processo);
@@ -99,24 +111,30 @@ async function backendProntoParaTestes() {
     return administrativoOk && adminOk;
 }
 
+/**
+ * @param {string[]} argumentosNpm
+ * @param {string} url
+ */
 async function garantirServidor(argumentosNpm, url) {
     const ehBackend = url.includes('3001');
     const podeReutilizar = !process.env.CI;
 
     if (podeReutilizar && ehBackend && (await backendProntoParaTestes())) {
         console.log('[e2e] Backend de teste já disponível com credenciais válidas.');
-        return;
+        return null;
     }
 
     if (podeReutilizar && !ehBackend && (await verificarUrl(url))) {
         console.log(`[e2e] Servidor já disponível em ${url}`);
-        return;
+        return null;
     }
 
     console.log(`[e2e] Iniciando servidor para ${url}...`);
-    iniciarProcesso(argumentosNpm);
-    await aguardarUrl(url);
+    const processo = iniciarProcesso(argumentosNpm);
+    const timeoutMs = process.env.CI ? 180_000 : 120_000;
+    await aguardarUrl(url, processo, timeoutMs);
     console.log(`[e2e] Servidor pronto em ${url}`);
+    return processo;
 }
 
 function encerrarProcessos() {
@@ -182,19 +200,27 @@ async function aguardarProxyLogin(timeoutMs = 120_000) {
     }
 
     throw new Error(
-        'Frontend em localhost:5173 não alcança a API de teste (porta 3001). Use `npm run dev:test` no frontend.'
+        'Frontend em localhost:5173 não alcança a API de teste (porta 3001). Verifique RH_API_PORT e o proxy do Vite.'
     );
 }
 
-await garantirInfraestruturaTeste();
-prepararAmbienteFrontendTeste();
-console.log('[e2e] Preparando schema e seeds antes de subir os servidores...');
-prepararBancoTeste();
-await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
-await garantirServidor(['run', 'dev:test', '-w', 'frontend'], 'http://localhost:5173');
+async function iniciarServidoresE2e() {
+    await garantirInfraestruturaTeste();
+    prepararAmbienteFrontendTeste();
+    console.log('[e2e] Preparando schema e seeds antes de subir os servidores...');
+    prepararBancoTeste();
+    await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
+    await garantirServidor(['run', 'dev:test', '-w', 'frontend'], 'http://localhost:5173');
+    await aguardarProxyLogin(process.env.CI ? 180_000 : 120_000);
+    console.log('[e2e] Backend e frontend prontos para os testes.');
+    await new Promise(() => {});
+}
 
-await aguardarProxyLogin();
-
-console.log('[e2e] Backend e frontend prontos para os testes.');
-
-await new Promise(() => {});
+try {
+    await iniciarServidoresE2e();
+} catch (erro) {
+    console.error('[e2e] Falha ao preparar servidores para os testes E2E:');
+    console.error(erro instanceof Error ? erro.stack || erro.message : erro);
+    encerrarProcessos();
+    process.exit(1);
+}
