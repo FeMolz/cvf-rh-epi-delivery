@@ -56,3 +56,11 @@ export async function irParaAreaDoPerfil(page, perfil) {
     await page.goto(destino);
     await expect(page).toHaveURL(new RegExp(destino.replace(/\//g, '\\/')));
 }
+
+/**
+ * @param {import('@playwright/test').Page} page
+ */
+export async function fazerLogout(page) {
+    await page.getByRole('button', { name: 'Sair' }).click();
+    await expect(page).toHaveURL(/\/login/);
+}

@@ -28,6 +28,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Cobertura de endpoints (testes vs Postman)](./docs/COBERTURA_ENDPOINTS.md)** - Mapa de rotas e como rodar `npm test` / `npm run test:routes`.
 - 📄 **[Checklist Postman (testes manuais)](./docs/POSTMAN_MANUAL.md)** - O que ainda validar na mão (PDF, Secullum, upload, JWT).
 - 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
+- 📄 **[Testes de integração e E2E](./docs/TESTES_INTEGRACAO_E2E.md)** - Suites com banco real e Playwright.
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 - 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
 - 📄 **[PostgreSQL Supabase (produção)](./docs/SUPABASE.md)** - `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (migrations 5432).

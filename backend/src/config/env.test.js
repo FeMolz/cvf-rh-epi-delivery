@@ -172,6 +172,32 @@ describe('env', () => {
         expect(env.SUPABASE_STORAGE_BUCKET_EPI_REPORTS).toBe('bucket-customizado');
     });
 
+    it('deve remover espaços em branco das variáveis Supabase', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.DATABASE_URL = 'postgresql://localhost/teste';
+        process.env.JWT_SECRET = 'segredo-teste-local-16';
+        process.env.SUPABASE_URL = ' https://projeto.supabase.co ';
+        process.env.SUPABASE_SERVICE_ROLE_KEY = ' service-role-key ';
+
+        const env = await importarEnv();
+
+        expect(env.SUPABASE_URL).toBe('https://projeto.supabase.co');
+        expect(env.SUPABASE_SERVICE_ROLE_KEY).toBe('service-role-key');
+    });
+
+    it('deve tratar variáveis Supabase vazias ou só com espaços como nulas', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.DATABASE_URL = 'postgresql://localhost/teste';
+        process.env.JWT_SECRET = 'segredo-teste-local-16';
+        process.env.SUPABASE_URL = '   ';
+        process.env.SUPABASE_SERVICE_ROLE_KEY = '   ';
+
+        const env = await importarEnv();
+
+        expect(env.SUPABASE_URL).toBeNull();
+        expect(env.SUPABASE_SERVICE_ROLE_KEY).toBeNull();
+    });
+
     it('deve usar caminho retornado pelo resolver de Puppeteer', async () => {
         resolverCaminhoExecutavelPuppeteerMock.mockReturnValue('C:\\chrome\\chrome.exe');
         process.env.NODE_ENV = 'test';

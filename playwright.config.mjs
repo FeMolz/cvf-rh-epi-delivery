@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url';
 
 import { defineConfig, devices } from '@playwright/test';
 
+import { montarVariaveisAmbienteE2e } from './e2e/helpers/variaveisAmbienteE2e.mjs';
+
 const diretorioE2e = path.dirname(fileURLToPath(import.meta.url));
 const diretorioAuth = path.join(diretorioE2e, '.auth');
 
@@ -23,9 +25,10 @@ export default defineConfig({
     webServer: {
         command: 'node scripts/servidor-e2e.mjs',
         url: 'http://localhost:5173',
-        reuseExistingServer: true,
-        timeout: 180_000,
-        cwd: '.'
+        reuseExistingServer: !process.env.CI,
+        timeout: process.env.CI ? 300_000 : 180_000,
+        cwd: '.',
+        env: process.env.CI ? montarVariaveisAmbienteE2e(process.env) : undefined
     },
     projects: [
         {

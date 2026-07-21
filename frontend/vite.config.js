@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
-    const portaApi = Number(env.RH_API_PORT || 3000);
+    const portaApi = Number(env.RH_API_PORT || process.env.RH_API_PORT || 3000);
 
     return {
         plugins: [react()],

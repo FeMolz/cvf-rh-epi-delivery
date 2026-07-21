@@ -6,6 +6,8 @@ const createClientMock = jest.fn(() => ({
     storage: { from: jest.fn() }
 }));
 
+const wsMock = jest.fn();
+
 const envMock = {
     SUPABASE_URL: 'https://projeto.supabase.co',
     SUPABASE_SERVICE_ROLE_KEY: 'service-role-key'
@@ -23,6 +25,9 @@ describe('obterClienteSupabase', () => {
 
         jest.unstable_mockModule('@supabase/supabase-js', () => ({
             createClient: createClientMock
+        }));
+        jest.unstable_mockModule('ws', () => ({
+            default: wsMock
         }));
         jest.unstable_mockModule('../../../config/env.js', () => ({
             default: envMock
@@ -64,6 +69,9 @@ describe('obterClienteSupabase', () => {
                 auth: {
                     persistSession: false,
                     autoRefreshToken: false
+                },
+                realtime: {
+                    transport: wsMock
                 }
             }
         );
