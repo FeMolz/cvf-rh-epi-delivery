@@ -25,7 +25,9 @@ function carregarArquivoEnv(caminhoArquivo, sobrescreverVariaveisExistentes) {
 }
 
 export function carregarAmbienteTeste() {
-    if (fs.existsSync(arquivoEnvTeste)) {
+    const possuiDatabaseUrlCi = Boolean(process.env.CI && process.env.DATABASE_URL);
+
+    if (fs.existsSync(arquivoEnvTeste) && !possuiDatabaseUrlCi) {
         carregarArquivoEnv(arquivoEnvTeste, true);
     } else if (fs.existsSync(arquivoEnvTesteExemplo)) {
         // CI e clones novos: defaults do exemplo sem sobrescrever DATABASE_URL/JWT do workflow.

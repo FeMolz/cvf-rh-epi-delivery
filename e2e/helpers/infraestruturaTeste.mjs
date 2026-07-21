@@ -1,10 +1,12 @@
 import { execSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 import { setTimeout as aguardar } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const diretorioBackend = path.join(diretorioRaiz, 'backend');
+const diretorioFrontend = path.join(diretorioRaiz, 'frontend');
 
 /**
  * @param {string} comando
@@ -38,6 +40,16 @@ export async function garantirInfraestruturaTeste() {
             '[e2e] Não foi possível subir docker-compose.test.yml automaticamente.',
             erro instanceof Error ? erro.message : erro
         );
+    }
+}
+
+export function prepararAmbienteFrontendTeste() {
+    const destino = path.join(diretorioFrontend, '.env.test');
+    const exemplo = path.join(diretorioFrontend, '.env.test.example');
+
+    if (!fs.existsSync(destino) && fs.existsSync(exemplo)) {
+        fs.copyFileSync(exemplo, destino);
+        console.log('[e2e] frontend/.env.test criado a partir do exemplo.');
     }
 }
 

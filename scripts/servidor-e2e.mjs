@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { garantirInfraestruturaTeste, prepararBancoTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
+import { garantirInfraestruturaTeste, prepararAmbienteFrontendTeste, prepararBancoTeste } from '../e2e/helpers/infraestruturaTeste.mjs';
 
 const diretorioRaiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const processosFilhos = [];
@@ -58,8 +58,57 @@ function iniciarProcesso(argumentosNpm) {
     return processo;
 }
 
+async function verificarLoginBackend(email, password) {
+    return new Promise((resolver) => {
+        const corpo = JSON.stringify({ email, password });
+
+        const requisicao = http.request(
+            {
+                hostname: 'localhost',
+                port: 3001,
+                path: '/api/v1/users/login',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(corpo)
+                }
+            },
+            (resposta) => {
+                resposta.resume();
+                resolver(resposta.statusCode === 200);
+            }
+        );
+
+        requisicao.on('error', () => resolver(false));
+        requisicao.write(corpo);
+        requisicao.end();
+    });
+}
+
+async function backendProntoParaTestes() {
+    if (!(await verificarUrl('http://localhost:3001/health'))) {
+        return false;
+    }
+
+    const administrativoOk = await verificarLoginBackend(
+        'administrativo@rhsystem.com',
+        'AlterarSenha123!'
+    );
+    const adminOk = await verificarLoginBackend('admin@rhsystem.com', 'AlterarSenha123!');
+
+    return administrativoOk && adminOk;
+}
+
 async function garantirServidor(argumentosNpm, url) {
-    if (await verificarUrl(url)) {
+    const ehBackend = url.includes('3001');
+    const podeReutilizar = !process.env.CI;
+
+    if (podeReutilizar && ehBackend && (await backendProntoParaTestes())) {
+        console.log('[e2e] Backend de teste já disponível com credenciais válidas.');
+        return;
+    }
+
+    if (podeReutilizar && !ehBackend && (await verificarUrl(url))) {
         console.log(`[e2e] Servidor já disponível em ${url}`);
         return;
     }
@@ -138,6 +187,7 @@ async function aguardarProxyLogin(timeoutMs = 120_000) {
 }
 
 await garantirInfraestruturaTeste();
+prepararAmbienteFrontendTeste();
 console.log('[e2e] Preparando schema e seeds antes de subir os servidores...');
 prepararBancoTeste();
 await garantirServidor(['run', 'dev:test', '-w', 'backend'], 'http://localhost:3001/health');
