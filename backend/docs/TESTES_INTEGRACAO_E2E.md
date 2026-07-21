@@ -91,6 +91,8 @@ npm run test:deploy
 
 Variáveis necessárias no job E2E: `JWT_SECRET`, `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (secrets do repositório em **Settings → Secrets → Actions**).
 
+Ao copiar do `backend/.env.test`, cole **sem espaços ou quebras de linha** no final da key — o CI valida o acesso real ao bucket `epi-reports-dev-teste` antes dos testes.
+
 O CI também define `RH_API_PORT=3001`, copia `frontend/.env.test.example` → `.env.test` e desativa Redis (`REDIS_URL` vazio) para usar o Postgres do service container (porta 5432).
 
 ---

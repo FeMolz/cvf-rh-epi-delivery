@@ -8,6 +8,27 @@ const nomeArquivoAmbiente = process.env.RH_ENV_ARQUIVO || '.env';
 
 dotenv.config({ path: path.join(diretorioBackend, nomeArquivoAmbiente) });
 
+/**
+ * @param {string | undefined} valor
+ */
+function normalizarVariavelOpcional(valor) {
+    if (valor === undefined || valor === null) {
+        return null;
+    }
+
+    const texto = String(valor).trim();
+    return texto || null;
+}
+
+if (process.env.SUPABASE_URL) {
+    process.env.SUPABASE_URL = normalizarVariavelOpcional(process.env.SUPABASE_URL) ?? '';
+}
+
+if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    process.env.SUPABASE_SERVICE_ROLE_KEY =
+        normalizarVariavelOpcional(process.env.SUPABASE_SERVICE_ROLE_KEY) ?? '';
+}
+
 import {
     DIAS_VALIDADE_TOKEN_CADASTRO_PADRAO,
     LIMITE_REQUISICOES_GLOBAL_PADRAO
@@ -73,8 +94,8 @@ const env = {
     CAEPI_API_URL: process.env.CAEPI_API_URL || URL_PADRAO_CAEPI_API,
     CAEPI_AGUARDAR_INICIO: resolverAguardarInicioCaepi(),
     CAEPI_USAR_SOMENTE_CACHE: process.env.CAEPI_USAR_SOMENTE_CACHE === 'true',
-    SUPABASE_URL: process.env.SUPABASE_URL || null,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
+    SUPABASE_URL: normalizarVariavelOpcional(process.env.SUPABASE_URL),
+    SUPABASE_SERVICE_ROLE_KEY: normalizarVariavelOpcional(process.env.SUPABASE_SERVICE_ROLE_KEY),
     SUPABASE_STORAGE_BUCKET_EPI_REPORTS:
         process.env.SUPABASE_STORAGE_BUCKET_EPI_REPORTS || BUCKET_PADRAO_RELATORIOS_EPI,
     PUPPETEER_EXECUTABLE_PATH: resolverCaminhoExecutavelPuppeteer() || null

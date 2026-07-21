@@ -135,6 +135,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: testes-integracao
     timeout-minutes: 25
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_STORAGE_BUCKET_EPI_REPORTS: epi-reports-dev-teste
 
     services:
       postgres:
@@ -184,11 +188,7 @@ jobs:
         working-directory: frontend
 
       - name: Validar secrets do Supabase
-        run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
-            echo "::error::Configure os secrets SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no repositório GitHub (Settings → Secrets → Actions)."
-            exit 1
-          fi
+        run: node scripts/validar-supabase-ci.mjs
         working-directory: .
 
       - name: Executar testes E2E
@@ -203,6 +203,3 @@ jobs:
           ADMIN_SEED_PASSWORD: AlterarSenha123!
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rh_system_ci?schema=public
           REDIS_URL: ''
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_STORAGE_BUCKET_EPI_REPORTS: epi-reports-dev-teste
