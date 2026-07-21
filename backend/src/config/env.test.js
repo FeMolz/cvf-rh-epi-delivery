@@ -185,6 +185,19 @@ describe('env', () => {
         expect(env.SUPABASE_SERVICE_ROLE_KEY).toBe('service-role-key');
     });
 
+    it('deve tratar variáveis Supabase vazias ou só com espaços como nulas', async () => {
+        process.env.NODE_ENV = 'test';
+        process.env.DATABASE_URL = 'postgresql://localhost/teste';
+        process.env.JWT_SECRET = 'segredo-teste-local-16';
+        process.env.SUPABASE_URL = '   ';
+        process.env.SUPABASE_SERVICE_ROLE_KEY = '   ';
+
+        const env = await importarEnv();
+
+        expect(env.SUPABASE_URL).toBeNull();
+        expect(env.SUPABASE_SERVICE_ROLE_KEY).toBeNull();
+    });
+
     it('deve usar caminho retornado pelo resolver de Puppeteer', async () => {
         resolverCaminhoExecutavelPuppeteerMock.mockReturnValue('C:\\chrome\\chrome.exe');
         process.env.NODE_ENV = 'test';
