@@ -1,5 +1,50 @@
 import { STATUS_FUNCIONARIO_AFASTAMENTO_TEMPORARIO } from '../constants/funcionarioStatusConstantes.js';
 
+const PADRAO_DATA_SOMENTE_DIA = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/**
+ * @param {unknown} valor
+ * @returns {Date | null}
+ */
+export function parsearDataSomenteDia(valor) {
+    if (valor === null || valor === undefined || valor === '') {
+        return null;
+    }
+
+    if (valor instanceof Date) {
+        if (Number.isNaN(valor.getTime())) {
+            return null;
+        }
+
+        return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate());
+    }
+
+    const texto = String(valor).trim();
+
+    if (!texto) {
+        return null;
+    }
+
+    const parteData = texto.includes('T') ? texto.slice(0, 10) : texto;
+    const correspondencia = PADRAO_DATA_SOMENTE_DIA.exec(parteData);
+
+    if (correspondencia) {
+        const [, ano, mes, dia] = correspondencia;
+        const data = new Date(Number(ano), Number(mes) - 1, Number(dia));
+
+        return Number.isNaN(data.getTime()) ? null : data;
+    }
+
+    const data = new Date(texto);
+
+    if (Number.isNaN(data.getTime())) {
+        return null;
+    }
+
+    data.setHours(0, 0, 0, 0);
+    return data;
+}
+
 /**
  * @param {string} status
  * @returns {boolean}
@@ -13,18 +58,7 @@ export function statusFuncionarioExigeDataRetornoAfastamento(status) {
  * @returns {Date | null}
  */
 export function inicioDoDia(valor) {
-    if (valor === null || valor === undefined || valor === '') {
-        return null;
-    }
-
-    const data = valor instanceof Date ? new Date(valor) : new Date(String(valor).trim());
-
-    if (Number.isNaN(data.getTime())) {
-        return null;
-    }
-
-    data.setHours(0, 0, 0, 0);
-    return data;
+    return parsearDataSomenteDia(valor);
 }
 
 /**

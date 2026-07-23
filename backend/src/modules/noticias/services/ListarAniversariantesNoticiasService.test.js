@@ -48,12 +48,15 @@ describe('ListarAniversariantesNoticiasService', () => {
         expect(resultado.aniversariantesPessoais[0]).toMatchObject({
             nome: 'Bruno',
             empresa: 'Empresa B',
-            dataAniversario: '21/06'
+            dataAniversario: '21/06',
+            ehHoje: true
         });
         expect(resultado.aniversariantesEmpresa[0]).toMatchObject({
             nome: 'Bruno',
             empresa: 'Empresa B',
-            tempoEmpresa: '7 anos'
+            tempoEmpresa: '7 anos',
+            dataAniversarioEmpresa: '21/06',
+            ehHoje: true
         });
     });
 });

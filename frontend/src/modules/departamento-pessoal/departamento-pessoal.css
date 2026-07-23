@@ -1,0 +1,131 @@
+.filtros-dp {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.35rem;
+    border: 1px solid var(--cor-borda, #e2e8f0);
+    border-radius: 0.85rem;
+    background: var(--cor-superficie, #fff);
+    box-shadow: var(--sombra-suave, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+
+.filtros-dp__cabecalho {
+    margin-bottom: 1rem;
+}
+
+.filtros-dp__cabecalho h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cor-texto, #0f172a);
+}
+
+.filtros-dp__cabecalho p {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--cor-texto-medio, #64748b);
+}
+
+.filtros-dp__grade {
+    display: grid;
+    gap: 1rem;
+}
+
+.filtros-dp__grade--ferias {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.filtros-dp__grade--funcionarios {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.filtros-dp__grade--funcionarios .filtros-dp__campo--busca,
+.filtros-dp__campo--busca {
+    grid-column: 1 / -1;
+}
+
+.filtros-dp .campo {
+    display: grid;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.filtros-dp .campo label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cor-label, #334155);
+}
+
+.filtros-dp .campo input:not(.campo-data-br__input-calendario),
+.filtros-dp .campo select {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--cor-borda-forte, #cbd5e1);
+    border-radius: 0.55rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--cor-texto, #0f172a);
+    background: var(--cor-superficie, #fff);
+    box-shadow: var(--sombra-suave, 0 1px 2px rgba(15, 23, 42, 0.04));
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filtros-dp .campo input[type='search'] {
+    padding-right: 2.5rem;
+    background-color: var(--cor-superficie, #fff);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+}
+
+.filtros-dp .campo select {
+    padding-right: 2.25rem;
+    appearance: none;
+    cursor: pointer;
+    background-color: var(--cor-superficie, #fff);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+}
+
+.filtros-dp .campo input[type='date'] {
+    color-scheme: light;
+}
+
+.filtros-dp .campo input:not(.campo-data-br__input-calendario):focus,
+.filtros-dp .campo select:focus {
+    outline: none;
+    border-color: var(--cor-primaria, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.filtros-dp .campo input::placeholder {
+    color: #94a3b8;
+}
+
+.filtros-dp__acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cor-borda, #e2e8f0);
+}
+
+.filtros-dp__acoes .botao {
+    min-width: 10rem;
+    min-height: 2.75rem;
+}
+
+@media (max-width: 900px) {
+    .filtros-dp__grade--ferias {
+        grid-template-columns: 1fr;
+    }
+}
+
+.listagem-painel .tabela-usuarios--ferias {
+    min-width: 42rem;
+}
+
+.listagem-painel .tabela-usuarios--ferias td:nth-child(4) {
+    white-space: nowrap;
+}

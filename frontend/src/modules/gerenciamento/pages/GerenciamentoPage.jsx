@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { PainelListagemCargos } from '../../cargos/components/PainelListagemCargos.jsx';
+import { PainelListagemEmpresas } from '../../empresas/components/PainelListagemEmpresas.jsx';
+import { PainelListagemSetores } from '../../setores/components/PainelListagemSetores.jsx';
 import { AbasGerenciamento } from '../components/AbasGerenciamento.jsx';
-import { PainelCargosGerenciamento } from '../components/PainelCargosGerenciamento.jsx';
-import { PainelEmpresasGerenciamento } from '../components/PainelEmpresasGerenciamento.jsx';
-import { PainelFuncionariosGerenciamento } from '../components/PainelFuncionariosGerenciamento.jsx';
-import { PainelSetoresGerenciamento } from '../components/PainelSetoresGerenciamento.jsx';
-import { PainelUsuariosGerenciamento } from '../components/PainelUsuariosGerenciamento.jsx';
+import { PainelListagemUsuarios } from '../components/PainelListagemUsuarios.jsx';
 import {
     ABA_GERENCIAMENTO_PADRAO,
     ABAS_GERENCIAMENTO,
@@ -33,15 +32,13 @@ export function GerenciamentoPage() {
     const painelAtivo = useMemo(() => {
         switch (abaAtiva) {
             case 'cargos':
-                return <PainelCargosGerenciamento />;
+                return <PainelListagemCargos />;
             case 'empresas':
-                return <PainelEmpresasGerenciamento />;
+                return <PainelListagemEmpresas />;
             case 'setores':
-                return <PainelSetoresGerenciamento />;
-            case 'funcionarios':
-                return <PainelFuncionariosGerenciamento />;
+                return <PainelListagemSetores />;
             default:
-                return <PainelUsuariosGerenciamento />;
+                return <PainelListagemUsuarios />;
         }
     }, [abaAtiva]);
 
@@ -50,7 +47,7 @@ export function GerenciamentoPage() {
             <header className="admin-pagina__cabecalho">
                 <h1>Gerenciamento</h1>
                 <p className="admin-pagina__subtitulo">
-                    Centralize os cadastros de usuários, cargos, empresas, setores e funcionários do RH-System.
+                    Visualize usuários, cargos, empresas e setores cadastrados no RH-System.
                 </p>
             </header>
 

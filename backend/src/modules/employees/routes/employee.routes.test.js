@@ -5,6 +5,8 @@ import express from 'express';
 const employeeControllerMock = {
     create: jest.fn((req, res) => res.status(201).json({ id: '1' })),
     findAll: jest.fn((req, res) => res.status(200).json([{ id: '1' }])),
+    consultar: jest.fn((req, res) => res.status(200).json([{ id: '1' }])),
+    listarFerias: jest.fn((req, res) => res.status(200).json({ items: [], total: 0 })),
     exportarLista: jest.fn((req, res) => res.status(200).send(Buffer.from('xlsx'))),
     exportarFuncionarioCompleto: jest.fn((req, res) => res.status(200).send(Buffer.from('xlsx'))),
     findById: jest.fn((req, res) => res.status(200).json({ id: '1' })),
@@ -61,6 +63,20 @@ describe('Employee Routes', () => {
         
         expect(res.statusCode).toBe(200);
         expect(employeeControllerMock.findAll).toHaveBeenCalled();
+    });
+
+    it('GET /employees/consulta deve chamar employeeController.consultar', async () => {
+        const res = await request(app).get('/employees/consulta?situacao=ativos');
+
+        expect(res.statusCode).toBe(200);
+        expect(employeeControllerMock.consultar).toHaveBeenCalled();
+    });
+
+    it('GET /employees/ferias deve chamar employeeController.listarFerias', async () => {
+        const res = await request(app).get('/employees/ferias');
+
+        expect(res.statusCode).toBe(200);
+        expect(employeeControllerMock.listarFerias).toHaveBeenCalled();
     });
 
     it('GET /employees/export/lista deve chamar exportarLista', async () => {

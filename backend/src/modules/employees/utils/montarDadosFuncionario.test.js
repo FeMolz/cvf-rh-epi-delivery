@@ -51,8 +51,8 @@ describe('montarDadosFuncionario', () => {
         expect(resultado.admissionDate).toBeInstanceOf(Date);
         expect(resultado.admissionDate.getTime()).toBeGreaterThanOrEqual(antes);
         expect(resultado.admissionDate.getTime()).toBeLessThanOrEqual(depois);
-        expect(resultado.resignationDate).toEqual(new Date('2024-06-01'));
-        expect(resultado.leaveReturnDate).toEqual(new Date('2026-12-31'));
+        expect(resultado.resignationDate).toEqual(new Date(2024, 5, 1));
+        expect(resultado.leaveReturnDate).toEqual(new Date(2026, 11, 31));
         expect(resultado.valeAlimentacao).toBe(false);
         expect(resultado.planoSaude).toBe(true);
     });

@@ -16,7 +16,7 @@ describe('situacaoEntregaEpi', () => {
 
     it('deve retornar classe css da situacao', () => {
         expect(obterClasseSituacaoEpi(SITUACAO_EPI_ENTREGA.EM_DIA)).toContain('ativo');
-        expect(obterClasseSituacaoEpi(SITUACAO_EPI_ENTREGA.VENCIDO)).toContain('afastado');
+        expect(obterClasseSituacaoEpi(SITUACAO_EPI_ENTREGA.VENCIDO)).toContain('encerrado');
         expect(obterClasseSituacaoEpi(SITUACAO_EPI_ENTREGA.PENDENTE)).toContain('afastado');
         expect(obterClasseSituacaoEpi(SITUACAO_EPI_ENTREGA.SEM_PERIODICIDADE)).toBe('status-badge');
     });

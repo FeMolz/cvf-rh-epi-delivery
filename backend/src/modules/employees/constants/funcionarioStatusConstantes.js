@@ -22,6 +22,7 @@ export const FILTROS_LISTAGEM_FUNCIONARIOS = [
     FILTRO_LISTAGEM_FUNCIONARIOS_LICENCA_MED,
     'inativo',
     'desligado',
+    'demitido',
     'rescindido',
     'aposentado',
     'ativo'

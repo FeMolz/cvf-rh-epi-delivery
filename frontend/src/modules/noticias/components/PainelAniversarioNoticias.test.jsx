@@ -21,6 +21,7 @@ describe('PainelAniversarioNoticias', () => {
                         id: '2',
                         nome: 'Bruno Costa',
                         empresa: 'CVF',
+                        dataAniversarioEmpresa: '15/07',
                         tempoEmpresa: '5 anos'
                     }
                 ]}
@@ -31,7 +32,7 @@ describe('PainelAniversarioNoticias', () => {
             screen.getByText(/aniversariantes do mês entre todos os funcionários/i)
         ).toBeInTheDocument();
         expect(screen.getByText(/referência: julho\/2026/i)).toBeInTheDocument();
-        expect(screen.getByRole('heading', { name: 'Aniversariantes pessoais' })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: 'Aniversariantes' })).toBeInTheDocument();
         expect(
             screen.getByRole('heading', { name: 'Aniversariantes de tempo de empresa' })
         ).toBeInTheDocument();

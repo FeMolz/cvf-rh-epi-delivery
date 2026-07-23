@@ -5,7 +5,9 @@ import {
     baixarFichaFuncionario,
     baixarRelatorioFuncionarios,
     buscarFuncionarioPorId,
+    consultarFuncionarios,
     criarFuncionario,
+    listarFeriasFuncionarios,
     listarFuncionarios
 } from './funcionariosApi.js';
 
@@ -23,6 +25,36 @@ describe('funcionariosApi', () => {
         await listarFuncionarios('jwt', { filtro: 'todos' });
 
         expect(requisicaoApi).toHaveBeenCalledWith('/employees?filtro=todos', { token: 'jwt' });
+    });
+
+    it('deve consultar funcionarios com filtros avancados', async () => {
+        requisicaoApi.mockResolvedValue([]);
+
+        await consultarFuncionarios('jwt', {
+            companyId: 'emp-1',
+            situacao: 'ativos',
+            ordenacaoAdmissao: 'recentes'
+        });
+
+        expect(requisicaoApi).toHaveBeenCalledWith(
+            '/employees/consulta?companyId=emp-1&situacao=ativos&ordenacaoAdmissao=recentes',
+            { token: 'jwt' }
+        );
+    });
+
+    it('deve listar ferias paginadas', async () => {
+        requisicaoApi.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 25 });
+
+        await listarFeriasFuncionarios('jwt', {
+            proximidade: 30,
+            page: 1,
+            pageSize: 25
+        });
+
+        expect(requisicaoApi).toHaveBeenCalledWith(
+            '/employees/ferias?proximidade=30&page=1&pageSize=25',
+            { token: 'jwt' }
+        );
     });
 
     it('deve criar funcionario', async () => {

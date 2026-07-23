@@ -80,7 +80,8 @@ src/modules/noticias/
       "id": "uuid",
       "nome": "Maria Silva",
       "empresa": "Empresa 01 - Matriz",
-      "dataAniversario": "21/06"
+      "dataAniversario": "21/06",
+      "ehHoje": true
     }
   ],
   "aniversariantesEmpresa": [
@@ -88,7 +89,9 @@ src/modules/noticias/
       "id": "uuid",
       "nome": "João Souza",
       "empresa": "Empresa 02 - Filial",
-      "tempoEmpresa": "5 anos"
+      "tempoEmpresa": "5 anos",
+      "dataAniversarioEmpresa": "21/06",
+      "ehHoje": true
     }
   ]
 }

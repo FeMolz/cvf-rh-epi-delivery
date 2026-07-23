@@ -24,6 +24,7 @@ const MAPA_FILTRO_PARA_STATUS = {
     [FILTRO_LISTAGEM_FUNCIONARIOS_INATIVOS]: { status: { in: STATUS_FUNCIONARIO_INATIVOS } },
     inativo: { status: 'INATIVO' },
     desligado: { status: 'DESLIGADO' },
+    demitido: { status: 'DESLIGADO' },
     rescindido: { status: 'RESCINDIDO' },
     aposentado: { status: 'APOSENTADO' },
     [FILTRO_LISTAGEM_FUNCIONARIOS_TODOS]: {}

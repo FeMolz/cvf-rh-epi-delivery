@@ -38,6 +38,7 @@ describe('listagemFuncionarios', () => {
         expect(obterVarianteStatusFuncionario({ status: 'FERIAS' })).toBe('afastado');
         expect(obterVarianteStatusFuncionario({ status: 'INATIVO' })).toBe('afastado');
         expect(obterVarianteStatusFuncionario({ status: 'DESLIGADO' })).toBe('encerrado');
+        expect(obterRotuloStatusFuncionario({ status: 'DESLIGADO' })).toBe('Demitido');
         expect(obterVarianteStatusFuncionario({ status: 'DESCONHECIDO' })).toBe('encerrado');
         expect(obterClasseStatusFuncionario({ status: 'FERIAS' })).toBe(
             'status-badge status-badge--afastado'
@@ -93,6 +94,7 @@ describe('listagemFuncionarios', () => {
         expect(formatarData('')).toBe('—');
         expect(formatarData('invalido')).toBe('—');
         expect(formatarData(new Date('2024-06-15T12:00:00.000Z'))).toMatch(/\d{2}\/\d{2}\/\d{4}/);
+        expect(formatarData('2026-07-24')).toMatch(/24\/07\/2026/);
     });
 
     it('deve cobrir demais status de afastamento e encerramento', () => {

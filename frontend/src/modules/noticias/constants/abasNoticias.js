@@ -1,7 +1,4 @@
-export const ABAS_NOTICIAS = [
-    { id: 'aniversario', rotulo: 'Aniversário' },
-    { id: 'afastamento', rotulo: 'Afastamento' }
-];
+export const ABAS_NOTICIAS = [{ id: 'aniversario', rotulo: 'Aniversário' }];
 
 export const ABA_NOTICIAS_PADRAO = 'aniversario';
 
