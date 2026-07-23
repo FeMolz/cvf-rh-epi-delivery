@@ -32,7 +32,7 @@ export function parsearDataSomenteDia(valor) {
         const [, ano, mes, dia] = correspondencia;
         const data = new Date(Number(ano), Number(mes) - 1, Number(dia));
 
-        return Number.isNaN(data.getTime()) ? null : data;
+        return data;
     }
 
     const data = new Date(texto);

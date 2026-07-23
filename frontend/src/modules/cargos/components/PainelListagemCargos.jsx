@@ -47,7 +47,7 @@ export function PainelListagemCargos() {
     }, [carregarCargos]);
 
     const cargosFiltrados = useMemo(
-        () => filtrarCargos(cargos ?? [], termoBusca),
+        () => filtrarCargos(cargos, termoBusca),
         [cargos, termoBusca]
     );
 

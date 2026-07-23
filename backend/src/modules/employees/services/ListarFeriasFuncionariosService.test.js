@@ -53,6 +53,22 @@ describe('ListarFeriasFuncionariosService', () => {
         expect(resultado.items[1].id).toBe('1');
     });
 
+    it('deve usar parâmetros padrão quando execute é chamado sem argumentos', async () => {
+        employeeRepositoryMock.findManyFerias.mockResolvedValue([]);
+
+        const resultado = await listarFeriasFuncionariosService.execute();
+
+        expect(employeeRepositoryMock.findManyFerias).toHaveBeenCalledWith(
+            expect.objectContaining({ status: 'FERIAS' })
+        );
+        expect(resultado).toEqual({
+            items: [],
+            total: 0,
+            page: 1,
+            pageSize: 25
+        });
+    });
+
     it('deve paginar resultados', async () => {
         const funcionarios = Array.from({ length: 30 }, (_, indice) => ({
             id: String(indice + 1),

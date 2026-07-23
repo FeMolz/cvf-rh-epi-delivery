@@ -151,4 +151,12 @@ describe('converterDataFuncionario', () => {
         const data = converterDataFuncionario(1_704_067_200_000);
         expect(data).toBeInstanceOf(Date);
     });
+
+    it('deve retornar null para Date inválida', () => {
+        expect(converterDataFuncionario(new Date('data-invalida'))).toBeNull();
+    });
+
+    it('deve retornar null para timestamp numérico inválido', () => {
+        expect(converterDataFuncionario(Number.NaN)).toBeNull();
+    });
 });

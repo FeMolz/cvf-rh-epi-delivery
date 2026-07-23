@@ -157,7 +157,7 @@ export function ordenarFeriasVencidosPrimeiro(funcionarios, dataReferencia = new
         const bVencido = ehVencido(b);
 
         if (aVencido !== bVencido) {
-            return aVencido ? -1 : 1;
+            return Number(bVencido) - Number(aVencido);
         }
 
         return obterTimestamp(a) - obterTimestamp(b);

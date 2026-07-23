@@ -42,6 +42,14 @@ describe('funcionariosApi', () => {
         );
     });
 
+    it('deve consultar funcionarios sem filtros', async () => {
+        requisicaoApi.mockResolvedValue([]);
+
+        await consultarFuncionarios('jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/employees/consulta', { token: 'jwt' });
+    });
+
     it('deve listar ferias paginadas', async () => {
         requisicaoApi.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 25 });
 
@@ -55,6 +63,14 @@ describe('funcionariosApi', () => {
             '/employees/ferias?proximidade=30&page=1&pageSize=25',
             { token: 'jwt' }
         );
+    });
+
+    it('deve listar ferias sem filtros', async () => {
+        requisicaoApi.mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 25 });
+
+        await listarFeriasFuncionarios('jwt');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/employees/ferias', { token: 'jwt' });
     });
 
     it('deve criar funcionario', async () => {

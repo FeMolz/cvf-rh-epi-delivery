@@ -41,6 +41,23 @@ describe('afastamentoTemporarioFuncionario', () => {
         expect(data?.getDate()).toBe(24);
     });
 
+    it('deve normalizar data parseável fora do formato YYYY-MM-DD', () => {
+        const data = inicioDoDia('Jul 23 2026');
+
+        expect(data).toBeInstanceOf(Date);
+        expect(data?.getHours()).toBe(0);
+        expect(data?.getFullYear()).toBe(2026);
+    });
+
+    it('deve extrair somente a data de string ISO com horário', () => {
+        const data = inicioDoDia('2026-07-24T15:30:00.000Z');
+
+        expect(data).toBeInstanceOf(Date);
+        expect(data?.getFullYear()).toBe(2026);
+        expect(data?.getMonth()).toBe(6);
+        expect(data?.getDate()).toBe(24);
+    });
+
     it('deve considerar afastamento expirado na data de retorno', () => {
         expect(afastamentoTemporarioExpirado(new Date('2026-06-20'), new Date('2026-06-22'))).toBe(
             true

@@ -152,5 +152,36 @@ describe('EmployeeRepository', () => {
       orderBy: [{ name: 'asc' }]
     });
   });
+
+  it('should find many for departamento pessoal consulta', async () => {
+    const where = { deletedAt: null, status: { in: ['ATIVO'] } };
+    const orderBy = { admissionDate: 'desc' };
+    const mockList = [{ id: '1', name: 'Ana' }];
+    prismaMock.employee.findMany.mockResolvedValue(mockList);
+
+    const resultado = await repo.findManyConsulta(where, orderBy);
+
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where,
+      select: expect.any(Object),
+      orderBy: [orderBy, { name: 'asc' }]
+    });
+    expect(resultado).toEqual(mockList);
+  });
+
+  it('should find many for ferias listing', async () => {
+    const where = { status: 'FERIAS', deletedAt: null };
+    const mockList = [{ id: '1', name: 'Ana', leaveReturnDate: new Date('2026-08-01') }];
+    prismaMock.employee.findMany.mockResolvedValue(mockList);
+
+    const resultado = await repo.findManyFerias(where);
+
+    expect(prismaMock.employee.findMany).toHaveBeenCalledWith({
+      where,
+      select: expect.any(Object),
+      orderBy: [{ leaveReturnDate: 'asc' }]
+    });
+    expect(resultado).toEqual(mockList);
+  });
 });
 

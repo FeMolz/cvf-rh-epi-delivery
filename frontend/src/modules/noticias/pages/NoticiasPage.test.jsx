@@ -8,6 +8,18 @@ vi.mock('../../../shared/auth/useAuth.js', () => ({
     useAuth: vi.fn()
 }));
 
+vi.mock('../constants/abasNoticias.js', async () => {
+    const atual = await vi.importActual('../constants/abasNoticias.js');
+    return {
+        ...atual,
+        ABAS_NOTICIAS: [
+            { id: 'aniversario', rotulo: 'Aniversário' },
+            { id: 'afastamento', rotulo: 'Afastamento' }
+        ],
+        SECOES_NOTICIAS: new Set(['aniversario', 'afastamento'])
+    };
+});
+
 let searchParams = new URLSearchParams();
 const setSearchParams = vi.fn((params) => {
     searchParams = new URLSearchParams(params);
@@ -112,5 +124,39 @@ describe('NoticiasPage', () => {
 
         expect(screen.queryByText('Erro temporário')).not.toBeInTheDocument();
         vi.useRealTimers();
+    });
+
+    it('deve trocar aba e sincronizar secao na url', async () => {
+        const usuario = userEvent.setup();
+
+        render(<NoticiasPage />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Ana')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /aniversário/i }));
+
+        expect(setSearchParams).toHaveBeenCalledWith({ secao: 'aniversario' }, { replace: true });
+    });
+
+    it('deve sincronizar aba quando secao da url mudar externamente', async () => {
+        const usuario = userEvent.setup();
+
+        const { rerender } = render(<NoticiasPage />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Ana')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /afastamento/i }));
+
+        searchParams = new URLSearchParams({ secao: 'aniversario' });
+        rerender(<NoticiasPage />);
+
+        expect(screen.getByRole('button', { name: /aniversário/i })).toHaveAttribute(
+            'aria-current',
+            'page'
+        );
     });
 });
