@@ -4,6 +4,7 @@ import {
     MENSAGEM_RELATORIO_NAO_ENCONTRADO
 } from '../constants/relatorioEntregaEpiConstantes.js';
 import epiDeliveryReportRepository from '../repositories/EpiDeliveryReportRepository.js';
+import supabaseStorageProvider from '../../../shared/providers/SupabaseStorageProvider/SupabaseStorageProvider.js';
 
 /**
  * Remove caracteres inválidos em nomes de arquivo e substitui espaços por sublinhado.
@@ -45,20 +46,6 @@ function formatarDataEmissaoUtcParaNomeArquivo(dataEmissao) {
     return `${ano}-${mes}-${dia}`;
 }
 
-/**
- * @param {Buffer | Uint8Array | null | undefined} pdfConteudo
- * @returns {Buffer}
- */
-function normalizarBufferPdf(pdfConteudo) {
-    if (!pdfConteudo) {
-        return Buffer.alloc(0);
-    }
-    if (Buffer.isBuffer(pdfConteudo)) {
-        return pdfConteudo;
-    }
-    return Buffer.from(pdfConteudo);
-}
-
 class ResolveEpiDeliveryReportPdfFileService {
     /**
      * @param {string} identificadorRelatorio
@@ -69,7 +56,7 @@ class ResolveEpiDeliveryReportPdfFileService {
             throw new Error(MENSAGEM_IDENTIFICADOR_RELATORIO_OBRIGATORIO);
         }
 
-        const relatorioPersistido = await epiDeliveryReportRepository.findByIdComPdfBinarioParaDownload(
+        const relatorioPersistido = await epiDeliveryReportRepository.findByIdComPathPdfParaDownload(
             identificadorRelatorio
         );
 
@@ -77,7 +64,16 @@ class ResolveEpiDeliveryReportPdfFileService {
             throw new Error(MENSAGEM_RELATORIO_NAO_ENCONTRADO);
         }
 
-        const bufferPdf = normalizarBufferPdf(relatorioPersistido.pdfConteudo);
+        if (!relatorioPersistido.pdfStoragePath || !relatorioPersistido.pdfTamanhoBytes) {
+            throw new Error(MENSAGEM_ARQUIVO_PDF_AUSENTE);
+        }
+
+        const bucketRelatorios = supabaseStorageProvider.obterBucketRelatoriosEpi();
+        const bufferPdf = await supabaseStorageProvider.downloadArquivo({
+            bucket: bucketRelatorios,
+            path: relatorioPersistido.pdfStoragePath
+        });
+
         if (bufferPdf.length === 0) {
             throw new Error(MENSAGEM_ARQUIVO_PDF_AUSENTE);
         }

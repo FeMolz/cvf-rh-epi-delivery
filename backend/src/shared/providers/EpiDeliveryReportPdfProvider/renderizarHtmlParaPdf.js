@@ -1,5 +1,7 @@
 import puppeteer from 'puppeteer';
 
+import env from '../../../config/env.js';
+
 /**
  * @param {string} htmlCompleto
  * @returns {Promise<Buffer>}
@@ -10,8 +12,8 @@ export async function renderizarHtmlParaPdf(htmlCompleto) {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
 
-    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-        opcoesLaunch.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (env.PUPPETEER_EXECUTABLE_PATH) {
+        opcoesLaunch.executablePath = env.PUPPETEER_EXECUTABLE_PATH;
     }
 
     const navegador = await puppeteer.launch(opcoesLaunch);

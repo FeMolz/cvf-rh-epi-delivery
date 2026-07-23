@@ -1,6 +1,7 @@
 import './carregarAmbienteRaiz.js';
 
 import prisma from '../../src/config/database.js';
+import supabaseStorageProvider from '../../src/shared/providers/SupabaseStorageProvider/SupabaseStorageProvider.js';
 import { obterConteudoPdfMinimoSeed } from './dados/conteudoPdfMinimoSeed.js';
 import {
     ENTREGAS_POR_FUNCIONARIO_SEED,
@@ -109,32 +110,53 @@ async function main() {
     const periodoFim = new Date('2025-03-31');
     const conteudoPdf = obterConteudoPdfMinimoSeed();
 
-    await prisma.epiDeliveryReport.upsert({
-        where: { id: ID_RELATORIO_EPI_ANA },
-        update: {
-            employeeId: ID_FUNCIONARIO_ANA,
-            periodStartDate: periodoInicio,
-            periodEndDate: periodoFim,
-            pdfConteudo: conteudoPdf,
-            generatedByUserId: usuarioAdmin?.id ?? null,
-            foiImpresso: false,
-            foiEncaminhado: true,
-            foiAssinado: false
-        },
-        create: {
-            id: ID_RELATORIO_EPI_ANA,
-            employeeId: ID_FUNCIONARIO_ANA,
-            periodStartDate: periodoInicio,
-            periodEndDate: periodoFim,
-            pdfConteudo: conteudoPdf,
-            generatedByUserId: usuarioAdmin?.id ?? null,
-            foiImpresso: false,
-            foiEncaminhado: true,
-            foiAssinado: false
-        }
-    });
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.warn(
+            '- Relatório PDF de EPI ignorado: defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY para popular o Storage.'
+        );
+    } else {
+        const pathPdfRelatorio = supabaseStorageProvider.montarPathRelatorioEpi(
+            ID_FUNCIONARIO_ANA,
+            ID_RELATORIO_EPI_ANA
+        );
+        const bucketRelatorios = supabaseStorageProvider.obterBucketRelatoriosEpi();
 
-    console.log('- Relatório PDF de EPI para Ana Silva sincronizado.');
+        await supabaseStorageProvider.uploadArquivo({
+            bucket: bucketRelatorios,
+            path: pathPdfRelatorio,
+            buffer: conteudoPdf,
+            substituirSeExistir: true
+        });
+
+        await prisma.epiDeliveryReport.upsert({
+            where: { id: ID_RELATORIO_EPI_ANA },
+            update: {
+                employeeId: ID_FUNCIONARIO_ANA,
+                periodStartDate: periodoInicio,
+                periodEndDate: periodoFim,
+                pdfStoragePath: pathPdfRelatorio,
+                pdfTamanhoBytes: conteudoPdf.length,
+                generatedByUserId: usuarioAdmin?.id ?? null,
+                foiImpresso: false,
+                foiEncaminhado: true,
+                foiAssinado: false
+            },
+            create: {
+                id: ID_RELATORIO_EPI_ANA,
+                employeeId: ID_FUNCIONARIO_ANA,
+                periodStartDate: periodoInicio,
+                periodEndDate: periodoFim,
+                pdfStoragePath: pathPdfRelatorio,
+                pdfTamanhoBytes: conteudoPdf.length,
+                generatedByUserId: usuarioAdmin?.id ?? null,
+                foiImpresso: false,
+                foiEncaminhado: true,
+                foiAssinado: false
+            }
+        });
+
+        console.log('- Relatório PDF de EPI para Ana Silva sincronizado no Supabase Storage.');
+    }
     console.log('\n=== ENTREGAS E RELATÓRIOS DE EPI ATUALIZADOS ===');
 }
 

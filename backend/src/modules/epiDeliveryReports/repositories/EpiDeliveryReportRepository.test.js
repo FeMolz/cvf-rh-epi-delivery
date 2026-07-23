@@ -262,12 +262,16 @@ describe('EpiDeliveryReportRepository', () => {
         );
     });
 
-    it('findByIdComPdfBinarioParaDownload deve buscar pdf binario', async () => {
-        prismaMock.epiDeliveryReport.findUnique.mockResolvedValue({ id: 'r1', pdfConteudo: Buffer.from('pdf') });
+    it('findByIdComPathPdfParaDownload deve buscar path do pdf', async () => {
+        prismaMock.epiDeliveryReport.findUnique.mockResolvedValue({
+            id: 'r1',
+            pdfStoragePath: 'e1/r1.pdf',
+            pdfTamanhoBytes: 100
+        });
 
-        const resultado = await epiDeliveryReportRepository.findByIdComPdfBinarioParaDownload('r1');
+        const resultado = await epiDeliveryReportRepository.findByIdComPathPdfParaDownload('r1');
 
-        expect(resultado.pdfConteudo).toBeInstanceOf(Buffer);
+        expect(resultado.pdfStoragePath).toBe('e1/r1.pdf');
         expect(prismaMock.epiDeliveryReport.findUnique).toHaveBeenCalledWith(
             expect.objectContaining({ where: { id: 'r1' } })
         );

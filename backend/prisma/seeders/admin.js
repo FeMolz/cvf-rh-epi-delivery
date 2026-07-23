@@ -46,7 +46,8 @@ async function main() {
         update: {
             name: adminName,
             passwordHash,
-            role: UserRole.ADMIN
+            role: UserRole.ADMIN,
+            isActive: true
         },
         create: {
             name: adminName,

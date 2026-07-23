@@ -59,6 +59,11 @@ JWT_EXPIRES_IN="7d"
 # Opcional — seed do admin
 # ADMIN_SEED_EMAIL="admin@rhsystem.com"
 # ADMIN_SEED_PASSWORD="AlterarSenha123!"
+
+# Supabase Storage (relatórios EPI) — bucket de dev, não use epi-reports de produção
+# SUPABASE_URL="https://SEU-PROJETO.supabase.co"
+# SUPABASE_SERVICE_ROLE_KEY=""
+# SUPABASE_STORAGE_BUCKET_EPI_REPORTS="epi-reports-dev-teste"
 ```
 
 Frontend (opcional — padrão já funciona):
@@ -170,13 +175,17 @@ copy backend\.env.test.example backend\.env.test
 copy .env.test.example .env.test
 ```
 
-Confira `DATABASE_URL` e `PORT`:
+Confira `DATABASE_URL`, `PORT` e Supabase Storage:
 
 ```env
 PORT=3001
 NODE_ENV=test
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/rh_system_test?schema=public"
 JWT_SECRET="jwt-secreto-apenas-ambiente-teste-com-16-chars"
+
+SUPABASE_URL="https://SEU-PROJETO.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="sb_secret_..."
+SUPABASE_STORAGE_BUCKET_EPI_REPORTS="epi-reports-dev-teste"
 ```
 
 ### 4.3 Frontend em modo teste

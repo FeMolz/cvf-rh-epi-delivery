@@ -20,7 +20,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de EPIs (Epis)](./docs/EPI.md)** - Integração baseCAEPI (`EpiProvider`), cache local por CA, validade cadastral (`Validade`, `StatusValidade`, `Situacao`) e consulta/listagem.
 - 📄 **[Chaining (Cargo–EPI)](./docs/CHAINING.md)** - Vincular, listar e desvincular EPIs por cargo (`RoleEpi`), periodicidade de troca e rotas `/api/v1/roles-epis`.
 - 📄 **[Módulo de Entregas de EPIs (EpiDeliveries)](./docs/EPI_DELIVERIES.md)** - Detalha a entrega em lote de EPIs para funcionários e o cálculo condicional de vencimento (periodicidade).
-- 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento em disco, pendências de assinatura e atualização de flags operacionais.
+- 📄 **[Módulo de Relatórios de Entrega de EPI (EpiDeliveryReports)](./docs/EPI_DELIVERY_REPORTS.md)** - Emissão de PDF por período, armazenamento no Supabase Storage, pendências de assinatura e atualização de flags operacionais.
 - 📄 **[Módulo de Quesitos e vínculo Cargo–Quesito](./docs/QUESITOS.md)** - Cadastro de quesitos (nome único, descrição, bloco), filtros de listagem e encadeamento opcional com cargos (`/api/v1/roles-quesitos`).
 - 📄 **[Módulo de Recrutamento (Recruitment)](./docs/RECRUTAMENTO.md)** - Anúncios de vaga com modelo padrão, inscrição pública com currículo e gestão de candidaturas com filtro por data.
 - 📄 **[Módulo de Ponto (Secullum)](./docs/PONTO.md)** - Resumo diário de batidas: quem bateu ponto, batidas registradas e quem não bateu (integração Ponto Web).
@@ -28,6 +28,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Cobertura de endpoints (testes vs Postman)](./docs/COBERTURA_ENDPOINTS.md)** - Mapa de rotas e como rodar `npm test` / `npm run test:routes`.
 - 📄 **[Checklist Postman (testes manuais)](./docs/POSTMAN_MANUAL.md)** - O que ainda validar na mão (PDF, Secullum, upload, JWT).
 - 📄 **[Banco de teste](./docs/BANCO_TESTE.md)** - PostgreSQL isolado + `.env.test` + `npm run dev:test`.
+- 📄 **[Testes de integração e E2E](./docs/TESTES_INTEGRACAO_E2E.md)** - Suites com banco real e Playwright.
 - 📄 **[Segurança da API](./docs/SEGURANCA.md)** - JWT, CORS, rate limit, senhas, upload, auditoria e checklist de produção.
 - 📄 **[Padrão de erros HTTP](./docs/PADRAO_ERROS.md)** - `criarErroHttp` nos services e controllers finos.
 - 📄 **[PostgreSQL Supabase (produção)](./docs/SUPABASE.md)** - `DATABASE_URL` (pooler 6543) e `DIRECT_URL` (migrations 5432).
