@@ -14,6 +14,7 @@ import {
 } from '../shared/constants/segurancaConstantes.js';
 import {
     validarCaepiProducao,
+    validarMailProducao,
     validarOrigensCorsProducao,
     validarRedisProducao,
     validarSegredoJwt,
@@ -32,6 +33,12 @@ validarCaepiProducao(process.env.CAEPI_API_URL, NODE_ENV);
 validarSupabaseStorageProducao(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
+    NODE_ENV
+);
+validarMailProducao(
+    process.env.GMAIL_USER,
+    process.env.GMAIL_PASS,
+    process.env.FRONTEND_PUBLIC_URL,
     NODE_ENV
 );
 
@@ -77,7 +84,13 @@ const env = {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || null,
     SUPABASE_STORAGE_BUCKET_EPI_REPORTS:
         process.env.SUPABASE_STORAGE_BUCKET_EPI_REPORTS || BUCKET_PADRAO_RELATORIOS_EPI,
-    PUPPETEER_EXECUTABLE_PATH: resolverCaminhoExecutavelPuppeteer() || null
+    PUPPETEER_EXECUTABLE_PATH: resolverCaminhoExecutavelPuppeteer() || null,
+    GMAIL_USER: process.env.GMAIL_USER || null,
+    GMAIL_PASS: process.env.GMAIL_PASS || null,
+    FRONTEND_PUBLIC_URL: (process.env.FRONTEND_PUBLIC_URL || 'http://localhost:5173').replace(
+        /\/$/,
+        ''
+    )
 };
 
 export default env;

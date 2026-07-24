@@ -5,7 +5,7 @@ import { useState } from 'react';
  *   valoresIniciais?: Record<string, unknown>,
  *   onVoltar: () => void,
  *   onContinuar: (dados: Record<string, unknown>) => void,
- *   onFinalizar: (dados: Record<string, unknown>) => void,
+ *   onFinalizar?: (dados: Record<string, unknown>) => void,
  *   carregando?: boolean,
  *   rotuloFinalizar?: string
  * }} props
@@ -39,7 +39,7 @@ export function FormularioFuncionarioEtapa2({
 
     function aoFinalizar(evento) {
         evento.preventDefault();
-        onFinalizar(dados);
+        onFinalizar?.(dados);
     }
 
     return (
@@ -134,14 +134,16 @@ export function FormularioFuncionarioEtapa2({
                 >
                     Voltar
                 </button>
-                <button
-                    className="botao botao--secundario"
-                    type="button"
-                    disabled={carregando}
-                    onClick={aoFinalizar}
-                >
-                    {carregando ? 'Salvando…' : rotuloFinalizar}
-                </button>
+                {onFinalizar ? (
+                    <button
+                        className="botao botao--secundario"
+                        type="button"
+                        disabled={carregando}
+                        onClick={aoFinalizar}
+                    >
+                        {carregando ? 'Salvando…' : rotuloFinalizar}
+                    </button>
+                ) : null}
                 <button className="botao botao--primario" type="submit" disabled={carregando}>
                     Continuar para benefícios
                 </button>

@@ -19,3 +19,7 @@ export function middlewareUploadCurriculo(requisicao, resposta, proximo) {
         return proximo();
     });
 }
+
+export function middlewareUploadCurriculoOpcional(requisicao, resposta, proximo) {
+    uploadCurriculo(requisicao, resposta, (erro) => proximo(erro));
+}

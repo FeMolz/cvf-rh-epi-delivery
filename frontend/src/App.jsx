@@ -31,6 +31,14 @@ import { RedirecionarRelatoriosEpiInicio } from './modules/epi-relatorios/pages/
 import { EmitirRelatorioEpiPage } from './modules/epi-relatorios/pages/EmitirRelatorioEpiPage.jsx';
 import { UltimasEmissoesRelatorioEpiPage } from './modules/epi-relatorios/pages/UltimasEmissoesRelatorioEpiPage.jsx';
 import { HistoricoEmissoesRelatorioEpiPage } from './modules/epi-relatorios/pages/HistoricoEmissoesRelatorioEpiPage.jsx';
+import { DetalheVagaAdminPage } from './modules/recrutamento/pages/DetalheVagaAdminPage.jsx';
+import { ListagemVagasAdminPage } from './modules/recrutamento/pages/ListagemVagasAdminPage.jsx';
+import { CadastroContratacaoPublicoPage } from './modules/recrutamento/pages/CadastroContratacaoPublicoPage.jsx';
+import { DetalheVagaPublicaPage } from './modules/recrutamento/pages/DetalheVagaPublicaPage.jsx';
+import { ListagemVagasPublicaPage } from './modules/recrutamento/pages/ListagemVagasPublicaPage.jsx';
+import { ValidarCadastroContratacaoPage } from './modules/recrutamento/pages/ValidarCadastroContratacaoPage.jsx';
+import { DetalheVagaPage } from './modules/recrutamento/pages/DetalheVagaPage.jsx';
+import { ListagemVagasPage } from './modules/recrutamento/pages/ListagemVagasPage.jsx';
 import { InicioPage } from './modules/usuarios/pages/InicioPage.jsx';
 import { LoginPage } from './modules/usuarios/pages/LoginPage.jsx';
 
@@ -42,6 +50,17 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<InicioPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/publico/vagas" element={<ListagemVagasPublicaPage />} />
+                    <Route path="/publico/vagas/:id" element={<DetalheVagaPublicaPage />} />
+                    <Route
+                        path="/publico/cadastro-contratacao/:token"
+                        element={<CadastroContratacaoPublicoPage />}
+                    />
+
+                    <Route element={<RotasProtegidas />}>
+                        <Route path="/vagas" element={<ListagemVagasPage />} />
+                        <Route path="/vagas/:id" element={<DetalheVagaPage />} />
+                    </Route>
 
                     <Route element={<RotasProtegidas papeisPermitidos={PAPEIS_AREA_ADMIN} />}>
                         <Route path="/admin" element={<LayoutAdmin />}>
@@ -64,6 +83,12 @@ export default function App() {
                                 <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />
                                 <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
                                 <Route path="noticias" element={<NoticiasPage />} />
+                                <Route path="recrutamento" element={<ListagemVagasAdminPage />} />
+                                <Route
+                                    path="recrutamento/cadastros/:id/validar"
+                                    element={<ValidarCadastroContratacaoPage />}
+                                />
+                                <Route path="recrutamento/:id" element={<DetalheVagaAdminPage />} />
                                 <Route path="epis" element={<ListagemEpisPage />} />
                                 <Route path="epis/vinculos" element={<VinculoEpisCargoPage />} />
                                 <Route path="epis/relatorios" element={<LayoutRelatoriosEntregaEpiPage />}>

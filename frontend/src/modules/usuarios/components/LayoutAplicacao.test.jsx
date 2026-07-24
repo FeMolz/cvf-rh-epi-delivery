@@ -117,6 +117,43 @@ describe('LayoutAplicacao', () => {
         expect(navegarMock).toHaveBeenCalledWith('/login');
     });
 
+    it('deve aplicar cartao amplo quando largura for ampla', () => {
+        useAuth.mockReturnValue({
+            user: null,
+            logout: logoutMock,
+            podeCadastrarUsuarios: false
+        });
+
+        const { container } = render(
+            <MemoryRouter>
+                <LayoutAplicacao titulo="Vagas" largura="ampla">
+                    <p>Conteúdo</p>
+                </LayoutAplicacao>
+            </MemoryRouter>
+        );
+
+        expect(container.querySelector('.cartao--amplo')).toBeInTheDocument();
+    });
+
+    it('deve aplicar variante aberta sem container visivel', () => {
+        useAuth.mockReturnValue({
+            user: null,
+            logout: logoutMock,
+            podeCadastrarUsuarios: false
+        });
+
+        const { container } = render(
+            <MemoryRouter>
+                <LayoutAplicacao titulo="Vagas" largura="ampla" variante="aberta">
+                    <p>Conteúdo</p>
+                </LayoutAplicacao>
+            </MemoryRouter>
+        );
+
+        expect(container.querySelector('.cartao--aberto')).toBeInTheDocument();
+        expect(container.querySelector('.layout__conteudo--aberto')).toBeInTheDocument();
+    });
+
     it('deve exibir papel desconhecido quando rotulo nao estiver mapeado', () => {
         useAuth.mockReturnValue({
             user: { name: 'João', role: 'PAPEL_CUSTOM' },

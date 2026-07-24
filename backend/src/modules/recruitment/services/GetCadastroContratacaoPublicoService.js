@@ -48,8 +48,12 @@ class GetCadastroContratacaoPublicoService {
                 cpf: cadastro.cpf || candidatura?.cpf || null
             },
             camposPermitidosCandidato: {
-                obrigatorios: ['name', 'cpf', 'email', 'telefone', 'birthDate'],
-                opcionaisPessoais: [
+                obrigatorios: [
+                    'name',
+                    'cpf',
+                    'email',
+                    'telefone',
+                    'birthDate',
                     'nacionalidade',
                     'estadoCivil',
                     'racaCor',
@@ -63,11 +67,11 @@ class GetCadastroContratacaoPublicoService {
                     'cep',
                     'logradouro',
                     'numeroEndereco',
-                    'complemento',
                     'bairro',
                     'cidade',
                     'estado'
-                ]
+                ],
+                opcionais: ['complemento']
             },
             dadosPreenchidos: {
                 name: cadastro.name,

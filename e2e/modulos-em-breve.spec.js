@@ -4,7 +4,7 @@ import path from 'node:path';
 import { irParaAreaDoPerfil } from './helpers/login.js';
 
 const diretorioAuth = path.join(process.cwd(), 'e2e', '.auth');
-const MODULOS_EM_BREVE = ['Quesitos', 'Recrutamento', 'Ponto'];
+const MODULOS_EM_BREVE = ['Quesitos', 'Ponto'];
 
 test.describe('Modulos em breve', () => {
     test.use({ storageState: path.join(diretorioAuth, 'administrativo.json') });
@@ -34,7 +34,7 @@ test.describe('Modulos em breve', () => {
 test.describe('Modulos em breve (admin)', () => {
     test.use({ storageState: path.join(diretorioAuth, 'admin.json') });
 
-    test('admin tambem ve os tres modulos em breve', async ({ page }) => {
+    test('admin tambem ve os modulos em breve restantes', async ({ page }) => {
         await irParaAreaDoPerfil(page, 'admin');
 
         for (const rotulo of MODULOS_EM_BREVE) {

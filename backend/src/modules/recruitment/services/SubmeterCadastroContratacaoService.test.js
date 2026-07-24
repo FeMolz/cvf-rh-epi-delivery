@@ -43,7 +43,23 @@ describe('SubmeterCadastroContratacaoService', () => {
             cpf: '529.982.247-25',
             email: 'maria@email.com',
             telefone: '(11) 91234-5678',
-            birthDate: '1990-05-10'
+            birthDate: '1990-05-10',
+            nacionalidade: 'Brasileira',
+            estadoCivil: 'SOLTEIRO',
+            racaCor: 'PARDA',
+            filiacao: 'João e Ana',
+            grauInstrucao: 'SUPERIOR_COMPLETO',
+            numeroCtps: '12345',
+            serieCtps: '001',
+            numeroDependentes: 0,
+            pis: '12345678901',
+            chavePix: 'maria@email.com',
+            cep: '01310-100',
+            logradouro: 'Av. Paulista',
+            numeroEndereco: '1000',
+            bairro: 'Bela Vista',
+            cidade: 'São Paulo',
+            estado: 'SP'
         });
 
         expect(cadastroContratacaoRepositoryMock.update).toHaveBeenCalledWith(

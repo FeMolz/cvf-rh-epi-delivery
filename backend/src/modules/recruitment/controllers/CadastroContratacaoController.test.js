@@ -10,6 +10,7 @@ const submeterPublicoMock = { execute: jest.fn() };
 const listMock = { execute: jest.fn() };
 const getByIdMock = { execute: jest.fn() };
 const atualizarStatusMock = { execute: jest.fn() };
+const reenviarEmailMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/GerarConviteCadastroContratacaoService.js', () => ({
     default: gerarConviteMock
@@ -28,6 +29,9 @@ jest.unstable_mockModule('../services/GetCadastroContratacaoService.js', () => (
 }));
 jest.unstable_mockModule('../services/AtualizarStatusCadastroContratacaoService.js', () => ({
     default: atualizarStatusMock
+}));
+jest.unstable_mockModule('../services/ReenviarEmailConviteCadastroService.js', () => ({
+    default: reenviarEmailMock
 }));
 
 const cadastroContratacaoController = (await import('./CadastroContratacaoController.js')).default;
@@ -54,6 +58,18 @@ describe('CadastroContratacaoController', () => {
         await cadastroContratacaoController.gerarConvite({ params: { id: 'c1' } }, resposta, jest.fn());
 
         expect(resposta.status).toHaveBeenCalledWith(201);
+    });
+
+    it('reenviarEmail deve retornar 200', async () => {
+        reenviarEmailMock.execute.mockResolvedValue({ id: 'cad1', emailEnviadoPara: 'a@b.com' });
+        const resposta = criarMocksResposta();
+
+        await cadastroContratacaoController.reenviarEmail({ params: { id: 'cad1' } }, resposta, jest.fn());
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(
+            expect.objectContaining({ emailEnviadoPara: 'a@b.com' })
+        );
     });
 
     it('gerarConvite deve encaminhar 400 ao next para convite duplicado', async () => {

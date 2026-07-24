@@ -44,4 +44,21 @@ describe('DialogoConfirmacao', () => {
         await usuario.click(screen.getByRole('button', { name: 'Excluir' }));
         expect(onConfirmar).toHaveBeenCalled();
     });
+
+    it('deve ocultar botao cancelar quando exibirCancelar for falso', () => {
+        render(
+            <DialogoConfirmacao
+                aberto
+                titulo="Detalhe"
+                mensagem="Conteúdo"
+                rotuloConfirmar="Ok"
+                exibirCancelar={false}
+                onConfirmar={vi.fn()}
+                onCancelar={vi.fn()}
+            />
+        );
+
+        expect(screen.queryByRole('button', { name: /cancelar/i })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /^ok$/i })).toBeInTheDocument();
+    });
 });

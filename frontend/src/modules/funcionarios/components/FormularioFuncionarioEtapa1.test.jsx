@@ -20,7 +20,12 @@ const valoresCompletos = {
     admissionDate: '2024-01-15',
     companyId: 'emp-1',
     roleId: 'cargo-1',
-    setorId: 'set-1'
+    setorId: 'set-1',
+    numeroCtps: '12345',
+    serieCtps: '001',
+    numeroDependentes: '0',
+    pis: '12345678901',
+    chavePix: 'maria@test.com'
 };
 
 async function enviarFormulario() {
@@ -36,12 +41,20 @@ async function preencherCamposObrigatorios(usuario) {
     await usuario.selectOptions(screen.getByLabelText(/empresa/i), valoresCompletos.companyId);
     await usuario.selectOptions(screen.getByLabelText(/cargo/i), valoresCompletos.roleId);
     await usuario.selectOptions(screen.getByLabelText(/setor/i), valoresCompletos.setorId);
+    await usuario.type(screen.getByLabelText(/número ctps/i), valoresCompletos.numeroCtps);
+    await usuario.type(screen.getByLabelText(/série ctps/i), valoresCompletos.serieCtps);
+    await usuario.type(
+        screen.getByLabelText(/número de dependentes/i),
+        valoresCompletos.numeroDependentes
+    );
+    await usuario.type(screen.getByLabelText(/^pis$/i), valoresCompletos.pis);
+    await usuario.type(screen.getByLabelText(/chave pix/i), valoresCompletos.chavePix);
 }
 
 describe('FormularioFuncionarioEtapa1', () => {
     const usuarioRapido = () => userEvent.setup({ delay: null });
 
-    it('deve exibir valores iniciais e campos opcionais', () => {
+    it('deve exibir valores iniciais incluindo ctps, pis e chave pix', () => {
         render(
             <FormularioFuncionarioEtapa1
                 valoresIniciais={{
@@ -103,6 +116,11 @@ describe('FormularioFuncionarioEtapa1', () => {
         await usuario.selectOptions(screen.getByLabelText(/empresa/i), 'emp-1');
         await usuario.selectOptions(screen.getByLabelText(/cargo/i), 'cargo-1');
         await usuario.selectOptions(screen.getByLabelText(/setor/i), 'set-1');
+        await usuario.type(screen.getByLabelText(/número ctps/i), '12345');
+        await usuario.type(screen.getByLabelText(/série ctps/i), '001');
+        await usuario.type(screen.getByLabelText(/número de dependentes/i), '0');
+        await usuario.type(screen.getByLabelText(/^pis$/i), '12345678901');
+        await usuario.type(screen.getByLabelText(/chave pix/i), 'maria@test.com');
         await enviarFormulario();
 
         expect(screen.getByRole('alert')).toHaveTextContent(/cpf completo/i);

@@ -23,6 +23,12 @@ class DownloadCurriculoCandidaturaService {
             lancarErroRecrutamento(MENSAGEM_CURRICULO_AUSENTE);
         }
 
+        if (!candidatura.curriculoVisualizadoEm) {
+            await candidaturaRepository.update(identificadorCandidatura, {
+                curriculoVisualizadoEm: new Date()
+            });
+        }
+
         registrarEventoAuditoria(TIPOS_EVENTO_AUDITORIA.DOWNLOAD_CURRICULO, {
             identificadorCandidatura,
             identificadorUsuario: contextoAuditoria.identificadorUsuario,

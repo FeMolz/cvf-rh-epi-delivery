@@ -3,7 +3,7 @@ import express from 'express';
 import anuncioVagaController from '../controllers/AnuncioVagaController.js';
 import candidaturaController from '../controllers/CandidaturaController.js';
 import cadastroContratacaoController from '../controllers/CadastroContratacaoController.js';
-import { middlewareUploadCurriculo } from '../middlewares/uploadCurriculoMiddleware.js';
+import { middlewareUploadCurriculoOpcional } from '../middlewares/uploadCurriculoMiddleware.js';
 import { ROLES_GESTAO_RECRUTAMENTO } from '../constants/recrutamentoConstantes.js';
 import { isAuthenticated } from '../../../shared/middlewares/auth.js';
 import { authorize } from '../../../shared/middlewares/rbac.js';
@@ -11,6 +11,12 @@ import { limitadorTaxaRotasPublicas } from '../../../shared/middlewares/criarLim
 
 const { Router } = express;
 const recruitmentRoutes = Router();
+
+recruitmentRoutes.get(
+    '/publico/vagas',
+    limitadorTaxaRotasPublicas,
+    (requisicao, resposta, proximo) => anuncioVagaController.listPublico(requisicao, resposta, proximo)
+);
 
 recruitmentRoutes.get(
     '/publico/vagas/:id',
@@ -21,7 +27,7 @@ recruitmentRoutes.get(
 recruitmentRoutes.post(
     '/publico/vagas/:id/candidaturas',
     limitadorTaxaRotasPublicas,
-    middlewareUploadCurriculo,
+    middlewareUploadCurriculoOpcional,
     (requisicao, resposta, proximo) => candidaturaController.createPublica(requisicao, resposta, proximo)
 );
 
@@ -36,6 +42,25 @@ recruitmentRoutes.post(
     limitadorTaxaRotasPublicas,
     (requisicao, resposta, proximo) =>
         cadastroContratacaoController.submeterPublico(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/vagas/ativas',
+    isAuthenticated,
+    (requisicao, resposta, proximo) => anuncioVagaController.listAtivos(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
+    '/vagas/ativas/:id',
+    isAuthenticated,
+    (requisicao, resposta, proximo) => anuncioVagaController.getAtivo(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/vagas/:id/candidaturas',
+    isAuthenticated,
+    middlewareUploadCurriculoOpcional,
+    (requisicao, resposta, proximo) => candidaturaController.createAutenticada(requisicao, resposta, proximo)
 );
 
 recruitmentRoutes.post(
@@ -81,6 +106,28 @@ recruitmentRoutes.get(
 );
 
 recruitmentRoutes.get(
+    '/candidaturas',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.list(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/candidaturas/:id/reativar',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.reativar(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/candidaturas/:id/visualizacao',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) =>
+        candidaturaController.marcarVisualizacao(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.get(
     '/candidaturas/:id',
     isAuthenticated,
     authorize(ROLES_GESTAO_RECRUTAMENTO),
@@ -92,6 +139,13 @@ recruitmentRoutes.get(
     isAuthenticated,
     authorize(ROLES_GESTAO_RECRUTAMENTO),
     (requisicao, resposta, proximo) => candidaturaController.downloadCurriculo(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.patch(
+    '/candidaturas/:id/status',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) => candidaturaController.atualizarStatus(requisicao, resposta, proximo)
 );
 
 recruitmentRoutes.post(
@@ -107,6 +161,14 @@ recruitmentRoutes.get(
     isAuthenticated,
     authorize(ROLES_GESTAO_RECRUTAMENTO),
     (requisicao, resposta, proximo) => cadastroContratacaoController.list(requisicao, resposta, proximo)
+);
+
+recruitmentRoutes.post(
+    '/cadastros-contratacao/:id/reenviar-email',
+    isAuthenticated,
+    authorize(ROLES_GESTAO_RECRUTAMENTO),
+    (requisicao, resposta, proximo) =>
+        cadastroContratacaoController.reenviarEmail(requisicao, resposta, proximo)
 );
 
 recruitmentRoutes.get(

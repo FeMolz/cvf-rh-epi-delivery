@@ -3,6 +3,7 @@ import gerarConviteCadastroContratacaoService from '../services/GerarConviteCada
 import getCadastroContratacaoPublicoService from '../services/GetCadastroContratacaoPublicoService.js';
 import getCadastroContratacaoService from '../services/GetCadastroContratacaoService.js';
 import listCadastrosContratacaoService from '../services/ListCadastrosContratacaoService.js';
+import reenviarEmailConviteCadastroService from '../services/ReenviarEmailConviteCadastroService.js';
 import submeterCadastroContratacaoService from '../services/SubmeterCadastroContratacaoService.js';
 
 class CadastroContratacaoController {
@@ -10,6 +11,15 @@ class CadastroContratacaoController {
         try {
             const convite = await gerarConviteCadastroContratacaoService.execute(requisicao.params.id);
             return resposta.status(201).json(convite);
+        } catch (erro) {
+            return proximo(erro);
+        }
+    }
+
+    async reenviarEmail(requisicao, resposta, proximo) {
+        try {
+            const resultado = await reenviarEmailConviteCadastroService.execute(requisicao.params.id);
+            return resposta.status(200).json(resultado);
         } catch (erro) {
             return proximo(erro);
         }
@@ -39,7 +49,8 @@ class CadastroContratacaoController {
     async list(requisicao, resposta, proximo) {
         try {
             const lista = await listCadastrosContratacaoService.execute({
-                status: requisicao.query.status
+                status: requisicao.query.status,
+                processoAprovacao: requisicao.query.processoAprovacao
             });
             return resposta.status(200).json(lista);
         } catch (erro) {

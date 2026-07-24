@@ -77,6 +77,18 @@ enum StatusCadastroContratacao {
     DESCONTINUADO
 }
 
+enum ModoTrabalhoVaga {
+    PRESENCIAL
+    REMOTO
+    HIBRIDO
+}
+
+enum StatusCandidatura {
+    PENDENTE
+    PROXIMA_FASE
+    DESCARTADO
+}
+
 model Company {
     id       String  @id @default(uuid())
     name     String
@@ -120,6 +132,8 @@ model User {
     anunciosVagaCriados AnuncioVaga[] @relation("AnuncioVagaCriador")
 
     cadastrosContratacaoAnalisados CadastroContratacao[] @relation("CadastroContratacaoAnalisador")
+
+    candidaturas Candidatura[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -315,6 +329,7 @@ model AnuncioVaga {
     beneficios          String
 
     localTrabalho     String
+    modoTrabalho      ModoTrabalhoVaga    @default(PRESENCIAL)
     tipoContratacao   TipoContratacaoVaga
     jornadaTrabalho   String
     faixaSalarial     String?
@@ -348,30 +363,46 @@ model Candidatura {
     anuncioVagaId String
     anuncioVaga   AnuncioVaga @relation(fields: [anuncioVagaId], references: [id])
 
+    userId String?
+    user   User?   @relation(fields: [userId], references: [id])
+
+    status StatusCandidatura @default(PENDENTE)
+
     nomeCompleto String
     email        String
-    telefone     String
+    telefone     String?
     cpf          String?
-    cidade       String
-    estado       String
+    cidade       String?
+    estado       String?
     linkedinUrl  String?
 
     pretensaoSalarial      String?
     disponibilidadeInicio  String?
     mensagemCandidato      String?
 
-    curriculoConteudo     Bytes
-    curriculoNomeArquivo  String
-    curriculoTipoMime     String
-    curriculoTamanhoBytes Int
+    curriculoConteudo     Bytes?
+    curriculoNomeArquivo  String?
+    curriculoTipoMime     String?
+    curriculoTamanhoBytes Int?
+
+    descricaoVisualizadaEm  DateTime?
+    curriculoVisualizadoEm  DateTime?
+
+    descartadoEm DateTime?
+    reativadoEm  DateTime?
 
     cadastroContratacao CadastroContratacao?
 
     createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
+    @@unique([anuncioVagaId, userId])
     @@index([anuncioVagaId])
     @@index([createdAt])
     @@index([email])
+    @@index([status])
+    @@index([descartadoEm])
+    @@index([reativadoEm])
 }
 
 model CadastroContratacao {

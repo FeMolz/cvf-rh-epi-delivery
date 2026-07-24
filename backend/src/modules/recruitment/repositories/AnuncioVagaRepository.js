@@ -9,6 +9,7 @@ const SELECAO_ANUNCIO_SEM_CURRICULO = {
     requisitos: true,
     beneficios: true,
     localTrabalho: true,
+    modoTrabalho: true,
     tipoContratacao: true,
     jornadaTrabalho: true,
     faixaSalarial: true,

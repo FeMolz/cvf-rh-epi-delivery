@@ -28,6 +28,7 @@ describe('CreateAnuncioVagaService', () => {
             requisitos: 'Req',
             beneficios: 'Ben',
             localTrabalho: 'SP',
+            modoTrabalho: 'REMOTO',
             tipoContratacao: 'clt',
             jornadaTrabalho: '40h',
             roleId: 'role-1',
@@ -50,6 +51,7 @@ describe('CreateAnuncioVagaService', () => {
                 requisitos: 'R',
                 beneficios: 'B',
                 localTrabalho: 'L',
+                modoTrabalho: 'PRESENCIAL',
                 tipoContratacao: 'CLT',
                 jornadaTrabalho: '8h',
                 criadoPorUserId: 'u1'

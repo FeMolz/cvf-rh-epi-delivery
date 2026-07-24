@@ -4,8 +4,11 @@ const prismaMock = {
     candidatura: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         findMany: jest.fn(),
-        count: jest.fn()
+        count: jest.fn(),
+        update: jest.fn(),
+        deleteMany: jest.fn()
     }
 };
 
@@ -18,6 +21,8 @@ const candidaturaRepository = (await import('./CandidaturaRepository.js')).defau
 const selecaoListagemEsperada = {
     id: true,
     anuncioVagaId: true,
+    userId: true,
+    status: true,
     nomeCompleto: true,
     email: true,
     telefone: true,
@@ -31,7 +36,12 @@ const selecaoListagemEsperada = {
     curriculoNomeArquivo: true,
     curriculoTipoMime: true,
     curriculoTamanhoBytes: true,
+    descricaoVisualizadaEm: true,
+    curriculoVisualizadoEm: true,
+    descartadoEm: true,
+    reativadoEm: true,
     createdAt: true,
+    updatedAt: true,
     anuncioVaga: {
         select: {
             id: true,
@@ -41,6 +51,9 @@ const selecaoListagemEsperada = {
             companyId: true,
             setorId: true
         }
+    },
+    user: {
+        select: { id: true, name: true, email: true }
     }
 };
 
@@ -93,16 +106,64 @@ describe('CandidaturaRepository', () => {
         expect(resultado).toEqual(candidatura);
     });
 
-    it('deve listar candidaturas por anuncio ordenadas por createdAt asc', async () => {
+    it('deve buscar candidatura ativa por anuncio e email', async () => {
+        const candidatura = { id: 'c1' };
+        prismaMock.candidatura.findFirst.mockResolvedValue(candidatura);
+
+        const resultado = await candidaturaRepository.findByAnuncioAndEmail('v1', 'maria@email.com');
+
+        expect(prismaMock.candidatura.findFirst).toHaveBeenCalledWith({
+            where: {
+                anuncioVagaId: 'v1',
+                email: 'maria@email.com',
+                status: { not: 'DESCARTADO' }
+            },
+            select: selecaoListagemEsperada
+        });
+        expect(resultado).toEqual(candidatura);
+    });
+
+    it('deve listar reativados excluindo quem ja tem cadastro ativo', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ reativados: true, excluirComCadastroAtivo: true });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                reativadoEm: { not: null },
+                status: { not: 'DESCARTADO' },
+                AND: [{ cadastroContratacao: null }]
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve excluir reativados da listagem geral de candidaturas', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ excluirReativadosSemVaga: true });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                status: { not: 'DESCARTADO' },
+                AND: [{ reativadoEm: null }]
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve listar candidaturas por anuncio excluindo descartadas por padrao', async () => {
         const lista = [{ id: 'c1' }, { id: 'c2' }];
         prismaMock.candidatura.findMany.mockResolvedValue(lista);
 
         const resultado = await candidaturaRepository.findManyByAnuncio('v1');
 
         expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
-            where: { anuncioVagaId: 'v1' },
+            where: { anuncioVagaId: 'v1', status: { not: 'DESCARTADO' } },
             select: selecaoListagemEsperada,
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'desc' }
         });
         expect(resultado).toEqual(lista);
     });
@@ -117,53 +178,71 @@ describe('CandidaturaRepository', () => {
         expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
             where: {
                 anuncioVagaId: 'v1',
+                status: { not: 'DESCARTADO' },
                 createdAt: { gte: dataInicio, lte: dataFim }
             },
             select: selecaoListagemEsperada,
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'desc' }
         });
     });
 
-    it('deve listar candidaturas com filtro apenas de data inicio', async () => {
-        const dataInicio = new Date('2026-01-01');
-        prismaMock.candidatura.findMany.mockResolvedValue([]);
-
-        await candidaturaRepository.findManyByAnuncio('v1', { dataInicio });
-
-        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
-            where: {
-                anuncioVagaId: 'v1',
-                createdAt: { gte: dataInicio }
-            },
-            select: selecaoListagemEsperada,
-            orderBy: { createdAt: 'asc' }
-        });
-    });
-
-    it('deve listar candidaturas com filtro apenas de data fim', async () => {
-        const dataFim = new Date('2026-12-31');
-        prismaMock.candidatura.findMany.mockResolvedValue([]);
-
-        await candidaturaRepository.findManyByAnuncio('v1', { dataFim });
-
-        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
-            where: {
-                anuncioVagaId: 'v1',
-                createdAt: { lte: dataFim }
-            },
-            select: selecaoListagemEsperada,
-            orderBy: { createdAt: 'asc' }
-        });
-    });
-
-    it('deve contar candidaturas por anuncio', async () => {
+    it('deve contar candidaturas por anuncio excluindo descartadas', async () => {
         prismaMock.candidatura.count.mockResolvedValue(5);
 
         const resultado = await candidaturaRepository.countByAnuncio('v1');
 
         expect(prismaMock.candidatura.count).toHaveBeenCalledWith({
-            where: { anuncioVagaId: 'v1' }
+            where: { anuncioVagaId: 'v1', status: { not: 'DESCARTADO' } }
         });
         expect(resultado).toBe(5);
+    });
+
+    it('deve listar todas as candidaturas sem filtro de vaga', async () => {
+        const lista = [{ id: 'c1' }, { id: 'c2' }];
+        prismaMock.candidatura.findMany.mockResolvedValue(lista);
+
+        const resultado = await candidaturaRepository.findMany();
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: { status: { not: 'DESCARTADO' } },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+        expect(resultado).toEqual(lista);
+    });
+
+    it('deve listar candidaturas com filtro de vaga via findMany', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ anuncioVagaId: 'v1', status: 'PENDENTE' });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: { anuncioVagaId: 'v1', status: 'PENDENTE' },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve ordenar candidaturas pelos mais antigos', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ ordenacao: 'ANTIGOS' });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: { status: { not: 'DESCARTADO' } },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'asc' }
+        });
+    });
+
+    it('deve contar candidaturas globalmente excluindo descartadas', async () => {
+        prismaMock.candidatura.count.mockResolvedValue(10);
+
+        const resultado = await candidaturaRepository.count();
+
+        expect(prismaMock.candidatura.count).toHaveBeenCalledWith({
+            where: { status: { not: 'DESCARTADO' } }
+        });
+        expect(resultado).toBe(10);
     });
 });

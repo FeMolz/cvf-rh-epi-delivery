@@ -35,6 +35,7 @@ describe('InicioPage', () => {
 
         expect(screen.getByRole('heading', { name: /bem-vindo ao cvf gerenciamento/i })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /ir para login/i })).toHaveAttribute('href', '/login');
+        expect(screen.queryByRole('link', { name: /ver vagas abertas/i })).not.toBeInTheDocument();
     });
 
     it('deve redirecionar almoxarifado para entregas de EPI', () => {
@@ -59,7 +60,7 @@ describe('InicioPage', () => {
         expect(screen.getByText('Gerenciamento')).toBeInTheDocument();
     });
 
-    it('deve exibir mensagem para colaborador autenticado sem módulos', () => {
+    it('deve exibir link para vagas para colaborador autenticado', () => {
         useAuth.mockReturnValue({
             user: { name: 'Carlos', role: 'COLABORADOR' },
             autenticado: true
@@ -69,9 +70,7 @@ describe('InicioPage', () => {
 
         expect(screen.getByRole('heading', { name: /olá, carlos/i })).toBeInTheDocument();
         expect(screen.getByText(/você está autenticado como colaborador/i)).toBeInTheDocument();
-        expect(
-            screen.getByText(/seu perfil ainda não possui módulos disponíveis no sistema/i)
-        ).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /ver vagas abertas/i })).toHaveAttribute('href', '/vagas');
     });
 
     it('deve exibir papel desconhecido quando rotulo nao estiver mapeado', () => {

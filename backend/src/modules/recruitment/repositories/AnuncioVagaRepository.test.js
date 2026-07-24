@@ -24,6 +24,7 @@ const selecaoEsperada = {
     requisitos: true,
     beneficios: true,
     localTrabalho: true,
+    modoTrabalho: true,
     tipoContratacao: true,
     jornadaTrabalho: true,
     faixaSalarial: true,

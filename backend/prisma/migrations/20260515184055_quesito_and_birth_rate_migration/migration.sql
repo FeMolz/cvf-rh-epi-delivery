@@ -1,8 +1,8 @@
 -- AlterEnum
 ALTER TYPE "UserRole" ADD VALUE 'COLABORADOR';
 
--- DropIndex
-DROP INDEX "RoleQuesito_quesitoId_idx";
+-- DropIndex (IF EXISTS: tabela RoleQuesito só é criada na migration seguinte)
+DROP INDEX IF EXISTS "RoleQuesito_quesitoId_idx";
 
 -- DropIndex
-DROP INDEX "RoleQuesito_roleId_idx";
+DROP INDEX IF EXISTS "RoleQuesito_roleId_idx";

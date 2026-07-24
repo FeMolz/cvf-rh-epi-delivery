@@ -7,7 +7,10 @@ import './dialogo-confirmacao.css';
  *   mensagem: string,
  *   rotuloConfirmar?: string,
  *   rotuloCancelar?: string,
+ *   rotuloCarregando?: string,
+ *   classeBotaoConfirmar?: string,
  *   carregando?: boolean,
+ *   exibirCancelar?: boolean,
  *   onConfirmar: () => void,
  *   onCancelar: () => void
  * }} props
@@ -18,7 +21,10 @@ export function DialogoConfirmacao({
     mensagem,
     rotuloConfirmar = 'Confirmar',
     rotuloCancelar = 'Cancelar',
+    rotuloCarregando = 'Excluindo…',
+    classeBotaoConfirmar = 'botao botao--perigo',
     carregando = false,
+    exibirCancelar = true,
     onConfirmar,
     onCancelar
 }) {
@@ -43,21 +49,23 @@ export function DialogoConfirmacao({
                     {mensagem}
                 </p>
                 <div className="dialogo-confirmacao__acoes">
+                    {exibirCancelar ? (
+                        <button
+                            className="botao botao--secundario"
+                            type="button"
+                            disabled={carregando}
+                            onClick={onCancelar}
+                        >
+                            {rotuloCancelar}
+                        </button>
+                    ) : null}
                     <button
-                        className="botao botao--secundario"
-                        type="button"
-                        disabled={carregando}
-                        onClick={onCancelar}
-                    >
-                        {rotuloCancelar}
-                    </button>
-                    <button
-                        className="botao botao--perigo"
+                        className={classeBotaoConfirmar}
                         type="button"
                         disabled={carregando}
                         onClick={onConfirmar}
                     >
-                        {carregando ? 'Excluindo…' : rotuloConfirmar}
+                        {carregando ? rotuloCarregando : rotuloConfirmar}
                     </button>
                 </div>
             </div>

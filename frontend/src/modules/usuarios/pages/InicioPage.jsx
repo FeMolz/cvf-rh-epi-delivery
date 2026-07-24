@@ -38,10 +38,13 @@ export function InicioPage() {
             titulo={`Olá, ${user.name}`}
             subtitulo={`Você está autenticado como ${ROTULOS_PAPEIS[user.role] || user.role}.`}
         >
-            <p className="mensagem">
-                Seu perfil ainda não possui módulos disponíveis no sistema. Entre em contato com um
-                administrador.
-            </p>
+            <Link
+                className="botao botao--primario"
+                to="/vagas"
+                style={{ display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}
+            >
+                Ver vagas abertas
+            </Link>
         </LayoutAplicacao>
     );
 }

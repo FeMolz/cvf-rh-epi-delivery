@@ -69,8 +69,8 @@ export const MODULOS_SISTEMA = [
     {
         id: 'recruitment',
         rotulo: 'Recrutamento',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO],
-        emBreve: true
+        rota: '/admin/recrutamento',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
         id: 'ponto',

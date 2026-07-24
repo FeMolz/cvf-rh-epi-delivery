@@ -78,6 +78,22 @@ export function validarSupabaseStorageProducao(urlSupabase, chaveServiceRole, no
     exigirVariavelDefinida('SUPABASE_SERVICE_ROLE_KEY', chaveServiceRole);
 }
 
+/**
+ * @param {string | undefined} gmailUser
+ * @param {string | undefined} gmailPass
+ * @param {string | undefined} frontendPublicUrl
+ * @param {string} nodeEnv
+ */
+export function validarMailProducao(gmailUser, gmailPass, frontendPublicUrl, nodeEnv) {
+    if (nodeEnv !== 'production') {
+        return;
+    }
+
+    exigirVariavelDefinida('GMAIL_USER', gmailUser);
+    exigirVariavelDefinida('GMAIL_PASS', gmailPass);
+    exigirVariavelDefinida('FRONTEND_PUBLIC_URL', frontendPublicUrl);
+}
+
 export function validarOrigensCorsProducao(origensCors, nodeEnv) {
     if (nodeEnv !== 'production') {
         return;

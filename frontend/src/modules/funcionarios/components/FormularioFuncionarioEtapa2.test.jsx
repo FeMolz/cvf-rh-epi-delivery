@@ -99,6 +99,19 @@ describe('FormularioFuncionarioEtapa2', () => {
         );
     });
 
+    it('deve ocultar botao de finalizar quando callback nao for informado', () => {
+        render(
+            <FormularioFuncionarioEtapa2
+                onVoltar={vi.fn()}
+                onContinuar={vi.fn()}
+            />
+        );
+
+        expect(screen.queryByRole('button', { name: /finalizar cadastro/i })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /continuar para benefícios/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /voltar/i })).toBeInTheDocument();
+    });
+
     it('deve voltar quando nao estiver carregando', async () => {
         const usuario = userEvent.setup();
         const onVoltar = vi.fn();

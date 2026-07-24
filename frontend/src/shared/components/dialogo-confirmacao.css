@@ -28,6 +28,7 @@
     margin: 0 0 1.25rem;
     color: #475569;
     line-height: 1.5;
+    white-space: pre-wrap;
 }
 
 .dialogo-confirmacao__acoes {

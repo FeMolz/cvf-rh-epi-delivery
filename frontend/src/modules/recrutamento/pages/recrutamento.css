@@ -1,0 +1,446 @@
+.recrutamento-portal__barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.recrutamento-portal__filtros {
+    margin: 0 0 1.5rem;
+    padding: 1.1rem 1.15rem;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(4px);
+}
+
+.recrutamento-portal__filtros-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+    gap: 0.85rem 1rem;
+}
+
+.recrutamento-portal__filtro {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.recrutamento-portal__filtro > span {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cor-label, #334155);
+}
+
+.recrutamento-portal__filtro input,
+.recrutamento-portal__filtro select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--cor-borda-forte, #cbd5e1);
+    border-radius: 0.55rem;
+    background: #fff;
+    font: inherit;
+    color: var(--cor-texto, #0f172a);
+}
+
+.recrutamento-portal__filtro input:focus,
+.recrutamento-portal__filtro select:focus {
+    outline: none;
+    border-color: var(--cor-primaria, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.recrutamento-portal__limpar-filtros {
+    margin-top: 0.9rem;
+}
+
+.recrutamento-portal__pesquisa {
+    display: block;
+    width: 100%;
+    margin: 0 0 1.25rem;
+}
+
+.recrutamento-portal__pesquisa input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 0.95rem;
+    border: 1px solid var(--cor-borda-forte, #cbd5e1);
+    border-radius: 0.6rem;
+    background: #fff;
+    font: inherit;
+    color: var(--cor-texto, #0f172a);
+}
+
+.recrutamento-portal__pesquisa input:focus {
+    outline: none;
+    border-color: var(--cor-primaria, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.recrutamento-cartoes {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+    align-items: stretch;
+}
+
+.recrutamento-cartoes--portal {
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(19.5rem, 1fr));
+}
+
+.recrutamento-cartao {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border: 1px solid var(--cor-borda, #e2e8f0);
+    border-radius: 0.85rem;
+    padding: 1.25rem;
+    background: var(--cor-superficie, #fff);
+    box-shadow: var(--sombra-suave, 0 1px 2px rgba(15, 23, 42, 0.06));
+    min-width: 0;
+}
+
+.recrutamento-cartao--portal {
+    gap: 0.9rem;
+    min-height: 11.5rem;
+    padding: 1.45rem 1.4rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.recrutamento-cartao h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.35;
+    color: var(--cor-texto, #0f172a);
+}
+
+.recrutamento-cartao--portal h2 {
+    font-size: 1.22rem;
+}
+
+.recrutamento-cartao__meta {
+    margin: 0;
+    flex: 1;
+    color: var(--cor-texto-medio, #64748b);
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.recrutamento-cartao--portal .recrutamento-cartao__meta {
+    font-size: 0.96rem;
+}
+
+.recrutamento-cartao .botao {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recrutamento-cartao--portal .botao {
+    padding: 0.8rem 1.1rem;
+}
+
+.formulario-candidatura-publica {
+    margin-top: 0.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--cor-borda, #e2e8f0);
+}
+
+.formulario-candidatura-publica .formulario__grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.85rem;
+}
+
+.formulario-candidatura-publica .campo {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.formulario-candidatura-publica .campo > span,
+.formulario-candidatura-publica .campo > label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cor-label, #334155);
+}
+
+.formulario-candidatura-publica .campo input,
+.formulario-candidatura-publica .campo textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.6rem;
+    font: inherit;
+    color: #0f172a;
+    background: #fff;
+}
+
+.formulario-candidatura-publica .campo textarea {
+    resize: vertical;
+    min-height: 5rem;
+    line-height: 1.5;
+}
+
+.formulario-candidatura-publica .campo input:focus,
+.formulario-candidatura-publica .campo textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.formulario-candidatura-publica .campo--largura-total {
+    grid-column: 1 / -1;
+}
+
+.recrutamento-painel-candidaturas {
+    margin-top: 1.25rem;
+}
+
+.modulo-pesquisa--filtro-vaga {
+    margin-bottom: 1rem;
+}
+
+.modulo-pesquisa--filtros-candidaturas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.recrutamento-seletor-vaga {
+    display: grid;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+.recrutamento-seletor-vaga__rotulo {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--cor-label);
+}
+
+.recrutamento-seletor-vaga__campo {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--cor-borda-forte);
+    border-radius: 0.55rem;
+    background: var(--cor-superficie);
+    box-shadow: var(--sombra-suave);
+    font: inherit;
+    color: var(--cor-texto);
+}
+
+.recrutamento-seletor-vaga__campo:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.recrutamento-seletor-vaga__campo:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.admin-pagina--formulario-completo .cadastro-funcionario {
+    flex: 1;
+}
+
+.admin-pagina--formulario-completo .formulario__grupo {
+    margin-bottom: 1.5rem;
+}
+
+.listagem-painel .listagem-painel__conteudo > .feedback-mensagens {
+    margin: 0 0 1.25rem;
+}
+
+.badge-candidatura {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-candidatura--pendente {
+    background: #fff4d6;
+    color: #8a6100;
+}
+
+.badge-candidatura--proxima-fase {
+    background: #dff5ea;
+    color: #0f6a3d;
+}
+
+.badge-candidatura--descartado {
+    background: #f2e7e7;
+    color: #8a2f2f;
+}
+
+.tabela-candidaturas__acoes {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.botao-cancelar-processo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: #b42318;
+    cursor: pointer;
+}
+
+.botao-cancelar-processo:hover:not(:disabled) {
+    background: #fef3f2;
+}
+
+.botao-cancelar-processo:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.tabela-vagas__acoes {
+    white-space: nowrap;
+}
+
+.seletor-status-candidatura {
+    min-width: 150px;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--cor-borda-forte);
+    border-radius: 0.55rem;
+    background: var(--cor-superficie);
+}
+
+.botao--compacto {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.85rem;
+}
+
+.modal-candidatura {
+    max-width: 520px;
+}
+
+.modal-candidatura__formulario {
+    margin-top: 1rem;
+}
+
+.modal-candidatura__formulario .campo {
+    margin-bottom: 0.85rem;
+}
+
+.detalhe-vaga__secao {
+    margin-bottom: 1.5rem;
+}
+
+.detalhe-vaga__secao h3 {
+    margin-bottom: 0.5rem;
+    color: var(--cor-texto);
+}
+
+.detalhe-vaga__texto {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    color: var(--cor-texto-medio);
+}
+
+.detalhe-vaga__acoes {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.formulario-candidatura-publica__ajuda {
+    margin: 0 0 1rem;
+    color: var(--cor-texto-medio);
+    line-height: 1.45;
+}
+
+.formulario-candidatura-publica__form {
+    margin-top: 0.5rem;
+}
+
+.formulario-candidatura-publica__form .botao {
+    margin-top: 1rem;
+}
+
+.tabela-candidaturas__nome-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--cor-primaria, #1a5f8a);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.tabela-candidaturas__candidato {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge-candidatura-novo {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+
+.tabela-candidaturas__nome-link:hover,
+.tabela-candidaturas__nome-link:focus-visible {
+    color: var(--cor-primaria-escura, #134861);
+}
+
+.texto-status-retorno {
+    display: inline-block;
+    margin-right: 0.5rem;
+    color: var(--cor-texto-medio);
+    font-size: 0.9rem;
+}
+
+.cadastro-contratacao-publico {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+}
+
+.cadastro-contratacao-publico__cabecalho {
+    margin-bottom: 1.5rem;
+}
+
+.cadastro-contratacao-publico__cabecalho h1 {
+    margin: 0 0 0.5rem;
+}
+
+.cadastro-contratacao-publico__cabecalho p {
+    margin: 0;
+    color: var(--cor-texto-medio);
+    line-height: 1.5;
+}
+
+.cadastro-contratacao-publico__formulario {
+    margin-top: 1rem;
+}

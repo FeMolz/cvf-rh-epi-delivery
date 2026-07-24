@@ -17,7 +17,8 @@ jest.unstable_mockModule('./validarConfiguracaoAmbiente.js', () => ({
     validarOrigensCorsProducao: jest.fn(),
     validarRedisProducao: jest.fn(),
     validarCaepiProducao: jest.fn(),
-    validarSupabaseStorageProducao: jest.fn()
+    validarSupabaseStorageProducao: jest.fn(),
+    validarMailProducao: jest.fn()
 }));
 
 jest.unstable_mockModule(
@@ -81,7 +82,8 @@ describe('env', () => {
             validarOrigensCorsProducao: jest.fn(),
             validarRedisProducao: jest.fn(),
             validarCaepiProducao: jest.fn(),
-            validarSupabaseStorageProducao: jest.fn()
+            validarSupabaseStorageProducao: jest.fn(),
+            validarMailProducao: jest.fn()
         }));
 
         process.env.NODE_ENV = 'test';

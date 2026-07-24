@@ -61,6 +61,11 @@
     padding: 2rem 1rem 3rem;
 }
 
+.layout__conteudo--aberto {
+    place-items: start stretch;
+    padding: 1.75rem 1.25rem 3rem;
+}
+
 .cartao {
     width: min(100%, 28rem);
     padding: 2rem;
@@ -68,6 +73,20 @@
     border-radius: 1rem;
     background: var(--cor-superficie);
     box-shadow: var(--sombra-cartao);
+}
+
+.cartao--amplo {
+    width: min(100%, 56rem);
+}
+
+.cartao--aberto {
+    width: min(100%, 72rem);
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .cartao__cabecalho {
@@ -136,6 +155,7 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    text-decoration: none;
     transition: transform 0.1s ease, background 0.15s ease;
 }
 

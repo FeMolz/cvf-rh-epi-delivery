@@ -106,18 +106,20 @@ class CadastroContratacaoRepository {
     }
 
     /**
-     * @param {{ status?: string }} filtros
+     * @param {{ status?: string, statusIn?: string[] }} filtros
      */
     async findMany(filtros = {}) {
         const condicao = {};
         if (filtros.status) {
             condicao.status = filtros.status;
+        } else if (Array.isArray(filtros.statusIn) && filtros.statusIn.length) {
+            condicao.status = { in: filtros.statusIn };
         }
 
         return prisma.cadastroContratacao.findMany({
             where: condicao,
             select: SELECAO_CADASTRO_COMPLETO,
-            orderBy: { enviadoEm: 'desc' }
+            orderBy: [{ enviadoEm: 'desc' }, { createdAt: 'desc' }]
         });
     }
 

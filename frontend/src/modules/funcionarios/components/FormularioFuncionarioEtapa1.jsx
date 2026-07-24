@@ -27,6 +27,7 @@ import {
  *   exibirStatus?: boolean,
  *   rotuloContinuar?: string,
  *   carregando?: boolean,
+ *   vinculosBloqueados?: boolean,
  *   onContinuar: (dados: Record<string, unknown>) => void,
  *   onCancelar?: () => void,
  *   onSalvar?: (dados: Record<string, unknown>) => void,
@@ -42,6 +43,7 @@ export function FormularioFuncionarioEtapa1({
     rotuloContinuar = 'Continuar para endereço',
     rotuloSalvar = 'Salvar alterações',
     carregando = false,
+    vinculosBloqueados = false,
     onContinuar,
     onCancelar,
     onSalvar
@@ -109,13 +111,21 @@ export function FormularioFuncionarioEtapa1({
             ['birthDate', 'Data de nascimento'],
             ['companyId', 'Empresa'],
             ['roleId', 'Cargo'],
-            ['setorId', 'Setor']
+            ['setorId', 'Setor'],
+            ['numeroCtps', 'Número CTPS'],
+            ['serieCtps', 'Série CTPS'],
+            ['pis', 'PIS'],
+            ['chavePix', 'Chave Pix']
         ];
 
         const faltando = obrigatorios.find(([campo]) => !String(dados[campo] || '').trim());
 
         if (faltando) {
             return `Preencha o campo obrigatório: ${faltando[1]}.`;
+        }
+
+        if (dados.numeroDependentes === '' || dados.numeroDependentes === null) {
+            return 'Preencha o campo obrigatório: Número de dependentes.';
         }
 
         if (!cpfEstaCompleto(dados.cpf)) {
@@ -254,6 +264,7 @@ export function FormularioFuncionarioEtapa1({
                             value={dados.companyId}
                             onChange={(evento) => atualizarCampo('companyId', evento.target.value)}
                             required
+                            disabled={vinculosBloqueados}
                         >
                             <option value="">Selecione…</option>
                             {empresas.map((empresa) => (
@@ -271,6 +282,7 @@ export function FormularioFuncionarioEtapa1({
                             value={dados.roleId}
                             onChange={(evento) => atualizarCampo('roleId', evento.target.value)}
                             required
+                            disabled={vinculosBloqueados}
                         >
                             <option value="">Selecione…</option>
                             {cargosParaSelecao.map((cargo) => (
@@ -288,6 +300,7 @@ export function FormularioFuncionarioEtapa1({
                             value={dados.setorId}
                             onChange={(evento) => atualizarCampo('setorId', evento.target.value)}
                             required
+                            disabled={vinculosBloqueados}
                         >
                             <option value="">Selecione…</option>
                             {setores.map((setor) => (
@@ -296,6 +309,62 @@ export function FormularioFuncionarioEtapa1({
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="campo">
+                        <label htmlFor="funcionario-ctps">Número CTPS</label>
+                        <input
+                            id="funcionario-ctps"
+                            type="text"
+                            value={dados.numeroCtps}
+                            onChange={(evento) => atualizarCampo('numeroCtps', evento.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="campo">
+                        <label htmlFor="funcionario-serie-ctps">Série CTPS</label>
+                        <input
+                            id="funcionario-serie-ctps"
+                            type="text"
+                            value={dados.serieCtps}
+                            onChange={(evento) => atualizarCampo('serieCtps', evento.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="campo">
+                        <label htmlFor="funcionario-dependentes">Número de dependentes</label>
+                        <input
+                            id="funcionario-dependentes"
+                            type="number"
+                            min="0"
+                            value={dados.numeroDependentes}
+                            onChange={(evento) => atualizarCampo('numeroDependentes', evento.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="campo">
+                        <label htmlFor="funcionario-pis">PIS</label>
+                        <input
+                            id="funcionario-pis"
+                            type="text"
+                            value={dados.pis}
+                            onChange={(evento) => atualizarCampo('pis', evento.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="campo">
+                        <label htmlFor="funcionario-pix">Chave Pix</label>
+                        <input
+                            id="funcionario-pix"
+                            type="text"
+                            value={dados.chavePix}
+                            onChange={(evento) => atualizarCampo('chavePix', evento.target.value)}
+                            required
+                        />
                     </div>
                 </div>
             </fieldset>
@@ -413,57 +482,6 @@ export function FormularioFuncionarioEtapa1({
                             type="text"
                             value={dados.filiacao}
                             onChange={(evento) => atualizarCampo('filiacao', evento.target.value)}
-                        />
-                    </div>
-
-                    <div className="campo">
-                        <label htmlFor="funcionario-ctps">Número CTPS</label>
-                        <input
-                            id="funcionario-ctps"
-                            type="text"
-                            value={dados.numeroCtps}
-                            onChange={(evento) => atualizarCampo('numeroCtps', evento.target.value)}
-                        />
-                    </div>
-
-                    <div className="campo">
-                        <label htmlFor="funcionario-serie-ctps">Série CTPS</label>
-                        <input
-                            id="funcionario-serie-ctps"
-                            type="text"
-                            value={dados.serieCtps}
-                            onChange={(evento) => atualizarCampo('serieCtps', evento.target.value)}
-                        />
-                    </div>
-
-                    <div className="campo">
-                        <label htmlFor="funcionario-dependentes">Número de dependentes</label>
-                        <input
-                            id="funcionario-dependentes"
-                            type="number"
-                            min="0"
-                            value={dados.numeroDependentes}
-                            onChange={(evento) => atualizarCampo('numeroDependentes', evento.target.value)}
-                        />
-                    </div>
-
-                    <div className="campo">
-                        <label htmlFor="funcionario-pis">PIS</label>
-                        <input
-                            id="funcionario-pis"
-                            type="text"
-                            value={dados.pis}
-                            onChange={(evento) => atualizarCampo('pis', evento.target.value)}
-                        />
-                    </div>
-
-                    <div className="campo">
-                        <label htmlFor="funcionario-pix">Chave Pix</label>
-                        <input
-                            id="funcionario-pix"
-                            type="text"
-                            value={dados.chavePix}
-                            onChange={(evento) => atualizarCampo('chavePix', evento.target.value)}
                         />
                     </div>
                 </div>

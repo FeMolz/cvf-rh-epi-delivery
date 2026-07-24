@@ -1,13 +1,15 @@
 import {
     MENSAGEM_ANUNCIO_NAO_ATIVO,
     MENSAGEM_ANUNCIO_NAO_ENCONTRADO,
-    MENSAGEM_CIDADE_OBRIGATORIA,
+    MENSAGEM_CANDIDATURA_EMAIL_DUPLICADA,
     MENSAGEM_EMAIL_OBRIGATORIO,
-    MENSAGEM_ESTADO_OBRIGATORIO,
+    MENSAGEM_MENSAGEM_CANDIDATO_OBRIGATORIA,
     MENSAGEM_NOME_COMPLETO_OBRIGATORIO,
-    MENSAGEM_TELEFONE_OBRIGATORIO,
-    STATUS_ANUNCIO_VAGA
+    MENSAGEM_PRETENSAO_SALARIAL_OBRIGATORIA,
+    STATUS_ANUNCIO_VAGA,
+    STATUS_CANDIDATURA
 } from '../constants/recrutamentoConstantes.js';
+import { criarErroHttp } from '../../../shared/errors/criarErroHttp.js';
 import anuncioVagaRepository from '../repositories/AnuncioVagaRepository.js';
 import candidaturaRepository from '../repositories/CandidaturaRepository.js';
 import { validarArquivoCurriculo } from '../utils/validarArquivoCurriculo.js';
@@ -32,21 +34,42 @@ class CreateCandidaturaService {
         const nomeCompleto =
             typeof dadosFormulario.nomeCompleto === 'string' ? dadosFormulario.nomeCompleto.trim() : '';
         const email = typeof dadosFormulario.email === 'string' ? dadosFormulario.email.trim().toLowerCase() : '';
-        const telefone =
-            typeof dadosFormulario.telefone === 'string' ? dadosFormulario.telefone.trim() : '';
-        const cidade = typeof dadosFormulario.cidade === 'string' ? dadosFormulario.cidade.trim() : '';
-        const estado = typeof dadosFormulario.estado === 'string' ? dadosFormulario.estado.trim() : '';
+        const pretensaoSalarial =
+            typeof dadosFormulario.pretensaoSalarial === 'string'
+                ? dadosFormulario.pretensaoSalarial.trim()
+                : '';
+        const mensagemCandidato =
+            typeof dadosFormulario.mensagemCandidato === 'string'
+                ? dadosFormulario.mensagemCandidato.trim()
+                : '';
 
         if (!nomeCompleto) lancarErroRecrutamento(MENSAGEM_NOME_COMPLETO_OBRIGATORIO);
         if (!email) lancarErroRecrutamento(MENSAGEM_EMAIL_OBRIGATORIO);
-        if (!telefone) lancarErroRecrutamento(MENSAGEM_TELEFONE_OBRIGATORIO);
-        if (!cidade) lancarErroRecrutamento(MENSAGEM_CIDADE_OBRIGATORIA);
-        if (!estado) lancarErroRecrutamento(MENSAGEM_ESTADO_OBRIGATORIO);
+        if (!pretensaoSalarial) lancarErroRecrutamento(MENSAGEM_PRETENSAO_SALARIAL_OBRIGATORIA);
+        if (!mensagemCandidato) lancarErroRecrutamento(MENSAGEM_MENSAGEM_CANDIDATO_OBRIGATORIA);
 
         validarEmailCandidato(email);
 
-        const metadadosCurriculo = validarArquivoCurriculo(arquivoCurriculo);
+        const candidaturaExistente = await candidaturaRepository.findByAnuncioAndEmail(
+            identificadorAnuncio,
+            email
+        );
+        if (candidaturaExistente) {
+            throw criarErroHttp(MENSAGEM_CANDIDATURA_EMAIL_DUPLICADA, 409);
+        }
 
+        const telefone =
+            typeof dadosFormulario.telefone === 'string' && dadosFormulario.telefone.trim()
+                ? dadosFormulario.telefone.trim()
+                : null;
+        const cidade =
+            typeof dadosFormulario.cidade === 'string' && dadosFormulario.cidade.trim()
+                ? dadosFormulario.cidade.trim()
+                : null;
+        const estado =
+            typeof dadosFormulario.estado === 'string' && dadosFormulario.estado.trim()
+                ? dadosFormulario.estado.trim()
+                : null;
         const cpf =
             typeof dadosFormulario.cpf === 'string' && dadosFormulario.cpf.trim()
                 ? dadosFormulario.cpf.trim()
@@ -55,24 +78,15 @@ class CreateCandidaturaService {
             typeof dadosFormulario.linkedinUrl === 'string' && dadosFormulario.linkedinUrl.trim()
                 ? dadosFormulario.linkedinUrl.trim()
                 : null;
-        const pretensaoSalarial =
-            typeof dadosFormulario.pretensaoSalarial === 'string' &&
-            dadosFormulario.pretensaoSalarial.trim()
-                ? dadosFormulario.pretensaoSalarial.trim()
-                : null;
         const disponibilidadeInicio =
             typeof dadosFormulario.disponibilidadeInicio === 'string' &&
             dadosFormulario.disponibilidadeInicio.trim()
                 ? dadosFormulario.disponibilidadeInicio.trim()
                 : null;
-        const mensagemCandidato =
-            typeof dadosFormulario.mensagemCandidato === 'string' &&
-            dadosFormulario.mensagemCandidato.trim()
-                ? dadosFormulario.mensagemCandidato.trim()
-                : null;
 
-        return candidaturaRepository.create({
+        const dadosCandidatura = {
             anuncioVagaId: identificadorAnuncio,
+            status: STATUS_CANDIDATURA.PENDENTE,
             nomeCompleto,
             email,
             telefone,
@@ -82,12 +96,18 @@ class CreateCandidaturaService {
             linkedinUrl,
             pretensaoSalarial,
             disponibilidadeInicio,
-            mensagemCandidato,
-            curriculoConteudo: arquivoCurriculo.buffer,
-            curriculoNomeArquivo: metadadosCurriculo.nomeArquivo,
-            curriculoTipoMime: metadadosCurriculo.tipoMime,
-            curriculoTamanhoBytes: metadadosCurriculo.tamanhoBytes
-        });
+            mensagemCandidato
+        };
+
+        if (arquivoCurriculo) {
+            const metadadosCurriculo = validarArquivoCurriculo(arquivoCurriculo);
+            dadosCandidatura.curriculoConteudo = arquivoCurriculo.buffer;
+            dadosCandidatura.curriculoNomeArquivo = metadadosCurriculo.nomeArquivo;
+            dadosCandidatura.curriculoTipoMime = metadadosCurriculo.tipoMime;
+            dadosCandidatura.curriculoTamanhoBytes = metadadosCurriculo.tamanhoBytes;
+        }
+
+        return candidaturaRepository.create(dadosCandidatura);
     }
 }
 

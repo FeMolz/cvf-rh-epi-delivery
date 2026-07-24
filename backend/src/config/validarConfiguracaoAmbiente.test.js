@@ -1,6 +1,7 @@
 import {
     exigirVariavelDefinida,
     validarCaepiProducao,
+    validarMailProducao,
     validarOrigensCorsProducao,
     validarRedisProducao,
     validarSegredoJwt,
@@ -72,6 +73,22 @@ describe('validarConfiguracaoAmbiente', () => {
         expect(() => validarSupabaseStorageProducao(undefined, undefined, 'development')).not.toThrow();
     });
 
+    it('deve exigir GMAIL e FRONTEND_PUBLIC_URL em produção', () => {
+        expect(() => validarMailProducao(undefined, 'pass', 'http://app', 'production')).toThrow(
+            'GMAIL_USER'
+        );
+        expect(() => validarMailProducao('user@gmail.com', '  ', 'http://app', 'production')).toThrow(
+            'GMAIL_PASS'
+        );
+        expect(() =>
+            validarMailProducao('user@gmail.com', 'pass', undefined, 'production')
+        ).toThrow('FRONTEND_PUBLIC_URL');
+    });
+
+    it('deve ignorar mail fora de produção', () => {
+        expect(() => validarMailProducao(undefined, undefined, undefined, 'development')).not.toThrow();
+    });
+
     it('deve aceitar configuração válida', () => {
         expect(() => validarSegredoJwt('segredo-teste-local-16', 'test')).not.toThrow();
         expect(() =>
@@ -81,6 +98,9 @@ describe('validarConfiguracaoAmbiente', () => {
         expect(() => validarCaepiProducao('http://localhost:8080', 'production')).not.toThrow();
         expect(() =>
             validarSupabaseStorageProducao('https://projeto.supabase.co', 'service-role-key', 'production')
+        ).not.toThrow();
+        expect(() =>
+            validarMailProducao('rh@gmail.com', 'senha-app', 'https://app.empresa.com', 'production')
         ).not.toThrow();
     });
 });

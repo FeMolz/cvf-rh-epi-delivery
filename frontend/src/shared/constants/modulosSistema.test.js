@@ -11,12 +11,16 @@ import {
 describe('modulosSistema', () => {
     const modulosEmBreve = MODULOS_SISTEMA.filter((modulo) => modulo.emBreve);
 
-    it('deve manter Quesitos, Recrutamento e Ponto como em breve', () => {
-        expect(modulosEmBreve.map((modulo) => modulo.id)).toEqual([
-            'quesitos',
-            'recruitment',
-            'ponto'
-        ]);
+    it('deve manter Quesitos e Ponto como em breve', () => {
+        expect(modulosEmBreve.map((modulo) => modulo.id)).toEqual(['quesitos', 'ponto']);
+    });
+
+    it('deve expor recrutamento com rota para admin e administrativo', () => {
+        const recrutamento = MODULOS_SISTEMA.find((modulo) => modulo.id === 'recruitment');
+
+        expect(recrutamento?.rota).toBe('/admin/recrutamento');
+        expect(recrutamento?.emBreve).toBeUndefined();
+        expect(recrutamento?.papeis).toEqual([PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]);
     });
 
     it('deve expor modulos em breve apenas para admin e administrativo', () => {

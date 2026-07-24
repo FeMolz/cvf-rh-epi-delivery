@@ -2,13 +2,21 @@ import createEmployeeService from '../../employees/services/CreateEmployeeServic
 import {
     MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
     MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE,
+    MENSAGEM_CADASTRO_NAO_PODE_CANCELAR,
     MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO,
     MENSAGEM_STATUS_CADASTRO_INVALIDO,
-    STATUS_CADASTRO_CONTRATACAO
+    STATUS_CADASTRO_CONTRATACAO,
+    STATUS_CANDIDATURA
 } from '../constants/recrutamentoConstantes.js';
 import cadastroContratacaoRepository from '../repositories/CadastroContratacaoRepository.js';
+import candidaturaRepository from '../repositories/CandidaturaRepository.js';
 import { validarDadosRhAprovacaoContratacao } from '../utils/validarDadosRhAprovacaoContratacao.js';
 import { lancarErroRecrutamento } from '../utils/lancarErroRecrutamento.js';
+
+const STATUS_CANCELAVEIS = new Set([
+    STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+    STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH
+]);
 
 class AtualizarStatusCadastroContratacaoService {
     /**
@@ -32,13 +40,24 @@ class AtualizarStatusCadastroContratacaoService {
             lancarErroRecrutamento(MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO);
         }
 
-        if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH) {
-            lancarErroRecrutamento(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
-        }
-
         if (status === STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO) {
+            if (!STATUS_CANCELAVEIS.has(cadastro.status)) {
+                lancarErroRecrutamento(MENSAGEM_CADASTRO_NAO_PODE_CANCELAR);
+            }
+
+            if (cadastro.candidaturaId) {
+                await candidaturaRepository.update(cadastro.candidaturaId, {
+                    status: STATUS_CANDIDATURA.DESCARTADO,
+                    descartadoEm: new Date()
+                });
+            }
+
             await cadastroContratacaoRepository.delete(identificadorCadastro);
             return { id: identificadorCadastro, status: STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO };
+        }
+
+        if (cadastro.status !== STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH) {
+            lancarErroRecrutamento(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
         }
 
         if (

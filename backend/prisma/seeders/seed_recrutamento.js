@@ -1,18 +1,18 @@
 import './carregarAmbienteRaiz.js';
 
-import {
-    StatusAnuncioVaga,
-    StatusCadastroContratacao,
-    TipoContratacaoVaga
-} from '@prisma/client';
+import { StatusCadastroContratacao } from '@prisma/client';
 
 import prisma from '../../src/config/database.js';
 import { obterConteudoPdfMinimoSeed } from './dados/conteudoPdfMinimoSeed.js';
 import {
+    listarCandidaturasRecrutamentoSeed,
+    listarVagasRecrutamentoSeed,
+    QUANTIDADE_CANDIDATURAS_SEED,
+    QUANTIDADE_VAGAS_SEED
+} from './dados/conteudoRecrutamentoSeed.js';
+import {
     EMAIL_ADMIN_PADRAO,
-    ID_ANUNCIO_VAGA_ANALISTA,
     ID_CADASTRO_CONTRATACAO_MARIA,
-    ID_CANDIDATURA_JOAO,
     ID_CANDIDATURA_MARIA,
     ID_EMPRESA_MATRIZ,
     ID_SETOR_TI,
@@ -32,118 +32,78 @@ async function main() {
     }
 
     const conteudoCurriculo = obterConteudoPdfMinimoSeed();
-    const idCargoAnalista = await obterIdCargoPorNome('Analista de Sistemas');
+    const vagas = listarVagasRecrutamentoSeed();
+    const candidaturas = listarCandidaturasRecrutamentoSeed();
+    const cacheCargos = new Map();
 
-    await prisma.anuncioVaga.upsert({
-        where: { id: ID_ANUNCIO_VAGA_ANALISTA },
-        update: {
-            tituloVaga: 'Analista de Sistemas Pleno',
-            apresentacaoEmpresa: 'Empresa em expansão com foco em tecnologia para RH e SST.',
-            sobreVaga: 'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.',
-            responsabilidades: 'Desenvolver APIs, integrar módulos e apoiar o time de produto.',
-            requisitos: 'Experiência com Node.js, PostgreSQL e boas práticas de testes.',
-            beneficios: 'Vale refeição, plano de saúde e modelo híbrido.',
-            localTrabalho: 'São Paulo - SP (híbrido)',
-            tipoContratacao: TipoContratacaoVaga.CLT,
-            jornadaTrabalho: '44h semanais',
-            faixaSalarial: 'R$ 6.000 - R$ 8.000',
-            roleId: idCargoAnalista,
-            companyId: ID_EMPRESA_MATRIZ,
-            setorId: ID_SETOR_TI,
-            status: StatusAnuncioVaga.ATIVA,
+    for (const vaga of vagas) {
+        let roleId = cacheCargos.get(vaga.nomeCargo);
+
+        if (!roleId) {
+            roleId = await obterIdCargoPorNome(vaga.nomeCargo);
+            cacheCargos.set(vaga.nomeCargo, roleId);
+        }
+
+        const dadosVaga = {
+            tituloVaga: vaga.tituloVaga,
+            apresentacaoEmpresa: vaga.apresentacaoEmpresa,
+            sobreVaga: vaga.sobreVaga,
+            responsabilidades: vaga.responsabilidades,
+            requisitos: vaga.requisitos,
+            beneficios: vaga.beneficios,
+            localTrabalho: vaga.localTrabalho,
+            modoTrabalho: vaga.modoTrabalho,
+            tipoContratacao: vaga.tipoContratacao,
+            jornadaTrabalho: vaga.jornadaTrabalho,
+            faixaSalarial: vaga.faixaSalarial,
+            roleId,
+            companyId: vaga.companyId,
+            setorId: vaga.setorId,
+            status: vaga.status,
             criadoPorUserId: usuarioAdmin.id
-        },
-        create: {
-            id: ID_ANUNCIO_VAGA_ANALISTA,
-            tituloVaga: 'Analista de Sistemas Pleno',
-            apresentacaoEmpresa: 'Empresa em expansão com foco em tecnologia para RH e SST.',
-            sobreVaga: 'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.',
-            responsabilidades: 'Desenvolver APIs, integrar módulos e apoiar o time de produto.',
-            requisitos: 'Experiência com Node.js, PostgreSQL e boas práticas de testes.',
-            beneficios: 'Vale refeição, plano de saúde e modelo híbrido.',
-            localTrabalho: 'São Paulo - SP (híbrido)',
-            tipoContratacao: TipoContratacaoVaga.CLT,
-            jornadaTrabalho: '44h semanais',
-            faixaSalarial: 'R$ 6.000 - R$ 8.000',
-            roleId: idCargoAnalista,
-            companyId: ID_EMPRESA_MATRIZ,
-            setorId: ID_SETOR_TI,
-            status: StatusAnuncioVaga.ATIVA,
-            criadoPorUserId: usuarioAdmin.id
-        }
-    });
+        };
 
-    console.log('- Anúncio de vaga sincronizado.');
+        await prisma.anuncioVaga.upsert({
+            where: { id: vaga.id },
+            update: dadosVaga,
+            create: { id: vaga.id, ...dadosVaga }
+        });
+    }
 
-    await prisma.candidatura.upsert({
-        where: { id: ID_CANDIDATURA_MARIA },
-        update: {
-            anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'Maria Oliveira',
-            email: 'maria.oliveira@candidato.com',
-            telefone: '(11) 95555-4444',
-            cpf: '529.982.247-25',
-            cidade: 'São Paulo',
-            estado: 'SP',
-            pretensaoSalarial: 'R$ 7.000',
-            disponibilidadeInicio: 'Imediata',
-            mensagemCandidato: 'Tenho experiência com Node.js e Prisma.',
+    console.log(`- ${vagas.length} anúncios de vaga sincronizados.`);
+
+    for (const candidatura of candidaturas) {
+        const dadosCandidatura = {
+            anuncioVagaId: candidatura.anuncioVagaId,
+            nomeCompleto: candidatura.nomeCompleto,
+            email: candidatura.email,
+            telefone: candidatura.telefone ?? null,
+            cpf: candidatura.cpf ?? null,
+            cidade: candidatura.cidade ?? null,
+            estado: candidatura.estado ?? null,
+            pretensaoSalarial: candidatura.pretensaoSalarial ?? null,
+            disponibilidadeInicio: candidatura.disponibilidadeInicio ?? null,
+            mensagemCandidato: candidatura.mensagemCandidato ?? null,
+            status: candidatura.status,
+            descartadoEm: candidatura.descartadoEm ?? null,
+            reativadoEm: candidatura.reativadoEm ?? null,
             curriculoConteudo: conteudoCurriculo,
-            curriculoNomeArquivo: 'curriculo-maria.pdf',
+            curriculoNomeArquivo: `curriculo-${candidatura.id.slice(0, 8)}.pdf`,
             curriculoTipoMime: 'application/pdf',
             curriculoTamanhoBytes: conteudoCurriculo.length
-        },
-        create: {
-            id: ID_CANDIDATURA_MARIA,
-            anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'Maria Oliveira',
-            email: 'maria.oliveira@candidato.com',
-            telefone: '(11) 95555-4444',
-            cpf: '529.982.247-25',
-            cidade: 'São Paulo',
-            estado: 'SP',
-            pretensaoSalarial: 'R$ 7.000',
-            disponibilidadeInicio: 'Imediata',
-            mensagemCandidato: 'Tenho experiência com Node.js e Prisma.',
-            curriculoConteudo: conteudoCurriculo,
-            curriculoNomeArquivo: 'curriculo-maria.pdf',
-            curriculoTipoMime: 'application/pdf',
-            curriculoTamanhoBytes: conteudoCurriculo.length
-        }
-    });
+        };
 
-    await prisma.candidatura.upsert({
-        where: { id: ID_CANDIDATURA_JOAO },
-        update: {
-            anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'João Pereira',
-            email: 'joao.pereira@candidato.com',
-            telefone: '(11) 94444-3333',
-            cidade: 'Guarulhos',
-            estado: 'SP',
-            mensagemCandidato: 'Disponível para entrevista na próxima semana.',
-            curriculoConteudo: conteudoCurriculo,
-            curriculoNomeArquivo: 'curriculo-joao.pdf',
-            curriculoTipoMime: 'application/pdf',
-            curriculoTamanhoBytes: conteudoCurriculo.length
-        },
-        create: {
-            id: ID_CANDIDATURA_JOAO,
-            anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'João Pereira',
-            email: 'joao.pereira@candidato.com',
-            telefone: '(11) 94444-3333',
-            cidade: 'Guarulhos',
-            estado: 'SP',
-            mensagemCandidato: 'Disponível para entrevista na próxima semana.',
-            curriculoConteudo: conteudoCurriculo,
-            curriculoNomeArquivo: 'curriculo-joao.pdf',
-            curriculoTipoMime: 'application/pdf',
-            curriculoTamanhoBytes: conteudoCurriculo.length
-        }
-    });
+        await prisma.candidatura.upsert({
+            where: { id: candidatura.id },
+            update: dadosCandidatura,
+            create: { id: candidatura.id, ...dadosCandidatura }
+        });
+    }
 
-    console.log('- Candidaturas sincronizadas.');
+    console.log(`- ${candidaturas.length} candidaturas sincronizadas.`);
+
+    const idCargoAnalista = cacheCargos.get('Analista de Sistemas')
+        ?? (await obterIdCargoPorNome('Analista de Sistemas'));
 
     await prisma.cadastroContratacao.upsert({
         where: { id: ID_CADASTRO_CONTRATACAO_MARIA },
@@ -174,7 +134,9 @@ async function main() {
 
     console.log('- Cadastro de contratação (convite) sincronizado.');
     console.log(`  Token público de teste: ${TOKEN_CADASTRO_MARIA}`);
-    console.log('\n=== RECRUTAMENTO ATUALIZADO ===');
+    console.log(
+        `\n=== RECRUTAMENTO ATUALIZADO (${QUANTIDADE_VAGAS_SEED} vagas + ${QUANTIDADE_CANDIDATURAS_SEED} candidaturas) ===`
+    );
 }
 
 main()

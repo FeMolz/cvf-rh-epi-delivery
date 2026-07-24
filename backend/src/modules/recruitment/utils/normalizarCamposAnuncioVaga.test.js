@@ -22,6 +22,7 @@ const entradaValida = {
     requisitos: ' Req ',
     beneficios: ' Ben ',
     localTrabalho: ' SP ',
+    modoTrabalho: ' hibrido ',
     tipoContratacao: 'clt',
     jornadaTrabalho: ' 44h ',
     faixaSalarial: ' R$ 5000 ',

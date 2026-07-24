@@ -2,9 +2,11 @@ import { jest } from '@jest/globals';
 import {
     MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
     MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE,
+    MENSAGEM_CADASTRO_NAO_PODE_CANCELAR,
     MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO,
     MENSAGEM_STATUS_CADASTRO_INVALIDO,
-    STATUS_CADASTRO_CONTRATACAO
+    STATUS_CADASTRO_CONTRATACAO,
+    STATUS_CANDIDATURA
 } from '../constants/recrutamentoConstantes.js';
 
 const cadastroContratacaoRepositoryMock = {
@@ -13,10 +15,18 @@ const cadastroContratacaoRepositoryMock = {
     update: jest.fn()
 };
 
+const candidaturaRepositoryMock = {
+    update: jest.fn()
+};
+
 const createEmployeeServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../repositories/CadastroContratacaoRepository.js', () => ({
     default: cadastroContratacaoRepositoryMock
+}));
+
+jest.unstable_mockModule('../repositories/CandidaturaRepository.js', () => ({
+    default: candidaturaRepositoryMock
 }));
 
 jest.unstable_mockModule('../../employees/services/CreateEmployeeService.js', () => ({
@@ -29,6 +39,7 @@ const atualizarStatusCadastroContratacaoService = (
 
 const cadastroCompleto = {
     id: 'cad1',
+    candidaturaId: 'c1',
     status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH,
     name: 'Maria',
     cpf: '529.982.247-25',
@@ -45,17 +56,57 @@ describe('AtualizarStatusCadastroContratacaoService', () => {
         jest.clearAllMocks();
     });
 
-    it('deve descontinuar e remover cadastro', async () => {
+    it('deve cancelar processo, descartar candidatura e remover cadastro', async () => {
         cadastroContratacaoRepositoryMock.findById.mockResolvedValue(cadastroCompleto);
+        candidaturaRepositoryMock.update.mockResolvedValue({
+            id: 'c1',
+            status: STATUS_CANDIDATURA.DESCARTADO
+        });
 
         const resultado = await atualizarStatusCadastroContratacaoService.execute('cad1', {
             status: 'DESCONTINUADO',
             analisadoPorUserId: 'u1'
         });
 
+        expect(candidaturaRepositoryMock.update).toHaveBeenCalledWith('c1', {
+            status: STATUS_CANDIDATURA.DESCARTADO,
+            descartadoEm: expect.any(Date)
+        });
         expect(cadastroContratacaoRepositoryMock.delete).toHaveBeenCalledWith('cad1');
         expect(resultado.status).toBe(STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO);
         expect(createEmployeeServiceMock.execute).not.toHaveBeenCalled();
+    });
+
+    it('deve cancelar processo ainda aguardando preenchimento', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            ...cadastroCompleto,
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO
+        });
+
+        await atualizarStatusCadastroContratacaoService.execute('cad1', {
+            status: 'DESCONTINUADO',
+            analisadoPorUserId: 'u1'
+        });
+
+        expect(candidaturaRepositoryMock.update).toHaveBeenCalledWith(
+            'c1',
+            expect.objectContaining({ status: STATUS_CANDIDATURA.DESCARTADO })
+        );
+        expect(cadastroContratacaoRepositoryMock.delete).toHaveBeenCalledWith('cad1');
+    });
+
+    it('deve rejeitar cancelamento fora do processo de aprovacao', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            ...cadastroCompleto,
+            status: STATUS_CADASTRO_CONTRATACAO.CONTRATADO
+        });
+
+        await expect(
+            atualizarStatusCadastroContratacaoService.execute('cad1', {
+                status: 'DESCONTINUADO',
+                analisadoPorUserId: 'u1'
+            })
+        ).rejects.toThrow(MENSAGEM_CADASTRO_NAO_PODE_CANCELAR);
     });
 
     it('deve contratar e criar funcionario ativo', async () => {

@@ -18,13 +18,12 @@ function executarComando(comando, argumentos) {
 const apenasSchema = process.argv.includes('--apenas-schema');
 
 carregarAmbienteTeste();
-const urlBancoTeste = process.env.DATABASE_URL;
 
 process.env.RH_ENV_ARQUIVO = '.env.test';
 
 console.log('Usando ambiente:', arquivoEnvTeste);
 
-executarComando('npx', ['prisma', 'db', 'push', `--url=${urlBancoTeste}`]);
+executarComando('npx', ['prisma', 'migrate', 'deploy']);
 executarComando('npx', ['prisma', 'generate']);
 
 if (apenasSchema) {

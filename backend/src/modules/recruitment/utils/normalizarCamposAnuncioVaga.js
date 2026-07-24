@@ -3,6 +3,7 @@ import {
     MENSAGEM_BENEFICIOS_OBRIGATORIOS,
     MENSAGEM_JORNADA_TRABALHO_OBRIGATORIA,
     MENSAGEM_LOCAL_TRABALHO_OBRIGATORIO,
+    MENSAGEM_MODO_TRABALHO_INVALIDO,
     MENSAGEM_REQUISITOS_OBRIGATORIOS,
     MENSAGEM_RESPONSABILIDADES_OBRIGATORIAS,
     MENSAGEM_SOBRE_VAGA_OBRIGATORIA,
@@ -11,6 +12,7 @@ import {
     MENSAGEM_SETOR_ID_OBRIGATORIO,
     MENSAGEM_TIPO_CONTRATACAO_INVALIDO,
     MENSAGEM_TITULO_VAGA_OBRIGATORIO,
+    MODOS_TRABALHO_VAGA,
     TIPOS_CONTRATACAO_VAGA
 } from '../constants/recrutamentoConstantes.js';
 import { lancarErroRecrutamento } from './lancarErroRecrutamento.js';
@@ -29,6 +31,8 @@ export function normalizarCamposAnuncioVaga(entrada, opcoes = { obrigatorio: tru
     const requisitos = typeof entrada.requisitos === 'string' ? entrada.requisitos.trim() : '';
     const beneficios = typeof entrada.beneficios === 'string' ? entrada.beneficios.trim() : '';
     const localTrabalho = typeof entrada.localTrabalho === 'string' ? entrada.localTrabalho.trim() : '';
+    const modoTrabalho =
+        typeof entrada.modoTrabalho === 'string' ? entrada.modoTrabalho.trim().toUpperCase() : '';
     const jornadaTrabalho =
         typeof entrada.jornadaTrabalho === 'string' ? entrada.jornadaTrabalho.trim() : '';
     const faixaSalarial =
@@ -49,6 +53,7 @@ export function normalizarCamposAnuncioVaga(entrada, opcoes = { obrigatorio: tru
         if (!requisitos) lancarErroRecrutamento(MENSAGEM_REQUISITOS_OBRIGATORIOS);
         if (!beneficios) lancarErroRecrutamento(MENSAGEM_BENEFICIOS_OBRIGATORIOS);
         if (!localTrabalho) lancarErroRecrutamento(MENSAGEM_LOCAL_TRABALHO_OBRIGATORIO);
+        if (!modoTrabalho) lancarErroRecrutamento(MENSAGEM_MODO_TRABALHO_INVALIDO);
         if (!jornadaTrabalho) lancarErroRecrutamento(MENSAGEM_JORNADA_TRABALHO_OBRIGATORIA);
         if (!tipoContratacao) lancarErroRecrutamento(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
         if (!roleId) lancarErroRecrutamento(MENSAGEM_ROLE_ID_OBRIGATORIO);
@@ -60,6 +65,10 @@ export function normalizarCamposAnuncioVaga(entrada, opcoes = { obrigatorio: tru
         lancarErroRecrutamento(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
     }
 
+    if (modoTrabalho && !Object.values(MODOS_TRABALHO_VAGA).includes(modoTrabalho)) {
+        lancarErroRecrutamento(MENSAGEM_MODO_TRABALHO_INVALIDO);
+    }
+
     return {
         tituloVaga,
         apresentacaoEmpresa,
@@ -68,6 +77,7 @@ export function normalizarCamposAnuncioVaga(entrada, opcoes = { obrigatorio: tru
         requisitos,
         beneficios,
         localTrabalho,
+        modoTrabalho: modoTrabalho || MODOS_TRABALHO_VAGA.PRESENCIAL,
         jornadaTrabalho,
         faixaSalarial,
         tipoContratacao,
