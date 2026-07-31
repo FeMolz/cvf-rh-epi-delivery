@@ -1,3 +1,5 @@
+import { CampoDataBr } from '../../../shared/components/CampoDataBr.jsx';
+
 /**
  * @param {{
  *   funcionarios: Array<{ id: string, name: string, roleName?: string }>,
@@ -45,32 +47,30 @@ export function FiltrosHistoricoEmissoes({
                     </select>
                 </div>
 
-                <div className="campo epi-relatorios__campo-data">
-                    <label htmlFor="historico-emissao-inicio">Emissão de</label>
-                    <input
+                <div className="epi-relatorios__campo-data">
+                    <CampoDataBr
                         id="historico-emissao-inicio"
-                        type="date"
+                        rotulo="Emissão de"
                         value={emissaoInicio}
-                        disabled={processando || !employeeId}
-                        onChange={(evento) => onAlterarEmissaoInicio(evento.target.value)}
+                        onChange={onAlterarEmissaoInicio}
                     />
                 </div>
 
-                <div className="campo epi-relatorios__campo-data">
-                    <label htmlFor="historico-emissao-fim">Emissão até</label>
-                    <input
+                <div className="epi-relatorios__campo-data">
+                    <CampoDataBr
                         id="historico-emissao-fim"
-                        type="date"
+                        rotulo="Emissão até"
                         value={emissaoFim}
-                        disabled={processando || !employeeId}
-                        onChange={(evento) => onAlterarEmissaoFim(evento.target.value)}
+                        onChange={onAlterarEmissaoFim}
                     />
                 </div>
 
                 <button
                     className="botao botao--primario epi-relatorios__botao-buscar"
                     type="button"
-                    disabled={processando || !employeeId}
+                    disabled={
+                        processando || (!employeeId && !(emissaoInicio && emissaoFim))
+                    }
                     onClick={onBuscar}
                 >
                     {processando ? 'Buscando…' : 'Buscar emissões'}

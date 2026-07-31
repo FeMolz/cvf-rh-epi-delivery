@@ -87,8 +87,6 @@ describe('PainelFeriasDp', () => {
 
         await usuario.selectOptions(screen.getByLabelText('Ordenação'), 'vencidos_primeiro');
         await usuario.selectOptions(screen.getByLabelText('Proximidade'), '60');
-        await usuario.type(screen.getByLabelText(/funcionário \(nome ou cpf\)/i), 'Ana');
-        await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
 
         await waitFor(() => {
             expect(listarFeriasFuncionarios).toHaveBeenLastCalledWith(
@@ -96,11 +94,27 @@ describe('PainelFeriasDp', () => {
                 expect.objectContaining({
                     ordenacao: 'vencidos_primeiro',
                     proximidade: 60,
-                    busca: 'Ana',
                     page: 1
                 })
             );
         });
+
+        await usuario.type(screen.getByLabelText(/funcionário \(nome ou cpf\)/i), 'Ana');
+
+        await waitFor(
+            () => {
+                expect(listarFeriasFuncionarios).toHaveBeenLastCalledWith(
+                    'jwt',
+                    expect.objectContaining({
+                        ordenacao: 'vencidos_primeiro',
+                        proximidade: 60,
+                        busca: 'Ana',
+                        page: 1
+                    })
+                );
+            },
+            { timeout: 2000 }
+        );
 
         listarFeriasFuncionarios.mockClear();
         listarFeriasFuncionarios.mockResolvedValue({
@@ -120,12 +134,11 @@ describe('PainelFeriasDp', () => {
         });
 
         await usuario.selectOptions(screen.getByLabelText('Por página'), '50');
-        await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
 
         await waitFor(() => {
             expect(listarFeriasFuncionarios).toHaveBeenLastCalledWith(
                 'jwt',
-                expect.objectContaining({ pageSize: 50 })
+                expect.objectContaining({ pageSize: 50, page: 1 })
             );
         });
 

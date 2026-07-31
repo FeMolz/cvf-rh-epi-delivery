@@ -18,6 +18,8 @@ import {
     SITUACOES_FUNCIONARIOS_DP
 } from '../constants/abasDepartamentoPessoal.js';
 
+const DEBOUNCE_BUSCA_MS = 400;
+
 const FILTROS_INICIAIS = {
     companyId: '',
     busca: '',
@@ -50,8 +52,8 @@ function IconeFuncionariosDp() {
 export function PainelFuncionariosDp() {
     const { token } = useAuth();
     const [empresas, setEmpresas] = useState([]);
-    const [filtrosFormulario, setFiltrosFormulario] = useState(FILTROS_INICIAIS);
-    const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIAIS);
+    const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
+    const [buscaDigitada, setBuscaDigitada] = useState('');
     const [funcionarios, setFuncionarios] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [baixandoRelatorio, setBaixandoRelatorio] = useState(false);
@@ -65,12 +67,30 @@ export function PainelFuncionariosDp() {
             .catch(() => setEmpresas([]));
     }, [token]);
 
+    useEffect(() => {
+        const temporizador = setTimeout(() => {
+            setFiltros((atual) => {
+                if (atual.busca === buscaDigitada) {
+                    return atual;
+                }
+
+                return { ...atual, busca: buscaDigitada };
+            });
+        }, DEBOUNCE_BUSCA_MS);
+
+        return () => clearTimeout(temporizador);
+    }, [buscaDigitada]);
+
+    useEffect(() => {
+        setPagina(1);
+    }, [filtros.busca]);
+
     const carregarFuncionarios = useCallback(async () => {
         setCarregando(true);
         setErro('');
 
         try {
-            const lista = await consultarFuncionarios(token, filtrosAplicados);
+            const lista = await consultarFuncionarios(token, filtros);
             setFuncionarios(lista);
             setIdsSelecionados(new Set());
         } catch (erroCapturado) {
@@ -78,7 +98,7 @@ export function PainelFuncionariosDp() {
         } finally {
             setCarregando(false);
         }
-    }, [token, filtrosAplicados]);
+    }, [token, filtros]);
 
     useEffect(() => {
         carregarFuncionarios();
@@ -95,12 +115,8 @@ export function PainelFuncionariosDp() {
     );
 
     function atualizarFiltro(campo, valor) {
-        setFiltrosFormulario((atual) => ({ ...atual, [campo]: valor }));
-    }
-
-    function aplicarFiltros() {
         setPagina(1);
-        setFiltrosAplicados({ ...filtrosFormulario });
+        setFiltros((atual) => ({ ...atual, [campo]: valor }));
     }
 
     function alternarSelecaoFuncionario(id) {
@@ -142,8 +158,8 @@ export function PainelFuncionariosDp() {
             idsSelecionadosLista.length > 0
                 ? { ids: idsSelecionadosLista }
                 : {
-                      filtro: filtrosAplicados.situacao === 'demitidos' ? 'inativos' : 'todos',
-                      companyId: filtrosAplicados.companyId || undefined
+                      filtro: filtros.situacao === 'demitidos' ? 'inativos' : 'todos',
+                      companyId: filtros.companyId || undefined
                   };
 
         try {
@@ -157,13 +173,7 @@ export function PainelFuncionariosDp() {
 
     return (
         <>
-            <form
-                className="filtros-dp filtros-dp--funcionarios"
-                onSubmit={(evento) => {
-                    evento.preventDefault();
-                    aplicarFiltros();
-                }}
-            >
+            <div className="filtros-dp filtros-dp--funcionarios">
                 <header className="filtros-dp__cabecalho">
                     <h3>Filtros de funcionários</h3>
                     <p>Refine a listagem por empresa, situação e período de admissão.</p>
@@ -174,7 +184,7 @@ export function PainelFuncionariosDp() {
                         <label htmlFor="dp-funcionarios-empresa">Empresa</label>
                         <select
                             id="dp-funcionarios-empresa"
-                            value={filtrosFormulario.companyId}
+                            value={filtros.companyId}
                             onChange={(evento) => atualizarFiltro('companyId', evento.target.value)}
                         >
                             <option value="">Todas as empresas</option>
@@ -191,8 +201,8 @@ export function PainelFuncionariosDp() {
                         <input
                             id="dp-funcionarios-busca"
                             type="search"
-                            value={filtrosFormulario.busca}
-                            onChange={(evento) => atualizarFiltro('busca', evento.target.value)}
+                            value={buscaDigitada}
+                            onChange={(evento) => setBuscaDigitada(evento.target.value)}
                             placeholder="Buscar por nome ou CPF…"
                         />
                     </div>
@@ -201,7 +211,7 @@ export function PainelFuncionariosDp() {
                         <label htmlFor="dp-funcionarios-situacao">Situação</label>
                         <select
                             id="dp-funcionarios-situacao"
-                            value={filtrosFormulario.situacao}
+                            value={filtros.situacao}
                             onChange={(evento) => atualizarFiltro('situacao', evento.target.value)}
                         >
                             {SITUACOES_FUNCIONARIOS_DP.map((opcao) => (
@@ -217,7 +227,7 @@ export function PainelFuncionariosDp() {
                         <input
                             id="dp-funcionarios-admissao-de"
                             type="date"
-                            value={filtrosFormulario.admissaoDe}
+                            value={filtros.admissaoDe}
                             onChange={(evento) => atualizarFiltro('admissaoDe', evento.target.value)}
                         />
                     </div>
@@ -227,7 +237,7 @@ export function PainelFuncionariosDp() {
                         <input
                             id="dp-funcionarios-admissao-ate"
                             type="date"
-                            value={filtrosFormulario.admissaoAte}
+                            value={filtros.admissaoAte}
                             onChange={(evento) => atualizarFiltro('admissaoAte', evento.target.value)}
                         />
                     </div>
@@ -236,7 +246,7 @@ export function PainelFuncionariosDp() {
                         <label htmlFor="dp-funcionarios-ordenacao">Ordenação por admissão</label>
                         <select
                             id="dp-funcionarios-ordenacao"
-                            value={filtrosFormulario.ordenacaoAdmissao}
+                            value={filtros.ordenacaoAdmissao}
                             onChange={(evento) =>
                                 atualizarFiltro('ordenacaoAdmissao', evento.target.value)
                             }
@@ -249,13 +259,7 @@ export function PainelFuncionariosDp() {
                         </select>
                     </div>
                 </div>
-
-                <div className="filtros-dp__acoes">
-                    <button className="botao botao--primario" type="submit">
-                        Aplicar filtros
-                    </button>
-                </div>
-            </form>
+            </div>
 
             <section className="gerenciamento-painel listagem-painel">
                 <CabecalhoListagemPainel

@@ -53,28 +53,36 @@ export function HistoricoEmissoesRelatorioEpiPage() {
         (itens) => {
             const funcionario = funcionarioSelecionado;
 
-            return (itens || []).map((relatorio) => ({
-                ...relatorio,
-                employee: {
-                    name: funcionario?.name,
-                    role: { name: funcionario?.roleName }
+            return (itens || []).map((relatorio) => {
+                if (!funcionario) {
+                    return relatorio;
                 }
-            }));
+
+                return {
+                    ...relatorio,
+                    employee: {
+                        name: funcionario.name,
+                        role: { name: funcionario.roleName }
+                    }
+                };
+            });
         },
         [funcionarioSelecionado]
     );
 
     const buscarEmissoes = useCallback(async () => {
-        if (!filtros.employeeId) {
-            setErro('Selecione um funcionário para consultar o histórico.');
+        const periodoCompleto = Boolean(filtros.emissaoInicio && filtros.emissaoFim);
+        const periodoIncompleto =
+            (filtros.emissaoInicio && !filtros.emissaoFim) ||
+            (!filtros.emissaoInicio && filtros.emissaoFim);
+
+        if (periodoIncompleto) {
+            setErro('Informe o início e o fim do período para filtrar por data.');
             return;
         }
 
-        if (
-            (filtros.emissaoInicio && !filtros.emissaoFim) ||
-            (!filtros.emissaoInicio && filtros.emissaoFim)
-        ) {
-            setErro('Informe o início e o fim do período para filtrar por data.');
+        if (!filtros.employeeId && !periodoCompleto) {
+            setErro('Selecione um funcionário ou informe o período de emissão para consultar.');
             return;
         }
 
@@ -82,9 +90,9 @@ export function HistoricoEmissoesRelatorioEpiPage() {
         setErro('');
 
         try {
-            if (filtros.emissaoInicio && filtros.emissaoFim) {
+            if (periodoCompleto) {
                 const resultado = await listarRelatoriosEntregaEpi(token, {
-                    employeeId: filtros.employeeId,
+                    employeeId: filtros.employeeId || undefined,
                     emissaoInicio: filtros.emissaoInicio,
                     emissaoFim: filtros.emissaoFim,
                     limite: 100
@@ -190,7 +198,7 @@ export function HistoricoEmissoesRelatorioEpiPage() {
                         <CabecalhoListagemPainel
                             icone={<IconeModulo id="epi-reports" />}
                             titulo="Histórico de emissões"
-                            descricao="Selecione o funcionário e, se desejar, um período de emissão para consultar os relatórios gerados."
+                            descricao="Consulte por funcionário e/ou por período de emissão os relatórios gerados."
                         />
 
                         <div className="listagem-painel__conteudo">
@@ -209,8 +217,8 @@ export function HistoricoEmissoesRelatorioEpiPage() {
 
                             {!buscaRealizada ? (
                                 <p className="estado-vazio epi-relatorios__historico-vazio">
-                                    Selecione um funcionário e clique em Buscar emissões para visualizar o
-                                    histórico.
+                                    Selecione um funcionário ou um período e clique em Buscar emissões para
+                                    visualizar o histórico.
                                 </p>
                             ) : processandoBusca ? (
                                 <p className="estado-carregando">Carregando emissões…</p>

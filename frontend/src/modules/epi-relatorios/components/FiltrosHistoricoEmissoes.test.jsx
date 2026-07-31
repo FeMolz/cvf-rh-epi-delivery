@@ -8,7 +8,7 @@ const funcionarios = [{ id: 'f1', name: 'Ana Silva', roleName: 'Soldador' }];
 
 describe('FiltrosHistoricoEmissoes', () => {
     it('deve chamar callbacks de filtro e busca', async () => {
-        const usuario = userEvent.setup();
+        const usuario = userEvent.setup({ delay: null });
         const onAlterarEmployeeId = vi.fn();
         const onAlterarEmissaoInicio = vi.fn();
         const onAlterarEmissaoFim = vi.fn();
@@ -38,27 +38,48 @@ describe('FiltrosHistoricoEmissoes', () => {
         expect(onLimpar).toHaveBeenCalled();
     });
 
-    it('deve desabilitar datas e busca sem funcionario', () => {
-        render(
+    it('deve permitir selecionar periodo sem funcionario e habilitar busca com periodo completo', () => {
+        const onAlterarEmissaoInicio = vi.fn();
+
+        const { rerender } = render(
             <FiltrosHistoricoEmissoes
                 funcionarios={funcionarios}
                 employeeId=""
                 emissaoInicio=""
                 emissaoFim=""
                 onAlterarEmployeeId={vi.fn()}
-                onAlterarEmissaoInicio={vi.fn()}
+                onAlterarEmissaoInicio={onAlterarEmissaoInicio}
                 onAlterarEmissaoFim={vi.fn()}
                 onBuscar={vi.fn()}
                 onLimpar={vi.fn()}
             />
         );
 
-        expect(screen.getByLabelText(/emissão de/i)).toBeDisabled();
-        expect(screen.getByLabelText(/emissão até/i)).toBeDisabled();
+        const campoInicio = document.getElementById('historico-emissao-inicio');
+        expect(campoInicio).not.toBeDisabled();
         expect(screen.getByRole('button', { name: /buscar emissões/i })).toBeDisabled();
+
+        fireEvent.change(campoInicio, { target: { value: '01012026' } });
+        expect(onAlterarEmissaoInicio).toHaveBeenCalled();
+
+        rerender(
+            <FiltrosHistoricoEmissoes
+                funcionarios={funcionarios}
+                employeeId=""
+                emissaoInicio="2026-01-01"
+                emissaoFim="2026-01-31"
+                onAlterarEmployeeId={vi.fn()}
+                onAlterarEmissaoInicio={onAlterarEmissaoInicio}
+                onAlterarEmissaoFim={vi.fn()}
+                onBuscar={vi.fn()}
+                onLimpar={vi.fn()}
+            />
+        );
+
+        expect(screen.getByRole('button', { name: /buscar emissões/i })).not.toBeDisabled();
     });
 
-    it('deve alterar datas e exibir estado buscando', () => {
+    it('deve alterar datas pelo calendario e exibir estado buscando', () => {
         const onAlterarEmissaoInicio = vi.fn();
         const onAlterarEmissaoFim = vi.fn();
 
@@ -80,15 +101,15 @@ describe('FiltrosHistoricoEmissoes', () => {
         expect(screen.getByRole('button', { name: /buscando/i })).toBeDisabled();
         expect(screen.getByRole('option', { name: /ana silva — soldador/i })).toBeInTheDocument();
 
-        fireEvent.change(screen.getByLabelText(/emissão de/i), {
+        fireEvent.change(screen.getByLabelText(/abrir calendário para emissão de/i), {
             target: { value: '2026-02-01' }
         });
-        fireEvent.change(screen.getByLabelText(/emissão até/i), {
+        fireEvent.change(screen.getByLabelText(/abrir calendário para emissão até/i), {
             target: { value: '2026-02-28' }
         });
 
-        expect(onAlterarEmissaoInicio).toHaveBeenCalled();
-        expect(onAlterarEmissaoFim).toHaveBeenCalled();
+        expect(onAlterarEmissaoInicio).toHaveBeenCalledWith('2026-02-01');
+        expect(onAlterarEmissaoFim).toHaveBeenCalledWith('2026-02-28');
     });
 
     it('deve listar funcionario sem cargo no rotulo da opcao', () => {

@@ -12,11 +12,14 @@ import {
 } from '../constants/abasDepartamentoPessoal.js';
 import { TabelaFeriasFuncionarios } from './TabelaFeriasFuncionarios.jsx';
 
+const DEBOUNCE_BUSCA_MS = 400;
+
 const FILTROS_INICIAIS = {
     busca: '',
     ordenacao: 'proximos_vencimentos',
     proximidade: 30,
-    pageSize: 25
+    pageSize: 25,
+    page: 1
 };
 
 function IconeFeriasDp() {
@@ -41,11 +44,25 @@ function IconeFeriasDp() {
 
 export function PainelFeriasDp() {
     const { token } = useAuth();
-    const [filtrosFormulario, setFiltrosFormulario] = useState(FILTROS_INICIAIS);
-    const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIAIS);
+    const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
+    const [buscaDigitada, setBuscaDigitada] = useState('');
     const [resultado, setResultado] = useState({ items: [], total: 0, page: 1, pageSize: 25 });
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
+
+    useEffect(() => {
+        const temporizador = setTimeout(() => {
+            setFiltros((atual) => {
+                if (atual.busca === buscaDigitada) {
+                    return atual;
+                }
+
+                return { ...atual, busca: buscaDigitada, page: 1 };
+            });
+        }, DEBOUNCE_BUSCA_MS);
+
+        return () => clearTimeout(temporizador);
+    }, [buscaDigitada]);
 
     const carregarFerias = useCallback(async () => {
         setCarregando(true);
@@ -53,8 +70,8 @@ export function PainelFeriasDp() {
 
         try {
             const resposta = await listarFeriasFuncionarios(token, {
-                ...filtrosAplicados,
-                page: filtrosAplicados.page || 1
+                ...filtros,
+                page: filtros.page || 1
             });
             setResultado(resposta);
         } catch (erroCapturado) {
@@ -62,36 +79,25 @@ export function PainelFeriasDp() {
         } finally {
             setCarregando(false);
         }
-    }, [token, filtrosAplicados]);
+    }, [token, filtros]);
 
     useEffect(() => {
         carregarFerias();
     }, [carregarFerias]);
 
     function atualizarFiltro(campo, valor) {
-        setFiltrosFormulario((atual) => ({ ...atual, [campo]: valor }));
-    }
-
-    function aplicarFiltros() {
-        setFiltrosAplicados({ ...filtrosFormulario, page: 1 });
+        setFiltros((atual) => ({ ...atual, [campo]: valor, page: 1 }));
     }
 
     function irParaPagina(novaPagina) {
-        setFiltrosAplicados((atual) => ({ ...atual, page: novaPagina }));
-        setFiltrosFormulario((atual) => ({ ...atual, page: novaPagina }));
+        setFiltros((atual) => ({ ...atual, page: novaPagina }));
     }
 
     const totalPaginas = Math.max(1, Math.ceil(resultado.total / resultado.pageSize));
 
     return (
         <>
-            <form
-                className="filtros-dp filtros-dp--ferias"
-                onSubmit={(evento) => {
-                    evento.preventDefault();
-                    aplicarFiltros();
-                }}
-            >
+            <div className="filtros-dp filtros-dp--ferias">
                 <header className="filtros-dp__cabecalho">
                     <h3>Filtros de férias</h3>
                     <p>Busque por funcionário e refine a listagem por vencimento e paginação.</p>
@@ -103,8 +109,8 @@ export function PainelFeriasDp() {
                         <input
                             id="ferias-busca"
                             type="search"
-                            value={filtrosFormulario.busca}
-                            onChange={(evento) => atualizarFiltro('busca', evento.target.value)}
+                            value={buscaDigitada}
+                            onChange={(evento) => setBuscaDigitada(evento.target.value)}
                             placeholder="Buscar por nome ou CPF…"
                         />
                     </div>
@@ -113,7 +119,7 @@ export function PainelFeriasDp() {
                         <label htmlFor="ferias-ordenacao">Ordenação</label>
                         <select
                             id="ferias-ordenacao"
-                            value={filtrosFormulario.ordenacao}
+                            value={filtros.ordenacao}
                             onChange={(evento) => atualizarFiltro('ordenacao', evento.target.value)}
                         >
                             {ORDENACOES_FERIAS_DP.map((opcao) => (
@@ -128,7 +134,7 @@ export function PainelFeriasDp() {
                         <label htmlFor="ferias-proximidade">Proximidade</label>
                         <select
                             id="ferias-proximidade"
-                            value={filtrosFormulario.proximidade}
+                            value={filtros.proximidade}
                             onChange={(evento) =>
                                 atualizarFiltro('proximidade', Number(evento.target.value))
                             }
@@ -145,7 +151,7 @@ export function PainelFeriasDp() {
                         <label htmlFor="ferias-pagina">Por página</label>
                         <select
                             id="ferias-pagina"
-                            value={filtrosFormulario.pageSize}
+                            value={filtros.pageSize}
                             onChange={(evento) =>
                                 atualizarFiltro('pageSize', Number(evento.target.value))
                             }
@@ -158,13 +164,7 @@ export function PainelFeriasDp() {
                         </select>
                     </div>
                 </div>
-
-                <div className="filtros-dp__acoes">
-                    <button className="botao botao--primario" type="submit">
-                        Aplicar filtros
-                    </button>
-                </div>
-            </form>
+            </div>
 
             <section className="gerenciamento-painel listagem-painel">
                 <CabecalhoListagemPainel

@@ -94,7 +94,6 @@ describe('PainelFuncionariosDp', () => {
         });
 
         await usuario.selectOptions(screen.getByLabelText('Situação'), 'demitidos');
-        await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
 
         await waitFor(() => {
             expect(consultarFuncionarios).toHaveBeenLastCalledWith(
@@ -205,19 +204,16 @@ describe('PainelFuncionariosDp', () => {
         });
 
         await usuario.selectOptions(screen.getByLabelText('Empresa'), 'emp-1');
-        await usuario.type(screen.getByLabelText(/funcionário \(nome ou cpf\)/i), 'Ana');
         await usuario.selectOptions(screen.getByLabelText('Situação'), 'todos');
         await usuario.type(screen.getByLabelText('Admissão de'), '2024-01-01');
         await usuario.type(screen.getByLabelText('Admissão até'), '2024-12-31');
         await usuario.selectOptions(screen.getByLabelText('Ordenação por admissão'), 'antigas');
-        await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
 
         await waitFor(() => {
             expect(consultarFuncionarios).toHaveBeenLastCalledWith(
                 'jwt',
                 expect.objectContaining({
                     companyId: 'emp-1',
-                    busca: 'Ana',
                     situacao: 'todos',
                     admissaoDe: '2024-01-01',
                     admissaoAte: '2024-12-31',
@@ -225,6 +221,25 @@ describe('PainelFuncionariosDp', () => {
                 })
             );
         });
+
+        await usuario.type(screen.getByLabelText(/funcionário \(nome ou cpf\)/i), 'Ana');
+
+        await waitFor(
+            () => {
+                expect(consultarFuncionarios).toHaveBeenLastCalledWith(
+                    'jwt',
+                    expect.objectContaining({
+                        companyId: 'emp-1',
+                        busca: 'Ana',
+                        situacao: 'todos',
+                        admissaoDe: '2024-01-01',
+                        admissaoAte: '2024-12-31',
+                        ordenacaoAdmissao: 'antigas'
+                    })
+                );
+            },
+            { timeout: 2000 }
+        );
 
         await usuario.click(screen.getByRole('button', { name: /próxima/i }));
         expect(screen.getByText('Funcionário 11')).toBeInTheDocument();
@@ -253,7 +268,6 @@ describe('PainelFuncionariosDp', () => {
         await usuario.click(screen.getByRole('checkbox', { name: /selecionar ana/i }));
 
         await usuario.selectOptions(screen.getByLabelText('Empresa'), 'emp-1');
-        await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
 
         await waitFor(() => {
             expect(consultarFuncionarios).toHaveBeenLastCalledWith(
