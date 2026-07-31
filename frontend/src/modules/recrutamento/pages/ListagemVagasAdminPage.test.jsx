@@ -370,4 +370,201 @@ describe('ListagemVagasAdminPage', () => {
 
         expect(screen.getByText(/vaga encerrada com sucesso/i)).toBeInTheDocument();
     });
+
+    it('deve exibir erro generico ao falhar carregamento das vagas', async () => {
+        listarVagasAdmin.mockRejectedValue(new Error());
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        expect(
+            await screen.findByText(/não foi possível carregar as vagas/i)
+        ).toBeInTheDocument();
+    });
+
+    it('deve exibir erro customizado ao falhar publicacao da vaga', async () => {
+        const usuario = userEvent.setup();
+        listarVagasAdmin.mockImplementation((_token, filtros) => {
+            if (filtros?.status === 'INATIVA') {
+                return Promise.resolve([
+                    { id: 'v2', tituloVaga: 'Rascunho RH', localTrabalho: 'SP', status: 'INATIVA' }
+                ]);
+            }
+
+            return Promise.resolve([
+                { id: 'v1', tituloVaga: 'Analista', localTrabalho: 'SP', status: 'ATIVA' }
+            ]);
+        });
+        atualizarStatusVaga.mockRejectedValue(new Error('Vaga incompleta'));
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Analista')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /rascunho/i }));
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /^publicar$/i })).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /^publicar$/i }));
+
+        expect(await screen.findByText('Vaga incompleta')).toBeInTheDocument();
+    });
+
+    it('deve exibir erro generico ao falhar publicacao da vaga sem detalhe do erro', async () => {
+        const usuario = userEvent.setup();
+        listarVagasAdmin.mockImplementation((_token, filtros) => {
+            if (filtros?.status === 'INATIVA') {
+                return Promise.resolve([
+                    { id: 'v2', tituloVaga: 'Rascunho RH', localTrabalho: 'SP', status: 'INATIVA' }
+                ]);
+            }
+
+            return Promise.resolve([
+                { id: 'v1', tituloVaga: 'Analista', localTrabalho: 'SP', status: 'ATIVA' }
+            ]);
+        });
+        atualizarStatusVaga.mockRejectedValue(new Error());
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Analista')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /rascunho/i }));
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /^publicar$/i })).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /^publicar$/i }));
+
+        expect(
+            await screen.findByText(/não foi possível publicar a vaga/i)
+        ).toBeInTheDocument();
+    });
+
+    it('deve exibir aba de vagas encerradas e permitir buscar por termo', async () => {
+        const usuario = userEvent.setup();
+        listarVagasAdmin.mockImplementation((_token, filtros) => {
+            if (filtros?.status === 'ENCERRADA') {
+                return Promise.resolve([
+                    { id: 'v3', tituloVaga: 'Vaga Encerrada', localTrabalho: 'RJ', status: 'ENCERRADA' }
+                ]);
+            }
+
+            return Promise.resolve([
+                { id: 'v1', tituloVaga: 'Analista', localTrabalho: 'SP', status: 'ATIVA' }
+            ]);
+        });
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Analista')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /^encerradas$/i }));
+
+        expect(await screen.findByRole('heading', { name: /vagas encerradas/i })).toBeInTheDocument();
+        expect(await screen.findByText('Vaga Encerrada')).toBeInTheDocument();
+
+        await usuario.type(
+            screen.getByPlaceholderText(/buscar por título ou local/i),
+            'Encerrada'
+        );
+
+        expect(screen.getByText('Vaga Encerrada')).toBeInTheDocument();
+        expect(screen.queryByText('Analista')).not.toBeInTheDocument();
+    });
+
+    it('deve invocar callbacks de limpeza das mensagens de feedback', async () => {
+        const MensagemFeedbackModule = await import(
+            '../../../shared/components/MensagemFeedback.jsx'
+        );
+        const original = MensagemFeedbackModule.AreaMensagensFeedback;
+        const spy = vi
+            .spyOn(MensagemFeedbackModule, 'AreaMensagensFeedback')
+            .mockImplementation((props) => {
+                props.onLimparErro?.();
+                props.onLimparSucesso?.();
+                return original(props);
+            });
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Analista')).toBeInTheDocument();
+        });
+
+        spy.mockRestore();
+    });
+
+    it('deve exibir erro generico ao falhar encerramento da vaga', async () => {
+        const usuario = userEvent.setup();
+        listarVagasAdmin.mockResolvedValue([
+            { id: 'v1', tituloVaga: 'Analista', localTrabalho: 'SP', status: 'ATIVA' }
+        ]);
+        atualizarStatusVaga.mockRejectedValue(new Error());
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /^encerrar$/i })).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /^encerrar$/i }));
+
+        expect(
+            await screen.findByText(/não foi possível encerrar a vaga/i)
+        ).toBeInTheDocument();
+    });
+
+    it('deve exibir painel de processo de aprovacao', async () => {
+        const usuario = userEvent.setup();
+
+        render(
+            <MemoryRouter>
+                <ListagemVagasAdminPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Analista')).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: /processo de aprovação/i }));
+
+        expect(
+            await screen.findByText(/nenhum cadastro em processo de aprovação/i)
+        ).toBeInTheDocument();
+        expect(listarCadastrosContratacao).toHaveBeenCalledWith('jwt', { processoAprovacao: true });
+    });
 });

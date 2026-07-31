@@ -43,6 +43,20 @@ describe('ListCandidaturasService', () => {
         expect(resultado.candidaturas).toHaveLength(2);
     });
 
+    it('deve retornar lista vazia para status invalido', async () => {
+        anuncioVagaRepositoryMock.findById.mockResolvedValue({
+            id: 'v1',
+            tituloVaga: 'Analista',
+            status: 'ATIVA'
+        });
+
+        const resultado = await listCandidaturasService.execute('v1', { status: 'INVALIDO' });
+
+        expect(candidaturaRepositoryMock.findManyByAnuncio).not.toHaveBeenCalled();
+        expect(resultado.totalCandidaturas).toBe(0);
+        expect(resultado.candidaturas).toEqual([]);
+    });
+
     it('deve rejeitar anuncio inexistente', async () => {
         anuncioVagaRepositoryMock.findById.mockResolvedValue(null);
 

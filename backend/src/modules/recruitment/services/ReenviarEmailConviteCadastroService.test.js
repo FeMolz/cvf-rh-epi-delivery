@@ -1,7 +1,9 @@
 import { jest } from '@jest/globals';
 import {
     MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO,
+    MENSAGEM_FALHA_ENVIO_CONVITE_CADASTRO,
     MENSAGEM_REENVIAR_EMAIL_STATUS_INVALIDO,
+    MENSAGEM_TOKEN_CADASTRO_INVALIDO,
     STATUS_CADASTRO_CONTRATACAO
 } from '../constants/recrutamentoConstantes.js';
 
@@ -57,6 +59,35 @@ describe('ReenviarEmailConviteCadastroService', () => {
 
         await expect(reenviarEmailConviteCadastroService.execute('x')).rejects.toThrow(
             MENSAGEM_CADASTRO_CONTRATACAO_NAO_ENCONTRADO
+        );
+    });
+
+    it('deve rejeitar token expirado', async () => {
+        tokenExpiradoMock.mockReturnValue(true);
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            id: 'cad1',
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+            createdAt: new Date('2020-01-01')
+        });
+
+        await expect(reenviarEmailConviteCadastroService.execute('cad1')).rejects.toThrow(
+            MENSAGEM_TOKEN_CADASTRO_INVALIDO
+        );
+    });
+
+    it('deve rejeitar falha no envio de e-mail', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            id: 'cad1',
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+            tokenAcesso: 'tok',
+            createdAt: new Date(),
+            email: 'cand@email.com',
+            name: 'Maria'
+        });
+        enviarEmailMock.execute.mockRejectedValue(new Error('smtp'));
+
+        await expect(reenviarEmailConviteCadastroService.execute('cad1')).rejects.toThrow(
+            MENSAGEM_FALHA_ENVIO_CONVITE_CADASTRO
         );
     });
 

@@ -26,6 +26,18 @@ describe('montarDadosPersistenciaCadastroContratacao', () => {
         expect(resultado).not.toHaveProperty('valeTransporte');
     });
 
+    it('deve preservar complemento existente quando entrada nao informa complemento', () => {
+        const obrigatorios = {
+            name: 'Maria',
+            cpf: '529.982.247-25',
+            complemento: 'Sala 2'
+        };
+
+        const resultado = montarDadosPersistenciaCadastroContratacao({}, obrigatorios);
+
+        expect(resultado.complemento).toBe('Sala 2');
+    });
+
     it('deve zerar complemento quando nao informado', () => {
         const obrigatorios = {
             name: 'Maria',

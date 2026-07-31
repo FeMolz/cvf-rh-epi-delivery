@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import {
     MENSAGEM_CANDIDATURA_NAO_ENCONTRADA,
+    MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO,
     MENSAGEM_TIPO_VISUALIZACAO_CANDIDATURA_INVALIDO,
     TIPO_VISUALIZACAO_CANDIDATURA
 } from '../constants/recrutamentoConstantes.js';
@@ -18,6 +19,14 @@ const marcarVisualizacaoCandidaturaService = (
 describe('MarcarVisualizacaoCandidaturaService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    it('deve rejeitar identificador vazio', async () => {
+        await expect(
+            marcarVisualizacaoCandidaturaService.execute('', {
+                tipo: TIPO_VISUALIZACAO_CANDIDATURA.DESCRICAO
+            })
+        ).rejects.toThrow(MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO);
     });
 
     it('deve marcar descricao visualizada', async () => {
@@ -79,6 +88,10 @@ describe('MarcarVisualizacaoCandidaturaService', () => {
     it('deve rejeitar tipo invalido', async () => {
         await expect(
             marcarVisualizacaoCandidaturaService.execute('c1', { tipo: 'OUTRO' })
+        ).rejects.toThrow(MENSAGEM_TIPO_VISUALIZACAO_CANDIDATURA_INVALIDO);
+
+        await expect(
+            marcarVisualizacaoCandidaturaService.execute('c1', { tipo: 123 })
         ).rejects.toThrow(MENSAGEM_TIPO_VISUALIZACAO_CANDIDATURA_INVALIDO);
     });
 

@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import {
     MENSAGEM_CANDIDATURA_NAO_ENCONTRADA,
+    MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO,
     MENSAGEM_STATUS_CANDIDATURA_INVALIDO,
     MENSAGEM_STATUS_CANDIDATURA_NAO_ALTERAVEL,
     STATUS_CANDIDATURA
@@ -63,9 +64,19 @@ describe('AtualizarStatusCandidaturaService', () => {
         );
     });
 
+    it('deve rejeitar identificador vazio', async () => {
+        await expect(
+            atualizarStatusCandidaturaService.execute('', { status: STATUS_CANDIDATURA.DESCARTADO })
+        ).rejects.toThrow(MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO);
+    });
+
     it('deve rejeitar status invalido', async () => {
         await expect(
             atualizarStatusCandidaturaService.execute('c1', { status: 'PENDENTE' })
+        ).rejects.toThrow(MENSAGEM_STATUS_CANDIDATURA_INVALIDO);
+
+        await expect(
+            atualizarStatusCandidaturaService.execute('c1', { status: 123 })
         ).rejects.toThrow(MENSAGEM_STATUS_CANDIDATURA_INVALIDO);
     });
 

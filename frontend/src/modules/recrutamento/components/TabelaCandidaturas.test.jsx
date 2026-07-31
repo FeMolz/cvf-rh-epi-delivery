@@ -115,6 +115,81 @@ describe('TabelaCandidaturas', () => {
         expect(screen.queryByText('NOVO')).not.toBeInTheDocument();
     });
 
+    it('deve exibir estado vazio quando nao houver candidaturas', () => {
+        render(
+            <TabelaCandidaturas
+                candidaturas={[]}
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText(/nenhuma candidatura encontrada/i)).toBeInTheDocument();
+    });
+
+    it('deve exibir mensagem padrao quando nao houver mensagem do candidato nem data', () => {
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c6',
+                        nomeCompleto: 'Sem Data',
+                        email: 'semdata@teste.com',
+                        status: 'PENDENTE',
+                        descricaoVisualizadaEm: '2026-07-24',
+                        curriculoVisualizadoEm: '2026-07-24'
+                    }
+                ]}
+                candidaturaDetalhe={{
+                    id: 'c6',
+                    nomeCompleto: 'Sem Data',
+                    pretensaoSalarial: '',
+                    mensagemCandidato: '   '
+                }}
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText(/pretensão salarial: não informada/i)).toBeInTheDocument();
+        expect(screen.getByText(/sem descrição enviada/i)).toBeInTheDocument();
+        expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('deve alterar status da candidatura pelo seletor', async () => {
+        const usuario = userEvent.setup();
+        const onAlterarStatus = vi.fn();
+
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c7',
+                        nomeCompleto: 'Carlos',
+                        email: 'carlos@teste.com',
+                        status: 'PENDENTE',
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    }
+                ]}
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={onAlterarStatus}
+                onBaixarCurriculo={vi.fn()}
+            />
+        );
+
+        await usuario.selectOptions(
+            screen.getByRole('combobox'),
+            'PROXIMA_FASE'
+        );
+
+        expect(onAlterarStatus).toHaveBeenCalledWith('c7', 'PROXIMA_FASE');
+    });
+
     it('deve exibir convite cadastro em candidatura reativada na proxima fase', () => {
         const onGerarConvite = vi.fn();
 
@@ -139,5 +214,128 @@ describe('TabelaCandidaturas', () => {
         );
 
         expect(screen.getByRole('button', { name: /convite cadastro/i })).toBeInTheDocument();
+    });
+
+    it('deve baixar curriculo e gerar convite ao clicar nos respectivos botoes', async () => {
+        const usuario = userEvent.setup({ delay: null });
+        const onBaixarCurriculo = vi.fn();
+        const onGerarConvite = vi.fn();
+
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c8',
+                        nomeCompleto: 'Fernanda',
+                        email: 'fernanda@teste.com',
+                        status: 'PROXIMA_FASE',
+                        curriculoNomeArquivo: 'cv.pdf',
+                        descricaoVisualizadaEm: '2026-07-24',
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    }
+                ]}
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={onBaixarCurriculo}
+                onGerarConvite={onGerarConvite}
+            />
+        );
+
+        await usuario.click(screen.getByRole('button', { name: /currículo/i }));
+        expect(onBaixarCurriculo).toHaveBeenCalledWith('c8');
+
+        await usuario.click(screen.getByRole('button', { name: /convite cadastro/i }));
+        expect(onGerarConvite).toHaveBeenCalledWith('c8');
+    });
+
+    it('deve reativar candidatura na lixeira ao clicar no botao reativar', async () => {
+        const usuario = userEvent.setup({ delay: null });
+        const onReativar = vi.fn();
+
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c9',
+                        nomeCompleto: 'Gustavo',
+                        email: 'gustavo@teste.com',
+                        status: 'DESCARTADO',
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    }
+                ]}
+                modoLixeira
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={vi.fn()}
+                onReativar={onReativar}
+            />
+        );
+
+        await usuario.click(screen.getByRole('button', { name: /^reativar$/i }));
+        expect(onReativar).toHaveBeenCalledWith('c9');
+    });
+
+    it('deve exibir titulo da vaga ou travessao quando coluna de vaga estiver visivel', () => {
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c10',
+                        nomeCompleto: 'Helena',
+                        email: 'helena@teste.com',
+                        status: 'PENDENTE',
+                        anuncioVaga: { tituloVaga: 'Vaga com titulo' },
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    },
+                    {
+                        id: 'c11',
+                        nomeCompleto: 'Igor',
+                        email: 'igor@teste.com',
+                        status: 'PENDENTE',
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    }
+                ]}
+                exibirColunaVaga
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={vi.fn()}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={vi.fn()}
+            />
+        );
+
+        expect(screen.getByText('Vaga com titulo')).toBeInTheDocument();
+        expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('deve fechar detalhe ao confirmar ou cancelar o dialogo', async () => {
+        const usuario = userEvent.setup({ delay: null });
+        const onFecharDetalhe = vi.fn();
+
+        render(
+            <TabelaCandidaturas
+                candidaturas={[
+                    {
+                        id: 'c12',
+                        nomeCompleto: 'Julia',
+                        email: 'julia@teste.com',
+                        status: 'PENDENTE',
+                        createdAt: '2026-01-01T00:00:00.000Z'
+                    }
+                ]}
+                candidaturaDetalhe={{ id: 'c12', nomeCompleto: 'Julia' }}
+                onAbrirDetalhe={vi.fn()}
+                onFecharDetalhe={onFecharDetalhe}
+                onAlterarStatus={vi.fn()}
+                onBaixarCurriculo={vi.fn()}
+            />
+        );
+
+        await usuario.click(screen.getByRole('button', { name: /^ok$/i }));
+        expect(onFecharDetalhe).toHaveBeenCalledTimes(1);
+
+        await usuario.click(screen.getByRole('presentation'));
+        expect(onFecharDetalhe).toHaveBeenCalledTimes(2);
     });
 });

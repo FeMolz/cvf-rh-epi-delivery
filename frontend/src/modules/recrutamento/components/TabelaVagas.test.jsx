@@ -82,4 +82,16 @@ describe('TabelaVagas', () => {
 
         expect(screen.getByText('Ativa')).toHaveClass('status-badge--ativo');
     });
+
+    it('deve exibir estado vazio quando nao houver vagas', () => {
+        render(
+            <MemoryRouter>
+                <TabelaVagas vagas={[]} />
+            </MemoryRouter>
+        );
+
+        expect(
+            screen.getByText(/nenhuma vaga encontrada para os filtros aplicados/i)
+        ).toBeInTheDocument();
+    });
 });

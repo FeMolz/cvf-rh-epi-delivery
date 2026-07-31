@@ -13,6 +13,8 @@ const getAnuncioVagaServiceMock = { execute: jest.fn() };
 const getAnuncioVagaPublicoServiceMock = { execute: jest.fn() };
 const updateAnuncioVagaServiceMock = { execute: jest.fn() };
 const updateStatusAnuncioVagaServiceMock = { execute: jest.fn() };
+const listAnunciosVagaAtivosServiceMock = { execute: jest.fn() };
+const getAnuncioVagaAtivoServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/CreateAnuncioVagaService.js', () => ({
     default: createAnuncioVagaServiceMock
@@ -31,6 +33,12 @@ jest.unstable_mockModule('../services/UpdateAnuncioVagaService.js', () => ({
 }));
 jest.unstable_mockModule('../services/UpdateStatusAnuncioVagaService.js', () => ({
     default: updateStatusAnuncioVagaServiceMock
+}));
+jest.unstable_mockModule('../services/ListAnunciosVagaAtivosService.js', () => ({
+    default: listAnunciosVagaAtivosServiceMock
+}));
+jest.unstable_mockModule('../services/GetAnuncioVagaAtivoService.js', () => ({
+    default: getAnuncioVagaAtivoServiceMock
 }));
 
 const anuncioVagaController = (await import('./AnuncioVagaController.js')).default;
@@ -243,5 +251,77 @@ describe('AnuncioVagaController', () => {
         });
         expect(resposta.status).toHaveBeenCalledWith(200);
         expect(resposta.json).toHaveBeenCalledWith(atualizado);
+    });
+
+    it('listPublico deve retornar lista sem campos internos de criacao', async () => {
+        const lista = [
+            { id: 'v1', tituloVaga: 'Dev', criadoPor: { id: 'u1' }, criadoPorUserId: 'u1' }
+        ];
+        listAnunciosVagaAtivosServiceMock.execute.mockResolvedValue(lista);
+        const resposta = criarMocksResposta();
+
+        await anuncioVagaController.listPublico({}, resposta, jest.fn());
+
+        expect(listAnunciosVagaAtivosServiceMock.execute).toHaveBeenCalled();
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith([{ id: 'v1', tituloVaga: 'Dev' }]);
+    });
+
+    it('listPublico deve encaminhar erro ao next', async () => {
+        listAnunciosVagaAtivosServiceMock.execute.mockRejectedValue(new Error('falha publica'));
+        const proximo = jest.fn();
+
+        await anuncioVagaController.listPublico({}, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('listAtivos deve retornar 200 com lista de anuncios ativos', async () => {
+        const lista = [{ id: 'v1', tituloVaga: 'Dev' }];
+        listAnunciosVagaAtivosServiceMock.execute.mockResolvedValue(lista);
+        const resposta = criarMocksResposta();
+
+        await anuncioVagaController.listAtivos({}, resposta, jest.fn());
+
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(lista);
+    });
+
+    it('listAtivos deve encaminhar erro ao next', async () => {
+        listAnunciosVagaAtivosServiceMock.execute.mockRejectedValue(new Error('falha ativos'));
+        const proximo = jest.fn();
+
+        await anuncioVagaController.listAtivos({}, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('getAtivo deve retornar 200 com anuncio ativo', async () => {
+        const anuncio = { id: 'v1', tituloVaga: 'Dev' };
+        getAnuncioVagaAtivoServiceMock.execute.mockResolvedValue(anuncio);
+        const resposta = criarMocksResposta();
+
+        await anuncioVagaController.getAtivo(
+            { params: { id: 'v1' }, user: { id: 'u1' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(getAnuncioVagaAtivoServiceMock.execute).toHaveBeenCalledWith('v1', 'u1');
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(anuncio);
+    });
+
+    it('getAtivo deve encaminhar erro ao next', async () => {
+        getAnuncioVagaAtivoServiceMock.execute.mockRejectedValue(new Error('falha get ativo'));
+        const proximo = jest.fn();
+
+        await anuncioVagaController.getAtivo(
+            { params: { id: 'v1' }, user: {} },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
     });
 });

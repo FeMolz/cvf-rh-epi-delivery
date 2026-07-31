@@ -45,6 +45,21 @@ describe('ListCadastrosContratacaoService', () => {
         expect(resultado).toEqual(lista);
     });
 
+    it('deve listar cadastros em processo de aprovacao', async () => {
+        const lista = [{ id: 'cad1' }];
+        cadastroContratacaoRepositoryMock.findMany.mockResolvedValue(lista);
+
+        const resultado = await listCadastrosContratacaoService.execute({ processoAprovacao: 'true' });
+
+        expect(cadastroContratacaoRepositoryMock.findMany).toHaveBeenCalledWith({
+            statusIn: [
+                STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO,
+                STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_ANALISE_RH
+            ]
+        });
+        expect(resultado).toEqual(lista);
+    });
+
     it('deve ignorar status vazio ou nao-string', async () => {
         cadastroContratacaoRepositoryMock.findMany.mockResolvedValue([]);
 

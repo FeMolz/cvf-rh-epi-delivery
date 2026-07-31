@@ -5,6 +5,9 @@ const aguardarCaepiSeNecessarioMock = jest.fn().mockResolvedValue(undefined);
 const reverterAfastamentosExpiradosServiceMock = {
     execute: jest.fn().mockResolvedValue(0)
 };
+const limparCandidaturasDescartadasServiceMock = {
+    execute: jest.fn().mockResolvedValue(0)
+};
 
 function configurarMocksServidor(envConfig) {
     jest.unstable_mockModule('./config/env.js', () => ({
@@ -25,6 +28,13 @@ function configurarMocksServidor(envConfig) {
             default: reverterAfastamentosExpiradosServiceMock
         })
     );
+
+    jest.unstable_mockModule(
+        './modules/recruitment/services/LimparCandidaturasDescartadasService.js',
+        () => ({
+            default: limparCandidaturasDescartadasServiceMock
+        })
+    );
 }
 
 describe('server', () => {
@@ -37,6 +47,8 @@ describe('server', () => {
         aguardarCaepiSeNecessarioMock.mockClear();
         reverterAfastamentosExpiradosServiceMock.execute.mockReset();
         reverterAfastamentosExpiradosServiceMock.execute.mockResolvedValue(0);
+        limparCandidaturasDescartadasServiceMock.execute.mockReset();
+        limparCandidaturasDescartadasServiceMock.execute.mockResolvedValue(0);
         process.env.NODE_ENV = 'test';
     });
 
@@ -156,6 +168,61 @@ describe('server', () => {
             expect.stringContaining('[afastamentos]')
         );
 
+        consoleLogSpy.mockRestore();
+    });
+
+    it('deve executar limpeza periodica de candidaturas descartadas fora do ambiente de teste', async () => {
+        const setIntervalMock = jest.fn();
+        global.setInterval = setIntervalMock;
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+        configurarMocksServidor({
+            PORT: 3004,
+            DB_HOST: 'localhost',
+            NODE_ENV: 'development',
+            CAEPI_API_URL: 'http://localhost:8080',
+            CAEPI_AGUARDAR_INICIO: false
+        });
+        limparCandidaturasDescartadasServiceMock.execute.mockResolvedValue(3);
+
+        await import('./server.js');
+        await Promise.resolve();
+
+        expect(limparCandidaturasDescartadasServiceMock.execute).toHaveBeenCalledTimes(1);
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+            '[recrutamento] 3 candidatura(s) descartada(s) removida(s) permanentemente.'
+        );
+        expect(setIntervalMock).toHaveBeenCalledWith(expect.any(Function), 24 * 60 * 60 * 1000);
+
+        consoleLogSpy.mockRestore();
+    });
+
+    it('deve registrar falha ao limpar candidaturas descartadas', async () => {
+        const setIntervalMock = jest.fn();
+        global.setInterval = setIntervalMock;
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+        configurarMocksServidor({
+            PORT: 3005,
+            DB_HOST: 'localhost',
+            NODE_ENV: 'development',
+            CAEPI_API_URL: 'http://localhost:8080',
+            CAEPI_AGUARDAR_INICIO: false
+        });
+        limparCandidaturasDescartadasServiceMock.execute.mockRejectedValue(
+            new Error('falha na limpeza')
+        );
+
+        await import('./server.js');
+        await Promise.resolve();
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            '[recrutamento] Falha ao limpar candidaturas descartadas:',
+            'falha na limpeza'
+        );
+
+        consoleErrorSpy.mockRestore();
         consoleLogSpy.mockRestore();
     });
 });

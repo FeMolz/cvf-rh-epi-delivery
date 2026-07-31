@@ -72,6 +72,20 @@ describe('CadastroContratacaoController', () => {
         );
     });
 
+    it('reenviarEmail deve encaminhar erro ao next', async () => {
+        const erro = criarErroHttpTeste('falha no envio', 500);
+        reenviarEmailMock.execute.mockRejectedValue(erro);
+        const proximo = jest.fn();
+
+        await cadastroContratacaoController.reenviarEmail(
+            { params: { id: 'cad1' } },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(erro);
+    });
+
     it('gerarConvite deve encaminhar 400 ao next para convite duplicado', async () => {
         gerarConviteMock.execute.mockRejectedValue(
             criarErroHttpTeste(MENSAGEM_CONVITE_CADASTRO_JA_EXISTE, 400)

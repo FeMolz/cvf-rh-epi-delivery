@@ -78,4 +78,59 @@ describe('TabelaProcessoAprovacao', () => {
 
         expect(screen.queryByRole('button', { name: /cancelar processo/i })).not.toBeInTheDocument();
     });
+
+    it('deve exibir estado vazio quando nao houver cadastros', () => {
+        render(
+            <MemoryRouter>
+                <TabelaProcessoAprovacao cadastros={[]} />
+            </MemoryRouter>
+        );
+
+        expect(
+            screen.getByText(/nenhum cadastro em processo de aprovação/i)
+        ).toBeInTheDocument();
+    });
+
+    it('deve usar valores padrao quando nome, email e vaga nao estiverem disponiveis', () => {
+        render(
+            <MemoryRouter>
+                <TabelaProcessoAprovacao
+                    cadastros={[
+                        {
+                            id: 'cad3',
+                            status: 'OUTRO_STATUS'
+                        }
+                    ]}
+                />
+            </MemoryRouter>
+        );
+
+        const linhas = screen.getAllByRole('cell');
+        expect(linhas[0]).toHaveTextContent('—');
+        expect(linhas[1]).toHaveTextContent('—');
+        expect(linhas[2]).toHaveTextContent('—');
+        expect(screen.getByText('OUTRO_STATUS')).toBeInTheDocument();
+    });
+
+    it('deve usar nome e email da candidatura quando o cadastro nao tiver esses dados diretamente', () => {
+        render(
+            <MemoryRouter>
+                <TabelaProcessoAprovacao
+                    cadastros={[
+                        {
+                            id: 'cad4',
+                            status: 'OUTRO_STATUS',
+                            candidatura: {
+                                nomeCompleto: 'Nome via candidatura',
+                                email: 'via-candidatura@email.com'
+                            }
+                        }
+                    ]}
+                />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Nome via candidatura')).toBeInTheDocument();
+        expect(screen.getByText('via-candidatura@email.com')).toBeInTheDocument();
+    });
 });

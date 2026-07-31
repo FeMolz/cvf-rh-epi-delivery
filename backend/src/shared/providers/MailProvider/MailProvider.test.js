@@ -63,6 +63,18 @@ describe('MailProvider', () => {
             })
         ).rejects.toThrow(`${MENSAGEM_FALHA_ENVIO_EMAIL} SMTP down`);
     });
+
+    it('deve propagar falha do transporte sem mensagem', async () => {
+        sendMailMock.mockRejectedValue({});
+
+        await expect(
+            mailProvider.enviar({
+                para: 'a@b.com',
+                assunto: 'A',
+                html: '<p>x</p>'
+            })
+        ).rejects.toThrow(MENSAGEM_FALHA_ENVIO_EMAIL);
+    });
 });
 
 describe('MailProvider sem credenciais', () => {

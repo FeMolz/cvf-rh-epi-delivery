@@ -512,6 +512,35 @@ describe('FormularioFuncionarioEtapa1', () => {
         expect(screen.getByLabelText(/número de dependentes/i)).toHaveValue(3);
     });
 
+    it('deve validar numero de dependentes vazio', async () => {
+        const usuario = userEvent.setup({ delay: null });
+        const onContinuar = vi.fn();
+
+        render(
+            <FormularioFuncionarioEtapa1
+                valoresIniciais={{ ...valoresCompletos, numeroDependentes: '' }}
+                empresas={empresas}
+                cargos={cargos}
+                setores={setores}
+                onContinuar={onContinuar}
+            />
+        );
+
+        await enviarFormulario();
+
+        expect(screen.getByRole('alert')).toHaveTextContent(
+            /preencha o campo obrigatório: número de dependentes/i
+        );
+        expect(onContinuar).not.toHaveBeenCalled();
+
+        await usuario.type(screen.getByLabelText(/número de dependentes/i), '1');
+        await enviarFormulario();
+
+        await waitFor(() => {
+            expect(onContinuar).toHaveBeenCalled();
+        });
+    });
+
     it('deve limpar erro via callback do feedback', async () => {
         const original = (await import('../../../shared/components/MensagemFeedback.jsx'))
             .AreaMensagensFeedback;

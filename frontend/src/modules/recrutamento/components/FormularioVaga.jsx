@@ -17,6 +17,8 @@ const CAMPOS_TEXTO_LONGO = [
     { nome: 'beneficios', rotulo: 'Benefícios', obrigatorio: true }
 ];
 
+const VALORES_INICIAIS_VAZIOS = {};
+
 /**
  * @param {{
  *   valoresIniciais?: object,
@@ -29,7 +31,7 @@ const CAMPOS_TEXTO_LONGO = [
  * }} props
  */
 export function FormularioVaga({
-    valoresIniciais = {},
+    valoresIniciais = VALORES_INICIAIS_VAZIOS,
     token,
     carregando = false,
     exibirBotaoSalvar = true,
@@ -57,7 +59,7 @@ export function FormularioVaga({
     const [cargos, setCargos] = useState([]);
     const [empresas, setEmpresas] = useState([]);
     const [setores, setSetores] = useState([]);
-    const [carregandoReferencias, setCarregandoReferencias] = useState(true);
+    const [carregandoReferencias, setCarregandoReferencias] = useState(Boolean(token));
 
     useEffect(() => {
         setFormulario((estadoAtual) => ({ ...estadoAtual, ...valoresIniciais }));
@@ -65,8 +67,11 @@ export function FormularioVaga({
 
     useEffect(() => {
         if (!token) {
+            setCarregandoReferencias(false);
             return;
         }
+
+        let ativo = true;
 
         async function carregarReferencias() {
             setCarregandoReferencias(true);
@@ -78,15 +83,23 @@ export function FormularioVaga({
                     listarSetores(token)
                 ]);
 
-                setCargos(listaCargos);
-                setEmpresas(listaEmpresas);
-                setSetores(listaSetores);
+                if (ativo) {
+                    setCargos(listaCargos);
+                    setEmpresas(listaEmpresas);
+                    setSetores(listaSetores);
+                }
             } finally {
-                setCarregandoReferencias(false);
+                if (ativo) {
+                    setCarregandoReferencias(false);
+                }
             }
         }
 
         carregarReferencias();
+
+        return () => {
+            ativo = false;
+        };
     }, [token]);
 
     function atualizarCampo(nome, valor) {

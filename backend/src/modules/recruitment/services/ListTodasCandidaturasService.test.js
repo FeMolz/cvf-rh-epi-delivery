@@ -29,7 +29,7 @@ describe('ListTodasCandidaturasService', () => {
         ]);
         candidaturaRepositoryMock.count.mockResolvedValue(2);
 
-        const resultado = await listTodasCandidaturasService.execute({});
+        const resultado = await listTodasCandidaturasService.execute();
 
         expect(anuncioVagaRepositoryMock.findById).not.toHaveBeenCalled();
         expect(candidaturaRepositoryMock.findMany).toHaveBeenCalledWith({
@@ -107,6 +107,30 @@ describe('ListTodasCandidaturasService', () => {
             })
         );
         expect(resultado.candidaturas).toHaveLength(1);
+    });
+
+    it('deve ignorar filtro de vaga vazio ou apenas espacos', async () => {
+        candidaturaRepositoryMock.findMany.mockResolvedValue([]);
+        candidaturaRepositoryMock.count.mockResolvedValue(0);
+
+        await listTodasCandidaturasService.execute({ anuncioVagaId: '   ' });
+
+        expect(anuncioVagaRepositoryMock.findById).not.toHaveBeenCalled();
+        expect(candidaturaRepositoryMock.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({ anuncioVagaId: undefined })
+        );
+    });
+
+    it('deve ignorar filtro de vaga quando nao for string', async () => {
+        candidaturaRepositoryMock.findMany.mockResolvedValue([]);
+        candidaturaRepositoryMock.count.mockResolvedValue(0);
+
+        await listTodasCandidaturasService.execute({ anuncioVagaId: 123 });
+
+        expect(anuncioVagaRepositoryMock.findById).not.toHaveBeenCalled();
+        expect(candidaturaRepositoryMock.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({ anuncioVagaId: undefined })
+        );
     });
 
     it('deve rejeitar anuncio inexistente quando filtro de vaga informado', async () => {

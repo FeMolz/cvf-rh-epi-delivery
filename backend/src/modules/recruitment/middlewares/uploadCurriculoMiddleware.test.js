@@ -13,7 +13,9 @@ jest.unstable_mockModule('multer', () => ({
     default: multerMock
 }));
 
-const { middlewareUploadCurriculo } = await import('./uploadCurriculoMiddleware.js');
+const { middlewareUploadCurriculo, middlewareUploadCurriculoOpcional } = await import(
+    './uploadCurriculoMiddleware.js'
+);
 
 function criarMocksResposta() {
     return {
@@ -70,5 +72,36 @@ describe('middlewareUploadCurriculo', () => {
         middlewareUploadCurriculo({}, criarMocksResposta(), proximo);
 
         expect(proximo).toHaveBeenCalledWith(erroMulter);
+    });
+});
+
+describe('middlewareUploadCurriculoOpcional', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('deve encaminhar erro do multer ao next', () => {
+        const erroMulter = new Error('tipo invalido');
+        handlerUploadMock.mockImplementation((requisicao, resposta, callback) => {
+            callback(erroMulter);
+        });
+
+        const proximo = jest.fn();
+
+        middlewareUploadCurriculoOpcional({}, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(erroMulter);
+    });
+
+    it('deve chamar next sem exigir arquivo', () => {
+        handlerUploadMock.mockImplementation((requisicao, resposta, callback) => {
+            callback(null);
+        });
+
+        const proximo = jest.fn();
+
+        middlewareUploadCurriculoOpcional({}, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(null);
     });
 });

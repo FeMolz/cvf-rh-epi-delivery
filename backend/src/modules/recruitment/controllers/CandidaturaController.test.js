@@ -8,12 +8,32 @@ import {
 } from '../constants/recrutamentoConstantes.js';
 
 const createCandidaturaServiceMock = { execute: jest.fn() };
+const createCandidaturaAutenticadaServiceMock = { execute: jest.fn() };
+const atualizarStatusCandidaturaServiceMock = { execute: jest.fn() };
+const marcarVisualizacaoCandidaturaServiceMock = { execute: jest.fn() };
+const listTodasCandidaturasServiceMock = { execute: jest.fn() };
+const reativarCandidaturaServiceMock = { execute: jest.fn() };
 const listCandidaturasServiceMock = { execute: jest.fn() };
 const getCandidaturaServiceMock = { execute: jest.fn() };
 const downloadCurriculoCandidaturaServiceMock = { execute: jest.fn() };
 
 jest.unstable_mockModule('../services/CreateCandidaturaService.js', () => ({
     default: createCandidaturaServiceMock
+}));
+jest.unstable_mockModule('../services/CreateCandidaturaAutenticadaService.js', () => ({
+    default: createCandidaturaAutenticadaServiceMock
+}));
+jest.unstable_mockModule('../services/AtualizarStatusCandidaturaService.js', () => ({
+    default: atualizarStatusCandidaturaServiceMock
+}));
+jest.unstable_mockModule('../services/MarcarVisualizacaoCandidaturaService.js', () => ({
+    default: marcarVisualizacaoCandidaturaServiceMock
+}));
+jest.unstable_mockModule('../services/ListTodasCandidaturasService.js', () => ({
+    default: listTodasCandidaturasServiceMock
+}));
+jest.unstable_mockModule('../services/ReativarCandidaturaService.js', () => ({
+    default: reativarCandidaturaServiceMock
 }));
 jest.unstable_mockModule('../services/ListCandidaturasService.js', () => ({
     default: listCandidaturasServiceMock
@@ -103,6 +123,167 @@ describe('CandidaturaController', () => {
         );
     });
 
+    it('createAutenticada deve retornar 201 quando candidatura e criada', async () => {
+        const candidatura = { id: 'c1' };
+        createCandidaturaAutenticadaServiceMock.execute.mockResolvedValue(candidatura);
+        const requisicao = {
+            params: { id: 'v1' },
+            user: { id: 'u1' },
+            body: { telefone: '11999999999' },
+            file: { buffer: Buffer.from('pdf') }
+        };
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.createAutenticada(requisicao, resposta, jest.fn());
+
+        expect(createCandidaturaAutenticadaServiceMock.execute).toHaveBeenCalledWith(
+            'v1',
+            'u1',
+            requisicao.body,
+            requisicao.file
+        );
+        expect(resposta.status).toHaveBeenCalledWith(201);
+        expect(resposta.json).toHaveBeenCalledWith(candidatura);
+    });
+
+    it('createAutenticada deve encaminhar erro ao next', async () => {
+        createCandidaturaAutenticadaServiceMock.execute.mockRejectedValue(new Error('falha autenticada'));
+        const proximo = jest.fn();
+
+        await candidaturaController.createAutenticada(
+            { params: { id: 'v1' }, user: { id: 'u1' }, body: {}, file: null },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('atualizarStatus deve retornar 200 quando status e atualizado', async () => {
+        const candidatura = { id: 'c1', status: 'PROXIMA_FASE' };
+        atualizarStatusCandidaturaServiceMock.execute.mockResolvedValue(candidatura);
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.atualizarStatus(
+            { params: { id: 'c1' }, body: { status: 'PROXIMA_FASE' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(atualizarStatusCandidaturaServiceMock.execute).toHaveBeenCalledWith('c1', {
+            status: 'PROXIMA_FASE'
+        });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(candidatura);
+    });
+
+    it('atualizarStatus deve encaminhar erro ao next', async () => {
+        atualizarStatusCandidaturaServiceMock.execute.mockRejectedValue(new Error('status invalido'));
+        const proximo = jest.fn();
+
+        await candidaturaController.atualizarStatus(
+            { params: { id: 'c1' }, body: { status: 'X' } },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('marcarVisualizacao deve retornar 200 quando visualizacao e registrada', async () => {
+        const candidatura = { id: 'c1', descricaoVisualizadaEm: '2026-01-01' };
+        marcarVisualizacaoCandidaturaServiceMock.execute.mockResolvedValue(candidatura);
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.marcarVisualizacao(
+            { params: { id: 'c1' }, body: { tipo: 'DESCRICAO' } },
+            resposta,
+            jest.fn()
+        );
+
+        expect(marcarVisualizacaoCandidaturaServiceMock.execute).toHaveBeenCalledWith('c1', {
+            tipo: 'DESCRICAO'
+        });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(candidatura);
+    });
+
+    it('marcarVisualizacao deve encaminhar erro ao next', async () => {
+        marcarVisualizacaoCandidaturaServiceMock.execute.mockRejectedValue(new Error('tipo invalido'));
+        const proximo = jest.fn();
+
+        await candidaturaController.marcarVisualizacao(
+            { params: { id: 'c1' }, body: {} },
+            criarMocksResposta(),
+            proximo
+        );
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('list deve retornar 200 com resultado do servico', async () => {
+        const resultado = { candidaturas: [{ id: 'c1' }], totalCandidaturas: 1 };
+        listTodasCandidaturasServiceMock.execute.mockResolvedValue(resultado);
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.list(
+            {
+                query: {
+                    anuncioVagaId: 'v1',
+                    dataInicio: '2026-01-01',
+                    status: 'PENDENTE',
+                    incluirDescartadas: 'true',
+                    reativados: 'false',
+                    ordenacao: 'RECENTES'
+                }
+            },
+            resposta,
+            jest.fn()
+        );
+
+        expect(listTodasCandidaturasServiceMock.execute).toHaveBeenCalledWith({
+            anuncioVagaId: 'v1',
+            dataInicio: '2026-01-01',
+            dataFim: undefined,
+            status: 'PENDENTE',
+            incluirDescartadas: 'true',
+            reativados: 'false',
+            ordenacao: 'RECENTES'
+        });
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(resultado);
+    });
+
+    it('list deve encaminhar erro ao next', async () => {
+        listTodasCandidaturasServiceMock.execute.mockRejectedValue(new Error('falha listagem'));
+        const proximo = jest.fn();
+
+        await candidaturaController.list({ query: {} }, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('reativar deve retornar 200 com resultado do servico', async () => {
+        const resultado = { candidatura: { id: 'c1' }, destino: 'REATIVADOS' };
+        reativarCandidaturaServiceMock.execute.mockResolvedValue(resultado);
+        const resposta = criarMocksResposta();
+
+        await candidaturaController.reativar({ params: { id: 'c1' } }, resposta, jest.fn());
+
+        expect(reativarCandidaturaServiceMock.execute).toHaveBeenCalledWith('c1');
+        expect(resposta.status).toHaveBeenCalledWith(200);
+        expect(resposta.json).toHaveBeenCalledWith(resultado);
+    });
+
+    it('reativar deve encaminhar erro ao next', async () => {
+        reativarCandidaturaServiceMock.execute.mockRejectedValue(new Error('nao pode reativar'));
+        const proximo = jest.fn();
+
+        await candidaturaController.reativar({ params: { id: 'c1' } }, criarMocksResposta(), proximo);
+
+        expect(proximo).toHaveBeenCalledWith(expect.any(Error));
+    });
+
     it('listByAnuncio deve retornar 200 com resultado do servico', async () => {
         const resultado = { candidaturas: [{ id: 'c1' }] };
         listCandidaturasServiceMock.execute.mockResolvedValue(resultado);
@@ -116,7 +297,9 @@ describe('CandidaturaController', () => {
 
         expect(listCandidaturasServiceMock.execute).toHaveBeenCalledWith('v1', {
             dataInicio: '2026-01-01',
-            dataFim: undefined
+            dataFim: undefined,
+            status: undefined,
+            incluirDescartadas: undefined
         });
         expect(resposta.status).toHaveBeenCalledWith(200);
         expect(resposta.json).toHaveBeenCalledWith(resultado);

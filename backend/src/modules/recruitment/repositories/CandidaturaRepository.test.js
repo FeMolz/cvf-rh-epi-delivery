@@ -123,6 +123,46 @@ describe('CandidaturaRepository', () => {
         expect(resultado).toEqual(candidatura);
     });
 
+    it('deve buscar candidatura por anuncio e usuario', async () => {
+        const candidatura = { id: 'c1' };
+        prismaMock.candidatura.findFirst.mockResolvedValue(candidatura);
+
+        const resultado = await candidaturaRepository.findByAnuncioAndUser('v1', 'u1');
+
+        expect(prismaMock.candidatura.findFirst).toHaveBeenCalledWith({
+            where: {
+                anuncioVagaId: 'v1',
+                userId: 'u1'
+            },
+            select: selecaoListagemEsperada
+        });
+        expect(resultado).toEqual(candidatura);
+    });
+
+    it('deve listar reativados com filtro de vaga e periodo', async () => {
+        const dataInicio = new Date('2026-01-01');
+        const dataFim = new Date('2026-12-31');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({
+            reativados: true,
+            anuncioVagaId: 'v1',
+            dataInicio,
+            dataFim
+        });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                reativadoEm: { not: null },
+                status: { not: 'DESCARTADO' },
+                anuncioVagaId: 'v1',
+                createdAt: { gte: dataInicio, lte: dataFim }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
     it('deve listar reativados excluindo quem ja tem cadastro ativo', async () => {
         prismaMock.candidatura.findMany.mockResolvedValue([]);
 
@@ -233,6 +273,146 @@ describe('CandidaturaRepository', () => {
             select: selecaoListagemEsperada,
             orderBy: { createdAt: 'asc' }
         });
+    });
+
+    it('deve excluir candidaturas com cadastro ativo na listagem geral', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ excluirComCadastroAtivo: true });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                status: { not: 'DESCARTADO' },
+                AND: [{ cadastroContratacao: null }]
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve atualizar candidatura', async () => {
+        const dados = { status: 'PROXIMA_FASE' };
+        prismaMock.candidatura.update.mockResolvedValue({ id: 'c1', ...dados });
+
+        const resultado = await candidaturaRepository.update('c1', dados);
+
+        expect(prismaMock.candidatura.update).toHaveBeenCalledWith({
+            where: { id: 'c1' },
+            data: dados,
+            select: selecaoListagemEsperada
+        });
+        expect(resultado.status).toBe('PROXIMA_FASE');
+    });
+
+    it('deve listar reativados apenas com dataInicio', async () => {
+        const dataInicio = new Date('2026-01-01');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({
+            reativados: true,
+            dataInicio
+        });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                reativadoEm: { not: null },
+                status: { not: 'DESCARTADO' },
+                createdAt: { gte: dataInicio }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve listar incluindo descartadas quando solicitado', async () => {
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ incluirDescartadas: true });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {},
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve listar com filtro apenas de dataInicio', async () => {
+        const dataInicio = new Date('2026-01-01');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ dataInicio });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                status: { not: 'DESCARTADO' },
+                createdAt: { gte: dataInicio }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve montar condicao where via metodo publico', () => {
+        const condicao = candidaturaRepository.montarCondicaoWhere({ status: 'PENDENTE' });
+
+        expect(condicao).toEqual({ status: 'PENDENTE' });
+    });
+
+    it('deve montar condicao where padrao sem filtros', () => {
+        const condicao = candidaturaRepository.montarCondicaoWhere();
+
+        expect(condicao).toEqual({ status: { not: 'DESCARTADO' } });
+    });
+
+    it('deve listar reativados apenas com dataFim', async () => {
+        const dataFim = new Date('2026-12-31');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({
+            reativados: true,
+            dataFim
+        });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                reativadoEm: { not: null },
+                status: { not: 'DESCARTADO' },
+                createdAt: { lte: dataFim }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve listar com filtro apenas de dataFim', async () => {
+        const dataFim = new Date('2026-12-31');
+        prismaMock.candidatura.findMany.mockResolvedValue([]);
+
+        await candidaturaRepository.findMany({ dataFim });
+
+        expect(prismaMock.candidatura.findMany).toHaveBeenCalledWith({
+            where: {
+                status: { not: 'DESCARTADO' },
+                createdAt: { lte: dataFim }
+            },
+            select: selecaoListagemEsperada,
+            orderBy: { createdAt: 'desc' }
+        });
+    });
+
+    it('deve remover candidaturas descartadas antigas', async () => {
+        prismaMock.candidatura.deleteMany.mockResolvedValue({ count: 4 });
+        const dataLimite = new Date('2026-01-01');
+
+        const resultado = await candidaturaRepository.deleteManyDescartadasAntigas(dataLimite);
+
+        expect(prismaMock.candidatura.deleteMany).toHaveBeenCalledWith({
+            where: {
+                status: 'DESCARTADO',
+                descartadoEm: { lt: dataLimite }
+            }
+        });
+        expect(resultado).toBe(4);
     });
 
     it('deve contar candidaturas globalmente excluindo descartadas', async () => {

@@ -51,7 +51,22 @@ describe('CadastroContratacaoRepository', () => {
         expect(prismaMock.cadastroContratacao.findMany).toHaveBeenCalledWith(
             expect.objectContaining({
                 where: { status: 'AGUARDANDO_ANALISE_RH' },
-                orderBy: { enviadoEm: 'desc' }
+                orderBy: [{ enviadoEm: 'desc' }, { createdAt: 'desc' }]
+            })
+        );
+    });
+
+    it('deve listar com filtro statusIn', async () => {
+        prismaMock.cadastroContratacao.findMany.mockResolvedValue([]);
+
+        await cadastroContratacaoRepository.findMany({
+            statusIn: ['AGUARDANDO_PREENCHIMENTO', 'AGUARDANDO_ANALISE_RH']
+        });
+
+        expect(prismaMock.cadastroContratacao.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { status: { in: ['AGUARDANDO_PREENCHIMENTO', 'AGUARDANDO_ANALISE_RH'] } },
+                orderBy: [{ enviadoEm: 'desc' }, { createdAt: 'desc' }]
             })
         );
     });

@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import {
     MENSAGEM_CANDIDATURA_NAO_ENCONTRADA,
     MENSAGEM_CANDIDATURA_NAO_PODE_REATIVAR,
+    MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO,
     STATUS_ANUNCIO_VAGA,
     STATUS_CANDIDATURA
 } from '../constants/recrutamentoConstantes.js';
@@ -18,6 +19,12 @@ const reativarCandidaturaService = (await import('./ReativarCandidaturaService.j
 describe('ReativarCandidaturaService', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    it('deve rejeitar identificador vazio', async () => {
+        await expect(reativarCandidaturaService.execute('')).rejects.toThrow(
+            MENSAGEM_IDENTIFICADOR_CANDIDATURA_OBRIGATORIO
+        );
     });
 
     it('deve reativar candidatura sempre para a aba reativados', async () => {

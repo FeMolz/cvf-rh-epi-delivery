@@ -152,6 +152,23 @@ describe('AtualizarStatusCadastroContratacaoService', () => {
         ).rejects.toThrow(MENSAGEM_CADASTRO_NAO_AGUARDA_ANALISE);
     });
 
+    it('deve cancelar processo sem descartar candidatura quando cadastro nao tem candidaturaId', async () => {
+        cadastroContratacaoRepositoryMock.findById.mockResolvedValue({
+            ...cadastroCompleto,
+            candidaturaId: null,
+            status: STATUS_CADASTRO_CONTRATACAO.AGUARDANDO_PREENCHIMENTO
+        });
+
+        const resultado = await atualizarStatusCadastroContratacaoService.execute('cad1', {
+            status: 'DESCONTINUADO',
+            analisadoPorUserId: 'u1'
+        });
+
+        expect(candidaturaRepositoryMock.update).not.toHaveBeenCalled();
+        expect(cadastroContratacaoRepositoryMock.delete).toHaveBeenCalledWith('cad1');
+        expect(resultado.status).toBe(STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO);
+    });
+
     it('deve rejeitar status invalido', async () => {
         await expect(
             atualizarStatusCadastroContratacaoService.execute('cad1', {

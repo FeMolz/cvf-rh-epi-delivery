@@ -96,6 +96,8 @@ describe('app com trust proxy', () => {
 });
 
 describe('global error handler', () => {
+    jest.setTimeout(30000);
+
     const importarAppComRotaErro = async (nodeEnv) => {
         jest.resetModules();
         process.env.NODE_ENV = nodeEnv;

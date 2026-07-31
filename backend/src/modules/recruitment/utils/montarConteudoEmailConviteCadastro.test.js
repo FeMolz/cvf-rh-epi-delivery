@@ -13,6 +13,16 @@ describe('montarConteudoEmailConviteCadastro', () => {
         expect(resultado.html).toContain('http://localhost:5173/publico/cadastro-contratacao/tok');
     });
 
+    it('deve usar nome padrao quando candidato nao informado', () => {
+        const resultado = montarConteudoEmailConviteCadastro({
+            nomeCandidato: '   ',
+            urlCadastro: 'http://localhost:5173/publico/cadastro-contratacao/tok'
+        });
+
+        expect(resultado.texto).toContain('candidato(a)');
+        expect(resultado.html).toContain('candidato(a)');
+    });
+
     it('deve escapar HTML no nome', () => {
         const resultado = montarConteudoEmailConviteCadastro({
             nomeCandidato: '<script>',

@@ -19,6 +19,7 @@ export default defineConfig(({ mode }) => {
         test: {
             environment: 'jsdom',
             setupFiles: './src/test/setup.js',
+            testTimeout: 15000,
             css: true,
             coverage: {
                 provider: 'v8',

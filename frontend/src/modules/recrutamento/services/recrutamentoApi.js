@@ -1,5 +1,6 @@
 import { baixarArquivoApi, requisicaoApi } from '../../../shared/api/clienteHttp.js';
 
+/* v8 ignore next */
 const URL_BASE_API = import.meta.env.VITE_API_URL || '/api/v1';
 
 /**

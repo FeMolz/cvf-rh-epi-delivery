@@ -103,6 +103,24 @@ describe('validarDadosFuncionarioCadastroContratacao', () => {
         ).toThrow(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
     });
 
+    it('deve rejeitar numero de dependentes invalido', () => {
+        expect(() =>
+            validarDadosFuncionarioCadastroContratacao(
+                { ...dadosCompletos, numeroDependentes: -1 },
+                vinculos
+            )
+        ).toThrow(MENSAGEM_CAMPOS_FUNCIONARIO_OBRIGATORIOS_CADASTRO);
+    });
+
+    it('deve incluir complemento quando informado', () => {
+        const resultado = validarDadosFuncionarioCadastroContratacao(
+            { ...dadosCompletos, complemento: ' Apto 12 ' },
+            vinculos
+        );
+
+        expect(resultado.complemento).toBe('Apto 12');
+    });
+
     it('deve aceitar birthDate numérico convertível', () => {
         const resultado = validarDadosFuncionarioCadastroContratacao(
             { ...dadosCompletos, birthDate: Date.parse('1990-05-10') },

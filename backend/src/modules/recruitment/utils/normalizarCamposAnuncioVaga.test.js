@@ -4,6 +4,7 @@ import {
     MENSAGEM_COMPANY_ID_OBRIGATORIO,
     MENSAGEM_JORNADA_TRABALHO_OBRIGATORIA,
     MENSAGEM_LOCAL_TRABALHO_OBRIGATORIO,
+    MENSAGEM_MODO_TRABALHO_INVALIDO,
     MENSAGEM_REQUISITOS_OBRIGATORIOS,
     MENSAGEM_RESPONSABILIDADES_OBRIGATORIAS,
     MENSAGEM_ROLE_ID_OBRIGATORIO,
@@ -83,6 +84,18 @@ describe('normalizarCamposAnuncioVaga', () => {
         expect(() =>
             normalizarCamposAnuncioVaga({ ...entradaValida, tipoContratacao: '' })
         ).toThrow(MENSAGEM_TIPO_CONTRATACAO_INVALIDO);
+    });
+
+    it('deve rejeitar modo de trabalho vazio quando obrigatorio', () => {
+        expect(() =>
+            normalizarCamposAnuncioVaga({ ...entradaValida, modoTrabalho: '' })
+        ).toThrow(MENSAGEM_MODO_TRABALHO_INVALIDO);
+    });
+
+    it('deve rejeitar modo de trabalho invalido', () => {
+        expect(() =>
+            normalizarCamposAnuncioVaga({ ...entradaValida, modoTrabalho: 'INVALIDO' })
+        ).toThrow(MENSAGEM_MODO_TRABALHO_INVALIDO);
     });
 
     it('deve normalizar campos não textuais como vazio', () => {

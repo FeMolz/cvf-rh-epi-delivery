@@ -122,6 +122,28 @@ describe('GerarConviteCadastroContratacaoService', () => {
         );
     });
 
+    it('deve remover convite descontinuado antes de gerar novo', async () => {
+        candidaturaRepositoryMock.findById.mockResolvedValue({
+            id: 'c1',
+            status: STATUS_CANDIDATURA.PROXIMA_FASE,
+            email: 'cand@email.com',
+            nomeCompleto: 'Maria',
+            anuncioVaga: { roleId: 'r1', companyId: 'co1', setorId: 's1' }
+        });
+        cadastroContratacaoRepositoryMock.findByCandidaturaId.mockResolvedValue({
+            id: 'cad-antigo',
+            status: STATUS_CADASTRO_CONTRATACAO.DESCONTINUADO
+        });
+        cadastroContratacaoRepositoryMock.create.mockImplementation((dados) =>
+            Promise.resolve({ id: 'cad-novo', tokenAcesso: dados.tokenAcesso })
+        );
+
+        await gerarConviteCadastroContratacaoService.execute('c1');
+
+        expect(cadastroContratacaoRepositoryMock.delete).toHaveBeenCalledWith('cad-antigo');
+        expect(cadastroContratacaoRepositoryMock.create).toHaveBeenCalled();
+    });
+
     it('deve fazer rollback se o e-mail falhar', async () => {
         candidaturaRepositoryMock.findById.mockResolvedValue({
             id: 'c1',
