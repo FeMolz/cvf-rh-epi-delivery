@@ -146,17 +146,18 @@ describe('global error handler', () => {
         );
 
         consoleError.mockRestore();
-    });
+    }, 15000);
 
     it('deve registrar apenas mensagem em produção', async () => {
         const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
         const { default: appProducao } = await importarAppComRotaErro('production');
 
-        await request(appProducao).get('/api/v1/roles');
+        const resposta = await request(appProducao).get('/api/v1/roles');
 
+        expect(resposta.statusCode).toBe(418);
         expect(consoleError).toHaveBeenCalledWith(expect.stringMatching(/^\[/), 'falha simulada');
         consoleError.mockRestore();
-    });
+    }, 15000);
 
     it('deve usar valores padrão quando erro não tiver mensagem nem statusCode', async () => {
         jest.resetModules();

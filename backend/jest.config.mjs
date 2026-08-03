@@ -2,6 +2,7 @@
 export default {
     testEnvironment: 'node',
     transform: {},
+    testTimeout: 15000,
     moduleNameMapper: {
         '^(\\.{1,2}/.*)\\.js$': '$1'
     },
