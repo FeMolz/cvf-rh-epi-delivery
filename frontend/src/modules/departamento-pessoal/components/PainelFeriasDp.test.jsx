@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -64,6 +64,11 @@ describe('PainelFeriasDp', () => {
             'jwt',
             expect.objectContaining({ proximidade: 30, page: 1 })
         );
+
+        // Dispara o debounce inicial com busca inalterada (early-return).
+        await act(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 450));
+        });
     });
 
     it('deve aplicar filtros e paginar', async () => {

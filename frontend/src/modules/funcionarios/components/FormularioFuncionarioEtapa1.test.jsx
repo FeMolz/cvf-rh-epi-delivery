@@ -79,10 +79,9 @@ describe('FormularioFuncionarioEtapa1', () => {
     });
 
     it('deve validar campos obrigatorios e cpf incompleto', async () => {
-        const usuario = usuarioRapido();
         const onContinuar = vi.fn();
 
-        render(
+        const { unmount } = render(
             <FormularioFuncionarioEtapa1
                 empresas={empresas}
                 cargos={cargos}
@@ -94,18 +93,21 @@ describe('FormularioFuncionarioEtapa1', () => {
         await enviarFormulario();
         expect(screen.getByRole('alert')).toHaveTextContent(/preencha o campo obrigatório/i);
         expect(onContinuar).not.toHaveBeenCalled();
+        unmount();
 
-        await usuario.type(screen.getByLabelText(/nome completo/i), 'Maria');
-        await usuario.type(screen.getByLabelText(/^cpf$/i), '5299822472');
-        await usuario.type(screen.getByLabelText(/e-mail/i), 'maria@test.com');
-        await usuario.type(screen.getByLabelText(/telefone/i), '11988887777');
-        await usuario.type(screen.getAllByPlaceholderText('DD/MM/AAAA')[0], '10102000');
-        await usuario.selectOptions(screen.getByLabelText(/empresa/i), 'emp-1');
-        await usuario.selectOptions(screen.getByLabelText(/cargo/i), 'cargo-1');
-        await usuario.selectOptions(screen.getByLabelText(/setor/i), 'set-1');
+        render(
+            <FormularioFuncionarioEtapa1
+                valoresIniciais={{ ...valoresCompletos, cpf: '5299822472' }}
+                empresas={empresas}
+                cargos={cargos}
+                setores={setores}
+                onContinuar={onContinuar}
+            />
+        );
+
         await enviarFormulario();
-
         expect(screen.getByRole('alert')).toHaveTextContent(/cpf completo/i);
+        expect(onContinuar).not.toHaveBeenCalled();
     });
 
     it('deve validar telefone incompleto', async () => {

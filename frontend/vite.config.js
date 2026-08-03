@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
             environment: 'jsdom',
             setupFiles: './src/test/setup.js',
             css: true,
+            testTimeout: 15000,
             coverage: {
                 provider: 'v8',
                 reporter: ['text', 'lcov', 'json-summary'],

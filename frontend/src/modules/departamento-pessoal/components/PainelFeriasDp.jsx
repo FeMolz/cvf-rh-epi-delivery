@@ -69,10 +69,7 @@ export function PainelFeriasDp() {
         setErro('');
 
         try {
-            const resposta = await listarFeriasFuncionarios(token, {
-                ...filtros,
-                page: filtros.page || 1
-            });
+            const resposta = await listarFeriasFuncionarios(token, filtros);
             setResultado(resposta);
         } catch (erroCapturado) {
             setErro(erroCapturado.message || 'Não foi possível carregar as férias.');
