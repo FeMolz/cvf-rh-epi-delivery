@@ -2,11 +2,20 @@ import { expect } from '@playwright/test';
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {'usuarios' | 'cargos' | 'funcionarios' | 'empresas' | 'setores'} secao
+ * @param {'usuarios' | 'cargos' | 'empresas' | 'setores'} secao
  */
 export async function irParaGerenciamento(page, secao = 'usuarios') {
     await page.goto(`/admin/gerenciamento?secao=${secao}`);
     await expect(page.getByRole('heading', { name: 'Gerenciamento' })).toBeVisible();
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {'usuarios' | 'cargos' | 'funcionarios' | 'empresas' | 'setores'} secao
+ */
+export async function irParaCadastramento(page, secao = 'usuarios') {
+    await page.goto(`/admin/cadastramento?secao=${secao}`);
+    await expect(page.getByRole('heading', { name: 'Cadastramento' })).toBeVisible();
 }
 
 /**

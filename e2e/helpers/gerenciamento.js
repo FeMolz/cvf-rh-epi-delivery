@@ -3,6 +3,7 @@ import { expect } from '@playwright/test';
 import { gerarCnpjUnico, gerarCpfUnico, gerarEmailUnico, gerarNomeUnico } from './dadosSeed.js';
 import {
     esperarMensagemSucesso,
+    irParaCadastramento,
     irParaGerenciamento,
     selecionarOptionContendoTexto
 } from './navegacao.js';
@@ -28,14 +29,14 @@ function derivarNomeLegivelDoEmail(email) {
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{ email?: string, password?: string, papel?: string }} [opcoes]
- * @returns {Promise<{ email: string, password: string, papel: string }>}
+ * @returns {Promise<{ email: string, password: string, papel: string, nomeDerivado: string }>}
  */
 export async function criarAcessoUsuario(page, opcoes = {}) {
     const email = opcoes.email ?? gerarEmailUnico('colaborador');
     const password = opcoes.password ?? 'SenhaE2e123';
     const papel = opcoes.papel ?? 'COLABORADOR';
 
-    await irParaGerenciamento(page, 'usuarios');
+    await irParaCadastramento(page, 'usuarios');
 
     await page.getByLabel('Identificador / E-mail').fill(email);
     await page.locator('#papel-cadastro').selectOption(papel);
@@ -45,6 +46,8 @@ export async function criarAcessoUsuario(page, opcoes = {}) {
     await esperarMensagemSucesso(page, 'Acesso criado com sucesso.');
 
     const nomeDerivado = derivarNomeLegivelDoEmail(email);
+
+    await irParaGerenciamento(page, 'usuarios');
     await expect(page.getByRole('listitem').filter({ hasText: nomeDerivado })).toBeVisible();
 
     return { email, password, papel, nomeDerivado };
@@ -59,7 +62,7 @@ export async function cadastrarEmpresa(page, opcoes = {}) {
     const nome = opcoes.nome ?? gerarNomeUnico('Empresa E2E');
     const cnpj = opcoes.cnpj ?? gerarCnpjUnico();
 
-    await irParaGerenciamento(page, 'empresas');
+    await irParaCadastramento(page, 'empresas');
     await page.getByLabel('Nome da empresa').fill(nome);
     await page.getByLabel('CNPJ').fill(cnpj);
     await page.getByRole('button', { name: 'Cadastrar empresa' }).click();
@@ -77,7 +80,7 @@ export async function cadastrarEmpresa(page, opcoes = {}) {
 export async function cadastrarSetor(page, opcoes = {}) {
     const nome = opcoes.nome ?? gerarNomeUnico('Setor E2E').toUpperCase();
 
-    await irParaGerenciamento(page, 'setores');
+    await irParaCadastramento(page, 'setores');
     await page.getByLabel('Nome do setor').fill(nome);
     await page.getByRole('button', { name: 'Cadastrar setor' }).click();
 
@@ -95,7 +98,7 @@ export async function cadastrarCargo(page, opcoes = {}) {
     const nome = opcoes.nome ?? gerarNomeUnico('Cargo E2E');
     const descricao = opcoes.descricao ?? 'Cargo criado automaticamente nos testes E2E.';
 
-    await irParaGerenciamento(page, 'cargos');
+    await irParaCadastramento(page, 'cargos');
     await page.getByLabel('Nome do cargo').fill(nome);
     await page.getByLabel('Descrição').fill(descricao);
     await page.getByRole('button', { name: 'Cadastrar cargo' }).click();
@@ -111,6 +114,7 @@ export async function cadastrarCargo(page, opcoes = {}) {
  */
 export async function abrirDetalheUsuarioPorEmail(page, email) {
     const nomeDerivado = derivarNomeLegivelDoEmail(email);
+    await irParaGerenciamento(page, 'usuarios');
     await page
         .getByRole('listitem')
         .filter({ hasText: nomeDerivado })
@@ -141,7 +145,7 @@ export async function cadastrarFuncionario(page, opcoes = {}) {
     const cargo = opcoes.cargo ?? 'Analista de Sistemas';
     const setor = opcoes.setor ?? 'TI';
 
-    await irParaGerenciamento(page, 'funcionarios');
+    await irParaCadastramento(page, 'funcionarios');
     await expect(page.getByText('Carregando opções do formulário…')).toHaveCount(0, { timeout: 15_000 });
     await page.locator('#funcionario-nome').fill(nome);
     await page.locator('#funcionario-cpf').fill(cpf);
@@ -153,10 +157,10 @@ export async function cadastrarFuncionario(page, opcoes = {}) {
     await selecionarOptionContendoTexto(page, '#funcionario-setor', setor);
     await page.getByRole('button', { name: 'Cadastrar funcionário' }).click();
 
-    await expect(page).toHaveURL(/\/admin\/funcionarios/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Funcionários' })).toBeVisible();
-    await page.getByRole('button', { name: empresa }).click();
-    await page.getByPlaceholder('Buscar por nome, cargo, setor ou status…').fill(nome);
+    await expect(page).toHaveURL(/\/admin\/(funcionarios|departamento-pessoal)/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Departamento Pessoal' })).toBeVisible();
+    await selecionarOptionContendoTexto(page, '#dp-funcionarios-empresa', empresa);
+    await page.getByPlaceholder('Buscar por nome ou CPF…').fill(nome);
     await expect(page.getByRole('link', { name: nome })).toBeVisible({ timeout: 15_000 });
 
     return { nome, cpf, email };
