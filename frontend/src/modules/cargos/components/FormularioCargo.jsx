@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 
 /**
  * @param {{
@@ -40,7 +41,10 @@ export function FormularioCargo({
         setSucesso('');
 
         try {
-            await onSubmit({ name, description });
+            await onSubmit({
+                name: normalizarTextoMaiusculo(name),
+                description: normalizarTextoMaiusculo(description)
+            });
             setSucesso('Cargo salvo com sucesso.');
 
             if (!valoresIniciais.name) {
@@ -52,13 +56,21 @@ export function FormularioCargo({
         }
     }
 
+    function limparErro() {
+        setErro('');
+    }
+
+    function limparSucesso() {
+        setSucesso('');
+    }
+
     return (
         <form className="formulario" onSubmit={aoEnviar}>
             <AreaMensagensFeedback
                 erro={erro}
                 sucesso={sucesso}
-                onLimparErro={() => setErro('')}
-                onLimparSucesso={() => setSucesso('')}
+                onLimparErro={limparErro}
+                onLimparSucesso={limparSucesso}
             />
 
             <div className="campo">

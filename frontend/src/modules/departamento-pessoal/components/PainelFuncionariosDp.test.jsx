@@ -13,6 +13,14 @@ vi.mock('../../funcionarios/services/empresasApi.js', () => ({
     listarEmpresas: vi.fn()
 }));
 
+vi.mock('../../setores/services/setoresApi.js', () => ({
+    listarSetores: vi.fn()
+}));
+
+vi.mock('../../cargos/services/cargosApi.js', () => ({
+    listarCargos: vi.fn()
+}));
+
 vi.mock('../../funcionarios/services/funcionariosApi.js', () => ({
     consultarFuncionarios: vi.fn(),
     baixarRelatorioFuncionarios: vi.fn()
@@ -32,6 +40,8 @@ vi.mock('../../../shared/components/MensagemFeedback.jsx', () => ({
 
 const { useAuth } = await import('../../../shared/auth/useAuth.js');
 const { listarEmpresas } = await import('../../funcionarios/services/empresasApi.js');
+const { listarSetores } = await import('../../setores/services/setoresApi.js');
+const { listarCargos } = await import('../../cargos/services/cargosApi.js');
 const { consultarFuncionarios, baixarRelatorioFuncionarios } = await import(
     '../../funcionarios/services/funcionariosApi.js'
 );
@@ -62,8 +72,28 @@ describe('PainelFuncionariosDp', () => {
         vi.clearAllMocks();
         useAuth.mockReturnValue({ token: 'jwt' });
         listarEmpresas.mockResolvedValue([{ id: 'emp-1', name: 'CVF', isActive: true }]);
+        listarSetores.mockResolvedValue([{ id: 'setor-1', nome: 'RH', isActive: true }]);
+        listarCargos.mockResolvedValue([{ id: 'cargo-1', name: 'Analista' }]);
         consultarFuncionarios.mockResolvedValue(funcionariosMock);
         baixarRelatorioFuncionarios.mockResolvedValue(undefined);
+    });
+
+    it('deve aceitar listas nulas de setores e cargos ao carregar filtros', async () => {
+        listarSetores.mockResolvedValue(null);
+        listarCargos.mockResolvedValue(null);
+
+        render(
+            <MemoryRouter>
+                <PainelFuncionariosDp />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Ana')).toBeInTheDocument();
+        });
+
+        expect(screen.getByLabelText(/^setor$/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/^cargo$/i)).toBeInTheDocument();
     });
 
     it('deve carregar funcionários com filtros padrão', async () => {
@@ -209,6 +239,8 @@ describe('PainelFuncionariosDp', () => {
         });
 
         await usuario.selectOptions(screen.getByLabelText('Empresa'), 'emp-1');
+        await usuario.selectOptions(screen.getByLabelText('Setor'), 'setor-1');
+        await usuario.selectOptions(screen.getByLabelText('Cargo'), 'cargo-1');
         await usuario.selectOptions(screen.getByLabelText('Situação'), 'todos');
         await usuario.type(screen.getByLabelText('Admissão de'), '2024-01-01');
         await usuario.type(screen.getByLabelText('Admissão até'), '2024-12-31');
@@ -219,6 +251,8 @@ describe('PainelFuncionariosDp', () => {
                 'jwt',
                 expect.objectContaining({
                     companyId: 'emp-1',
+                    setorId: 'setor-1',
+                    roleId: 'cargo-1',
                     situacao: 'todos',
                     admissaoDe: '2024-01-01',
                     admissaoAte: '2024-12-31',
@@ -306,6 +340,27 @@ describe('PainelFuncionariosDp', () => {
         await usuario.click(screen.getByRole('button', { name: 'limpar-erro' }));
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('deve limpar filtros de busca e situacao', async () => {
+        const usuario = userEvent.setup();
+
+        render(
+            <MemoryRouter>
+                <PainelFuncionariosDp />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Ana')).toBeInTheDocument();
+        });
+
+        await usuario.type(screen.getByPlaceholderText(/buscar por nome ou cpf/i), 'Ana');
+        await usuario.selectOptions(screen.getByLabelText(/^situação$/i), 'demitidos');
+        await usuario.click(screen.getByRole('button', { name: /limpar filtros/i }));
+
+        expect(screen.getByPlaceholderText(/buscar por nome ou cpf/i)).toHaveValue('');
+        expect(screen.getByLabelText(/^situação$/i)).toHaveValue('ativos');
     });
 
     it('deve exibir erro generico ao falhar download', async () => {

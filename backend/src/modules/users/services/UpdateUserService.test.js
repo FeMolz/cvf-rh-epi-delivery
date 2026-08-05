@@ -31,7 +31,7 @@ describe('UpdateUserService', () => {
         );
 
         expect(resultado.name).toBe('Novo Nome');
-        expect(userRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'Novo Nome' });
+        expect(userRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'NOVO NOME' });
         expect(resultado.isActive).toBeUndefined();
     });
 

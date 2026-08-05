@@ -311,7 +311,7 @@ describe('FormularioFuncionarioEtapa1', () => {
         expect(screen.getByRole('alert')).toBeInTheDocument();
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {

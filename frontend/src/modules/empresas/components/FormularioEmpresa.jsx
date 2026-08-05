@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { aplicarMascaraCnpj } from '../../../shared/utils/formatadoresBrasil.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 
 /**
  * @param {{
@@ -41,7 +42,7 @@ export function FormularioEmpresa({
         setSucesso('');
 
         try {
-            await onSubmit({ name: name.trim(), cnpj: cnpj.trim() });
+            await onSubmit({ name: normalizarTextoMaiusculo(name), cnpj: cnpj.trim() });
             setSucesso('Empresa salva com sucesso.');
 
             if (!valoresIniciais.name) {

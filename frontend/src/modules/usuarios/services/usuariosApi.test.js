@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+    alterarSenhaUsuario,
     autenticarUsuario,
     atualizarUsuario,
     buscarUsuarioPorId,
@@ -63,6 +64,18 @@ describe('usuariosApi', () => {
         expect(requisicaoApi).toHaveBeenCalledWith('/users/1', {
             method: 'PUT',
             body: { name: 'Novo' },
+            token: 'jwt-admin'
+        });
+    });
+
+    it('deve alterar senha do usuário', async () => {
+        requisicaoApi.mockResolvedValue({ id: '1' });
+
+        await alterarSenhaUsuario('1', { password: 'senha1234' }, 'jwt-admin');
+
+        expect(requisicaoApi).toHaveBeenCalledWith('/users/password/1', {
+            method: 'PUT',
+            body: { password: 'senha1234' },
             token: 'jwt-admin'
         });
     });

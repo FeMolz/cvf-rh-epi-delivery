@@ -18,6 +18,7 @@ import {
     ID_SETOR_TI,
     TOKEN_CADASTRO_MARIA
 } from './dados/identificadoresSeedConstantes.js';
+import { normalizarTextoMaiusculo } from '../../src/shared/utils/normalizarTextoMaiusculo.js';
 import { obterIdCargoPorNome } from './utils/resolverReferenciasSeed.js';
 
 async function main() {
@@ -37,15 +38,25 @@ async function main() {
     await prisma.anuncioVaga.upsert({
         where: { id: ID_ANUNCIO_VAGA_ANALISTA },
         update: {
-            tituloVaga: 'Analista de Sistemas Pleno',
-            apresentacaoEmpresa: 'Empresa em expansão com foco em tecnologia para RH e SST.',
-            sobreVaga: 'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.',
-            responsabilidades: 'Desenvolver APIs, integrar módulos e apoiar o time de produto.',
-            requisitos: 'Experiência com Node.js, PostgreSQL e boas práticas de testes.',
-            beneficios: 'Vale refeição, plano de saúde e modelo híbrido.',
-            localTrabalho: 'São Paulo - SP (híbrido)',
+            tituloVaga: normalizarTextoMaiusculo('Analista de Sistemas Pleno'),
+            apresentacaoEmpresa: normalizarTextoMaiusculo(
+                'Empresa em expansão com foco em tecnologia para RH e SST.'
+            ),
+            sobreVaga: normalizarTextoMaiusculo(
+                'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.'
+            ),
+            responsabilidades: normalizarTextoMaiusculo(
+                'Desenvolver APIs, integrar módulos e apoiar o time de produto.'
+            ),
+            requisitos: normalizarTextoMaiusculo(
+                'Experiência com Node.js, PostgreSQL e boas práticas de testes.'
+            ),
+            beneficios: normalizarTextoMaiusculo(
+                'Vale refeição, plano de saúde e modelo híbrido.'
+            ),
+            localTrabalho: normalizarTextoMaiusculo('São Paulo - SP (híbrido)'),
             tipoContratacao: TipoContratacaoVaga.CLT,
-            jornadaTrabalho: '44h semanais',
+            jornadaTrabalho: normalizarTextoMaiusculo('44h semanais'),
             faixaSalarial: 'R$ 6.000 - R$ 8.000',
             roleId: idCargoAnalista,
             companyId: ID_EMPRESA_MATRIZ,
@@ -55,15 +66,25 @@ async function main() {
         },
         create: {
             id: ID_ANUNCIO_VAGA_ANALISTA,
-            tituloVaga: 'Analista de Sistemas Pleno',
-            apresentacaoEmpresa: 'Empresa em expansão com foco em tecnologia para RH e SST.',
-            sobreVaga: 'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.',
-            responsabilidades: 'Desenvolver APIs, integrar módulos e apoiar o time de produto.',
-            requisitos: 'Experiência com Node.js, PostgreSQL e boas práticas de testes.',
-            beneficios: 'Vale refeição, plano de saúde e modelo híbrido.',
-            localTrabalho: 'São Paulo - SP (híbrido)',
+            tituloVaga: normalizarTextoMaiusculo('Analista de Sistemas Pleno'),
+            apresentacaoEmpresa: normalizarTextoMaiusculo(
+                'Empresa em expansão com foco em tecnologia para RH e SST.'
+            ),
+            sobreVaga: normalizarTextoMaiusculo(
+                'Oportunidade para atuar no desenvolvimento e sustentação de sistemas internos.'
+            ),
+            responsabilidades: normalizarTextoMaiusculo(
+                'Desenvolver APIs, integrar módulos e apoiar o time de produto.'
+            ),
+            requisitos: normalizarTextoMaiusculo(
+                'Experiência com Node.js, PostgreSQL e boas práticas de testes.'
+            ),
+            beneficios: normalizarTextoMaiusculo(
+                'Vale refeição, plano de saúde e modelo híbrido.'
+            ),
+            localTrabalho: normalizarTextoMaiusculo('São Paulo - SP (híbrido)'),
             tipoContratacao: TipoContratacaoVaga.CLT,
-            jornadaTrabalho: '44h semanais',
+            jornadaTrabalho: normalizarTextoMaiusculo('44h semanais'),
             faixaSalarial: 'R$ 6.000 - R$ 8.000',
             roleId: idCargoAnalista,
             companyId: ID_EMPRESA_MATRIZ,
@@ -79,15 +100,17 @@ async function main() {
         where: { id: ID_CANDIDATURA_MARIA },
         update: {
             anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'Maria Oliveira',
+            nomeCompleto: normalizarTextoMaiusculo('Maria Oliveira'),
             email: 'maria.oliveira@candidato.com',
             telefone: '(11) 95555-4444',
             cpf: '529.982.247-25',
-            cidade: 'São Paulo',
+            cidade: normalizarTextoMaiusculo('São Paulo'),
             estado: 'SP',
             pretensaoSalarial: 'R$ 7.000',
-            disponibilidadeInicio: 'Imediata',
-            mensagemCandidato: 'Tenho experiência com Node.js e Prisma.',
+            disponibilidadeInicio: normalizarTextoMaiusculo('Imediata'),
+            mensagemCandidato: normalizarTextoMaiusculo(
+                'Tenho experiência com Node.js e Prisma.'
+            ),
             curriculoConteudo: conteudoCurriculo,
             curriculoNomeArquivo: 'curriculo-maria.pdf',
             curriculoTipoMime: 'application/pdf',
@@ -96,15 +119,17 @@ async function main() {
         create: {
             id: ID_CANDIDATURA_MARIA,
             anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'Maria Oliveira',
+            nomeCompleto: normalizarTextoMaiusculo('Maria Oliveira'),
             email: 'maria.oliveira@candidato.com',
             telefone: '(11) 95555-4444',
             cpf: '529.982.247-25',
-            cidade: 'São Paulo',
+            cidade: normalizarTextoMaiusculo('São Paulo'),
             estado: 'SP',
             pretensaoSalarial: 'R$ 7.000',
-            disponibilidadeInicio: 'Imediata',
-            mensagemCandidato: 'Tenho experiência com Node.js e Prisma.',
+            disponibilidadeInicio: normalizarTextoMaiusculo('Imediata'),
+            mensagemCandidato: normalizarTextoMaiusculo(
+                'Tenho experiência com Node.js e Prisma.'
+            ),
             curriculoConteudo: conteudoCurriculo,
             curriculoNomeArquivo: 'curriculo-maria.pdf',
             curriculoTipoMime: 'application/pdf',
@@ -116,12 +141,14 @@ async function main() {
         where: { id: ID_CANDIDATURA_JOAO },
         update: {
             anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'João Pereira',
+            nomeCompleto: normalizarTextoMaiusculo('João Pereira'),
             email: 'joao.pereira@candidato.com',
             telefone: '(11) 94444-3333',
-            cidade: 'Guarulhos',
+            cidade: normalizarTextoMaiusculo('Guarulhos'),
             estado: 'SP',
-            mensagemCandidato: 'Disponível para entrevista na próxima semana.',
+            mensagemCandidato: normalizarTextoMaiusculo(
+                'Disponível para entrevista na próxima semana.'
+            ),
             curriculoConteudo: conteudoCurriculo,
             curriculoNomeArquivo: 'curriculo-joao.pdf',
             curriculoTipoMime: 'application/pdf',
@@ -130,12 +157,14 @@ async function main() {
         create: {
             id: ID_CANDIDATURA_JOAO,
             anuncioVagaId: ID_ANUNCIO_VAGA_ANALISTA,
-            nomeCompleto: 'João Pereira',
+            nomeCompleto: normalizarTextoMaiusculo('João Pereira'),
             email: 'joao.pereira@candidato.com',
             telefone: '(11) 94444-3333',
-            cidade: 'Guarulhos',
+            cidade: normalizarTextoMaiusculo('Guarulhos'),
             estado: 'SP',
-            mensagemCandidato: 'Disponível para entrevista na próxima semana.',
+            mensagemCandidato: normalizarTextoMaiusculo(
+                'Disponível para entrevista na próxima semana.'
+            ),
             curriculoConteudo: conteudoCurriculo,
             curriculoNomeArquivo: 'curriculo-joao.pdf',
             curriculoTipoMime: 'application/pdf',
@@ -154,7 +183,7 @@ async function main() {
             companyId: ID_EMPRESA_MATRIZ,
             setorId: ID_SETOR_TI,
             status: StatusCadastroContratacao.AGUARDANDO_PREENCHIMENTO,
-            name: 'Maria Oliveira',
+            name: normalizarTextoMaiusculo('Maria Oliveira'),
             email: 'maria.oliveira@candidato.com',
             telefone: '(11) 95555-4444'
         },
@@ -166,7 +195,7 @@ async function main() {
             companyId: ID_EMPRESA_MATRIZ,
             setorId: ID_SETOR_TI,
             status: StatusCadastroContratacao.AGUARDANDO_PREENCHIMENTO,
-            name: 'Maria Oliveira',
+            name: normalizarTextoMaiusculo('Maria Oliveira'),
             email: 'maria.oliveira@candidato.com',
             telefone: '(11) 95555-4444'
         }

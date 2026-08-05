@@ -91,7 +91,7 @@ O sistema emprega a arquitetura **Repository / Service / Controller**, focando n
 
 - **`ListUsersService`**, **`FindUserByIdService`**, **`FindUserByEmailService`**: leitura administrativa.
 - **`UpdateUserService`**: atualização por `ADMIN` ou `ADMINISTRATIVO` (`PAPEIS_GESTAO_RH`). Ao alterar `role`, aplica a mesma hierarquia do cadastro (não pode promover acima do próprio nível).
-- **`DeleteUserService`**, **`DeleteMeService`**: exclusão por admin ou autoexclusão autenticada.
+- **`DeleteUserService`**, **`DeleteMeService`**: exclusão por admin ou autoexclusão autenticada. A exclusão de usuário **preserva** o histórico de entregas de EPI e demais vínculos: FKs opcionais (`deliveredById`, `generatedByUserId`, `analisadoPorUserId`, `criadoPorUserId`) usam `ON DELETE SET NULL`.
 - **`ChangePasswordService`**: altera senha do próprio usuário **ou** de qualquer usuário se o autenticado for `ADMIN`; demais papéis recebem `403` ao tentar alterar senha de terceiros.
 
 ## 5. Endpoints / Rotas Disponíveis

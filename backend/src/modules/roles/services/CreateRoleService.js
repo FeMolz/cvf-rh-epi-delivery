@@ -20,7 +20,12 @@ class CreateRoleService {
             throw criarErroHttp(MENSAGEM_NOME_CARGO_DUPLICADO);
         }
 
-        return roleRepository.create(nomeFormatado, description);
+        return roleRepository.create(
+            nomeFormatado,
+            typeof description === 'string'
+                ? description.trim().replace(/\s+/g, ' ').toUpperCase()
+                : description
+        );
     }
 }
 

@@ -5,6 +5,7 @@ import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedba
 import { CabecalhoListagemPainel } from '../../../shared/components/CabecalhoListagemPainel.jsx';
 import { paginarLista } from '../../../shared/utils/listagemUsuarios.js';
 import { TabelaFuncionarios } from '../../funcionarios/components/TabelaFuncionarios.jsx';
+import { listarCargos } from '../../cargos/services/cargosApi.js';
 import { listarEmpresas } from '../../funcionarios/services/empresasApi.js';
 import {
     baixarRelatorioFuncionarios,
@@ -12,6 +13,7 @@ import {
 } from '../../funcionarios/services/funcionariosApi.js';
 import { calcularEstatisticasFuncionarios } from '../../funcionarios/utils/listagemFuncionarios.js';
 import { filtrarEmpresasAtivasParaFuncionario } from '../../funcionarios/utils/selecaoEmpresasFuncionario.js';
+import { listarSetores } from '../../setores/services/setoresApi.js';
 import { ITENS_POR_PAGINA_PADRAO, Paginacao } from '../../usuarios/components/Paginacao.jsx';
 import {
     ORDENACOES_ADMISSAO_DP,
@@ -22,6 +24,8 @@ const DEBOUNCE_BUSCA_MS = 400;
 
 const FILTROS_INICIAIS = {
     companyId: '',
+    setorId: '',
+    roleId: '',
     busca: '',
     situacao: 'ativos',
     admissaoDe: '',
@@ -52,6 +56,8 @@ function IconeFuncionariosDp() {
 export function PainelFuncionariosDp() {
     const { token } = useAuth();
     const [empresas, setEmpresas] = useState([]);
+    const [setores, setSetores] = useState([]);
+    const [cargos, setCargos] = useState([]);
     const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
     const [buscaDigitada, setBuscaDigitada] = useState('');
     const [funcionarios, setFuncionarios] = useState([]);
@@ -62,9 +68,17 @@ export function PainelFuncionariosDp() {
     const [idsSelecionados, setIdsSelecionados] = useState(() => new Set());
 
     useEffect(() => {
-        listarEmpresas(token)
-            .then((lista) => setEmpresas(filtrarEmpresasAtivasParaFuncionario(lista)))
-            .catch(() => setEmpresas([]));
+        Promise.all([
+            listarEmpresas(token).catch(() => []),
+            listarSetores(token).catch(() => []),
+            listarCargos(token).catch(() => [])
+        ]).then(([listaEmpresas, listaSetores, listaCargos]) => {
+            setEmpresas(filtrarEmpresasAtivasParaFuncionario(listaEmpresas));
+            setSetores(
+                (listaSetores || []).filter((setor) => setor.isActive !== false && !setor.deletedAt)
+            );
+            setCargos((listaCargos || []).filter((cargo) => !cargo.deletedAt));
+        });
     }, [token]);
 
     useEffect(() => {
@@ -119,6 +133,12 @@ export function PainelFuncionariosDp() {
         setFiltros((atual) => ({ ...atual, [campo]: valor }));
     }
 
+    function limparFiltros() {
+        setPagina(1);
+        setBuscaDigitada('');
+        setFiltros({ ...FILTROS_INICIAIS });
+    }
+
     function alternarSelecaoFuncionario(id) {
         setIdsSelecionados((atual) => {
             const proximo = new Set(atual);
@@ -149,6 +169,18 @@ export function PainelFuncionariosDp() {
         });
     }
 
+    function limparErroFeedback() {
+        setErro('');
+    }
+
+    function irParaPaginaAnterior() {
+        setPagina((atual) => Math.max(1, atual - 1));
+    }
+
+    function irParaProximaPagina() {
+        setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1));
+    }
+
     async function aoBaixarRelatorio() {
         setBaixandoRelatorio(true);
         setErro('');
@@ -176,7 +208,7 @@ export function PainelFuncionariosDp() {
             <div className="filtros-dp filtros-dp--funcionarios">
                 <header className="filtros-dp__cabecalho">
                     <h3>Filtros de funcionários</h3>
-                    <p>Refine a listagem por empresa, situação e período de admissão.</p>
+                    <p>Refine a listagem por empresa, setor, cargo, situação e período de admissão.</p>
                 </header>
 
                 <div className="filtros-dp__grade filtros-dp__grade--funcionarios">
@@ -191,6 +223,38 @@ export function PainelFuncionariosDp() {
                             {empresas.map((empresa) => (
                                 <option key={empresa.id} value={empresa.id}>
                                     {empresa.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="campo filtros-dp__campo">
+                        <label htmlFor="dp-funcionarios-setor">Setor</label>
+                        <select
+                            id="dp-funcionarios-setor"
+                            value={filtros.setorId}
+                            onChange={(evento) => atualizarFiltro('setorId', evento.target.value)}
+                        >
+                            <option value="">Todos os setores</option>
+                            {setores.map((setor) => (
+                                <option key={setor.id} value={setor.id}>
+                                    {setor.nome}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="campo filtros-dp__campo">
+                        <label htmlFor="dp-funcionarios-cargo">Cargo</label>
+                        <select
+                            id="dp-funcionarios-cargo"
+                            value={filtros.roleId}
+                            onChange={(evento) => atualizarFiltro('roleId', evento.target.value)}
+                        >
+                            <option value="">Todos os cargos</option>
+                            {cargos.map((cargo) => (
+                                <option key={cargo.id} value={cargo.id}>
+                                    {cargo.name}
                                 </option>
                             ))}
                         </select>
@@ -258,6 +322,16 @@ export function PainelFuncionariosDp() {
                             ))}
                         </select>
                     </div>
+
+                    <div className="filtros-dp__campo filtros-dp__campo--acoes">
+                        <button
+                            className="botao botao--secundario"
+                            type="button"
+                            onClick={limparFiltros}
+                        >
+                            Limpar filtros
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -282,7 +356,7 @@ export function PainelFuncionariosDp() {
                     {carregando ? (
                         <p className="estado-carregando">Carregando funcionários…</p>
                     ) : erro ? (
-                        <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
+                        <AreaMensagensFeedback erro={erro} onLimparErro={limparErroFeedback} />
                     ) : (
                         <>
                             <TabelaFuncionarios
@@ -296,10 +370,8 @@ export function PainelFuncionariosDp() {
                                 totalPaginas={paginacao.totalPaginas}
                                 totalItens={paginacao.totalItens}
                                 rotuloItens="funcionário(s)"
-                                onPaginaAnterior={() => setPagina((atual) => Math.max(1, atual - 1))}
-                                onProximaPagina={() =>
-                                    setPagina((atual) => Math.min(paginacao.totalPaginas, atual + 1))
-                                }
+                                onPaginaAnterior={irParaPaginaAnterior}
+                                onProximaPagina={irParaProximaPagina}
                             />
                         </>
                     )}

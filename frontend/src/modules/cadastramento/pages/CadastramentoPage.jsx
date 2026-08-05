@@ -50,8 +50,7 @@ export function CadastramentoPage() {
             <header className="admin-pagina__cabecalho">
                 <h1>Cadastramento</h1>
                 <p className="admin-pagina__subtitulo">
-                    Centralize os cadastros de usuários, cargos, empresas, setores e funcionários do
-                    RH-System.
+                    Centralize os cadastros de usuários, cargos, empresas, setores e funcionários.
                 </p>
             </header>
 

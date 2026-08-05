@@ -524,7 +524,7 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
         expect(await screen.findByText('Erro temporário')).toBeInTheDocument();
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {

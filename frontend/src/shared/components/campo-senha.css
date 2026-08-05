@@ -1,0 +1,38 @@
+.campo-senha {
+    position: relative;
+    width: 100%;
+}
+
+.campo-senha__input {
+    width: 100%;
+    padding-right: 2.75rem !important;
+}
+
+.campo-senha__alternar {
+    position: absolute;
+    top: 50%;
+    right: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0.45rem;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.campo-senha__alternar:hover {
+    color: #334155;
+    background: #f1f5f9;
+}
+
+.campo-senha__alternar:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}

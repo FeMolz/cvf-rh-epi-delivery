@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { CampoSenha } from '../../../shared/components/CampoSenha.jsx';
 
 /**
  * @param {{ onSubmit: (dados: { email: string, password: string }) => Promise<void>, carregando?: boolean }} props
@@ -38,19 +39,16 @@ export function FormularioLogin({ onSubmit, carregando = false }) {
                 />
             </div>
 
-            <div className="campo">
-                <label htmlFor="senha-login">Senha</label>
-                <input
-                    id="senha-login"
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(evento) => setPassword(evento.target.value)}
-                    placeholder="••••••••"
-                    minLength={8}
-                    required
-                />
-            </div>
+            <CampoSenha
+                id="senha-login"
+                rotulo="Senha"
+                value={password}
+                onChange={setPassword}
+                placeholder="••••••••"
+                minLength={8}
+                required
+                autoComplete="current-password"
+            />
 
             <button className="botao botao--primario" type="submit" disabled={carregando}>
                 {carregando ? 'Entrando…' : 'Entrar'}

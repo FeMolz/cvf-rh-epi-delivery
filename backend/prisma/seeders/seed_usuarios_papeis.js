@@ -14,19 +14,19 @@ import {
 const usuariosPapeis = [
     {
         id: ID_USUARIO_ADMINISTRATIVO,
-        name: 'Gestor Administrativo',
+        name: 'GESTOR ADMINISTRATIVO',
         email: 'administrativo@rhsystem.com',
         role: UserRole.ADMINISTRATIVO
     },
     {
         id: ID_USUARIO_ALMOXARIFADO,
-        name: 'Responsável Almoxarifado',
+        name: 'RESPONSÁVEL ALMOXARIFADO',
         email: 'almoxarifado@rhsystem.com',
         role: UserRole.ALMOXARIFADO
     },
     {
         id: ID_USUARIO_COLABORADOR,
-        name: 'Colaborador Exemplo',
+        name: 'COLABORADOR EXEMPLO',
         email: 'colaborador@rhsystem.com',
         role: UserRole.COLABORADOR
     }

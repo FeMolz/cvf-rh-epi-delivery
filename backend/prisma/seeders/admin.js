@@ -17,7 +17,7 @@ async function main() {
     const ambienteProducao = process.env.NODE_ENV === 'production';
     const adminEmail = process.env.ADMIN_SEED_EMAIL || 'admin@rhsystem.com';
     const adminPassword = process.env.ADMIN_SEED_PASSWORD;
-    const adminName = process.env.ADMIN_SEED_NAME || 'Administrador do Sistema';
+    const adminName = process.env.ADMIN_SEED_NAME || 'ADMINISTRADOR DO SISTEMA';
 
     if (!adminPassword) {
         if (ambienteProducao) {

@@ -62,6 +62,19 @@ export function atualizarUsuario(id, dados, token) {
 
 /**
  * @param {string} id
+ * @param {{ password: string }} dados
+ * @param {string} token
+ */
+export function alterarSenhaUsuario(id, dados, token) {
+    return requisicaoApi(`/users/password/${id}`, {
+        method: 'PUT',
+        body: dados,
+        token
+    });
+}
+
+/**
+ * @param {string} id
  * @param {string} token
  */
 export function excluirUsuario(id, token) {

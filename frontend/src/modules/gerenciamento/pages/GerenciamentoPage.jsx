@@ -47,7 +47,7 @@ export function GerenciamentoPage() {
             <header className="admin-pagina__cabecalho">
                 <h1>Gerenciamento</h1>
                 <p className="admin-pagina__subtitulo">
-                    Visualize usuários, cargos, empresas e setores cadastrados no RH-System.
+                    Visualize usuários, cargos, empresas e setores cadastrados no sistema.
                 </p>
             </header>
 

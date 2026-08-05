@@ -1,5 +1,6 @@
 import setorRepository from '../repositories/SetorRepository.js';
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import {
     MENSAGEM_NOME_SETOR_JA_CADASTRADO,
     MENSAGEM_NOME_SETOR_OBRIGATORIO,
@@ -18,7 +19,9 @@ class UpdateSetorService {
             throw criarErroNaoEncontrado(MENSAGEM_SETOR_NAO_ENCONTRADO);
         }
 
-        const nome = typeof dadosAtualizacao.nome === 'string' ? dadosAtualizacao.nome.trim() : '';
+        const nome = typeof dadosAtualizacao.nome === 'string'
+            ? normalizarTextoMaiusculo(dadosAtualizacao.nome)
+            : '';
         const isActive = dadosAtualizacao.isActive ?? setor.isActive;
 
         if (!nome) {

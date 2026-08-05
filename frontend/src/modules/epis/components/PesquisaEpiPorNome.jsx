@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { filtrarEpis, filtrarEpisPorSituacao } from '../utils/listagemEpis.js';
 import { buscarEpisPorNome } from '../services/episApi.js';
 
 /**
@@ -9,7 +10,8 @@ import { buscarEpisPorNome } from '../services/episApi.js';
  *   desabilitado?: boolean,
  *   onSelecionarCa?: (caNumber: string) => void,
  *   episSelecionados?: string[],
- *   onAlternarEpi?: (caNumber: string) => void
+ *   onAlternarEpi?: (caNumber: string) => void,
+ *   episCache?: Array<Record<string, unknown>>
  * }} props
  */
 export function PesquisaEpiPorNome({
@@ -17,18 +19,40 @@ export function PesquisaEpiPorNome({
     desabilitado = false,
     onSelecionarCa,
     episSelecionados = [],
-    onAlternarEpi
+    onAlternarEpi,
+    episCache = []
 }) {
     const modoMultiplo = typeof onAlternarEpi === 'function';
     const [termo, setTermo] = useState('');
     const [resultados, setResultados] = useState([]);
     const [buscando, setBuscando] = useState(false);
     const [erro, setErro] = useState('');
+    const [aviso, setAviso] = useState('');
     const [caSelecionado, setCaSelecionado] = useState('');
+
+    function filtrarCacheLocal(termoNormalizado) {
+        return filtrarEpis(filtrarEpisPorSituacao(episCache, false), termoNormalizado).map((epi) => ({
+            caNumber: String(epi.caNumber),
+            name: epi.name
+        }));
+    }
+
+    function limparErro() {
+        setErro('');
+    }
+
+    function limparAviso() {
+        setAviso('');
+    }
+
+    function atualizarTermo(evento) {
+        setTermo(evento.target.value);
+    }
 
     async function pesquisar(evento) {
         evento.preventDefault();
         setErro('');
+        setAviso('');
         setResultados([]);
         setCaSelecionado('');
 
@@ -49,7 +73,19 @@ export function PesquisaEpiPorNome({
                 setErro('Nenhum EPI encontrado na base pública com esse nome.');
             }
         } catch (erroCapturado) {
-            setErro(erroCapturado.message || 'Não foi possível pesquisar EPIs por nome.');
+            const fallbackCache = filtrarCacheLocal(termoNormalizado);
+
+            if (fallbackCache.length) {
+                setResultados(fallbackCache);
+                setAviso(
+                    'Base pública indisponível — exibindo resultados do cache local.'
+                );
+            } else {
+                setErro(
+                    erroCapturado.message ||
+                        'Não foi possível pesquisar EPIs por nome e não há itens em cache.'
+                );
+            }
         } finally {
             setBuscando(false);
         }
@@ -84,7 +120,7 @@ export function PesquisaEpiPorNome({
                         placeholder="Ex.: capacete, luva, óculos…"
                         value={termo}
                         disabled={desabilitado || buscando}
-                        onChange={(evento) => setTermo(evento.target.value)}
+                        onChange={atualizarTermo}
                     />
                 </label>
                 <button
@@ -96,7 +132,13 @@ export function PesquisaEpiPorNome({
                 </button>
             </form>
 
-            <AreaMensagensFeedback erro={erro} onLimparErro={() => setErro('')} />
+            <AreaMensagensFeedback
+                erro={erro}
+                aviso={aviso}
+                avisoTemporario
+                onLimparErro={limparErro}
+                onLimparAviso={limparAviso}
+            />
 
             {resultados.length > 0 ? (
                 <ul className="epis-pesquisa-nome__resultados">

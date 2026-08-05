@@ -119,7 +119,7 @@ describe('NoticiasPage', () => {
         expect(await screen.findByText('Erro temporário')).toBeInTheDocument();
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(2000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(screen.queryByText('Erro temporário')).not.toBeInTheDocument();

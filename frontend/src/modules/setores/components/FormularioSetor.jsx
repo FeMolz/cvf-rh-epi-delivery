@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 
 /**
  * @param {{
@@ -39,7 +40,7 @@ export function FormularioSetor({
         setSucesso('');
 
         try {
-            await onSubmit({ nome: nome.trim() });
+            await onSubmit({ nome: normalizarTextoMaiusculo(nome) });
             setSucesso('Setor salvo com sucesso.');
 
             if (!valoresIniciais.nome) {

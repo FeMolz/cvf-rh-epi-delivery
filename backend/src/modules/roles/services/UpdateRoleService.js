@@ -34,7 +34,13 @@ class UpdateRoleService {
             throw criarErroHttp(MENSAGEM_NOME_CARGO_DUPLICADO);
         }
 
-        return roleRepository.update(identificadorCargo, nomeFormatado, description);
+        return roleRepository.update(
+            identificadorCargo,
+            nomeFormatado,
+            typeof description === 'string'
+                ? description.trim().replace(/\s+/g, ' ').toUpperCase()
+                : description
+        );
     }
 }
 

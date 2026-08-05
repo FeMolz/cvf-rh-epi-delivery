@@ -79,6 +79,16 @@ describe('montarFiltroConsultaDepartamentoPessoal', () => {
         expect(where.admissionDate?.lte).toBeInstanceOf(Date);
     });
 
+    it('deve aplicar filtros de setor e cargo', () => {
+        const where = montarWhereConsultaFuncionarios({
+            setorId: 'setor-1',
+            roleId: 'cargo-1'
+        });
+
+        expect(where.setorId).toBe('setor-1');
+        expect(where.roleId).toBe('cargo-1');
+    });
+
     it('deve aplicar somente admissaoDe quando admissaoAte não for informada', () => {
         const where = montarWhereConsultaFuncionarios({ admissaoDe: '2024-01-01' });
 

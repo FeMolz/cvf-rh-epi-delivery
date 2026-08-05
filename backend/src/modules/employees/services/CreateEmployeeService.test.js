@@ -68,7 +68,7 @@ describe('CreateEmployeeService', () => {
         const result = await createEmployeeService.execute(reqData);
         expect(employeeRepositoryMock.create).toHaveBeenCalledWith(
             expect.objectContaining({
-                name: 'John',
+                name: 'JOHN',
                 cpf: CPF_VALIDO,
                 email: 'john@empresa.com',
                 telefone: TELEFONE_VALIDO,

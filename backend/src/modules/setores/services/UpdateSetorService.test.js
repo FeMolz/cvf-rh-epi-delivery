@@ -19,19 +19,19 @@ describe('UpdateSetorService', () => {
 
     it('deve atualizar setor com sucesso', async () => {
         const setorAtual = { id: '1', nome: 'TI', isActive: true };
-        const setorAtualizado = { id: '1', nome: 'Tecnologia', isActive: false };
+        const setorAtualizado = { id: '1', nome: 'TECNOLOGIA', isActive: false };
 
         setorRepositoryMock.findById.mockResolvedValue(setorAtual);
         setorRepositoryMock.findByNome.mockResolvedValue(null);
         setorRepositoryMock.update.mockResolvedValue(setorAtualizado);
 
         const resultado = await updateSetorService.execute('1', {
-            nome: 'Tecnologia',
+            nome: 'TECNOLOGIA',
             isActive: false
         });
 
         expect(setorRepositoryMock.update).toHaveBeenCalledWith('1', {
-            nome: 'Tecnologia',
+            nome: 'TECNOLOGIA',
             isActive: false
         });
         expect(resultado).toEqual(setorAtualizado);
@@ -65,12 +65,12 @@ describe('UpdateSetorService', () => {
     it('deve manter isActive do setor quando não informado', async () => {
         setorRepositoryMock.findById.mockResolvedValue({ id: '1', nome: 'TI', isActive: false });
         setorRepositoryMock.findByNome.mockResolvedValue(null);
-        setorRepositoryMock.update.mockResolvedValue({ id: '1', nome: 'Tecnologia', isActive: false });
+        setorRepositoryMock.update.mockResolvedValue({ id: '1', nome: 'TECNOLOGIA', isActive: false });
 
-        await updateSetorService.execute('1', { nome: 'Tecnologia' });
+        await updateSetorService.execute('1', { nome: 'TECNOLOGIA' });
 
         expect(setorRepositoryMock.update).toHaveBeenCalledWith('1', {
-            nome: 'Tecnologia',
+            nome: 'TECNOLOGIA',
             isActive: false
         });
     });

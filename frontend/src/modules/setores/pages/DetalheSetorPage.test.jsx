@@ -151,7 +151,7 @@ describe('DetalheSetorPage', () => {
         await waitFor(() => {
             expect(atualizarSetor).toHaveBeenCalledWith(
                 'setor-1',
-                { nome: 'Administrativo atualizado' },
+                { nome: 'ADMINISTRATIVO ATUALIZADO' },
                 'jwt'
             );
         });
@@ -346,7 +346,7 @@ describe('DetalheSetorPage', () => {
         expect(await screen.findByText('Aviso temporário')).toBeInTheDocument();
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {
@@ -375,7 +375,7 @@ describe('DetalheSetorPage', () => {
         expect((await screen.findAllByText('Erro temporário')).length).toBeGreaterThan(0);
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {

@@ -258,7 +258,7 @@ describe('ListagemFuncionariosPage', () => {
         expect(await screen.findByText('Erro temporário')).toBeInTheDocument();
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(2000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(screen.queryByText('Erro temporário')).not.toBeInTheDocument();
@@ -307,8 +307,12 @@ describe('ListagemFuncionariosPage', () => {
 
     it('deve exibir rotulo de download ao baixar ficha selecionada', async () => {
         const usuario = userEvent.setup();
+        let resolver;
         baixarRelatorioFuncionarios.mockImplementation(
-            () => new Promise((resolve) => setTimeout(resolve, 100))
+            () =>
+                new Promise((resolve) => {
+                    resolver = resolve;
+                })
         );
 
         render(
@@ -325,6 +329,8 @@ describe('ListagemFuncionariosPage', () => {
         await usuario.click(screen.getByRole('button', { name: /download ficha/i }));
 
         expect(screen.getByRole('button', { name: /baixando ficha/i })).toBeDisabled();
+
+        resolver();
     });
 
     it('deve exibir erro generico ao falhar download do relatorio', async () => {

@@ -28,7 +28,7 @@ test.describe('Fluxo de CRUD no gerenciamento', () => {
         await page.getByPlaceholder('Buscar por nome ou CNPJ…').fill(empresa.nome);
         await page.getByRole('link', { name: empresa.nome }).click();
 
-        const nomeAtualizado = gerarNomeUnico('Empresa E2E Atualizada');
+        const nomeAtualizado = gerarNomeUnico('Empresa E2E Atualizada').toUpperCase();
         await page.getByLabel('Nome da empresa').fill(nomeAtualizado);
         await page.getByRole('button', { name: 'Salvar alterações' }).click();
         await esperarMensagemSucesso(page, 'Empresa salva com sucesso.');

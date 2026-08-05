@@ -10,7 +10,7 @@ export async function fazerLogin(page, { email, password }) {
     await page.goto('/login');
     await page.waitForLoadState('domcontentloaded');
     await page.getByLabel('E-mail corporativo').fill(email);
-    await page.getByLabel('Senha').fill(password);
+    await page.getByRole('textbox', { name: 'Senha', exact: true }).fill(password);
     await page.getByRole('button', { name: 'Entrar' }).click();
 }
 

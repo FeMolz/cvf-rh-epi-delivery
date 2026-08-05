@@ -173,7 +173,7 @@ describe('DetalheCargoPage', () => {
         await waitFor(() => {
             expect(atualizarCargo).toHaveBeenCalledWith(
                 'cargo-1',
-                expect.objectContaining({ name: 'Operador Senior' }),
+                expect.objectContaining({ name: 'OPERADOR SENIOR' }),
                 'jwt'
             );
         });
@@ -422,7 +422,7 @@ describe('DetalheCargoPage', () => {
         await usuario.type(screen.getByLabelText(/nome do cargo/i), 'Operador Atualizado');
         await usuario.click(screen.getByRole('button', { name: /salvar alterações/i }));
 
-        expect(await screen.findByText(/não foi possível salvar as alterações/i)).toBeInTheDocument();
+        expect(await screen.findByText(/não foi possível salvar o cargo/i)).toBeInTheDocument();
     });
 
     it('deve exibir aviso padrao quando desativacao retornar 409 sem message', async () => {
@@ -485,13 +485,16 @@ describe('DetalheCargoPage', () => {
     it('deve limpar aviso via callback do feedback', async () => {
         const usuario = userEvent.setup();
         const original = MensagemFeedback.AreaMensagensFeedback;
-        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => {
-            if (props.aviso && props.onLimparAviso) {
-                props.onLimparAviso();
-            }
-
-            return original(props);
-        });
+        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => (
+            <div>
+                {props.aviso ? (
+                    <button type="button" onClick={props.onLimparAviso}>
+                        limpar-aviso
+                    </button>
+                ) : null}
+                {original(props)}
+            </div>
+        ));
 
         buscarCargoPorId.mockResolvedValue({
             id: 'cargo-1',
@@ -516,6 +519,9 @@ describe('DetalheCargoPage', () => {
         await usuario.click(screen.getByRole('button', { name: /desativar cargo/i }));
         await usuario.click(screen.getAllByRole('button', { name: /desativar cargo/i })[1]);
 
+        expect(await screen.findByRole('button', { name: 'limpar-aviso' })).toBeInTheDocument();
+        await usuario.click(screen.getByRole('button', { name: 'limpar-aviso' }));
+
         await waitFor(() => {
             expect(screen.queryByText('Bloqueio por funcionários.')).not.toBeInTheDocument();
         });
@@ -526,15 +532,17 @@ describe('DetalheCargoPage', () => {
     it('deve limpar erro via callback do feedback', async () => {
         const usuario = userEvent.setup();
         const original = MensagemFeedback.AreaMensagensFeedback;
-        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => {
-            if (props.erro && props.onLimparErro) {
-                props.onLimparErro();
-            }
+        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => (
+            <div>
+                {props.erro ? (
+                    <button type="button" onClick={props.onLimparErro}>
+                        limpar-erro
+                    </button>
+                ) : null}
+                {original(props)}
+            </div>
+        ));
 
-            return original(props);
-        });
-
-        atualizarCargo.mockRejectedValue(new Error('Erro ao salvar.'));
         buscarCargoPorId.mockResolvedValue({
             id: 'cargo-1',
             name: 'Operador',
@@ -544,17 +552,22 @@ describe('DetalheCargoPage', () => {
             updatedAt: '2024-01-01T12:00:00.000Z',
             _count: { roleEpis: 0, employees: 0 }
         });
+        alterarSituacaoCargo.mockRejectedValue(new Error('Falha ao desativar.'));
 
         renderizarPagina();
 
         await waitFor(() => {
-            expect(screen.getByLabelText(/nome do cargo/i)).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /desativar cargo/i })).toBeInTheDocument();
         });
 
-        await usuario.click(screen.getByRole('button', { name: /salvar alterações/i }));
+        await usuario.click(screen.getByRole('button', { name: /desativar cargo/i }));
+        await usuario.click(screen.getAllByRole('button', { name: /desativar cargo/i })[1]);
+
+        expect(await screen.findByRole('button', { name: 'limpar-erro' })).toBeInTheDocument();
+        await usuario.click(screen.getByRole('button', { name: 'limpar-erro' }));
 
         await waitFor(() => {
-            expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+            expect(screen.queryByText('Falha ao desativar.')).not.toBeInTheDocument();
         });
 
         spy.mockRestore();

@@ -17,7 +17,7 @@ describe('CreateCompanyService', () => {
     });
 
     it('deve criar empresa com sucesso', async () => {
-        const dados = { name: 'Empresa Nova', cnpj: '11.111.111/0001-11' };
+        const dados = { name: 'EMPRESA NOVA', cnpj: '11.111.111/0001-11' };
         const empresaCriada = { id: '1', ...dados, isActive: true };
 
         companyRepositoryMock.findByCnpj.mockResolvedValue(null);
@@ -27,7 +27,7 @@ describe('CreateCompanyService', () => {
 
         expect(companyRepositoryMock.findByCnpj).toHaveBeenCalledWith('11.111.111/0001-11');
         expect(companyRepositoryMock.create).toHaveBeenCalledWith({
-            name: 'Empresa Nova',
+            name: 'EMPRESA NOVA',
             cnpj: '11.111.111/0001-11',
             isActive: true
         });
@@ -73,7 +73,7 @@ describe('CreateCompanyService', () => {
         });
 
         expect(companyRepositoryMock.create).toHaveBeenCalledWith({
-            name: 'Empresa',
+            name: 'EMPRESA',
             cnpj: '11.111.111/0001-11',
             isActive: false
         });

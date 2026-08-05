@@ -1,10 +1,30 @@
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
+
+const CAMPOS_TEXTO_MAIUSCULO = new Set([
+    'nacionalidade',
+    'estadoCivil',
+    'racaCor',
+    'filiacao',
+    'grauInstrucao',
+    'numeroCtps',
+    'serieCtps',
+    'pis',
+    'cep',
+    'logradouro',
+    'numeroEndereco',
+    'complemento',
+    'bairro',
+    'cidade',
+    'estado'
+]);
+
 /**
  * Remove campos vazios e monta o payload para POST /employees.
  * @param {Record<string, unknown>} dados
  */
 export function montarPayloadFuncionario(dados) {
     const payload = {
-        name: dados.name,
+        name: normalizarTextoMaiusculo(dados.name),
         cpf: dados.cpf,
         email: dados.email,
         telefone: dados.telefone,
@@ -41,7 +61,9 @@ export function montarPayloadFuncionario(dados) {
         const valor = dados[campo];
 
         if (valor !== undefined && valor !== null && String(valor).trim() !== '') {
-            payload[campo] = valor;
+            payload[campo] = CAMPOS_TEXTO_MAIUSCULO.has(campo)
+                ? normalizarTextoMaiusculo(valor)
+                : valor;
         }
     }
 

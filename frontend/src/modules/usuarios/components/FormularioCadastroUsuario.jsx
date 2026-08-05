@@ -1,7 +1,9 @@
 import { useState } from 'react';
 
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { CampoSenha } from '../../../shared/components/CampoSenha.jsx';
 import { ROTULOS_PAPEIS, PAPEL_COLABORADOR } from '../../../shared/constants/papeis.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import { derivarNomeDoEmail } from '../utils/derivarNomeDoEmail.js';
 
 /**
@@ -39,7 +41,9 @@ export function FormularioCadastroUsuario({
 
         try {
             await onSubmit({
-                name: modoAcesso ? derivarNomeDoEmail(email) : name,
+                name: modoAcesso
+                    ? normalizarTextoMaiusculo(derivarNomeDoEmail(email))
+                    : normalizarTextoMaiusculo(name),
                 email,
                 password,
                 role
@@ -98,18 +102,15 @@ export function FormularioCadastroUsuario({
                         </select>
                     </div>
 
-                    <div className="campo">
-                        <label htmlFor="senha-cadastro">Senha inicial</label>
-                        <input
-                            id="senha-cadastro"
-                            type="password"
-                            value={password}
-                            onChange={(evento) => setPassword(evento.target.value)}
-                            placeholder="Mínimo 8 caracteres, letras e números"
-                            minLength={8}
-                            required
-                        />
-                    </div>
+                    <CampoSenha
+                        id="senha-cadastro"
+                        rotulo="Senha inicial"
+                        value={password}
+                        onChange={setPassword}
+                        placeholder="Mínimo 8 caracteres, letras e números"
+                        minLength={8}
+                        required
+                    />
 
                     <div className="formulario__acao-criar-acesso">
                         <button className="botao botao--primario" type="submit" disabled={carregando}>
@@ -143,18 +144,15 @@ export function FormularioCadastroUsuario({
                         />
                     </div>
 
-                    <div className="campo">
-                        <label htmlFor="senha-cadastro">Senha inicial</label>
-                        <input
-                            id="senha-cadastro"
-                            type="password"
-                            value={password}
-                            onChange={(evento) => setPassword(evento.target.value)}
-                            placeholder="Mínimo 8 caracteres, letras e números"
-                            minLength={8}
-                            required
-                        />
-                    </div>
+                    <CampoSenha
+                        id="senha-cadastro"
+                        rotulo="Senha inicial"
+                        value={password}
+                        onChange={setPassword}
+                        placeholder="Mínimo 8 caracteres, letras e números"
+                        minLength={8}
+                        required
+                    />
 
                     <div className="campo">
                         <label htmlFor="papel-cadastro">Permissão de acesso</label>

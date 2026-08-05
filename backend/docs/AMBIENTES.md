@@ -6,7 +6,8 @@ Guia único para subir o **RH-System** (API + frontend) nos três ambientes supo
 
 ## 1. Visão geral
 
-O monorepo usa **npm workspaces** (`backend/` + `frontend/`). Cada ambiente é definido pelo **arquivo `.env`** carregado e pela **porta** em que a API responde:
+O monorepo usa **npm workspaces** (`backend/` + `frontend/`). Cada ambiente é definido pelo **arquivo** `.env` carregado e pela **porta** em que a API responde:
+
 
 | Ambiente                | Arquivo de config               | Banco típico             | API                         | Frontend                |
 | ----------------------- | ------------------------------- | ------------------------ | --------------------------- | ----------------------- |
@@ -14,9 +15,12 @@ O monorepo usa **npm workspaces** (`backend/` + `frontend/`). Cada ambiente é d
 | **Teste / homologação** | `backend/.env.test`             | PostgreSQL Docker (5433) | `http://localhost:3001`     | `http://localhost:5173` |
 | **Produção**            | `backend/.env.production.local` | Supabase (nuvem)         | conforme deploy (ex.: 3000) | domínio do cliente      |
 
+
 **Regra de ouro:** nunca aponte `.env` de desenvolvimento para o banco de produção. Use sempre o ambiente correto para cada tarefa.
 
 ---
+
+
 
 ## 2. Pré-requisitos comuns
 
@@ -35,6 +39,8 @@ npm install
 ```
 
 ---
+
+
 
 ## 3. Desenvolvimento (dia a dia)
 
@@ -74,6 +80,8 @@ Frontend (opcional — padrão já funciona):
 # VITE_API_URL=/api/v1
 ```
 
+
+
 ### 3.2 Banco de dados
 
 Na pasta `backend/`:
@@ -82,6 +90,8 @@ Na pasta `backend/`:
 npx prisma db push
 npx prisma generate
 ```
+
+
 
 ### 3.3 Seeds (primeira vez ou reset parcial)
 
@@ -92,6 +102,8 @@ npm run seed:admin -w backend
 # Ou todos os módulos (empresas, cargos, funcionários, EPIs, etc.)
 npm run seed:all -w backend
 ```
+
+
 
 ### 3.4 Subir API e frontend
 
@@ -111,7 +123,10 @@ npm run dev:frontend
 npm run dev
 ```
 
+
+
 ### 3.5 Acessar
+
 
 | Serviço      | URL                            |
 | ------------ | ------------------------------ |
@@ -120,11 +135,16 @@ npm run dev
 | Frontend     | `http://localhost:5173`        |
 | Login        | `http://localhost:5173/login`  |
 
+
+
+
 ### 3.6 Credenciais padrão (seed)
+
 
 | E-mail               | Senha              |
 | -------------------- | ------------------ |
 | `admin@rhsystem.com` | `AlterarSenha123!` |
+
 
 (Senha usada quando `ADMIN_SEED_PASSWORD` não está definida no `.env`.)
 
@@ -137,6 +157,8 @@ npm run test:all            # ambos
 ```
 
 ---
+
+
 
 ## 4. Teste / homologação local
 
@@ -163,6 +185,8 @@ PostgreSQL de teste:
 - Usuário / senha: `postgres` / `postgres`
 - Banco: `rh_system_test`
 
+
+
 ### 4.2 Configurar `.env.test`
 
 Na pasta `backend/`:
@@ -188,6 +212,8 @@ SUPABASE_SERVICE_ROLE_KEY="sb_secret_..."
 SUPABASE_STORAGE_BUCKET_EPI_REPORTS="epi-reports-dev-teste"
 ```
 
+
+
 ### 4.3 Frontend em modo teste
 
 Na pasta `frontend/`:
@@ -202,6 +228,8 @@ Conteúdo esperado:
 RH_API_PORT=3001
 VITE_API_URL=/api/v1
 ```
+
+
 
 ### 4.4 Schema e seeds
 
@@ -220,6 +248,8 @@ npm run db:test:push -w backend    # só schema
 npm run seed:all:test -w backend   # só seeds (com schema já aplicado)
 ```
 
+
+
 ### 4.5 Subir API e frontend de teste
 
 **Opção A — um comando (raiz):**
@@ -237,7 +267,10 @@ npm run dev:test:backend
 npm run dev:test:frontend
 ```
 
+
+
 ### 4.6 Acessar
+
 
 | Serviço            | URL                            |
 | ------------------ | ------------------------------ |
@@ -245,7 +278,11 @@ npm run dev:test:frontend
 | Frontend           | `http://localhost:5173`        |
 | Postman (base URL) | `http://localhost:3001/api/v1` |
 
+
+
+
 ### 4.7 Credenciais padrão (seed de teste)
+
 
 | E-mail                        | Papel          | Senha              |
 | ----------------------------- | -------------- | ------------------ |
@@ -254,13 +291,19 @@ npm run dev:test:frontend
 | `almoxarifado@rhsystem.com`   | ALMOXARIFADO   | `AlterarSenha123!` |
 | `colaborador@rhsystem.com`    | COLABORADOR    | `AlterarSenha123!` |
 
+
+
+
 ### 4.8 Resetar banco de teste do zero
 
 ```bash
 npm run db:test:reset -w backend
 ```
 
+
+
 ### 4.9 Problemas comuns
+
 
 | Sintoma                                         | Solução                                                                                                     |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -268,9 +311,12 @@ npm run db:test:reset -w backend
 | Frontend chama API na 3000 em vez de 3001       | Use `npm run dev:test:frontend` e confira `frontend/.env.test` com `RH_API_PORT=3001`                       |
 | Conflito de nome de container Docker            | `docker start rh-system-postgres-teste` em vez de `up -d`                                                   |
 
+
 Mais detalhes: [BANCO_TESTE.md](./BANCO_TESTE.md).
 
 ---
+
+
 
 ## 5. Produção
 
@@ -293,6 +339,8 @@ Preencha obrigatoriamente (ver [SEGURANCA.md](./SEGURANCA.md) e [SUPABASE.md](./
 - `CORS_ORIGINS`
 - `ADMIN_SEED_EMAIL` e `ADMIN_SEED_PASSWORD` (fortes)
 
+
+
 ### 5.2 Schema no Supabase
 
 ```bash
@@ -300,11 +348,15 @@ npm run db:prod:migrate -w backend
 # Banco vazio / prototipagem: npm run db:prod:push -w backend
 ```
 
+
+
 ### 5.3 Admin inicial (apenas uma vez)
 
 ```bash
 npm run seed:admin:prod -w backend
 ```
+
+
 
 ### 5.4 Subir a stack
 
@@ -320,7 +372,7 @@ npm run docker:prod:up -w backend
 npm run dev:prod -w backend
 ```
 
-**Deploy automatizado no Render (após merge na `main`):**
+**Deploy automatizado no Render (após merge na** `main`**):**
 
 O Render observa a branch `main` e faz build/deploy da API automaticamente. Configuração em [DEPLOY.md](./DEPLOY.md).
 
@@ -334,17 +386,22 @@ Login: `POST /api/v1/users/login` com credenciais definidas no seed de produçã
 
 ### 5.6 Operação contínua
 
+
 | Tarefa             | Comando                               |
 | ------------------ | ------------------------------------- |
 | Parar stack Docker | `npm run docker:prod:down -w backend` |
 | Backup do banco    | `npm run backup:prod -w backend`      |
 | Nova migration     | `npm run db:prod:migrate -w backend`  |
 
+
 Guia completo: [DEPLOY.md](./DEPLOY.md).
 
 ---
 
+
+
 ## 6. Resumo de comandos (raiz do monorepo)
+
 
 | Objetivo               | Comando                                |
 | ---------------------- | -------------------------------------- |
@@ -358,9 +415,13 @@ Guia completo: [DEPLOY.md](./DEPLOY.md).
 | Produção — migrations  | `npm run db:prod:migrate -w backend`   |
 | Testes unitários       | `npm run test:all`                     |
 
+
 ---
 
+
+
 ## 7. Documentação relacionada
+
 
 | Documento                                      | Conteúdo                            |
 | ---------------------------------------------- | ----------------------------------- |
@@ -370,3 +431,5 @@ Guia completo: [DEPLOY.md](./DEPLOY.md).
 | [SUPABASE.md](./SUPABASE.md)                   | URLs do pooler e migrations         |
 | [backend/README.md](../README.md)              | Módulos da API e seeds individuais  |
 | [frontend/README.md](../../frontend/README.md) | Estrutura React e rotas             |
+
+

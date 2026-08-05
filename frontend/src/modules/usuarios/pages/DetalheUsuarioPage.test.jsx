@@ -14,6 +14,7 @@ vi.mock('../../../shared/auth/useAuth.js', () => ({
 vi.mock('../services/usuariosApi.js', () => ({
     buscarUsuarioPorId: vi.fn(),
     atualizarUsuario: vi.fn(),
+    alterarSenhaUsuario: vi.fn(),
     excluirUsuario: vi.fn()
 }));
 
@@ -26,7 +27,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 const { useAuth } = await import('../../../shared/auth/useAuth.js');
-const { buscarUsuarioPorId, atualizarUsuario, excluirUsuario } = await import(
+const { buscarUsuarioPorId, atualizarUsuario, alterarSenhaUsuario, excluirUsuario } = await import(
     '../services/usuariosApi.js'
 );
 
@@ -117,12 +118,133 @@ describe('DetalheUsuarioPage', () => {
         expect(atualizarUsuario).toHaveBeenCalledWith(
             'usuario-2',
             {
-                name: 'Maria Atualizada',
+                name: 'MARIA ATUALIZADA',
                 email: 'maria.nova@teste.com',
                 role: 'COLABORADOR'
             },
             'jwt-admin'
         );
+    });
+
+    it('deve limpar nome no formulario quando API retornar nome vazio', async () => {
+        const usuario = userEvent.setup();
+        atualizarUsuario.mockResolvedValue({
+            ...usuarioBase,
+            name: null
+        });
+
+        renderizarDetalhe();
+
+        expect(await screen.findByRole('heading', { name: 'Maria Silva' })).toBeInTheDocument();
+        await usuario.click(screen.getByRole('button', { name: /salvar alterações/i }));
+
+        await waitFor(() => {
+            expect(screen.getByText('Usuário atualizado com sucesso.')).toBeInTheDocument();
+        });
+
+        expect(screen.getByLabelText(/nome completo/i)).toHaveValue('');
+    });
+
+    it('deve alterar senha quando admin informar nova senha', async () => {
+        const usuario = userEvent.setup();
+        alterarSenhaUsuario.mockResolvedValue({ ...usuarioBase });
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        await usuario.type(screen.getByLabelText(/^nova senha$/i), 'senha1234');
+        await usuario.type(screen.getByLabelText(/confirmar nova senha/i), 'senha1234');
+        await usuario.click(screen.getByRole('button', { name: /salvar senha/i }));
+
+        await waitFor(() => {
+            expect(alterarSenhaUsuario).toHaveBeenCalledWith(
+                'usuario-2',
+                { password: 'senha1234' },
+                'jwt-admin'
+            );
+            expect(screen.getByText('Senha alterada com sucesso.')).toBeInTheDocument();
+        });
+    });
+
+    it('deve rejeitar alteração de senha quando confirmação divergir', async () => {
+        const usuario = userEvent.setup();
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        await usuario.type(screen.getByLabelText(/^nova senha$/i), 'senha1234');
+        await usuario.type(screen.getByLabelText(/confirmar nova senha/i), 'outra1234');
+        await usuario.click(screen.getByRole('button', { name: /salvar senha/i }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'A confirmação da senha não confere.'
+        );
+        expect(alterarSenhaUsuario).not.toHaveBeenCalled();
+    });
+
+    it('deve rejeitar alteração de senha quando campos estiverem vazios', async () => {
+        const usuario = userEvent.setup();
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        await usuario.click(screen.getByRole('button', { name: /salvar senha/i }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Informe a nova senha e a confirmação.'
+        );
+        expect(alterarSenhaUsuario).not.toHaveBeenCalled();
+    });
+
+    it('deve exibir erro generico ao falhar alteração de senha', async () => {
+        const usuario = userEvent.setup();
+        alterarSenhaUsuario.mockRejectedValue(new Error());
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        await usuario.type(screen.getByLabelText(/^nova senha$/i), 'senha1234');
+        await usuario.type(screen.getByLabelText(/confirmar nova senha/i), 'senha1234');
+        await usuario.click(screen.getByRole('button', { name: /salvar senha/i }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(
+            'Não foi possível alterar a senha.'
+        );
+    });
+
+    it('deve exibir erro da API ao falhar alteração de senha', async () => {
+        const usuario = userEvent.setup();
+        alterarSenhaUsuario.mockRejectedValue(new Error('Senha fraca.'));
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        await usuario.type(screen.getByLabelText(/^nova senha$/i), 'senha1234');
+        await usuario.type(screen.getByLabelText(/confirmar nova senha/i), 'senha1234');
+        await usuario.click(screen.getByRole('button', { name: /salvar senha/i }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('Senha fraca.');
+    });
+
+    it('deve fechar modal de senha ao cancelar', async () => {
+        const usuario = userEvent.setup();
+
+        renderizarDetalhe();
+
+        await screen.findByRole('heading', { name: 'Maria Silva' });
+        await usuario.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+        await usuario.click(screen.getByRole('button', { name: /cancelar/i }));
+
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        });
     });
 
     it('deve exibir erro ao salvar alterações', async () => {
@@ -153,63 +275,58 @@ describe('DetalheUsuarioPage', () => {
 
     it('deve excluir usuário após confirmação', async () => {
         const usuario = userEvent.setup();
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
         excluirUsuario.mockResolvedValue(undefined);
 
         renderizarDetalhe();
 
         await screen.findByRole('heading', { name: 'Maria Silva' });
         await usuario.click(screen.getByRole('button', { name: /excluir usuário/i }));
+        await usuario.click(screen.getAllByRole('button', { name: /excluir usuário/i })[1]);
 
         await waitFor(() => {
             expect(excluirUsuario).toHaveBeenCalledWith('usuario-2', 'jwt-admin');
             expect(navegarMock).toHaveBeenCalledWith('/admin/gerenciamento');
         });
-
-        confirmSpy.mockRestore();
     });
 
     it('não deve excluir quando confirmação é cancelada', async () => {
         const usuario = userEvent.setup();
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
 
         renderizarDetalhe();
 
         await screen.findByRole('heading', { name: 'Maria Silva' });
         await usuario.click(screen.getByRole('button', { name: /excluir usuário/i }));
+        await usuario.click(screen.getByRole('button', { name: /cancelar/i }));
 
         expect(excluirUsuario).not.toHaveBeenCalled();
-        confirmSpy.mockRestore();
     });
 
     it('deve exibir erro generico ao falhar exclusão', async () => {
         const usuario = userEvent.setup();
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
         excluirUsuario.mockRejectedValue(new Error());
 
         renderizarDetalhe();
 
         await screen.findByRole('heading', { name: 'Maria Silva' });
         await usuario.click(screen.getByRole('button', { name: /excluir usuário/i }));
+        await usuario.click(screen.getAllByRole('button', { name: /excluir usuário/i })[1]);
 
         expect(await screen.findByRole('alert')).toHaveTextContent(
             'Não foi possível excluir o usuário.'
         );
-        confirmSpy.mockRestore();
     });
 
     it('deve exibir erro ao falhar exclusão', async () => {
         const usuario = userEvent.setup();
-        const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
         excluirUsuario.mockRejectedValue(new Error('Não foi possível excluir.'));
 
         renderizarDetalhe();
 
         await screen.findByRole('heading', { name: 'Maria Silva' });
         await usuario.click(screen.getByRole('button', { name: /excluir usuário/i }));
+        await usuario.click(screen.getAllByRole('button', { name: /excluir usuário/i })[1]);
 
         expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível excluir.');
-        confirmSpy.mockRestore();
     });
 
     it('deve impedir exclusão do próprio usuário', async () => {
@@ -296,7 +413,7 @@ describe('DetalheUsuarioPage', () => {
         });
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {
@@ -351,7 +468,7 @@ describe('DetalheUsuarioPage', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('Falha ao salvar');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {

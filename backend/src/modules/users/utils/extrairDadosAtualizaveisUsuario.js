@@ -1,3 +1,5 @@
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
+
 /** Campos permitidos em PUT /users/:id (isActive não é editável pela API). */
 export const CAMPOS_USUARIO_EDITAVEIS = ['name', 'email', 'role'];
 
@@ -10,7 +12,10 @@ export function extrairDadosAtualizaveisUsuario(dadosBrutos) {
 
     for (const campo of CAMPOS_USUARIO_EDITAVEIS) {
         if (dadosBrutos[campo] !== undefined) {
-            dadosPermitidos[campo] = dadosBrutos[campo];
+            dadosPermitidos[campo] =
+                campo === 'name'
+                    ? normalizarTextoMaiusculo(dadosBrutos[campo])
+                    : dadosBrutos[campo];
         }
     }
 

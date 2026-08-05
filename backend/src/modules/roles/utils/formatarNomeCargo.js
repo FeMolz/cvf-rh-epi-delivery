@@ -5,5 +5,6 @@
 export function formatarNomeCargo(nome) {
     return String(nome ?? '')
         .trim()
-        .replace(/\s+/g, ' ');
+        .replace(/\s+/g, ' ')
+        .toUpperCase();
 }

@@ -1,0 +1,11 @@
+.modal-alterar-senha {
+    width: min(100%, 28rem);
+}
+
+.modal-alterar-senha__formulario {
+    margin-top: 0.25rem;
+}
+
+.modal-alterar-senha__formulario .estado-erro {
+    margin: 0;
+}

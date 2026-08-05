@@ -113,7 +113,7 @@ describe('PainelListagemSetores', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('Falha ao carregar');
 
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(2000);
+            await vi.advanceTimersByTimeAsync(5000);
         });
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();

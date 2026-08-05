@@ -280,7 +280,7 @@ describe('EmitirRelatorioEpiPage', () => {
 
         expect(await screen.findByText(/relatório gerado com sucesso/i)).toBeInTheDocument();
 
-        await vi.advanceTimersByTimeAsync(2000);
+        await vi.advanceTimersByTimeAsync(5000);
 
         await waitFor(() => {
             expect(screen.queryByText(/relatório gerado com sucesso/i)).not.toBeInTheDocument();

@@ -29,8 +29,8 @@ describe('UpdateRoleService', () => {
         });
 
         expect(roleRepositoryMock.exists).toHaveBeenCalledWith('1');
-        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('Novo nome', '1');
-        expect(roleRepositoryMock.update).toHaveBeenCalledWith('1', 'Novo nome', 'Nova desc');
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('NOVO NOME', '1');
+        expect(roleRepositoryMock.update).toHaveBeenCalledWith('1', 'NOVO NOME', 'NOVA DESC');
         expect(resultado).toEqual(cargoAtualizado);
     });
 
@@ -75,5 +75,15 @@ describe('UpdateRoleService', () => {
         });
 
         expect(roleRepositoryMock.update).not.toHaveBeenCalled();
+    });
+
+    it('deve preservar description nao textual ao atualizar', async () => {
+        roleRepositoryMock.exists.mockResolvedValue(true);
+        roleRepositoryMock.findActiveByNameIgnoringCase.mockResolvedValue(null);
+        roleRepositoryMock.update.mockResolvedValue({ id: '1' });
+
+        await updateRoleService.execute('1', { name: 'Pedreiro', description: undefined });
+
+        expect(roleRepositoryMock.update).toHaveBeenCalledWith('1', 'PEDREIRO', undefined);
     });
 });

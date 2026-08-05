@@ -112,6 +112,8 @@ export function montarOrdenacaoAdmissaoConsulta(ordenacaoBruta) {
 /**
  * @param {{
  *   companyId?: string;
+ *   setorId?: string;
+ *   roleId?: string;
  *   busca?: string;
  *   situacao?: string;
  *   admissaoDe?: string;
@@ -136,6 +138,18 @@ export function montarWhereConsultaFuncionarios(parametros = {}) {
 
     if (companyId) {
         where.companyId = companyId;
+    }
+
+    const setorId = String(parametros.setorId || '').trim();
+
+    if (setorId) {
+        where.setorId = setorId;
+    }
+
+    const roleId = String(parametros.roleId || '').trim();
+
+    if (roleId) {
+        where.roleId = roleId;
     }
 
     const filtroBusca = montarFiltroBuscaConsulta(parametros.busca);

@@ -88,6 +88,11 @@ export function prepararAmbienteFrontendTeste() {
 }
 
 export function prepararBancoTeste() {
+    if (process.env.E2E_SKIP_DB_PREPARE === 'true') {
+        console.log('[e2e] Preparação de banco pulada (E2E_SKIP_DB_PREPARE=true).');
+        return;
+    }
+
     executar('npm run db:test:push -w backend');
     executar('npm run seed:all:test -w backend');
 }

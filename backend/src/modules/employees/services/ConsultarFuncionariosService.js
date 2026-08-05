@@ -8,6 +8,8 @@ class ConsultarFuncionariosService {
     /**
      * @param {{
      *   companyId?: string;
+     *   setorId?: string;
+     *   roleId?: string;
      *   busca?: string;
      *   situacao?: string;
      *   admissaoDe?: string;

@@ -1,6 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { DURACAO_MENSAGEM_FEEDBACK_MS } from '../hooks/useMensagemTemporaria.js';
 import { AreaMensagensFeedback } from './MensagemFeedback.jsx';
 
 describe('AreaMensagensFeedback', () => {
@@ -12,7 +13,7 @@ describe('AreaMensagensFeedback', () => {
         vi.useRealTimers();
     });
 
-    it('deve ocultar mensagem de sucesso após 2 segundos', () => {
+    it('deve ocultar mensagem de sucesso após 5 segundos', () => {
         const onLimparSucesso = vi.fn();
 
         render(
@@ -25,13 +26,13 @@ describe('AreaMensagensFeedback', () => {
         expect(screen.getByRole('status')).toHaveTextContent('Operação concluída.');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(DURACAO_MENSAGEM_FEEDBACK_MS);
         });
 
         expect(onLimparSucesso).toHaveBeenCalledTimes(1);
     });
 
-    it('deve ocultar mensagem de erro após 2 segundos', () => {
+    it('deve ocultar mensagem de erro após 5 segundos', () => {
         const onLimparErro = vi.fn();
 
         render(<AreaMensagensFeedback erro="Falha na operação." onLimparErro={onLimparErro} />);
@@ -39,7 +40,7 @@ describe('AreaMensagensFeedback', () => {
         expect(screen.getByRole('alert')).toHaveTextContent('Falha na operação.');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(DURACAO_MENSAGEM_FEEDBACK_MS);
         });
 
         expect(onLimparErro).toHaveBeenCalledTimes(1);
@@ -59,7 +60,7 @@ describe('AreaMensagensFeedback', () => {
         expect(screen.getByRole('status')).toHaveTextContent('Aviso temporario');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(DURACAO_MENSAGEM_FEEDBACK_MS);
         });
 
         expect(onLimparAviso).toHaveBeenCalledTimes(1);
@@ -73,7 +74,7 @@ describe('AreaMensagensFeedback', () => {
         );
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(DURACAO_MENSAGEM_FEEDBACK_MS);
         });
 
         expect(onLimparAviso).toHaveBeenCalledTimes(1);
@@ -90,7 +91,7 @@ describe('AreaMensagensFeedback', () => {
         render(<AreaMensagensFeedback erro="Falha" sucesso="Ok" aviso="Aviso" avisoTemporario />);
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(DURACAO_MENSAGEM_FEEDBACK_MS);
         });
 
         expect(screen.getByRole('alert')).toHaveTextContent('Falha');
@@ -102,5 +103,6 @@ describe('AreaMensagensFeedback', () => {
         );
 
         expect(container.firstChild).toHaveClass('feedback-custom');
+        expect(container.firstChild).toHaveClass('feedback-mensagens');
     });
 });

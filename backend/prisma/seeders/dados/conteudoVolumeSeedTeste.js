@@ -1,3 +1,4 @@
+import { normalizarTextoMaiusculo } from '../../../src/shared/utils/normalizarTextoMaiusculo.js';
 import {
     ID_CARGO_ANALISTA_SISTEMAS,
     ID_CARGO_AUXILIAR_ADMINISTRATIVO,
@@ -37,22 +38,22 @@ export const MINIMO_EPIS_POR_CARGO_PRIORITARIO = 5;
 export const EMPRESAS_SEED = [
     {
         id: ID_EMPRESA_MATRIZ,
-        name: 'CVF Incorporadora',
+        name: 'CVF INCORPORADORA',
         cnpj: '11.111.111/0001-11'
     },
     {
         id: ID_EMPRESA_FILIAL_SUL,
-        name: 'Ligasul Ltda',
+        name: 'LIGASUL LTDA',
         cnpj: '22.222.222/0001-22'
     },
     {
         id: ID_EMPRESA_VIVANT,
-        name: 'Vivant',
+        name: 'VIVANT',
         cnpj: '33.333.333/0001-33'
     },
     {
         id: ID_EMPRESA_RIO_SPORTS,
-        name: 'Rio Sports',
+        name: 'RIO SPORTS',
         cnpj: '44.444.444/0001-44'
     }
 ];
@@ -216,7 +217,12 @@ export function listarCargosAtivosSeed() {
         description: `Atividades relacionadas ao cargo de ${name.toLowerCase()}.`
     }));
 
-    return [...cargosFixos, ...cargosGerados];
+    return [...cargosFixos, ...cargosGerados].map((cargo) => ({
+        ...cargo,
+        name: normalizarTextoMaiusculo(cargo.name),
+        description: normalizarTextoMaiusculo(cargo.description),
+        deletedAt: null
+    }));
 }
 
 /**
@@ -227,8 +233,8 @@ export function listarCargosInativosSeed() {
 
     return CARGOS_INATIVOS_NOMES.map((name, indice) => ({
         id: gerarUuidDeterministico('b2000000', indice + 1),
-        name,
-        description: `Cargo inativo: ${name.toLowerCase()}.`,
+        name: normalizarTextoMaiusculo(name),
+        description: normalizarTextoMaiusculo(`Cargo inativo: ${name.toLowerCase()}.`),
         deletedAt: dataExclusao
     }));
 }
@@ -352,7 +358,11 @@ export function listarFuncionariosSeed() {
         });
     }
 
-    return funcionarios;
+    return funcionarios.map((funcionario) => ({
+        ...funcionario,
+        name: normalizarTextoMaiusculo(funcionario.name),
+        nomeCargo: normalizarTextoMaiusculo(funcionario.nomeCargo)
+    }));
 }
 
 /**

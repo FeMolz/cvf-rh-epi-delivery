@@ -25,8 +25,8 @@ describe('CreateRoleService', () => {
 
         const result = await createRoleService.execute(roleData);
 
-        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('Eng De Minas');
-        expect(roleRepositoryMock.create).toHaveBeenCalledWith('Eng De Minas', 'Engenharia de minas');
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('ENG DE MINAS');
+        expect(roleRepositoryMock.create).toHaveBeenCalledWith('ENG DE MINAS', 'ENGENHARIA DE MINAS');
         expect(result).toEqual(createdRole);
     });
 
@@ -36,8 +36,8 @@ describe('CreateRoleService', () => {
 
         await createRoleService.execute({ name: '  Eng   de   Minas  ', description: 'Desc' });
 
-        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('Eng de Minas');
-        expect(roleRepositoryMock.create).toHaveBeenCalledWith('Eng de Minas', 'Desc');
+        expect(roleRepositoryMock.findActiveByNameIgnoringCase).toHaveBeenCalledWith('ENG DE MINAS');
+        expect(roleRepositoryMock.create).toHaveBeenCalledWith('ENG DE MINAS', 'DESC');
     });
 
     it('deve rejeitar cargo com nome duplicado ignorando maiusculas', async () => {
@@ -64,5 +64,14 @@ describe('CreateRoleService', () => {
 
         expect(roleRepositoryMock.findActiveByNameIgnoringCase).not.toHaveBeenCalled();
         expect(roleRepositoryMock.create).not.toHaveBeenCalled();
+    });
+
+    it('deve preservar description nao textual ao criar', async () => {
+        roleRepositoryMock.findActiveByNameIgnoringCase.mockResolvedValue(null);
+        roleRepositoryMock.create.mockResolvedValue({ id: '1' });
+
+        await createRoleService.execute({ name: 'Pedreiro', description: null });
+
+        expect(roleRepositoryMock.create).toHaveBeenCalledWith('PEDREIRO', null);
     });
 });

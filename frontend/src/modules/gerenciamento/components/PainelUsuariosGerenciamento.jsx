@@ -48,14 +48,10 @@ export function PainelUsuariosGerenciamento() {
 
     async function aoCadastrar(dados) {
         setCarregandoCadastro(true);
-        setErro('');
 
         try {
             await cadastrarUsuario(dados, token);
             await carregarDados();
-        } catch (erroCapturado) {
-            setErro(erroCapturado.message || 'Não foi possível cadastrar o usuário.');
-            throw erroCapturado;
         } finally {
             setCarregandoCadastro(false);
         }

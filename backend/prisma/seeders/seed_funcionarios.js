@@ -43,7 +43,7 @@ async function main() {
             status: EmployeeStatus.ATIVO,
             estadoCivil: ESTADOS_CIVIS[indice % ESTADOS_CIVIS.length],
             grauInstrucao: GRAUS_INSTRUCAO[indice % GRAUS_INSTRUCAO.length],
-            cidade: indice % 2 === 0 ? 'São Paulo' : 'Rio de Janeiro',
+            cidade: indice % 2 === 0 ? 'SÃO PAULO' : 'RIO DE JANEIRO',
             estado: indice % 2 === 0 ? 'SP' : 'RJ',
             valeTransporte: indice % 2 === 0,
             valeAlimentacao: indice % 3 !== 0,

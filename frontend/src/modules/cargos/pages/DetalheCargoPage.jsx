@@ -66,21 +66,17 @@ export function DetalheCargoPage() {
 
     async function aoSalvar(dados) {
         setSalvando(true);
-        setErro('');
 
         try {
             const atualizado = await atualizarCargo(id, dados, token);
             setCargo(atualizado);
-        } catch (erroCapturado) {
-            setErro(erroCapturado.message || 'Não foi possível salvar as alterações.');
-            throw erroCapturado;
         } finally {
             setSalvando(false);
         }
     }
 
     async function confirmarAlteracaoSituacao() {
-        /* v8 ignore next 3 */
+        /* v8 ignore next 3 — estado defensivo; botão só aparece com cargo carregado */
         if (!cargo) {
             return;
         }
@@ -115,6 +111,22 @@ export function DetalheCargoPage() {
         } finally {
             setSalvando(false);
         }
+    }
+
+    function abrirConfirmacaoSituacao() {
+        setExibirConfirmacaoSituacao(true);
+    }
+
+    function fecharConfirmacaoSituacao() {
+        setExibirConfirmacaoSituacao(false);
+    }
+
+    function limparErro() {
+        setErro('');
+    }
+
+    function limparAviso() {
+        setAviso('');
     }
 
     if (carregando) {
@@ -190,8 +202,8 @@ export function DetalheCargoPage() {
                         erro={erro}
                         aviso={aviso}
                         avisoTemporario
-                        onLimparErro={() => setErro('')}
-                        onLimparAviso={() => setAviso('')}
+                        onLimparErro={limparErro}
+                        onLimparAviso={limparAviso}
                     />
 
                     <FormularioCargo
@@ -215,7 +227,7 @@ export function DetalheCargoPage() {
                                     className={cargoAtivo ? 'botao botao--perigo' : 'botao botao--primario'}
                                     type="button"
                                     disabled={salvando || (cargoAtivo && !podeDesativar)}
-                                    onClick={() => setExibirConfirmacaoSituacao(true)}
+                                    onClick={abrirConfirmacaoSituacao}
                                 >
                                     {cargoAtivo ? 'Desativar cargo' : 'Reativar cargo'}
                                 </button>
@@ -237,7 +249,7 @@ export function DetalheCargoPage() {
                     rotuloConfirmar={cargoAtivo ? 'Desativar cargo' : 'Reativar cargo'}
                     carregando={salvando}
                     onConfirmar={confirmarAlteracaoSituacao}
-                    onCancelar={() => setExibirConfirmacaoSituacao(false)}
+                    onCancelar={fecharConfirmacaoSituacao}
                 />
             ) : null}
         </section>

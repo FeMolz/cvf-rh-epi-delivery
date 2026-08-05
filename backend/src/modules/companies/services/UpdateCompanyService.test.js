@@ -19,20 +19,20 @@ describe('UpdateCompanyService', () => {
 
     it('deve atualizar empresa com sucesso', async () => {
         const empresaAtual = { id: '1', name: 'Antiga', cnpj: '1', isActive: true };
-        const empresaAtualizada = { id: '1', name: 'Nova', cnpj: '2', isActive: false };
+        const empresaAtualizada = { id: '1', name: 'NOVA', cnpj: '2', isActive: false };
 
         companyRepositoryMock.findById.mockResolvedValue(empresaAtual);
         companyRepositoryMock.findByCnpj.mockResolvedValue(null);
         companyRepositoryMock.update.mockResolvedValue(empresaAtualizada);
 
         const resultado = await updateCompanyService.execute('1', {
-            name: 'Nova',
+            name: 'NOVA',
             cnpj: '2',
             isActive: false
         });
 
         expect(companyRepositoryMock.update).toHaveBeenCalledWith('1', {
-            name: 'Nova',
+            name: 'NOVA',
             cnpj: '2',
             isActive: false
         });
@@ -43,7 +43,7 @@ describe('UpdateCompanyService', () => {
         companyRepositoryMock.findById.mockResolvedValue(null);
 
         await expect(
-            updateCompanyService.execute('1', { name: 'Nova', cnpj: '2' })
+            updateCompanyService.execute('1', { name: 'NOVA', cnpj: '2' })
         ).rejects.toMatchObject({ statusCode: 404 });
     });
 
@@ -52,7 +52,7 @@ describe('UpdateCompanyService', () => {
         companyRepositoryMock.findByCnpj.mockResolvedValue({ id: '2', cnpj: '2' });
 
         await expect(
-            updateCompanyService.execute('1', { name: 'Nova', cnpj: '2' })
+            updateCompanyService.execute('1', { name: 'NOVA', cnpj: '2' })
         ).rejects.toMatchObject({ statusCode: 409 });
     });
 
@@ -68,19 +68,19 @@ describe('UpdateCompanyService', () => {
         companyRepositoryMock.findById.mockResolvedValue({ id: '1', name: 'A', cnpj: '1', isActive: true });
 
         await expect(
-            updateCompanyService.execute('1', { name: 'Nova', cnpj: '  ' })
+            updateCompanyService.execute('1', { name: 'NOVA', cnpj: '  ' })
         ).rejects.toMatchObject({ statusCode: 400 });
     });
 
     it('deve manter isActive da empresa quando não informado', async () => {
         companyRepositoryMock.findById.mockResolvedValue({ id: '1', name: 'A', cnpj: '1', isActive: false });
         companyRepositoryMock.findByCnpj.mockResolvedValue(null);
-        companyRepositoryMock.update.mockResolvedValue({ id: '1', name: 'Nova', cnpj: '2', isActive: false });
+        companyRepositoryMock.update.mockResolvedValue({ id: '1', name: 'NOVA', cnpj: '2', isActive: false });
 
-        await updateCompanyService.execute('1', { name: 'Nova', cnpj: '2' });
+        await updateCompanyService.execute('1', { name: 'NOVA', cnpj: '2' });
 
         expect(companyRepositoryMock.update).toHaveBeenCalledWith('1', {
-            name: 'Nova',
+            name: 'NOVA',
             cnpj: '2',
             isActive: false
         });

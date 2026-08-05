@@ -18,7 +18,7 @@ export function AbasDepartamentoPessoal({ abaAtiva, abas, onTrocarAba }) {
                     aria-current={abaAtiva === aba.id ? 'page' : undefined}
                     onClick={() => onTrocarAba(aba.id)}
                 >
-                    <IconeAbaGerenciamento id={aba.id === 'ferias' ? 'funcionarios' : aba.id} />
+                    <IconeAbaGerenciamento id={aba.id} />
                     <span>{aba.rotulo}</span>
                 </button>
             ))}

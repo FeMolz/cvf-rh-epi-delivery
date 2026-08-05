@@ -111,6 +111,33 @@ describe('PesquisaEpiPorNome', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('Serviço indisponível.');
     });
 
+    it('deve usar cache local quando a base pública estiver indisponível', async () => {
+        const usuario = userEvent.setup();
+        const onAlternarEpi = vi.fn();
+
+        buscarEpisPorNome.mockRejectedValue(new Error('Serviço indisponível.'));
+
+        render(
+            <PesquisaEpiPorNome
+                token="jwt"
+                onAlternarEpi={onAlternarEpi}
+                episSelecionados={[]}
+                episCache={[{ id: '1', name: 'Capacete Cache', caNumber: '11070', isActive: true }]}
+            />
+        );
+
+        await usuario.type(
+            screen.getByRole('searchbox', { name: /pesquisar epi por nome/i }),
+            'capacete'
+        );
+        await usuario.click(screen.getByRole('button', { name: /pesquisar na base pública/i }));
+
+        expect(
+            await screen.findByText(/base pública indisponível — exibindo resultados do cache local/i)
+        ).toBeInTheDocument();
+        expect(screen.getByText('Capacete Cache')).toBeInTheDocument();
+    });
+
     it('deve exibir erro generico e estado pesquisando', async () => {
         const usuario = userEvent.setup();
         let resolver;
@@ -231,6 +258,42 @@ describe('PesquisaEpiPorNome', () => {
 
         await waitFor(() => {
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+        });
+
+        spy.mockRestore();
+    });
+
+    it('deve limpar aviso via callback do feedback', async () => {
+        const usuario = userEvent.setup();
+        const original = MensagemFeedback.AreaMensagensFeedback;
+        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => {
+            if (props.aviso && props.onLimparAviso) {
+                props.onLimparAviso();
+            }
+
+            return original(props);
+        });
+
+        buscarEpisPorNome.mockRejectedValue(new Error('Serviço indisponível.'));
+
+        render(
+            <PesquisaEpiPorNome
+                token="jwt"
+                onSelecionarCa={vi.fn()}
+                episCache={[{ id: '1', name: 'Capacete Cache', caNumber: '11070', isActive: true }]}
+            />
+        );
+
+        await usuario.type(
+            screen.getByRole('searchbox', { name: /pesquisar epi por nome/i }),
+            'capacete'
+        );
+        await usuario.click(screen.getByRole('button', { name: /pesquisar na base pública/i }));
+
+        await waitFor(() => {
+            expect(
+                screen.queryByText(/base pública indisponível — exibindo resultados do cache local/i)
+            ).not.toBeInTheDocument();
         });
 
         spy.mockRestore();

@@ -145,7 +145,7 @@ describe('DetalheEmpresaPage', () => {
         await waitFor(() => {
             expect(atualizarEmpresa).toHaveBeenCalledWith(
                 'empresa-1',
-                expect.objectContaining({ name: 'Empresa Atualizada' }),
+                expect.objectContaining({ name: 'EMPRESA ATUALIZADA' }),
                 'jwt'
             );
         });

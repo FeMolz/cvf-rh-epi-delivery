@@ -10,7 +10,7 @@ import {
 import { selecionarOptionContendoTexto } from './helpers/navegacao.js';
 
 const diretorioAuth = path.join(process.cwd(), 'e2e', '.auth');
-const funcionarioRelatorio = 'Bruno Costa';
+const funcionarioRelatorio = 'BRUNO COSTA';
 const dataEntregaRelatorio = '2026-07-15';
 const periodoRelatorio = { inicio: '2026-01-01', fim: '2026-12-31' };
 

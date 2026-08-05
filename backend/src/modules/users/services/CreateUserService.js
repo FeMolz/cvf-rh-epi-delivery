@@ -8,6 +8,7 @@ import {
     PAPEL_ADMIN
 } from '../../../shared/constants/papeisUsuarioConstantes.js';
 import { podeAtribuirPapelUsuario } from '../../../shared/utils/hierarquiaPapeisUsuario.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import { formatarRespostaUsuario } from '../utils/formatarRespostaUsuario.js';
 import {
     MENSAGEM_EMAIL_JA_CADASTRADO,
@@ -58,7 +59,7 @@ class CreateUserService {
         const hashSenha = await bcrypt.hash(password, 10);
 
         const usuarioCriado = await userRepository.create({
-            name,
+            name: normalizarTextoMaiusculo(name),
             email,
             passwordHash: hashSenha,
             role: papelInformado

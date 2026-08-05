@@ -72,7 +72,7 @@ describe('FormularioLogin', () => {
         expect(screen.getByRole('alert')).toHaveTextContent('Falha');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();

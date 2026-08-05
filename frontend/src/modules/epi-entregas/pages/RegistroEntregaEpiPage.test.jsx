@@ -306,7 +306,7 @@ describe('RegistroEntregaEpiPage', () => {
         expect(await screen.findByText(/entrega registrada com sucesso/i)).toBeInTheDocument();
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         await waitFor(() => {
@@ -406,6 +406,27 @@ describe('RegistroEntregaEpiPage', () => {
 
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Ana Silva' })).toBeInTheDocument();
+        });
+    });
+
+    it('deve voltar aos ativos pelo botão dedicado', async () => {
+        const usuario = userEvent.setup();
+
+        renderizarPagina();
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Ana Silva' })).toBeInTheDocument();
+        });
+
+        await usuario.click(screen.getByRole('button', { name: 'Ana Silva' }));
+
+        expect(await screen.findByRole('button', { name: /voltar aos ativos/i })).toBeInTheDocument();
+
+        await usuario.click(screen.getByRole('button', { name: /voltar aos ativos/i }));
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Ana Silva' })).toBeInTheDocument();
+            expect(screen.queryByRole('button', { name: /voltar aos ativos/i })).not.toBeInTheDocument();
         });
     });
 

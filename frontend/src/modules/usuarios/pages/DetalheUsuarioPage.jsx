@@ -3,10 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
+import { DialogoConfirmacao } from '../../../shared/components/DialogoConfirmacao.jsx';
+import { ModalAlterarSenha } from '../../../shared/components/ModalAlterarSenha.jsx';
 import { PAPEL_ADMIN, ROTULOS_PAPEIS } from '../../../shared/constants/papeis.js';
 import { listarPapeisAtribuiveis } from '../../../shared/utils/hierarquiaPapeis.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import { formatarDataHora } from '../../../shared/utils/listagemUsuarios.js';
 import {
+    alterarSenhaUsuario,
     atualizarUsuario,
     buscarUsuarioPorId,
     excluirUsuario
@@ -23,13 +27,26 @@ export function DetalheUsuarioPage() {
     const [role, setRole] = useState('');
     const [carregando, setCarregando] = useState(true);
     const [salvando, setSalvando] = useState(false);
+    const [salvandoSenha, setSalvandoSenha] = useState(false);
     const [erro, setErro] = useState('');
     const [sucesso, setSucesso] = useState('');
+    const [exibirConfirmacaoExclusao, setExibirConfirmacaoExclusao] = useState(false);
+    const [exibirModalSenha, setExibirModalSenha] = useState(false);
 
     const papeisDisponiveis = useMemo(
         () => listarPapeisAtribuiveis(user?.role),
         [user?.role]
     );
+
+    const podeAlterarSenha = user?.role === PAPEL_ADMIN;
+
+    function abrirModalSenha() {
+        setExibirModalSenha(true);
+    }
+
+    function fecharModalSenha() {
+        setExibirModalSenha(false);
+    }
 
     useEffect(() => {
         let ativo = true;
@@ -74,8 +91,13 @@ export function DetalheUsuarioPage() {
         setSucesso('');
 
         try {
-            const atualizado = await atualizarUsuario(id, { name, email, role }, token);
+            const atualizado = await atualizarUsuario(
+                id,
+                { name: normalizarTextoMaiusculo(name), email, role },
+                token
+            );
             setUsuario(atualizado);
+            setName(atualizado.name || '');
             setSucesso('Usuário atualizado com sucesso.');
         } catch (erroCapturado) {
             setErro(erroCapturado.message || 'Não foi possível salvar as alterações.');
@@ -84,15 +106,23 @@ export function DetalheUsuarioPage() {
         }
     }
 
-    async function aoExcluir() {
-        const confirmado = window.confirm(
-            `Tem certeza que deseja excluir o usuário "${usuario?.name}"? Esta ação não pode ser desfeita.`
-        );
+    async function aoAlterarSenha(password) {
+        setErro('');
+        setSucesso('');
+        setSalvandoSenha(true);
 
-        if (!confirmado) {
-            return;
+        try {
+            await alterarSenhaUsuario(id, { password }, token);
+            setExibirModalSenha(false);
+            setSucesso('Senha alterada com sucesso.');
+        } catch (erroCapturado) {
+            throw new Error(erroCapturado.message || 'Não foi possível alterar a senha.');
+        } finally {
+            setSalvandoSenha(false);
         }
+    }
 
+    async function confirmarExclusao() {
         setSalvando(true);
         setErro('');
 
@@ -102,7 +132,16 @@ export function DetalheUsuarioPage() {
         } catch (erroCapturado) {
             setErro(erroCapturado.message || 'Não foi possível excluir o usuário.');
             setSalvando(false);
+            setExibirConfirmacaoExclusao(false);
         }
+    }
+
+    function limparErro() {
+        setErro('');
+    }
+
+    function limparSucesso() {
+        setSucesso('');
     }
 
     if (carregando) {
@@ -149,14 +188,14 @@ export function DetalheUsuarioPage() {
                         </div>
                     </div>
 
-                    <form className="formulario" onSubmit={aoSalvar}>
-                        <AreaMensagensFeedback
-                            erro={erro}
-                            sucesso={sucesso}
-                            onLimparErro={() => setErro('')}
-                            onLimparSucesso={() => setSucesso('')}
-                        />
+                    <AreaMensagensFeedback
+                        erro={erro}
+                        sucesso={sucesso}
+                        onLimparErro={limparErro}
+                        onLimparSucesso={limparSucesso}
+                    />
 
+                    <form className="formulario" onSubmit={aoSalvar}>
                         <div className="campo">
                             <label htmlFor="nome-edicao">Nome completo</label>
                             <input
@@ -199,11 +238,21 @@ export function DetalheUsuarioPage() {
                                 <button className="botao botao--primario" type="submit" disabled={salvando}>
                                     {salvando ? 'Salvando…' : 'Salvar alterações'}
                                 </button>
+                                {podeAlterarSenha ? (
+                                    <button
+                                        className="botao botao--secundario"
+                                        type="button"
+                                        disabled={salvando}
+                                        onClick={abrirModalSenha}
+                                    >
+                                        Alterar senha
+                                    </button>
+                                ) : null}
                                 <button
                                     className="botao botao--perigo"
                                     type="button"
                                     disabled={salvando || ehProprioUsuario}
-                                    onClick={aoExcluir}
+                                    onClick={() => setExibirConfirmacaoExclusao(true)}
                                 >
                                     Excluir usuário
                                 </button>
@@ -220,6 +269,23 @@ export function DetalheUsuarioPage() {
                     </form>
                 </div>
             </div>
+
+            <ModalAlterarSenha
+                aberto={exibirModalSenha}
+                carregando={salvandoSenha}
+                onConfirmar={aoAlterarSenha}
+                onCancelar={fecharModalSenha}
+            />
+
+            <DialogoConfirmacao
+                aberto={exibirConfirmacaoExclusao}
+                titulo="Excluir usuário"
+                mensagem={`Tem certeza que deseja excluir o usuário "${usuario.name}"? Esta ação não pode ser desfeita.`}
+                rotuloConfirmar="Excluir usuário"
+                carregando={salvando}
+                onConfirmar={confirmarExclusao}
+                onCancelar={() => setExibirConfirmacaoExclusao(false)}
+            />
         </section>
     );
 }

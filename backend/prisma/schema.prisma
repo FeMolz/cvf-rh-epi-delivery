@@ -212,7 +212,7 @@ model EpiDeliveryReport {
     foiAssinado    Boolean @default(false)
 
     generatedByUserId String?
-    generatedBy       User?   @relation("EpiDeliveryReportGenerator", fields: [generatedByUserId], references: [id])
+    generatedBy       User?   @relation("EpiDeliveryReportGenerator", fields: [generatedByUserId], references: [id], onDelete: SetNull)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -288,8 +288,8 @@ model EpiDelivery {
     epiId String
     epi   Epi    @relation(fields: [epiId], references: [id])
 
-    deliveredById String
-    deliveredBy   User   @relation(fields: [deliveredById], references: [id])
+    deliveredById String?
+    deliveredBy   User?  @relation(fields: [deliveredById], references: [id], onDelete: SetNull)
 
     deliveryDate DateTime @default(now())
 
@@ -330,8 +330,8 @@ model AnuncioVaga {
 
     status StatusAnuncioVaga @default(INATIVA)
 
-    criadoPorUserId String
-    criadoPor       User   @relation("AnuncioVagaCriador", fields: [criadoPorUserId], references: [id])
+    criadoPorUserId String?
+    criadoPor       User?  @relation("AnuncioVagaCriador", fields: [criadoPorUserId], references: [id], onDelete: SetNull)
 
     candidaturas Candidatura[]
 
@@ -425,7 +425,7 @@ model CadastroContratacao {
     employee   Employee? @relation(fields: [employeeId], references: [id])
 
     analisadoPorUserId String?
-    analisadoPor       User? @relation("CadastroContratacaoAnalisador", fields: [analisadoPorUserId], references: [id])
+    analisadoPor       User? @relation("CadastroContratacaoAnalisador", fields: [analisadoPorUserId], references: [id], onDelete: SetNull)
     analisadoEm        DateTime?
     enviadoEm          DateTime?
 

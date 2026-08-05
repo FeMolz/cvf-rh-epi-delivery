@@ -1,5 +1,6 @@
 import companyRepository from '../repositories/CompanyRepository.js';
 import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/criarErroHttp.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import {
     MENSAGEM_CNPJ_EMPRESA_JA_CADASTRADO,
     MENSAGEM_CNPJ_EMPRESA_OBRIGATORIO,
@@ -19,7 +20,9 @@ class UpdateCompanyService {
             throw criarErroNaoEncontrado(MENSAGEM_EMPRESA_NAO_ENCONTRADA);
         }
 
-        const name = typeof dadosAtualizacao.name === 'string' ? dadosAtualizacao.name.trim() : '';
+        const name = typeof dadosAtualizacao.name === 'string'
+            ? normalizarTextoMaiusculo(dadosAtualizacao.name)
+            : '';
         const cnpj = typeof dadosAtualizacao.cnpj === 'string' ? dadosAtualizacao.cnpj.trim() : '';
         const isActive = dadosAtualizacao.isActive ?? empresa.isActive;
 

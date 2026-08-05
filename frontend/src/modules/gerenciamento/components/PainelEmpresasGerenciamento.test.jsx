@@ -35,7 +35,7 @@ describe('PainelEmpresasGerenciamento', () => {
 
         await waitFor(() => {
             expect(criarEmpresa).toHaveBeenCalledWith(
-                { name: 'Empresa A', cnpj: '11.111.111/0001-11' },
+                { name: 'EMPRESA A', cnpj: '11.111.111/0001-11' },
                 'jwt'
             );
         });

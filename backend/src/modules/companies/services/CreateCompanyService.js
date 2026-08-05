@@ -1,4 +1,5 @@
 import companyRepository from '../repositories/CompanyRepository.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import {
     MENSAGEM_CNPJ_EMPRESA_JA_CADASTRADO,
     MENSAGEM_CNPJ_EMPRESA_OBRIGATORIO,
@@ -10,7 +11,7 @@ class CreateCompanyService {
      * @param {{ name: string, cnpj: string, isActive?: boolean }} entrada
      */
     async execute(entrada) {
-        const name = typeof entrada.name === 'string' ? entrada.name.trim() : '';
+        const name = typeof entrada.name === 'string' ? normalizarTextoMaiusculo(entrada.name) : '';
         const cnpj = typeof entrada.cnpj === 'string' ? entrada.cnpj.trim() : '';
         const isActive = entrada.isActive !== false;
 

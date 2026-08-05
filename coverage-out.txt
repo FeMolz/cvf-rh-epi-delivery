@@ -1,0 +1,822 @@
+﻿
+> frontend@0.1.0 test:coverage
+> vitest run --coverage --reporter=dot --coverage.reporter=json-summary --coverage.reporter=text
+
+
+ RUN  v3.2.7 C:/Users/felip/OneDrive/Documentos/CLIENTES/CVF_INCORPORADORA/02-sistema-rh-sst-new/frontend
+      Coverage enabled with v8
+
+node.exe : stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve 
+carregar funcionarios e exibir preview apos selecionar periodo
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (stderr | src/mo...ecionar periodo:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve carregar 
+funcionarios e exibir preview apos selecionar periodo
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve emitir 
+relatorio com sucesso
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve emitir 
+relatorio com sucesso
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/empresas/components/FormularioEmpresa.test.jsx > FormularioEmpresa > deve limpar mensagens via 
+callbacks do feedback
+Cannot update a component (`FormularioEmpresa`) while rendering a different component (`AreaMensagensFeedback`). To 
+locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve bloquear 
+emissao quando preview nao tiver entregas
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve bloquear 
+emissao quando preview nao tiver entregas
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+ao falhar preview do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+ao falhar preview do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+generico ao falhar preview do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+generico ao falhar preview do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+ao falhar emissao do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+ao falhar emissao do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+generico ao falhar emissao do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve exibir erro 
+generico ao falhar emissao do relatorio
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+mensagens de feedback automaticamente
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+mensagens de feedback automaticamente
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+mensagens de feedback automaticamente
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve ignorar 
+preview apos desmontar durante carregamento
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/funcionarios/pages/ListagemFuncionariosPage.test.jsx > ListagemFuncionariosPage > deve exibir 
+rotulo de download ao baixar ficha selecionada
+An update to ListagemFuncionariosPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+sucesso via callback do feedback
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+sucesso via callback do feedback
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+An update to EmitirRelatorioEpiPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/epi-relatorios/pages/EmitirRelatorioEpiPage.test.jsx > EmitirRelatorioEpiPage > deve limpar 
+sucesso via callback do feedback
+Cannot update a component (`EmitirRelatorioEpiPage`) while rendering a different component (`AreaMensagensFeedback`). 
+To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/epi-entregas/pages/RegistroEntregaEpiPage.test.jsx > RegistroEntregaEpiPage > deve limpar 
+mensagens via callbacks do feedback
+Cannot update a component (`RegistroEntregaEpiPage`) while rendering a different component (`AreaMensagensFeedback`). 
+To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/epis/pages/VinculoEpisCargoPage.test.jsx > VinculoEpisCargoPage > deve limpar erro via callback 
+do feedback
+Cannot update a component (`VinculoEpisCargoPage`) while rendering a different component (`AreaMensagensFeedback`). To 
+locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/funcionarios/components/FormularioFuncionarioEtapa1.test.jsx > FormularioFuncionarioEtapa1 > deve 
+limpar erro via callback do feedback
+Cannot update a component (`FormularioFuncionarioEtapa1`) while rendering a different component 
+(`AreaMensagensFeedback`). To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as 
+described in https://react.dev/link/setstate-in-render
+
+stderr | src/modules/epis/components/PesquisaEpiPorNome.test.jsx > PesquisaEpiPorNome > deve limpar erro via callback 
+do feedback
+Cannot update a component (`PesquisaEpiPorNome`) while rendering a different component (`AreaMensagensFeedback`). To 
+locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/cargos/pages/ListagemCargosPage.test.jsx > ListagemCargosPage > deve limpar erro via callback do 
+feedback
+Cannot update a component (`ListagemCargosPage`) while rendering a different component (`AreaMensagensFeedback`). To 
+locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/gerenciamento/components/PainelFuncionariosGerenciamento.test.jsx > 
+PainelFuncionariosGerenciamento > deve limpar erro via callback do feedback
+Cannot update a component (`PainelFuncionariosGerenciamento`) while rendering a different component 
+(`AreaMensagensFeedback`). To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as 
+described in https://react.dev/link/setstate-in-render
+
+stderr | src/modules/funcionarios/pages/EdicaoFuncionarioPage.test.jsx > EdicaoFuncionarioPage > deve limpar erro via 
+callback do feedback
+Cannot update a component (`EdicaoFuncionarioPage`) while rendering a different component (`AreaMensagensFeedback`). 
+To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/funcionarios/pages/EdicaoFuncionarioPage.test.jsx > EdicaoFuncionarioPage > deve exibir estado 
+baixando ficha
+An update to EdicaoFuncionarioPage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/modules/gerenciamento/components/PainelUsuariosGerenciamento.test.jsx > PainelUsuariosGerenciamento > 
+deve limpar erro via callback do feedback
+Cannot update a component (`PainelUsuariosGerenciamento`) while rendering a different component 
+(`AreaMensagensFeedback`). To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as 
+described in https://react.dev/link/setstate-in-render
+
+stderr | src/modules/setores/components/FormularioSetor.test.jsx > FormularioSetor > deve limpar mensagens via 
+callbacks do feedback
+Cannot update a component (`FormularioSetor`) while rendering a different component (`AreaMensagensFeedback`). To 
+locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as described in 
+https://react.dev/link/setstate-in-render
+
+stderr | src/modules/epis/components/FormularioVinculoEpi.test.jsx > FormularioVinculoEpi > FormularioVinculoEpiPorCa 
+> deve limpar erro via callback do feedback
+Cannot update a component (`FormularioVinculoEpiPorCa`) while rendering a different component 
+(`AreaMensagensFeedback`). To locate the bad setState() call inside `AreaMensagensFeedback`, follow the stack trace as 
+described in https://react.dev/link/setstate-in-render
+
+stderr | src/shared/auth/MonitorSessao.test.jsx > MonitorSessao > deve redirecionar para login quando a sess├úo expirar
+An update to MemoryRouter inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+stderr | src/shared/auth/MonitorSessao.test.jsx > MonitorSessao > deve agendar notifica├º├úo com tempo restante do 
+token
+An update to MemoryRouter inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://react.dev/link/wrap-tests-with-act
+
+┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬Àx┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 1 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/modules/gerenciamento/components/PainelFuncionariosGerenciamento.test.jsx > PainelFuncionariosGerenciamento 
+> deve percorrer etapas e cadastrar funcionario
+TestingLibraryElementError: Unable to find an element with the text: Lista de funcion├írios. This could be because the 
+text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your 
+matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33mclass[39m=[32m"gerenciamento-painel listagem-painel"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"gerenciamento-painel__cabecalho listagem-painel__cabecalho"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"listagem-painel__identidade"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"gerenciamento-painel__icone"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"gerenciamento-abas__icone"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"16"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"16"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"9"[39m
+                [33mcy[39m=[32m"7"[39m
+                [33mr[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M22 11h-6"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M19 8v6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div>[39m
+            [36m<h2>[39m
+              [0mFuncion├írios[0m
+            [36m</h2>[39m
+            [36m<p>[39m
+              [0mCadastre novos funcion├írios vinculados a empresas, cargos e setores.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<hr[39m
+        [33maria-hidden[39m=[32m"true"[39m
+        [33mclass[39m=[32m"listagem-painel__separador"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"listagem-painel__conteudo"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cadastro-funcionario cadastro-funcionario--gerenciamento"[39m
+        [36m>[39m
+          [36m<ol[39m
+            [33maria-label[39m=[32m"Etapas do cadastro"[39m
+            [33mclass[39m=[32m"cadastro-etapas"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"cadastro-etapas__item cadastro-etapas__item--concluida"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__numero"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__rotulo"[39m
+              [36m>[39m
+                [0mDados pessoais[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"cadastro-etapas__item cadastro-etapas__item--concluida"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__numero"[39m
+              [36m>[39m
+                [0m2[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__rotulo"[39m
+              [36m>[39m
+                [0mEndere├ºo[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"cadastro-etapas__item cadastro-etapas__item--ativa"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__numero"[39m
+              [36m>[39m
+                [0m3[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cadastro-etapas__rotulo"[39m
+              [36m>[39m
+                [0mBenef├¡cios[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ol>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cadastro-funcionario__corpo"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mVoltar etapa 2[0m
+              [36m</button>[39m
+              [36m<button[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [0mFinalizar cadastro[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ÔØ» Object.getElementError ../node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» ../node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» ../node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» ../node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/modules/gerenciamento/components/PainelFuncionariosGerenciamento.test.jsx:137:23
+    135|         });
+    136| 
+    137|         expect(screen.getByText('Lista de funcion├írios')).toBeInTheDocÔÇª
+       |                       ^
+    138|     });
+    139| 
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/1]ÔÄ»
+
+
+ Test Files  1 failed | 151 passed (152)
+      Tests  1 failed | 913 passed (914)
+   Start at  15:56:00
+   Duration  363.41s (transform 55.72s, setup 909.60s, collect 476.05s, tests 807.96s, environment 1382.49s, prepare 82.03s)
+
+npm error Lifecycle script `test:coverage` failed with error:
+npm error code 1
+npm error path C:\Users\felip\OneDrive\Documentos\CLIENTES\CVF_INCORPORADORA\02-sistema-rh-sst-new\frontend
+npm error workspace frontend@0.1.0
+npm error location C:\Users\felip\OneDrive\Documentos\CLIENTES\CVF_INCORPORADORA\02-sistema-rh-sst-new\frontend
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run --coverage --reporter=dot 
+--coverage.reporter=json-summary --coverage.reporter=text

@@ -65,8 +65,8 @@ test.describe('Permissoes por papel (administrativo)', () => {
 
     test('administrativo nao ve acao de excluir cargo permanentemente', async ({ page }) => {
         await page.goto('/admin/cargos');
-        await page.getByRole('searchbox', { name: 'Pesquisar cargos' }).fill('Pedreiro');
-        await page.getByRole('link', { name: 'Pedreiro' }).click();
+        await page.getByRole('searchbox', { name: 'Pesquisar cargos' }).fill('PEDREIRO');
+        await page.getByRole('link', { name: 'PEDREIRO' }).click();
 
         await expect(page.getByRole('button', { name: 'Desativar cargo' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Excluir cargo' })).toHaveCount(0);

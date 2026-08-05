@@ -4,6 +4,8 @@ import { baixarArquivoApi, requisicaoApi } from '../../../shared/api/clienteHttp
  * @param {string} token
  * @param {{
  *   companyId?: string;
+ *   setorId?: string;
+ *   roleId?: string;
  *   busca?: string;
  *   situacao?: string;
  *   admissaoDe?: string;

@@ -16,14 +16,14 @@ function derivarNomeLegivelDoEmail(email) {
     const local = email.split('@')[0]?.trim();
 
     if (!local) {
-        return 'Usuário';
+        return 'USUÁRIO';
     }
 
     return local
         .replace(/[._-]+/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
-        .replace(/\b\w/g, (caractere) => caractere.toUpperCase());
+        .toUpperCase();
 }
 
 /**
@@ -59,7 +59,7 @@ export async function criarAcessoUsuario(page, opcoes = {}) {
  * @returns {Promise<{ nome: string, cnpj: string }>}
  */
 export async function cadastrarEmpresa(page, opcoes = {}) {
-    const nome = opcoes.nome ?? gerarNomeUnico('Empresa E2E');
+    const nome = (opcoes.nome ?? gerarNomeUnico('Empresa E2E')).toUpperCase();
     const cnpj = opcoes.cnpj ?? gerarCnpjUnico();
 
     await irParaCadastramento(page, 'empresas');
@@ -95,8 +95,10 @@ export async function cadastrarSetor(page, opcoes = {}) {
  * @returns {Promise<{ nome: string, descricao: string }>}
  */
 export async function cadastrarCargo(page, opcoes = {}) {
-    const nome = opcoes.nome ?? gerarNomeUnico('Cargo E2E');
-    const descricao = opcoes.descricao ?? 'Cargo criado automaticamente nos testes E2E.';
+    const nome = (opcoes.nome ?? gerarNomeUnico('Cargo E2E')).toUpperCase();
+    const descricao = (
+        opcoes.descricao ?? 'Cargo criado automaticamente nos testes E2E.'
+    ).toUpperCase();
 
     await irParaCadastramento(page, 'cargos');
     await page.getByLabel('Nome do cargo').fill(nome);
@@ -137,13 +139,13 @@ export async function abrirDetalheUsuarioPorEmail(page, email) {
  * @returns {Promise<{ nome: string, cpf: string, email: string }>}
  */
 export async function cadastrarFuncionario(page, opcoes = {}) {
-    const nome = opcoes.nome ?? gerarNomeUnico('Funcionário E2E');
+    const nome = (opcoes.nome ?? gerarNomeUnico('Funcionário E2E')).toUpperCase();
     const cpf = opcoes.cpf ?? gerarCpfUnico();
     const email = opcoes.email ?? gerarEmailUnico('funcionario');
     const telefone = opcoes.telefone ?? '(11) 98888-1234';
-    const empresa = opcoes.empresa ?? 'CVF Incorporadora';
-    const cargo = opcoes.cargo ?? 'Analista de Sistemas';
-    const setor = opcoes.setor ?? 'TI';
+    const empresa = (opcoes.empresa ?? 'CVF Incorporadora').toUpperCase();
+    const cargo = (opcoes.cargo ?? 'Analista de Sistemas').toUpperCase();
+    const setor = (opcoes.setor ?? 'TI').toUpperCase();
 
     await irParaCadastramento(page, 'funcionarios');
     await expect(page.getByText('Carregando opções do formulário…')).toHaveCount(0, { timeout: 15_000 });

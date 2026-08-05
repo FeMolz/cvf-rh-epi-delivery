@@ -17,8 +17,8 @@ describe('FormularioCargo', () => {
         await usuario.click(screen.getByRole('button', { name: /cadastrar cargo/i }));
 
         expect(onSubmit).toHaveBeenCalledWith({
-            name: 'Soldador',
-            description: 'Soldagem MIG/MAG'
+            name: 'SOLDADOR',
+            description: 'SOLDAGEM MIG/MAG'
         });
     });
 
@@ -148,17 +148,21 @@ describe('FormularioCargo', () => {
         const usuario = userEvent.setup();
         const onSubmit = vi.fn().mockResolvedValue(undefined);
         const original = MensagemFeedback.AreaMensagensFeedback;
-        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => {
-            if (props.sucesso && props.onLimparSucesso) {
-                props.onLimparSucesso();
-            }
-
-            if (props.erro && props.onLimparErro) {
-                props.onLimparErro();
-            }
-
-            return original(props);
-        });
+        const spy = vi.spyOn(MensagemFeedback, 'AreaMensagensFeedback').mockImplementation((props) => (
+            <div>
+                {props.sucesso ? (
+                    <button type="button" onClick={props.onLimparSucesso}>
+                        limpar-sucesso
+                    </button>
+                ) : null}
+                {props.erro ? (
+                    <button type="button" onClick={props.onLimparErro}>
+                        limpar-erro
+                    </button>
+                ) : null}
+                {original(props)}
+            </div>
+        ));
 
         render(<FormularioCargo onSubmit={onSubmit} />);
 
@@ -166,12 +170,20 @@ describe('FormularioCargo', () => {
         await usuario.type(screen.getByLabelText(/descrição/i), 'Soldagem');
         await usuario.click(screen.getByRole('button', { name: /salvar cargo/i }));
 
+        expect(await screen.findByRole('button', { name: 'limpar-sucesso' })).toBeInTheDocument();
+        await usuario.click(screen.getByRole('button', { name: 'limpar-sucesso' }));
+
         await waitFor(() => {
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
         });
 
         onSubmit.mockRejectedValueOnce(new Error('Falha ao salvar.'));
+        await usuario.type(screen.getByLabelText(/nome do cargo/i), 'Soldador');
+        await usuario.type(screen.getByLabelText(/descrição/i), 'Soldagem');
         await usuario.click(screen.getByRole('button', { name: /salvar cargo/i }));
+
+        expect(await screen.findByRole('button', { name: 'limpar-erro' })).toBeInTheDocument();
+        await usuario.click(screen.getByRole('button', { name: 'limpar-erro' }));
 
         await waitFor(() => {
             expect(screen.queryByRole('alert')).not.toBeInTheDocument();

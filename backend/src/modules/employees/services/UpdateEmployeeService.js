@@ -14,9 +14,29 @@ import { normalizarDatasAtualizacaoFuncionario } from '../utils/montarDadosFunci
 import { resolverDataDesligamentoFuncionario } from '../utils/resolverDataDesligamentoFuncionario.js';
 import { resolverDataRetornoAfastamento } from '../utils/resolverDataRetornoAfastamento.js';
 import { statusFuncionarioExigeDataRetornoAfastamento } from '../utils/afastamentoTemporarioFuncionario.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import { extrairDigitosCpf, validarCpf } from '../utils/validarCpf.js';
 import { validarEmail } from '../utils/validarEmail.js';
 import { validarTelefone } from '../utils/validarTelefone.js';
+
+const CAMPOS_TEXTO_MAIUSCULO_ATUALIZACAO = [
+    'name',
+    'nacionalidade',
+    'estadoCivil',
+    'racaCor',
+    'filiacao',
+    'grauInstrucao',
+    'numeroCtps',
+    'serieCtps',
+    'pis',
+    'cep',
+    'logradouro',
+    'numeroEndereco',
+    'complemento',
+    'bairro',
+    'cidade',
+    'estado'
+];
 
 class UpdateEmployeeService {
     /**
@@ -103,6 +123,12 @@ class UpdateEmployeeService {
         }
         if (entrada.telefone !== undefined) {
             dadosAtualizacao.telefone = validarTelefone(entrada.telefone);
+        }
+
+        for (const campo of CAMPOS_TEXTO_MAIUSCULO_ATUALIZACAO) {
+            if (dadosAtualizacao[campo] !== undefined && dadosAtualizacao[campo] !== null) {
+                dadosAtualizacao[campo] = normalizarTextoMaiusculo(dadosAtualizacao[campo]);
+            }
         }
 
         const funcionarios = await employeeRepository.findAll();

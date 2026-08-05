@@ -131,7 +131,7 @@ async function garantirServidor(argumentosNpm, url) {
 
     console.log(`[e2e] Iniciando servidor para ${url}...`);
     const processo = iniciarProcesso(argumentosNpm);
-    const timeoutMs = process.env.CI ? 180_000 : 120_000;
+    const timeoutMs = 180_000;
     await aguardarUrl(url, processo, timeoutMs);
     console.log(`[e2e] Servidor pronto em ${url}`);
     return processo;
@@ -188,7 +188,7 @@ async function verificarProxyLogin() {
 /**
  * @param {number} [timeoutMs]
  */
-async function aguardarProxyLogin(timeoutMs = 120_000) {
+async function aguardarProxyLogin(timeoutMs = 180_000) {
     const inicio = Date.now();
 
     while (Date.now() - inicio < timeoutMs) {

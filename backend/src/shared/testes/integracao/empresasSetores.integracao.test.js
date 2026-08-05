@@ -53,8 +53,8 @@ describe('Integração — empresas e setores', () => {
         empresaId = empresa.id;
         setorId = setor.id;
 
-        expect(empresa.name).toContain('Empresa Integração');
-        expect(setor.nome).toContain('Setor Integração');
+        expect(empresa.name).toContain('EMPRESA INTEGRAÇÃO');
+        expect(setor.nome).toContain('SETOR INTEGRAÇÃO');
         await expect(validarEmpresaAtivaParaVinculoService.execute(empresa.id)).resolves.not.toThrow();
         await expect(validarSetorAtivoParaVinculoService.execute(setor.id)).resolves.not.toThrow();
     });

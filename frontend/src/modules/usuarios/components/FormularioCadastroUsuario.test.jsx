@@ -34,7 +34,7 @@ describe('FormularioCadastroUsuario', () => {
         await usuario.click(screen.getByRole('button', { name: /cadastrar usuário/i }));
 
         expect(onSubmit).toHaveBeenCalledWith({
-            name: 'João Teste',
+            name: 'JOÃO TESTE',
             email: 'joao@teste.com',
             password: 'senha1234',
             role: 'COLABORADOR'
@@ -58,7 +58,7 @@ describe('FormularioCadastroUsuario', () => {
         await usuario.click(screen.getByRole('button', { name: /criar novo acesso/i }));
 
         expect(onSubmit).toHaveBeenCalledWith({
-            name: 'Joao Silva',
+            name: 'JOAO SILVA',
             email: 'joao.silva@teste.com',
             password: 'senha1234',
             role: 'COLABORADOR'
@@ -141,7 +141,7 @@ describe('FormularioCadastroUsuario', () => {
         expect(screen.getByRole('status')).toHaveTextContent('Usuário cadastrado com sucesso.');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -226,7 +226,7 @@ describe('FormularioCadastroUsuario', () => {
         expect(screen.getByRole('alert')).toHaveTextContent('Falha');
 
         act(() => {
-            vi.advanceTimersByTime(2000);
+            vi.advanceTimersByTime(5000);
         });
 
         expect(screen.queryByRole('alert')).not.toBeInTheDocument();

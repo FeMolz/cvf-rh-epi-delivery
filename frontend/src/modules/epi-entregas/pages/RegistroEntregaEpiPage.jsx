@@ -112,6 +112,14 @@ export function RegistroEntregaEpiPage() {
         setFuncionarioSelecionadoId(employeeId);
     }
 
+    function aoVoltarAosAtivos() {
+        setMensagemSucesso('');
+        setErro('');
+        setFuncionarioSelecionadoId('');
+        setEpisSelecionados([]);
+        setEpisFuncionario([]);
+    }
+
     function aoAlternarEpi(caNumber) {
         setEpisSelecionados((atual) =>
             atual.includes(caNumber)
@@ -216,6 +224,17 @@ export function RegistroEntregaEpiPage() {
                                         ? 'Situação e validades dos EPIs vinculados ao cargo.'
                                         : 'Cargo sem EPIs vinculados — use a busca na base pública ou o cache para registrar entregas.'
                                     : 'Todos os funcionários ativos. Selecione um nome para ver os EPIs do cargo ou registrar entrega.'
+                            }
+                            acoes={
+                                funcionarioSelecionadoId ? (
+                                    <button
+                                        className="botao botao--secundario"
+                                        type="button"
+                                        onClick={aoVoltarAosAtivos}
+                                    >
+                                        Voltar aos ativos
+                                    </button>
+                                ) : null
                             }
                         />
 

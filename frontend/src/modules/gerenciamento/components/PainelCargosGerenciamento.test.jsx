@@ -35,7 +35,7 @@ describe('PainelCargosGerenciamento', () => {
 
         await waitFor(() => {
             expect(criarCargo).toHaveBeenCalledWith(
-                { name: 'Operador', description: 'Linha de produção' },
+                { name: 'OPERADOR', description: 'LINHA DE PRODUÇÃO' },
                 'jwt'
             );
         });

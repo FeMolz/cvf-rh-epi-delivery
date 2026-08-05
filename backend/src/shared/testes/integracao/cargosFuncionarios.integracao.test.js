@@ -64,7 +64,7 @@ describe('Integração — cargos e funcionários', () => {
 
         funcionarioId = funcionario.id;
 
-        expect(funcionario.name).toContain('Funcionário Service');
+        expect(funcionario.name).toContain('FUNCIONÁRIO SERVICE');
         expect(funcionario.roleId).toBe(cargoId);
     });
 

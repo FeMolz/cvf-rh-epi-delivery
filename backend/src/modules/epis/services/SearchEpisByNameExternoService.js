@@ -27,9 +27,12 @@ class SearchEpisByNameExternoService {
             return searchEpisByNameCacheService.execute(termo);
         }
 
-        const resultados = await epiProvider.buscarEpisPorNomeEquipamento(termo);
-
-        return resultados.slice(0, LIMITE_RESULTADOS_BUSCA_EPI_POR_NOME);
+        try {
+            const resultados = await epiProvider.buscarEpisPorNomeEquipamento(termo);
+            return resultados.slice(0, LIMITE_RESULTADOS_BUSCA_EPI_POR_NOME);
+        } catch {
+            return searchEpisByNameCacheService.execute(termo);
+        }
     }
 }
 

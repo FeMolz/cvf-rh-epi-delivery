@@ -17,7 +17,7 @@ describe('FormularioEmpresa', () => {
         await usuario.click(screen.getByRole('button', { name: /cadastrar empresa/i }));
 
         expect(onSubmit).toHaveBeenCalledWith({
-            name: 'Empresa 01',
+            name: 'EMPRESA 01',
             cnpj: '12.345.678/0001-99'
         });
     });

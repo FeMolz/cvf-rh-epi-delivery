@@ -23,10 +23,26 @@ describe('montarDadosFuncionario', () => {
 
         const resultado = montarDadosFuncionario(entrada);
 
-        expect(resultado.nacionalidade).toBe('Brasileira');
+        expect(resultado.nacionalidade).toBe('BRASILEIRA');
         expect(resultado.estadoCivil).toBe('CASADO');
         expect(resultado.numeroDependentes).toBe(2);
         expect(resultado.valeTransporte).toBe(true);
+    });
+
+    it('deve preservar chavePix sem converter para maiusculas', () => {
+        const resultado = montarDadosFuncionario({
+            name: 'Maria',
+            cpf: '123',
+            email: 'maria@empresa.com',
+            telefone: '11999999999',
+            birthDate: new Date('1990-01-01'),
+            companyId: 'comp-1',
+            roleId: 'role-1',
+            setorId: '30303030-3030-3030-3030-303030303030',
+            chavePix: 'email.pix@empresa.com'
+        });
+
+        expect(resultado.chavePix).toBe('email.pix@empresa.com');
     });
 
     it('deve aplicar valores padrão de status e datas', () => {

@@ -376,7 +376,7 @@ describe('UpdateEmployeeService', () => {
         expect(employeeRepositoryMock.update).toHaveBeenCalledWith(
             '1',
             expect.objectContaining({
-                name: 'Atualizado',
+                name: 'ATUALIZADO',
                 leaveReturnDate: expect.any(Date)
             })
         );
@@ -445,7 +445,7 @@ describe('UpdateEmployeeService', () => {
 
         await updateEmployeeService.execute('1', { name: 'Sem Status' });
 
-        expect(employeeRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'Sem Status' });
+        expect(employeeRepositoryMock.update).toHaveBeenCalledWith('1', { name: 'SEM STATUS' });
     });
 
     it('não deve alterar deletedAt ao trocar entre status de vínculo encerrado', async () => {

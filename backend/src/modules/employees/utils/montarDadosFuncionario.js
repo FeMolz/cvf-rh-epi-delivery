@@ -1,4 +1,23 @@
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import { parsearDataSomenteDia } from './afastamentoTemporarioFuncionario.js';
+
+const CAMPOS_TEXTO_MAIUSCULO = new Set([
+    'nacionalidade',
+    'estadoCivil',
+    'racaCor',
+    'filiacao',
+    'grauInstrucao',
+    'numeroCtps',
+    'serieCtps',
+    'pis',
+    'cep',
+    'logradouro',
+    'numeroEndereco',
+    'complemento',
+    'bairro',
+    'cidade',
+    'estado'
+]);
 
 /**
  * Monta o objeto de persistência do funcionário a partir da entrada da API.
@@ -42,7 +61,7 @@ export function montarDadosFuncionario(entrada) {
     } = entrada;
 
     const dados = {
-        name,
+        name: normalizarTextoMaiusculo(name),
         cpf,
         email,
         telefone,
@@ -77,7 +96,9 @@ export function montarDadosFuncionario(entrada) {
 
     for (const [chave, valor] of Object.entries(camposOpcionais)) {
         if (valor !== undefined && valor !== null && valor !== '') {
-            dados[chave] = valor;
+            dados[chave] = CAMPOS_TEXTO_MAIUSCULO.has(chave)
+                ? normalizarTextoMaiusculo(valor)
+                : valor;
         }
     }
 

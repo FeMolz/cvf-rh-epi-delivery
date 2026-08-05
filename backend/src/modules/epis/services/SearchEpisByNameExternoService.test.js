@@ -67,4 +67,18 @@ describe('SearchEpisByNameExternoService', () => {
         expect(epiProviderMock.buscarEpisPorNomeEquipamento).not.toHaveBeenCalled();
         expect(resultado).toEqual([{ caNumber: '11070', name: 'Capacete' }]);
     });
+
+    it('deve usar cache local quando a base pública estiver indisponível', async () => {
+        epiProviderMock.buscarEpisPorNomeEquipamento.mockRejectedValue(
+            new Error('Base CAEPI indisponível')
+        );
+        searchEpisByNameCacheServiceMock.execute.mockResolvedValue([
+            { caNumber: '11070', name: 'Capacete' }
+        ]);
+
+        const resultado = await searchEpisByNameExternoService.execute('capacete');
+
+        expect(searchEpisByNameCacheServiceMock.execute).toHaveBeenCalledWith('capacete');
+        expect(resultado).toEqual([{ caNumber: '11070', name: 'Capacete' }]);
+    });
 });

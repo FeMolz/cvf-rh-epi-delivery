@@ -16,8 +16,9 @@ async function main() {
 
     for (const cargo of cargosAtivos) {
         await prisma.role.upsert({
-            where: { name: cargo.name },
+            where: { id: cargo.id },
             update: {
+                name: cargo.name,
                 description: cargo.description,
                 deletedAt: null
             },
@@ -32,8 +33,9 @@ async function main() {
 
     for (const cargo of cargosInativos) {
         await prisma.role.upsert({
-            where: { name: cargo.name },
+            where: { id: cargo.id },
             update: {
+                name: cargo.name,
                 description: cargo.description,
                 deletedAt: cargo.deletedAt
             },

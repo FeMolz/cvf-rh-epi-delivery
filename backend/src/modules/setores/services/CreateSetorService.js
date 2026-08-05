@@ -1,4 +1,5 @@
 import setorRepository from '../repositories/SetorRepository.js';
+import { normalizarTextoMaiusculo } from '../../../shared/utils/normalizarTextoMaiusculo.js';
 import {
     MENSAGEM_NOME_SETOR_JA_CADASTRADO,
     MENSAGEM_NOME_SETOR_OBRIGATORIO
@@ -9,7 +10,7 @@ class CreateSetorService {
      * @param {{ nome: string, isActive?: boolean }} entrada
      */
     async execute(entrada) {
-        const nome = typeof entrada.nome === 'string' ? entrada.nome.trim() : '';
+        const nome = typeof entrada.nome === 'string' ? normalizarTextoMaiusculo(entrada.nome) : '';
         const isActive = entrada.isActive !== false;
 
         if (!nome) {

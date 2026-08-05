@@ -38,6 +38,7 @@ export function SelecaoEpisSemVinculoCargo({
                 desabilitado={desabilitado}
                 episSelecionados={episSelecionados}
                 onAlternarEpi={onAlternarEpi}
+                episCache={episCache}
             />
 
             <section className="entregas-epi__cache-epis">

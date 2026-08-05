@@ -16,7 +16,7 @@ describe('montarPayloadFuncionario', () => {
         });
 
         expect(payload).toMatchObject({
-            name: 'Maria',
+            name: 'MARIA',
             cpf: '529.982.247-25',
             email: 'maria@empresa.com',
             telefone: '(11) 98888-7777',
@@ -46,11 +46,27 @@ describe('montarPayloadFuncionario', () => {
 
         expect(payload).toMatchObject({
             cep: '01310-100',
-            cidade: 'São Paulo',
+            cidade: 'SÃO PAULO',
             valeTransporte: true,
             valeAlimentacao: false,
             planoSaude: true
         });
+    });
+
+    it('deve preservar chavePix sem converter para maiusculas', () => {
+        const payload = montarPayloadFuncionario({
+            name: 'Maria',
+            cpf: '529.982.247-25',
+            email: 'maria@empresa.com',
+            telefone: '(11) 98888-7777',
+            birthDate: '1995-08-12',
+            companyId: 'empresa-1',
+            roleId: 'cargo-1',
+            setorId: 'setor-1',
+            chavePix: 'email.pix@empresa.com'
+        });
+
+        expect(payload.chavePix).toBe('email.pix@empresa.com');
     });
 
     it('deve incluir status e data de desligamento na edicao', () => {
@@ -94,7 +110,7 @@ describe('montarPayloadFuncionario', () => {
             admissionDate: '2020-01-01',
             leaveReturnDate: '2026-03-01',
             numeroDependentes: 2,
-            cidade: 'São Paulo'
+            cidade: 'SÃO PAULO'
         });
         expect(payload.nacionalidade).toBeUndefined();
     });

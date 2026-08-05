@@ -26,7 +26,7 @@ test.describe('Fluxo de EPI', () => {
 
         test('deve registrar entrega para funcionário com EPI vinculado', async ({ page }) => {
             await registrarEntregaEpi(page, {
-                funcionarioNome: 'Bruno Costa',
+                funcionarioNome: 'BRUNO COSTA',
                 dataEntrega: '2025-06-10'
             });
         });
