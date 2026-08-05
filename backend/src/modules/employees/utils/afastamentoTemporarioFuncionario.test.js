@@ -32,6 +32,32 @@ describe('afastamentoTemporarioFuncionario', () => {
         expect(dataObjeto?.getHours()).toBe(0);
     });
 
+    it('deve interpretar data ISO somente dia no fuso local', () => {
+        const data = inicioDoDia('2026-07-24');
+
+        expect(data).toBeInstanceOf(Date);
+        expect(data?.getFullYear()).toBe(2026);
+        expect(data?.getMonth()).toBe(6);
+        expect(data?.getDate()).toBe(24);
+    });
+
+    it('deve normalizar data parseável fora do formato YYYY-MM-DD', () => {
+        const data = inicioDoDia('Jul 23 2026');
+
+        expect(data).toBeInstanceOf(Date);
+        expect(data?.getHours()).toBe(0);
+        expect(data?.getFullYear()).toBe(2026);
+    });
+
+    it('deve extrair somente a data de string ISO com horário', () => {
+        const data = inicioDoDia('2026-07-24T15:30:00.000Z');
+
+        expect(data).toBeInstanceOf(Date);
+        expect(data?.getFullYear()).toBe(2026);
+        expect(data?.getMonth()).toBe(6);
+        expect(data?.getDate()).toBe(24);
+    });
+
     it('deve considerar afastamento expirado na data de retorno', () => {
         expect(afastamentoTemporarioExpirado(new Date('2026-06-20'), new Date('2026-06-22'))).toBe(
             true
@@ -62,6 +88,21 @@ describe('resolverDataRetornoAfastamento', () => {
         });
 
         expect(resultado.leaveReturnDate).toBeInstanceOf(Date);
+    });
+
+    it('deve aceitar data de retorno no dia seguinte', () => {
+        const hoje = new Date();
+        const amanha = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1);
+        const dataIso = `${amanha.getFullYear()}-${String(amanha.getMonth() + 1).padStart(2, '0')}-${String(amanha.getDate()).padStart(2, '0')}`;
+
+        const resultado = resolverDataRetornoAfastamento({
+            statusAnterior: 'ATIVO',
+            statusNovo: 'FERIAS',
+            leaveReturnDate: dataIso
+        });
+
+        expect(afastamentoTemporarioExpirado(resultado.leaveReturnDate, hoje)).toBe(false);
+        expect(resultado.leaveReturnDate?.getDate()).toBe(amanha.getDate());
     });
 
     it('deve limpar data ao voltar para ativo', () => {

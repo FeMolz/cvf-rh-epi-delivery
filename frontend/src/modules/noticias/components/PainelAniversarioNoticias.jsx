@@ -9,6 +9,7 @@ const COLUNAS_ANIVERSARIO_PESSOAL = [
 const COLUNAS_ANIVERSARIO_EMPRESA = [
     { id: 'nome', rotulo: 'Nome' },
     { id: 'empresa', rotulo: 'Empresa' },
+    { id: 'dataAniversarioEmpresa', rotulo: 'Data do aniversário' },
     { id: 'tempoEmpresa', rotulo: 'Tempo de empresa' }
 ];
 
@@ -33,7 +34,7 @@ export function PainelAniversarioNoticias({
 
             <div className="noticias-grade">
                 <TabelaAniversariantes
-                    titulo="Aniversariantes pessoais"
+                    titulo="Aniversariantes"
                     colunas={COLUNAS_ANIVERSARIO_PESSOAL}
                     itens={aniversariantesPessoais}
                 />

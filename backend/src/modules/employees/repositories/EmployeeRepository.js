@@ -38,6 +38,29 @@ class EmployeeRepository {
         });
     }
 
+    /**
+     * @param {Record<string, unknown>} where
+     * @param {{ admissionDate: 'asc' | 'desc' }} orderBy
+     */
+    async findManyConsulta(where, orderBy) {
+        return prisma.employee.findMany({
+            where,
+            select: CAMPOS_SELECAO_FUNCIONARIO,
+            orderBy: [orderBy, { name: 'asc' }]
+        });
+    }
+
+    /**
+     * @param {Record<string, unknown>} where
+     */
+    async findManyFerias(where) {
+        return prisma.employee.findMany({
+            where,
+            select: CAMPOS_SELECAO_FUNCIONARIO,
+            orderBy: [{ leaveReturnDate: 'asc' }]
+        });
+    }
+
     async findAll() {
         return this.findManyComFiltro();
     }

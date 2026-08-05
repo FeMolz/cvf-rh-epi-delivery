@@ -1,3 +1,5 @@
+import { parsearDataSomenteDia } from './afastamentoTemporarioFuncionario.js';
+
 /**
  * Monta o objeto de persistência do funcionário a partir da entrada da API.
  * @param {Record<string, unknown>} entrada
@@ -44,11 +46,11 @@ export function montarDadosFuncionario(entrada) {
         cpf,
         email,
         telefone,
-        birthDate,
+        birthDate: converterDataFuncionario(birthDate),
         status: status || 'ATIVO',
-        admissionDate: admissionDate ? new Date(admissionDate) : new Date(),
-        resignationDate: resignationDate ? new Date(resignationDate) : null,
-        leaveReturnDate: leaveReturnDate ? new Date(leaveReturnDate) : null,
+        admissionDate: converterDataFuncionario(admissionDate) ?? new Date(),
+        resignationDate: converterDataFuncionario(resignationDate),
+        leaveReturnDate: converterDataFuncionario(leaveReturnDate),
         companyId,
         roleId,
         setorId
@@ -108,14 +110,16 @@ export function converterDataFuncionario(valor) {
         return null;
     }
 
-    const data =
-        valor instanceof Date ? valor : new Date(typeof valor === 'string' ? valor.trim() : valor);
-
-    if (Number.isNaN(data.getTime())) {
-        return null;
+    if (valor instanceof Date) {
+        return Number.isNaN(valor.getTime()) ? null : valor;
     }
 
-    return data;
+    if (typeof valor === 'number') {
+        const data = new Date(valor);
+        return Number.isNaN(data.getTime()) ? null : data;
+    }
+
+    return parsearDataSomenteDia(valor);
 }
 
 /**

@@ -2,6 +2,57 @@ import { baixarArquivoApi, requisicaoApi } from '../../../shared/api/clienteHttp
 
 /**
  * @param {string} token
+ * @param {{
+ *   companyId?: string;
+ *   busca?: string;
+ *   situacao?: string;
+ *   admissaoDe?: string;
+ *   admissaoAte?: string;
+ *   ordenacaoAdmissao?: string;
+ * }} [opcoes]
+ */
+export function consultarFuncionarios(token, opcoes = {}) {
+    const parametros = new URLSearchParams();
+
+    for (const [chave, valor] of Object.entries(opcoes)) {
+        if (valor !== undefined && valor !== null && String(valor).trim() !== '') {
+            parametros.set(chave, String(valor));
+        }
+    }
+
+    const consulta = parametros.toString();
+    const caminho = consulta ? `/employees/consulta?${consulta}` : '/employees/consulta';
+
+    return requisicaoApi(caminho, { token });
+}
+
+/**
+ * @param {string} token
+ * @param {{
+ *   busca?: string;
+ *   ordenacao?: string;
+ *   proximidade?: number | string;
+ *   page?: number | string;
+ *   pageSize?: number | string;
+ * }} [opcoes]
+ */
+export function listarFeriasFuncionarios(token, opcoes = {}) {
+    const parametros = new URLSearchParams();
+
+    for (const [chave, valor] of Object.entries(opcoes)) {
+        if (valor !== undefined && valor !== null && String(valor).trim() !== '') {
+            parametros.set(chave, String(valor));
+        }
+    }
+
+    const consulta = parametros.toString();
+    const caminho = consulta ? `/employees/ferias?${consulta}` : '/employees/ferias';
+
+    return requisicaoApi(caminho, { token });
+}
+
+/**
+ * @param {string} token
  * @param {{ filtro?: string }} [opcoes]
  */
 export function listarFuncionarios(token, opcoes = {}) {

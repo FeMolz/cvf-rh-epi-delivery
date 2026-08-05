@@ -29,6 +29,14 @@ const exportarFuncionarioCompletoPlanilhaServiceMock = {
     execute: jest.fn()
 };
 
+const consultarFuncionariosServiceMock = {
+    execute: jest.fn()
+};
+
+const listarFeriasFuncionariosServiceMock = {
+    execute: jest.fn()
+};
+
 jest.unstable_mockModule('../services/CreateEmployeeService.js', () => ({
     default: createEmployeeServiceMock
 }));
@@ -55,6 +63,14 @@ jest.unstable_mockModule('../services/ExportarListaFuncionariosPlanilhaService.j
 
 jest.unstable_mockModule('../services/ExportarFuncionarioCompletoPlanilhaService.js', () => ({
     default: exportarFuncionarioCompletoPlanilhaServiceMock
+}));
+
+jest.unstable_mockModule('../services/ConsultarFuncionariosService.js', () => ({
+    default: consultarFuncionariosServiceMock
+}));
+
+jest.unstable_mockModule('../services/ListarFeriasFuncionariosService.js', () => ({
+    default: listarFeriasFuncionariosServiceMock
 }));
 
 const employeeController = (await import('./EmployeeController.js')).default;
@@ -301,6 +317,90 @@ describe('EmployeeController', () => {
 
         listEmployeesServiceMock.execute.mockRejectedValue(erro);
         await employeeController.findAll(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve consultar funcionários do departamento pessoal', async () => {
+        const request = { query: { situacao: 'ativos', busca: 'Ana' } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const lista = [{ id: '1', name: 'Ana' }];
+
+        consultarFuncionariosServiceMock.execute.mockResolvedValue(lista);
+        await employeeController.consultar(request, response, next);
+
+        expect(consultarFuncionariosServiceMock.execute).toHaveBeenCalledWith({
+            situacao: 'ativos',
+            busca: 'Ana'
+        });
+        expect(response.json).toHaveBeenCalledWith(lista);
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('deve consultar com query vazia quando ausente', async () => {
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+
+        consultarFuncionariosServiceMock.execute.mockResolvedValue([]);
+        await employeeController.consultar({}, response, next);
+
+        expect(consultarFuncionariosServiceMock.execute).toHaveBeenCalledWith({});
+    });
+
+    it('deve encaminhar erro na consulta do departamento pessoal', async () => {
+        const request = { query: { situacao: 'invalida' } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('Situação inválida');
+
+        consultarFuncionariosServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.consultar(request, response, next);
+
+        expect(next).toHaveBeenCalledWith(erro);
+    });
+
+    it('deve listar férias do departamento pessoal', async () => {
+        const request = { query: { proximidade: 90, page: 1, pageSize: 25 } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const resultado = { items: [], total: 0, page: 1, pageSize: 25 };
+
+        listarFeriasFuncionariosServiceMock.execute.mockResolvedValue(resultado);
+        await employeeController.listarFerias(request, response, next);
+
+        expect(listarFeriasFuncionariosServiceMock.execute).toHaveBeenCalledWith({
+            proximidade: 90,
+            page: 1,
+            pageSize: 25
+        });
+        expect(response.json).toHaveBeenCalledWith(resultado);
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('deve listar férias com query vazia quando ausente', async () => {
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+
+        listarFeriasFuncionariosServiceMock.execute.mockResolvedValue({
+            items: [],
+            total: 0,
+            page: 1,
+            pageSize: 25
+        });
+        await employeeController.listarFerias({}, response, next);
+
+        expect(listarFeriasFuncionariosServiceMock.execute).toHaveBeenCalledWith({});
+    });
+
+    it('deve encaminhar erro na listagem de férias', async () => {
+        const request = { query: { proximidade: 999 } };
+        const response = { json: jest.fn() };
+        const next = jest.fn();
+        const erro = new Error('Proximidade inválida');
+
+        listarFeriasFuncionariosServiceMock.execute.mockRejectedValue(erro);
+        await employeeController.listarFerias(request, response, next);
 
         expect(next).toHaveBeenCalledWith(erro);
     });

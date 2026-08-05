@@ -4,17 +4,13 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../shared/auth/useAuth.js';
 import { AreaMensagensFeedback } from '../../../shared/components/MensagemFeedback.jsx';
 import { AbasNoticias } from '../components/AbasNoticias.jsx';
-import { PainelAfastamentoNoticias } from '../components/PainelAfastamentoNoticias.jsx';
 import { PainelAniversarioNoticias } from '../components/PainelAniversarioNoticias.jsx';
 import {
     ABA_NOTICIAS_PADRAO,
     ABAS_NOTICIAS,
     SECOES_NOTICIAS
 } from '../constants/abasNoticias.js';
-import {
-    listarAfastamentosNoticias,
-    listarAniversariantesNoticias
-} from '../services/noticiasApi.js';
+import { listarAniversariantesNoticias } from '../services/noticiasApi.js';
 import './noticias.css';
 
 export function NoticiasPage() {
@@ -28,11 +24,6 @@ export function NoticiasPage() {
         mesReferencia: '',
         aniversariantesPessoais: [],
         aniversariantesEmpresa: []
-    });
-    const [dadosAfastamento, setDadosAfastamento] = useState({
-        mesReferencia: '',
-        saindo: [],
-        voltando: []
     });
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState('');
@@ -53,48 +44,29 @@ export function NoticiasPage() {
         setErro('');
 
         try {
-            if (abaAtiva === 'afastamento') {
-                const resposta = await listarAfastamentosNoticias(token);
-                setDadosAfastamento(resposta);
-            } else {
-                const resposta = await listarAniversariantesNoticias(token);
-                setDadosAniversario(resposta);
-            }
+            const resposta = await listarAniversariantesNoticias(token);
+            setDadosAniversario(resposta);
         } catch (erroCapturado) {
-            setErro(
-                erroCapturado.message ||
-                    (abaAtiva === 'afastamento'
-                        ? 'Não foi possível carregar os afastamentos.'
-                        : 'Não foi possível carregar os aniversariantes.')
-            );
+            setErro(erroCapturado.message || 'Não foi possível carregar os aniversariantes.');
         } finally {
             setCarregando(false);
         }
-    }, [abaAtiva, token]);
+    }, [token]);
 
     useEffect(() => {
         carregarDados();
     }, [carregarDados]);
 
-    const painelAtivo = useMemo(() => {
-        if (abaAtiva === 'afastamento') {
-            return (
-                <PainelAfastamentoNoticias
-                    mesReferencia={dadosAfastamento.mesReferencia}
-                    saindo={dadosAfastamento.saindo}
-                    voltando={dadosAfastamento.voltando}
-                />
-            );
-        }
-
-        return (
+    const painelAtivo = useMemo(
+        () => (
             <PainelAniversarioNoticias
                 mesReferencia={dadosAniversario.mesReferencia}
                 aniversariantesPessoais={dadosAniversario.aniversariantesPessoais}
                 aniversariantesEmpresa={dadosAniversario.aniversariantesEmpresa}
             />
-        );
-    }, [abaAtiva, dadosAfastamento, dadosAniversario]);
+        ),
+        [dadosAniversario]
+    );
 
     return (
         <section className="admin-pagina">

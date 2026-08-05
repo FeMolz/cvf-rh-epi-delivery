@@ -2,7 +2,9 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 
 const employeeRepositoryMock = {
-    findManyComFiltro: jest.fn()
+    findManyComFiltro: jest.fn(),
+    findManyConsulta: jest.fn(),
+    findManyFerias: jest.fn()
 };
 
 jest.unstable_mockModule('../repositories/EmployeeRepository.js', () => ({
@@ -61,5 +63,39 @@ describe('Employee Routes — comportamento com handler de erros', () => {
         expect(employeeRepositoryMock.findManyComFiltro).toHaveBeenCalledWith({
             status: { in: ['FERIAS', 'LICENCA_MATERNIDADE', 'LICENCA_MED'] }
         });
+    });
+
+    it('GET /employees/consulta deve consultar com filtros avançados', async () => {
+        employeeRepositoryMock.findManyConsulta.mockResolvedValue([
+            { id: 'func-1', name: 'Maria', status: 'ATIVO' }
+        ]);
+
+        const resposta = await request(aplicacao).get(
+            '/employees/consulta?situacao=ativos&ordenacaoAdmissao=recentes'
+        );
+
+        expect(resposta.statusCode).toBe(200);
+        expect(employeeRepositoryMock.findManyConsulta).toHaveBeenCalled();
+        expect(resposta.body).toEqual([{ id: 'func-1', name: 'Maria', status: 'ATIVO' }]);
+    });
+
+    it('GET /employees/ferias deve retornar listagem paginada', async () => {
+        employeeRepositoryMock.findManyFerias.mockResolvedValue([
+            { id: 'func-1', name: 'Maria', status: 'FERIAS', leaveReturnDate: '2026-08-01' }
+        ]);
+
+        const resposta = await request(aplicacao).get(
+            '/employees/ferias?proximidade=30&page=1&pageSize=25'
+        );
+
+        expect(resposta.statusCode).toBe(200);
+        expect(resposta.body).toEqual(
+            expect.objectContaining({
+                total: 1,
+                page: 1,
+                pageSize: 25,
+                items: expect.any(Array)
+            })
+        );
     });
 });

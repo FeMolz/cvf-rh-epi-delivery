@@ -11,6 +11,20 @@ import {
 } from './utilitariosBancoIntegracao.js';
 import { limparFuncionarios } from './utilitarios/limpeza.js';
 
+/**
+ * @param {number} diasAFrente
+ * @returns {string} Data ISO (YYYY-MM-DD) estritamente futura.
+ */
+function dataRetornoFuturaIso(diasAFrente = 30) {
+    const data = new Date();
+    data.setHours(0, 0, 0, 0);
+    data.setDate(data.getDate() + diasAFrente);
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+}
+
 describe('Integração — entregas de EPI', () => {
     const sufixo = `${Date.now()}`;
     /** @type {Awaited<ReturnType<typeof criarDadosIntegracaoFuncionariosEpi>>} */
@@ -62,7 +76,7 @@ describe('Integração — entregas de EPI', () => {
     it('mudança de ATIVO para FERIAS deve pausar periodicidade do EPI', async () => {
         await updateEmployeeService.execute(dadosTeste.funcionarioAtivo.id, {
             status: 'FERIAS',
-            leaveReturnDate: '2026-08-01'
+            leaveReturnDate: dataRetornoFuturaIso(30)
         });
 
         const entregaAtualizada = await prisma.epiDelivery.findUnique({
@@ -76,9 +90,22 @@ describe('Integração — entregas de EPI', () => {
 
     it('retorno para ATIVO deve retomar periodicidade do EPI', async () => {
         const pausaSimuladaEm = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+        // Garante estado pausado independente da ordem/resultado dos testes anteriores.
+        await prisma.employee.update({
+            where: { id: dadosTeste.funcionarioAtivo.id },
+            data: {
+                status: 'FERIAS',
+                leaveReturnDate: new Date(dataRetornoFuturaIso(30))
+            }
+        });
         await prisma.epiDelivery.update({
             where: { id: dadosTeste.entregaEpi.id },
-            data: { periodicidadePausadaEm: pausaSimuladaEm }
+            data: {
+                nextDueDate: null,
+                vencimentoSuspenso: dadosTeste.vencimentoOriginal,
+                periodicidadePausadaEm: pausaSimuladaEm
+            }
         });
 
         await updateEmployeeService.execute(dadosTeste.funcionarioAtivo.id, { status: 'ATIVO' });

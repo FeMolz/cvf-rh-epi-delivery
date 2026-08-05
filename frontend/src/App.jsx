@@ -9,19 +9,17 @@ import {
 } from './shared/constants/papeis.js';
 import { LayoutAdmin } from './shared/layout/LayoutAdmin.jsx';
 import { RedirecionarAdminInicio } from './shared/layout/RedirecionarAdminInicio.jsx';
-import { CadastroUsuarioPage } from './modules/usuarios/pages/CadastroUsuarioPage.jsx';
+import { RedirecionarComQuery } from './shared/layout/RedirecionarComQuery.jsx';
+import { CadastramentoPage } from './modules/cadastramento/pages/CadastramentoPage.jsx';
+import { DepartamentoPessoalPage } from './modules/departamento-pessoal/pages/DepartamentoPessoalPage.jsx';
 import { NoticiasPage } from './modules/noticias/pages/NoticiasPage.jsx';
 import { DetalheUsuarioPage } from './modules/usuarios/pages/DetalheUsuarioPage.jsx';
 import { GerenciamentoPage } from './modules/gerenciamento/pages/GerenciamentoPage.jsx';
-import { ListagemCargosPage } from './modules/cargos/pages/ListagemCargosPage.jsx';
 import { DetalheCargoPage } from './modules/cargos/pages/DetalheCargoPage.jsx';
-import { ListagemEmpresasPage } from './modules/empresas/pages/ListagemEmpresasPage.jsx';
 import { DetalheEmpresaPage } from './modules/empresas/pages/DetalheEmpresaPage.jsx';
-import { ListagemSetoresPage } from './modules/setores/pages/ListagemSetoresPage.jsx';
 import { DetalheSetorPage } from './modules/setores/pages/DetalheSetorPage.jsx';
 import { CadastroFuncionarioPage } from './modules/funcionarios/pages/CadastroFuncionarioPage.jsx';
 import { EdicaoFuncionarioPage } from './modules/funcionarios/pages/EdicaoFuncionarioPage.jsx';
-import { ListagemFuncionariosPage } from './modules/funcionarios/pages/ListagemFuncionariosPage.jsx';
 import { ListagemEpisPage } from './modules/epis/pages/ListagemEpisPage.jsx';
 import { VinculoEpisCargoPage } from './modules/epis/pages/VinculoEpisCargoPage.jsx';
 import { RegistroEntregaEpiPage } from './modules/epi-entregas/pages/RegistroEntregaEpiPage.jsx';
@@ -51,16 +49,51 @@ export default function App() {
                             <Route path="epis/entregas/imediata" element={<EntregaImediataEpiPage />} />
 
                             <Route element={<RotasProtegidas papeisPermitidos={PAPEIS_GESTAO_SISTEMA} />}>
+                                <Route path="cadastramento" element={<CadastramentoPage />} />
                                 <Route path="gerenciamento" element={<GerenciamentoPage />} />
-                                <Route path="usuarios/cadastro" element={<CadastroUsuarioPage />} />
-                                <Route path="cargos" element={<ListagemCargosPage />} />
+                                <Route
+                                    path="departamento-pessoal"
+                                    element={<DepartamentoPessoalPage />}
+                                />
+                                <Route
+                                    path="usuarios/cadastro"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/cadastramento?secao=usuarios" />
+                                    }
+                                />
+                                <Route
+                                    path="cargos"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/gerenciamento?secao=cargos" />
+                                    }
+                                />
                                 <Route path="cargos/:id" element={<DetalheCargoPage />} />
-                                <Route path="empresas" element={<ListagemEmpresasPage />} />
+                                <Route
+                                    path="empresas"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/gerenciamento?secao=empresas" />
+                                    }
+                                />
                                 <Route path="empresas/:id" element={<DetalheEmpresaPage />} />
-                                <Route path="setores" element={<ListagemSetoresPage />} />
+                                <Route
+                                    path="setores"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/gerenciamento?secao=setores" />
+                                    }
+                                />
                                 <Route path="setores/:id" element={<DetalheSetorPage />} />
-                                <Route path="funcionarios" element={<ListagemFuncionariosPage />} />
-                                <Route path="funcionarios/cadastro" element={<CadastroFuncionarioPage />} />
+                                <Route
+                                    path="funcionarios"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/departamento-pessoal?secao=funcionarios" />
+                                    }
+                                />
+                                <Route
+                                    path="funcionarios/cadastro"
+                                    element={
+                                        <RedirecionarComQuery destino="/admin/cadastramento?secao=funcionarios" />
+                                    }
+                                />
                                 <Route path="funcionarios/:id" element={<EdicaoFuncionarioPage />} />
                                 <Route path="usuarios/:id" element={<DetalheUsuarioPage />} />
                                 <Route path="noticias" element={<NoticiasPage />} />

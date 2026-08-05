@@ -51,7 +51,11 @@ vi.mock('../components/FiltrosHistoricoEmissoes.jsx', () => ({
                 value={emissaoFim}
                 onChange={(evento) => onAlterarEmissaoFim(evento.target.value)}
             />
-            <button type="button" onClick={onBuscar} disabled={!employeeId}>
+            <button
+                type="button"
+                onClick={onBuscar}
+                disabled={!employeeId && !(emissaoInicio && emissaoFim)}
+            >
                 Buscar emissões
             </button>
             <button type="button" onClick={onLimpar}>
@@ -126,7 +130,7 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
         expect(screen.getByText(/informe o início e o fim do período/i)).toBeInTheDocument();
     });
 
-    it('deve validar busca sem funcionario e periodo apenas com fim', async () => {
+    it('deve validar busca sem criterios e periodo apenas com fim', async () => {
         const usuario = userEvent.setup();
         render(<HistoricoEmissoesRelatorioEpiPage />);
 
@@ -135,7 +139,9 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
         });
 
         await usuario.click(screen.getByRole('button', { name: /forcar busca/i }));
-        expect(screen.getByText(/selecione um funcionário para consultar o histórico/i)).toBeInTheDocument();
+        expect(
+            screen.getByText(/selecione um funcionário ou informe o período de emissão/i)
+        ).toBeInTheDocument();
 
         await usuario.selectOptions(screen.getByLabelText(/funcionário/i), 'f1');
         await usuario.type(screen.getByLabelText(/emissão até/i), '2026-01-31');
@@ -158,7 +164,7 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
         expect(screen.getByLabelText(/funcionário/i)).toHaveValue('');
     });
 
-    it('deve manter busca desabilitada sem funcionario', async () => {
+    it('deve manter busca desabilitada sem funcionario nem periodo', async () => {
         render(<HistoricoEmissoesRelatorioEpiPage />);
 
         await waitFor(() => {
@@ -166,7 +172,7 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
         });
     });
 
-    it('deve buscar por periodo completo', async () => {
+    it('deve buscar por periodo completo com funcionario', async () => {
         const usuario = userEvent.setup();
         listarRelatoriosEntregaEpi.mockResolvedValue({ itens: relatorios });
 
@@ -190,6 +196,40 @@ describe('HistoricoEmissoesRelatorioEpiPage', () => {
                     emissaoFim: '2026-01-31'
                 })
             );
+        });
+    });
+
+    it('deve buscar apenas por periodo sem funcionario', async () => {
+        const usuario = userEvent.setup();
+        listarRelatoriosEntregaEpi.mockResolvedValue({
+            itens: [
+                {
+                    ...relatorios[0],
+                    employee: { name: 'Bruno Costa', role: { name: 'Auxiliar' } }
+                }
+            ]
+        });
+
+        render(<HistoricoEmissoesRelatorioEpiPage />);
+
+        await waitFor(() => {
+            expect(screen.getByLabelText(/emissão de/i)).toBeInTheDocument();
+        });
+
+        await usuario.type(screen.getByLabelText(/emissão de/i), '2026-01-01');
+        await usuario.type(screen.getByLabelText(/emissão até/i), '2026-01-31');
+        await usuario.click(screen.getByRole('button', { name: /buscar emissões/i }));
+
+        await waitFor(() => {
+            expect(listarRelatoriosEntregaEpi).toHaveBeenCalledWith(
+                'jwt',
+                expect.objectContaining({
+                    employeeId: undefined,
+                    emissaoInicio: '2026-01-01',
+                    emissaoFim: '2026-01-31'
+                })
+            );
+            expect(screen.getByText('Bruno Costa')).toBeInTheDocument();
         });
     });
 

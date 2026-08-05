@@ -9,6 +9,20 @@ employeeRoutes.post('/', isAuthenticated, authorize(['ADMIN', 'ADMINISTRATIVO'])
 employeeRoutes.get('/', isAuthenticated, authorize(['ADMIN', 'ADMINISTRATIVO']), employeeController.findAll);
 
 employeeRoutes.get(
+    '/consulta',
+    isAuthenticated,
+    authorize(['ADMIN', 'ADMINISTRATIVO']),
+    employeeController.consultar
+);
+
+employeeRoutes.get(
+    '/ferias',
+    isAuthenticated,
+    authorize(['ADMIN', 'ADMINISTRATIVO']),
+    employeeController.listarFerias
+);
+
+employeeRoutes.get(
     '/export/lista',
     isAuthenticated,
     authorize(['ADMIN', 'ADMINISTRATIVO']),

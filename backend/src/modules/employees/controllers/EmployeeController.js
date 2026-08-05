@@ -3,7 +3,9 @@ import deleteEmployeeService from '../services/DeleteEmployeeService.js';
 import exportarFuncionarioCompletoPlanilhaService from '../services/ExportarFuncionarioCompletoPlanilhaService.js';
 import exportarListaFuncionariosPlanilhaService from '../services/ExportarListaFuncionariosPlanilhaService.js';
 import findEmployeeByIdService from '../services/FindEmployeeByIdService.js';
+import consultarFuncionariosService from '../services/ConsultarFuncionariosService.js';
 import listEmployeesService from '../services/ListEmployeesService.js';
+import listarFeriasFuncionariosService from '../services/ListarFeriasFuncionariosService.js';
 import updateEmployeeService from '../services/UpdateEmployeeService.js';
 import { TIPO_MIME_PLANILHA_XLSX } from '../constants/funcionarioExportacaoConstantes.js';
 
@@ -13,6 +15,8 @@ class EmployeeController {
         this.exportarLista = this.exportarLista.bind(this);
         this.exportarFuncionarioCompleto = this.exportarFuncionarioCompleto.bind(this);
         this.findAll = this.findAll.bind(this);
+        this.consultar = this.consultar.bind(this);
+        this.listarFerias = this.listarFerias.bind(this);
         this.findById = this.findById.bind(this);
         this.update = this.update.bind(this);
         this.delete = this.delete.bind(this);
@@ -64,6 +68,24 @@ class EmployeeController {
         try {
             const funcionarios = await listEmployeesService.execute(request.query?.filtro);
             return response.json(funcionarios);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async consultar(request, response, next) {
+        try {
+            const funcionarios = await consultarFuncionariosService.execute(request.query ?? {});
+            return response.json(funcionarios);
+        } catch (erro) {
+            return next(erro);
+        }
+    }
+
+    async listarFerias(request, response, next) {
+        try {
+            const resultado = await listarFeriasFuncionariosService.execute(request.query ?? {});
+            return response.json(resultado);
         } catch (erro) {
             return next(erro);
         }

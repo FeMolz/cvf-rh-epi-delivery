@@ -27,10 +27,13 @@
 
 .epi-relatorios__campo-data {
     flex: 0 0 auto;
-    width: 11rem;
+    width: 13rem;
 }
 
-.epi-relatorios__campo-data input[type='date'],
+.epi-relatorios__campo-data .campo-data-br {
+    width: 100%;
+}
+
 .epi-relatorios__formulario-linha select,
 .epi-relatorios__filtros-linha select {
     width: 100%;

@@ -36,6 +36,7 @@ describe('montarFiltroConsultaFuncionarios', () => {
         expect(montarFiltroConsultaFuncionarios('ativo')).toEqual({ status: 'ATIVO' });
         expect(montarFiltroConsultaFuncionarios('inativo')).toEqual({ status: 'INATIVO' });
         expect(montarFiltroConsultaFuncionarios('desligado')).toEqual({ status: 'DESLIGADO' });
+        expect(montarFiltroConsultaFuncionarios('demitido')).toEqual({ status: 'DESLIGADO' });
         expect(montarFiltroConsultaFuncionarios('rescindido')).toEqual({ status: 'RESCINDIDO' });
         expect(montarFiltroConsultaFuncionarios('aposentado')).toEqual({ status: 'APOSENTADO' });
     });

@@ -38,9 +38,10 @@ describe('modulosSistema', () => {
         const ids = modulos.map((modulo) => modulo.id);
 
         expect(ids).toContain('gerenciamento');
-        expect(ids).toContain('employees');
+        expect(ids).toContain('cadastramento');
+        expect(ids).toContain('departamento-pessoal');
         expect(ids).toContain('epi-reports');
-        expect(ids).not.toContain('epi-deliveries-only'); // sanity
+        expect(ids).not.toContain('employees');
     });
 
     it('nao deve listar modulos para colaborador', () => {

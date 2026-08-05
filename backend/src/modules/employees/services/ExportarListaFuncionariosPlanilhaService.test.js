@@ -242,7 +242,7 @@ describe('ExportarListaFuncionariosPlanilhaService', () => {
 
         expect(employeeRepositoryMock.findManyParaExportacaoLista).toHaveBeenCalledWith(
             { status: { in: ['INATIVO', 'DESLIGADO', 'RESCINDIDO', 'APOSENTADO'] } },
-            { incluirDesligados: false }
+            { incluirDesligados: true }
         );
         expect(resultado.nomeArquivo).toMatch(/^funcionarios-inativos-/);
     });

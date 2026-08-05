@@ -1,7 +1,22 @@
 /**
- * @param {{ titulo: string, colunas: Array<{ id: string, rotulo: string }>, itens: Array<Record<string, string>>, campoVazio?: string }} props
+ * @param {{
+ *   titulo: string,
+ *   colunas: Array<{ id: string, rotulo: string }>,
+ *   itens: Array<Record<string, string | boolean>>,
+ *   campoVazio?: string
+ * }} props
  */
 export function TabelaAniversariantes({ titulo, colunas, itens, campoVazio = 'Nenhum registro para o mês atual.' }) {
+    function renderizarCelula(item, coluna) {
+        const valor = item[coluna.id];
+
+        if (coluna.id === 'nome' && item.ehHoje) {
+            return <strong className="aniversariante-hoje">{String(valor || '—')}</strong>;
+        }
+
+        return String(valor ?? '—');
+    }
+
     return (
         <section className="noticias-painel">
             <header className="noticias-painel__cabecalho">
@@ -22,9 +37,14 @@ export function TabelaAniversariantes({ titulo, colunas, itens, campoVazio = 'Ne
                         </thead>
                         <tbody>
                             {itens.map((item) => (
-                                <tr key={item.id}>
+                                <tr
+                                    key={String(item.id)}
+                                    className={item.ehHoje ? 'tabela-usuarios__linha--destaque' : undefined}
+                                >
                                     {colunas.map((coluna) => (
-                                        <td key={`${item.id}-${coluna.id}`}>{item[coluna.id]}</td>
+                                        <td key={`${item.id}-${coluna.id}`}>
+                                            {renderizarCelula(item, coluna)}
+                                        </td>
                                     ))}
                                 </tr>
                             ))}

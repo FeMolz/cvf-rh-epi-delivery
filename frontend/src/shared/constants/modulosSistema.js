@@ -12,33 +12,21 @@ export const MODULOS_SISTEMA = [
         papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
+        id: 'cadastramento',
+        rotulo: 'Cadastramento',
+        rota: '/admin/cadastramento',
+        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
+    },
+    {
         id: 'gerenciamento',
         rotulo: 'Gerenciamento',
         rota: '/admin/gerenciamento',
         papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {
-        id: 'roles',
-        rotulo: 'Cargos',
-        rota: '/admin/cargos',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
-    },
-    {
-        id: 'employees',
-        rotulo: 'Funcionários',
-        rota: '/admin/funcionarios',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
-    },
-    {
-        id: 'companies',
-        rotulo: 'Empresas',
-        rota: '/admin/empresas',
-        papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
-    },
-    {
-        id: 'setores',
-        rotulo: 'Setores',
-        rota: '/admin/setores',
+        id: 'departamento-pessoal',
+        rotulo: 'Departamento Pessoal',
+        rota: '/admin/departamento-pessoal',
         papeis: [PAPEL_ADMIN, PAPEL_ADMINISTRATIVO]
     },
     {

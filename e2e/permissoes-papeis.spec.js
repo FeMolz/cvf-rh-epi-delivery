@@ -12,7 +12,7 @@ test.describe('Permissoes por papel (almoxarifado)', () => {
         await irParaAreaDoPerfil(page, 'almoxarifado');
 
         await expect(page.getByRole('link', { name: 'Entregas de EPI' })).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Funcionários' })).toHaveCount(0);
+        await expect(page.getByRole('link', { name: 'Departamento Pessoal' })).toHaveCount(0);
         await expect(page.getByRole('link', { name: 'Gerenciamento' })).toHaveCount(0);
         await expect(page.getByRole('link', { name: 'Relatórios de entrega' })).toHaveCount(0);
     });
@@ -44,9 +44,9 @@ test.describe('Permissoes por papel (administrativo)', () => {
     test('administrativo acessa modulos de gestao', async ({ page }) => {
         await irParaAreaDoPerfil(page, 'administrativo');
 
-        await page.getByRole('link', { name: 'Funcionários' }).click();
-        await expect(page).toHaveURL(/\/admin\/funcionarios/);
-        await expect(page.getByRole('heading', { level: 1, name: 'Funcionários' })).toBeVisible();
+        await page.getByRole('link', { name: 'Departamento Pessoal' }).click();
+        await expect(page).toHaveURL(/\/admin\/departamento-pessoal/);
+        await expect(page.getByRole('heading', { level: 1, name: 'Departamento Pessoal' })).toBeVisible();
 
         await page.getByRole('link', { name: 'Notícias' }).click();
         await expect(page).toHaveURL(/\/admin\/noticias/);
@@ -55,12 +55,12 @@ test.describe('Permissoes por papel (administrativo)', () => {
         await expect(page).toHaveURL(/\/admin\/epis\/relatorios/);
     });
 
-    test('administrativo acessa gerenciamento e empresas', async ({ page }) => {
+    test('administrativo acessa gerenciamento e cadastramento', async ({ page }) => {
         await irParaAreaDoPerfil(page, 'administrativo');
 
         await expect(page.getByRole('link', { name: 'Gerenciamento' })).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Empresas' })).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Setores' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Cadastramento' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Departamento Pessoal' })).toBeVisible();
     });
 
     test('administrativo nao ve acao de excluir cargo permanentemente', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('Permissoes por papel (admin)', () => {
         await irParaAreaDoPerfil(page, 'admin');
 
         await expect(page.getByRole('link', { name: 'Gerenciamento' })).toBeVisible();
-        await expect(page.getByRole('link', { name: 'Funcionários' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Departamento Pessoal' })).toBeVisible();
         await expect(page.getByRole('link', { name: 'Relatórios de entrega' })).toBeVisible();
 
         await page.goto('/admin/epis/vinculos');

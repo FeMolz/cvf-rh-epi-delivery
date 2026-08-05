@@ -2,6 +2,7 @@ import { criarErroHttp, criarErroNaoEncontrado } from '../../../shared/errors/cr
 import planilhaFuncionarioProvider from '../../../shared/providers/PlanilhaFuncionarioProvider/PlanilhaFuncionarioProvider.js';
 import {
     FILTRO_LISTAGEM_FUNCIONARIOS_ATIVOS,
+    FILTRO_LISTAGEM_FUNCIONARIOS_INATIVOS,
     FILTRO_LISTAGEM_FUNCIONARIOS_TODOS
 } from '../constants/funcionarioStatusConstantes.js';
 import { FILTROS_EXPORTACAO_LISTA_FUNCIONARIOS } from '../constants/funcionarioExportacaoConstantes.js';
@@ -94,7 +95,9 @@ class ExportarListaFuncionariosPlanilhaService {
             filtroConsulta.companyId = companyId;
         }
 
-        const incluirDesligados = filtroNormalizado === FILTRO_LISTAGEM_FUNCIONARIOS_TODOS;
+        const incluirDesligados =
+            filtroNormalizado === FILTRO_LISTAGEM_FUNCIONARIOS_TODOS ||
+            filtroNormalizado === FILTRO_LISTAGEM_FUNCIONARIOS_INATIVOS;
         const funcionarios = await employeeRepository.findManyParaExportacaoLista(filtroConsulta, {
             incluirDesligados
         });
@@ -104,7 +107,7 @@ class ExportarListaFuncionariosPlanilhaService {
         const dataAtual = new Date().toISOString().slice(0, 10);
         const sufixoArquivo = companyId
             ? `empresa-${companyId}`
-            : incluirDesligados
+            : filtroNormalizado === FILTRO_LISTAGEM_FUNCIONARIOS_TODOS
               ? 'empresa-completa'
               : filtroNormalizado;
         const nomeArquivo = `funcionarios-${sufixoArquivo}-${dataAtual}.xlsx`;

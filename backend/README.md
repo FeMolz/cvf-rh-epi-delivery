@@ -14,6 +14,7 @@ Antes de alterar algo em um módulo, é altamente recomendado a leitura da docum
 - 📄 **[Módulo de Usuários (Users)](./docs/USERS.md)** - Regras de cadastro, login, arquitetura e geração de Tokens JWT.
 - 📄 **[Módulo de Cargos (Roles)](./docs/ROLES.md)** - Explica como o padrão Repository/Service funciona para o gerenciamento das "roles".
 - 📄 **[Módulo de Funcionários (Employees)](./docs/EMPLOYEES.md)** - Detalha a gestão de funcionários, bloqueio de CPF e relacionamentos no banco.
+- 📄 **[Departamento Pessoal (consultas avançadas)](./docs/DEPARTAMENTO_PESSOAL.md)** - Endpoints `/employees/consulta` e `/employees/ferias` para o módulo frontend de DP.
 - 📄 **[Módulo de Empresas (Companies)](./docs/COMPANIES.md)** - CRUD de empresas; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
 - 📄 **[Módulo de Setores (Setores)](./docs/SETORES.md)** - CRUD de setores; listagem livre para qualquer role autenticada; escrita restrita a ADMIN e ADMINISTRATIVO.
 - 📄 **[Módulo de Notícias (Noticias)](./docs/NOTICIAS.md)** - Aniversariantes pessoais e de tempo de empresa do mês para a página administrativa.

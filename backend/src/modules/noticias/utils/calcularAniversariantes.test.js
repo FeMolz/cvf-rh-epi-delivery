@@ -292,13 +292,15 @@ describe('calcularAniversariantes', () => {
                 id: '2',
                 nome: 'Bruno',
                 empresa: 'Empresa B',
-                dataAniversario: '21/06'
+                dataAniversario: '21/06',
+                ehHoje: true
             },
             {
                 id: '1',
                 nome: 'Ana',
                 empresa: 'Empresa A',
-                dataAniversario: '25/06'
+                dataAniversario: '25/06',
+                ehHoje: false
             }
         ]);
     });
@@ -326,13 +328,17 @@ describe('calcularAniversariantes', () => {
                 id: '2',
                 nome: 'Bruno',
                 empresa: 'Empresa B',
-                tempoEmpresa: '7 anos'
+                tempoEmpresa: '7 anos',
+                dataAniversarioEmpresa: '21/06',
+                ehHoje: true
             },
             {
                 id: '1',
                 nome: 'Ana',
                 empresa: 'Empresa A',
-                tempoEmpresa: '4 anos'
+                tempoEmpresa: '4 anos',
+                dataAniversarioEmpresa: '25/06',
+                ehHoje: false
             }
         ]);
     });

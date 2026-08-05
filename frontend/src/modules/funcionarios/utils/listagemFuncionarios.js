@@ -14,7 +14,7 @@ export const STATUS_FUNCIONARIO_ENCERRADOS = ['DESLIGADO', 'RESCINDIDO', 'APOSEN
 export const ROTULOS_STATUS_FUNCIONARIO = {
     ATIVO: 'Ativo',
     INATIVO: 'Inativo',
-    DESLIGADO: 'Desligado',
+    DESLIGADO: 'Demitido',
     RESCINDIDO: 'Rescindido',
     APOSENTADO: 'Aposentado',
     FERIAS: 'Férias',
@@ -203,6 +203,21 @@ export function calcularEstatisticasFuncionarios(funcionarios) {
 export function formatarData(valor) {
     if (!valor) {
         return '—';
+    }
+
+    if (typeof valor === 'string') {
+        const correspondencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(valor.trim());
+
+        if (correspondencia) {
+            const [, ano, mes, dia] = correspondencia;
+            const dataLocal = new Date(Number(ano), Number(mes) - 1, Number(dia));
+
+            if (!Number.isNaN(dataLocal.getTime())) {
+                return new Intl.DateTimeFormat('pt-BR', {
+                    dateStyle: 'short'
+                }).format(dataLocal);
+            }
+        }
     }
 
     const data = valor instanceof Date ? valor : new Date(valor);
