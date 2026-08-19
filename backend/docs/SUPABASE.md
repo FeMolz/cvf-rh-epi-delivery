@@ -109,7 +109,7 @@ npm run seed:admin:prod
 
 Defina `ADMIN_SEED_EMAIL` e `ADMIN_SEED_PASSWORD` fortes em `.env.production.local` antes de executar.
 
-## Backup automático (a cada 1h, só se o banco mudou)
+## Backup do banco (manual, só se o banco mudou)
 
 O script `scripts/backup-postgres-se-mudou.mjs`:
 
@@ -119,13 +119,12 @@ O script `scripts/backup-postgres-se-mudou.mjs`:
 
 | Onde | Como |
 | ---- | ---- |
-| Local | `npm run backup:prod` → arquivos em `.backups/` |
-| GitHub Actions | Workflow `.github/workflows/backup.yml` (cron horário) |
-| Secret necessário | `DATABASE_BACKUP_DIRECT_URL` = mesma `DIRECT_URL` (porta 5432) |
+| Local / produção (manual) | `npm run backup:prod` → arquivos em `.backups/` |
+| Variável necessária | `DIRECT_URL` (ou `DATABASE_BACKUP_DIRECT_URL`) na porta 5432 |
 
-Artefatos de backup ficam em **Actions → Backup PostgreSQL** por 90 dias quando há mudança.
+Não há workflow agendado no GitHub Actions para backup (removido para evitar consumo de minutos).
 
-Detalhes e restauração: [DEPLOY.md](./DEPLOY.md#6-backup-do-banco-a-cada-1h-só-se-mudou).
+Detalhes e restauração: [DEPLOY.md](./DEPLOY.md#6-backup-do-banco-manual-só-se-mudou).
 
 ## SSL
 

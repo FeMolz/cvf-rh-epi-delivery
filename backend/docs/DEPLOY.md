@@ -173,35 +173,28 @@ Use a API autenticada (ADMIN). **Não** rode seeds de desenvolvimento em produç
 
 ---
 
-## 6. Backup do banco (a cada 1h, só se mudou)
+## 6. Backup do banco (manual, só se mudou)
 
 ### Como funciona
 
-1. A cada hora, o workflow `.github/workflows/backup.yml` (ou `npm run backup:prod` local) executa `scripts/backup-postgres-se-mudou.mjs`.
+1. Execute `npm run backup:prod` (local ou no servidor) para rodar `scripts/backup-postgres-se-mudou.mjs`.
 2. O script calcula um **fingerprint** do banco: para cada tabela `public`, soma `count(*)` + `max(updatedAt)` quando existir.
-3. Compara com o fingerprint salvo em `.backups/manifest.json` (local) ou do run anterior (CI).
+3. Compara com o fingerprint salvo em `.backups/manifest.json`.
 4. **Se igual** → nada é gravado (economia de espaço).
 5. **Se diferente** → `pg_dump` comprimido (`.sql.gz`) + manifesto atualizado.
 
 Isso detecta inserts, updates e deletes. Não grava backup redundante quando o banco está estável.
 
-### Local
+Não há cron no GitHub Actions para este backup (removido para não consumir minutos da cota).
 
-Requer `pg_dump` no PATH (cliente PostgreSQL):
+### Local / produção
+
+Requer `pg_dump` no PATH (cliente PostgreSQL) e `DIRECT_URL` (porta 5432):
 
 ```bash
 npm run backup:prod
 # Arquivos em .backups/ (gitignored)
 ```
-
-### GitHub Actions (nuvem)
-
-1. No repositório: **Settings → Secrets and variables → Actions**.
-2. Crie o secret `DATABASE_BACKUP_DIRECT_URL` com a `DIRECT_URL` do Supabase (porta **5432**).
-3. O workflow roda no cron `5 * * * *` (a cada hora, UTC).
-4. Quando há mudança, o artefato `.sql.gz` fica disponível por 90 dias em **Actions → Backup PostgreSQL**.
-
-Para backup off-site adicional, baixe periodicamente os artefatos ou estenda o workflow para S3/R2.
 
 ### Restaurar um backup
 
